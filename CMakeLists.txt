@@ -8,6 +8,11 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 option(COB_BUILD_TESTS "Build correctness tests" ON)
 option(COB_BUILD_BENCH "Build benchmark runner" ON)
+option(COB_BENCH_EXTERNAL_CBLAS "Build benchmark with an external CBLAS comparison" OFF)
+set(COB_EXTERNAL_CBLAS_NAME "external_CBLAS" CACHE STRING "Label for the external CBLAS benchmark row")
+set(COB_EXTERNAL_CBLAS_HEADER "cblas.h" CACHE STRING "Header to include for the external CBLAS benchmark")
+set(COB_EXTERNAL_CBLAS_INCLUDE_DIRS "" CACHE STRING "Include directories for the external CBLAS benchmark")
+set(COB_EXTERNAL_CBLAS_LIBRARIES "" CACHE STRING "Libraries for the external CBLAS benchmark")
 
 add_library(cob_matmul STATIC
     src/gemm.c
@@ -54,7 +59,19 @@ if(COB_BUILD_BENCH)
         target_compile_definitions(cob_gemm_bench PRIVATE _DARWIN_C_SOURCE)
     endif()
 
-    if(APPLE)
+    if(COB_BENCH_EXTERNAL_CBLAS)
+        target_compile_definitions(cob_gemm_bench PRIVATE
+            COB_HAVE_EXTERNAL_CBLAS=1
+            COB_EXTERNAL_CBLAS_NAME="${COB_EXTERNAL_CBLAS_NAME}"
+            COB_EXTERNAL_CBLAS_HEADER="${COB_EXTERNAL_CBLAS_HEADER}"
+        )
+        if(COB_EXTERNAL_CBLAS_INCLUDE_DIRS)
+            target_include_directories(cob_gemm_bench SYSTEM PRIVATE ${COB_EXTERNAL_CBLAS_INCLUDE_DIRS})
+        endif()
+        if(COB_EXTERNAL_CBLAS_LIBRARIES)
+            target_link_libraries(cob_gemm_bench PRIVATE ${COB_EXTERNAL_CBLAS_LIBRARIES})
+        endif()
+    elseif(APPLE)
         find_library(ACCELERATE_FRAMEWORK Accelerate)
         if(ACCELERATE_FRAMEWORK)
             target_link_libraries(cob_gemm_bench PRIVATE ${ACCELERATE_FRAMEWORK})

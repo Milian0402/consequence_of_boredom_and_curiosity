@@ -14,6 +14,16 @@
 #include <Accelerate/Accelerate.h>
 #endif
 
+#if defined(COB_HAVE_EXTERNAL_CBLAS)
+#ifndef COB_EXTERNAL_CBLAS_HEADER
+#define COB_EXTERNAL_CBLAS_HEADER "cblas.h"
+#endif
+#include COB_EXTERNAL_CBLAS_HEADER
+#ifndef COB_EXTERNAL_CBLAS_NAME
+#define COB_EXTERNAL_CBLAS_NAME "external_CBLAS"
+#endif
+#endif
+
 typedef void (*bench_fn)(int n, const float* a, const float* b, float* c);
 
 static uint32_t rng_next(uint32_t* state)
@@ -85,6 +95,27 @@ static void bench_cob_direct(int n, const float* a, const float* b, float* c)
 
 #if defined(COB_HAVE_ACCELERATE)
 static void bench_accelerate(int n, const float* a, const float* b, float* c)
+{
+    cblas_sgemm(
+        CblasRowMajor,
+        CblasNoTrans,
+        CblasNoTrans,
+        n,
+        n,
+        n,
+        1.0f,
+        a,
+        n,
+        b,
+        n,
+        0.0f,
+        c,
+        n);
+}
+#endif
+
+#if defined(COB_HAVE_EXTERNAL_CBLAS)
+static void bench_external_cblas(int n, const float* a, const float* b, float* c)
 {
     cblas_sgemm(
         CblasRowMajor,
@@ -183,6 +214,10 @@ int main(int argc, char** argv)
     static const int default_sizes[] = {64, 128, 192, 256, 384, 512, 768, 1024};
 
     setenv("VECLIB_MAXIMUM_THREADS", "1", 1);
+    setenv("ACCELERATE_MAXIMUM_THREADS", "1", 1);
+    setenv("BLIS_NUM_THREADS", "1", 1);
+    setenv("OPENBLAS_NUM_THREADS", "1", 1);
+    setenv("OMP_NUM_THREADS", "1", 1);
 
     int sizes[32];
     int size_count = 0;
@@ -223,6 +258,9 @@ int main(int argc, char** argv)
         run_case_cob_packed_reuse(n, a, b, c);
 #if defined(COB_HAVE_ACCELERATE)
         run_case("Accelerate", bench_accelerate, n, a, b, c);
+#endif
+#if defined(COB_HAVE_EXTERNAL_CBLAS)
+        run_case(COB_EXTERNAL_CBLAS_NAME, bench_external_cblas, n, a, b, c);
 #endif
         printf("\n");
 

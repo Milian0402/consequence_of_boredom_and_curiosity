@@ -55,6 +55,19 @@ On macOS the benchmark also builds an Apple Accelerate comparison when the
 framework is available. The benchmark allocates aligned matrices so it measures
 the fastest AMX output path.
 
+To compare against an open-source CBLAS implementation, build the separate
+external CBLAS benchmark target. For example, with a local BLIS build:
+
+```sh
+make bench-cblas \
+  CBLAS_NAME=blis_apple \
+  CBLAS_HEADER=blis.h \
+  CBLAS_CFLAGS=-isystem/path/to/blis/include/aaplmx \
+  CBLAS_LDFLAGS=/path/to/blis/lib/aaplmx/libblis.a
+```
+
+The benchmark pins common BLAS thread environment variables to `1`.
+
 ## API
 
 ```c
@@ -81,4 +94,4 @@ void cob_sgemm_rowmajor_packed_b(
 - Add `4x8`, `12x8`, and `16x4` NEON kernels and shape dispatch.
 - Tune the AMX `MC` threshold and add `KC`/`NC` blocking.
 - Replace scalar edges with vector edge kernels.
-- Add BLIS/OpenBLAS/BLASFEO comparison harnesses.
+- Use the CBLAS comparison target to track BLIS/OpenBLAS/BLASFEO results.
