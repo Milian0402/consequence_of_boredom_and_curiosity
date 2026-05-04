@@ -605,7 +605,7 @@ static int cob_sgemm_rowmajor_sme_from_packed_b32(
     return 1;
 }
 
-static int cob_sgemm_rowmajor_sme_medium_square_strided_b32(
+static int cob_sgemm_rowmajor_sme_medium_contiguous_strided_b32(
     int m,
     int n,
     int k,
@@ -616,9 +616,10 @@ static int cob_sgemm_rowmajor_sme_medium_square_strided_b32(
     float* c,
     int ldc)
 {
-    /* Tuned for medium contiguous square cases where skipping one-shot B packing wins. */
-    if (m != n || n != k || lda != k || ldb != n ||
-        n < 832 || n > 1216 || n == 1024 ||
+    /* Tuned for medium contiguous cases where skipping one-shot B packing wins. */
+    if (m < 832 || m > 1216 || n < 832 || n > 1216 || k < 832 || k > 1216 ||
+        n == 1024 || lda != k || ldb != n ||
+        (m % COB_SGEMM_AMX_MR) != 0 ||
         (n % 64) != 0 || !cob_apple_sme2p1_available()) {
         return 0;
     }
@@ -1236,7 +1237,7 @@ static int cob_sgemm_rowmajor_amx(
     }
 
 #if defined(COB_USE_APPLE_SME)
-    if (cob_sgemm_rowmajor_sme_medium_square_strided_b32(m, n, k, a, lda, b, ldb, c, ldc)) {
+    if (cob_sgemm_rowmajor_sme_medium_contiguous_strided_b32(m, n, k, a, lda, b, ldb, c, ldc)) {
         return 1;
     }
 #endif
