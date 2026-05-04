@@ -180,6 +180,19 @@ were mostly about 1.84-1.89 TF/s. With the original `1216` cap, repeated
 outlier. Validation passed with `make test` across 27 shapes, and
 `git diff --check` passed.
 
+### 2026-05-05: benchmark repeat controls and n=1024 SME rejection
+
+A one-shot `n = 1024` experiment routed the case through the post-pack SME path
+after `B` packing by extending the existing `n == 512` conflict check to also
+cover `n == 1024`. It passed `make test` across 27 shapes, but did not
+materially improve one-shot `n = 1024` versus the AMX path, so it was reverted.
+
+Commit `598444e` made benchmark repeats configurable with
+`COB_BENCH_REPEATS`, changed large-shape default repeats from 4 to 5 for a real
+median, and documented the environment variable in `README.md`. Validation
+included `make test`, `make all`, `git diff --check`, and
+`env COB_BENCH_REPEATS=9 ./build/cob_gemm_bench 1024 1280`.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
