@@ -501,6 +501,56 @@ static void cob_sgemm_16x64_sme_packed_b32(
     }
 }
 
+__arm_new("za") __arm_locally_streaming __attribute__((target("sme,sme2,sme2p1")))
+static void cob_sgemm_16x64_sme_strided_b32(
+    int a_panels16,
+    int b_panels64,
+    int k,
+    const float* packed_a32,
+    const float* b,
+    int ldb,
+    float* c,
+    int ldc)
+{
+    const svbool_t pg = svptrue_b32();
+
+    for (int ap16 = 0; ap16 < a_panels16; ++ap16) {
+        const int ap32 = ap16 / 2;
+        const int a_offset = (ap16 & 1) * 16;
+        const float* a_panel =
+            packed_a32 + (size_t)ap32 * (size_t)k * (size_t)COB_SGEMM_AMX_MR +
+            (size_t)a_offset;
+
+        for (int bp64 = 0; bp64 < b_panels64; ++bp64) {
+            const int col0 = bp64 * 64;
+            float* ct = c + (size_t)ap16 * 16u * (size_t)ldc + (size_t)col0;
+
+            svzero_za();
+            for (int p = 0; p < k; ++p) {
+                const svfloat32_t av =
+                    svld1(pg, a_panel + (size_t)p * (size_t)COB_SGEMM_AMX_MR);
+                const float* brow = b + (size_t)p * (size_t)ldb + (size_t)col0;
+                const svfloat32_t bv0 = svld1(pg, brow);
+                const svfloat32_t bv1 = svld1(pg, brow + 16);
+                const svfloat32_t bv2 = svld1(pg, brow + 32);
+                const svfloat32_t bv3 = svld1(pg, brow + 48);
+                svmopa_za32_f32_m(0, pg, pg, av, bv0);
+                svmopa_za32_f32_m(1, pg, pg, av, bv1);
+                svmopa_za32_f32_m(2, pg, pg, av, bv2);
+                svmopa_za32_f32_m(3, pg, pg, av, bv3);
+            }
+
+            for (int i = 0; i < 16; ++i) {
+                float* row = ct + (size_t)i * (size_t)ldc;
+                svst1(pg, row, svreadz_hor_za32_f32(0, (uint32_t)i));
+                svst1(pg, row + 16, svreadz_hor_za32_f32(1, (uint32_t)i));
+                svst1(pg, row + 32, svreadz_hor_za32_f32(2, (uint32_t)i));
+                svst1(pg, row + 48, svreadz_hor_za32_f32(3, (uint32_t)i));
+            }
+        }
+    }
+}
+
 static int cob_sgemm_rowmajor_sme_from_packed_b32(
     int m,
     int n,
@@ -552,6 +602,62 @@ static int cob_sgemm_rowmajor_sme_from_packed_b32(
     }
 
     free(packed_a_block);
+    return 1;
+}
+
+static int cob_sgemm_rowmajor_sme_medium_square_strided_b32(
+    int m,
+    int n,
+    int k,
+    const float* a,
+    int lda,
+    const float* b,
+    int ldb,
+    float* c,
+    int ldc)
+{
+    /* Tuned for medium contiguous square cases where skipping one-shot B packing wins. */
+    if (m != n || n != k || lda != k || ldb != n ||
+        n < 832 || n > 1216 || n == 1024 ||
+        (n % 64) != 0 || !cob_apple_sme2p1_available()) {
+        return 0;
+    }
+
+    const int b_panels64 = n / 64;
+    const int max_a32_panels = COB_SGEMM_AMX_MC / COB_SGEMM_AMX_MR;
+    const size_t a_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_MR;
+    float* packed_a =
+        (float*)cob_aligned_alloc(128, (size_t)max_a32_panels * a_panel_floats * sizeof(float));
+    if (packed_a == NULL) {
+        return 0;
+    }
+
+    for (int ib = 0; ib < m; ib += COB_SGEMM_AMX_MC) {
+        const int mc = cob_min_i32(COB_SGEMM_AMX_MC, m - ib);
+        const int a32_panels = mc / COB_SGEMM_AMX_MR;
+        cob_amx_set();
+        for (int ap = 0; ap < a32_panels; ++ap) {
+            const int ic = ib + ap * COB_SGEMM_AMX_MR;
+            cob_sgemm_pack_a32_full(
+                packed_a + (size_t)ap * a_panel_floats,
+                k,
+                a + (size_t)ic * (size_t)lda,
+                lda);
+        }
+        cob_amx_clr();
+
+        cob_sgemm_16x64_sme_strided_b32(
+            a32_panels * 2,
+            b_panels64,
+            k,
+            packed_a,
+            b,
+            ldb,
+            c + (size_t)ib * (size_t)ldc,
+            ldc);
+    }
+
+    free(packed_a);
     return 1;
 }
 #endif
@@ -1128,6 +1234,12 @@ static int cob_sgemm_rowmajor_amx(
         free(packed_a);
         return 1;
     }
+
+#if defined(COB_USE_APPLE_SME)
+    if (cob_sgemm_rowmajor_sme_medium_square_strided_b32(m, n, k, a, lda, b, ldb, c, ldc)) {
+        return 1;
+    }
+#endif
 
     float* scratch = (float*)cob_aligned_alloc(128, scratch_bytes);
     if (scratch == NULL) {

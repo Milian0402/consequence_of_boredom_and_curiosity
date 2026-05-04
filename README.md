@@ -19,6 +19,7 @@ matrix is reused.
 - Public packed-`B` API
 - Apple Silicon AMX `32x32` FP32 microkernel when available
 - Apple Silicon SME2.1 packed-`B` path for larger reused-`B` cases when available
+- Apple Silicon SME2.1 direct-`B` one-shot path for selected medium square cases
 - ARM64 NEON `8x8` microkernel when available
 - Scalar reference and scalar edge path
 
@@ -33,7 +34,8 @@ the `A` panel transpose/pack step and direct AMX stores for both 128-byte and
 packed `B` panels across multiple `A` panels. On Apple Silicon with SME2.1, the
 packed-`B` API can use a `16x64` SME kernel for larger reused-`B` problems, and
 the one-shot path can reuse that kernel for the `512`-wide direct-`B` conflict
-case.
+case. The one-shot path also has a guarded SME direct-`B` route for selected
+medium contiguous square cases where avoiding `B` packing is faster.
 
 ## Build
 
