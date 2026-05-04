@@ -18,6 +18,9 @@ this repository.
   `/private/tmp` worktrees when the client may surface an edit confirmation;
   use the main checkout, then commit useful changes or revert local experiment
   edits directly.
+- If an edit-confirmation dialog appears anyway, treat it as client/tooling
+  friction rather than missing user permission; stop using that edit path and
+  continue inside this repo checkout without asking the user.
 - Temporary worktrees and copies of this repo still have full edit, test,
   commit, and normal push permission when they are used.
 - If context is compacted or instructions are unclear, re-read this file and
