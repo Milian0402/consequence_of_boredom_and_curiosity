@@ -432,6 +432,28 @@ int cob_sgemm_pack_b(
         return -1;
     }
 
+#if defined(COB_USE_APPLE_AMX)
+    if (nr_pack == COB_SGEMM_AMX_NR) {
+        for (int panel = 0; panel < panels; ++panel) {
+            const int col0 = panel * nr_pack;
+            const int nr = cob_min_i32(nr_pack, n - col0);
+            float* dst_panel = data + (size_t)panel * (size_t)k * (size_t)nr_pack;
+            if (nr == COB_SGEMM_AMX_NR) {
+                cob_sgemm_pack_b32_panel_full(dst_panel, k, b + col0, ldb);
+            } else {
+                cob_sgemm_pack_b32_panel_partial(dst_panel, k, b + col0, ldb, nr);
+            }
+        }
+
+        packed->k = k;
+        packed->n = n;
+        packed->nr = nr_pack;
+        packed->bytes = bytes;
+        packed->data = data;
+        return 0;
+    }
+#endif
+
     for (int panel = 0; panel < panels; ++panel) {
         const int col0 = panel * nr_pack;
         float* dst_panel = data + (size_t)panel * (size_t)k * (size_t)nr_pack;
