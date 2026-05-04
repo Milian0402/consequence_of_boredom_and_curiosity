@@ -193,6 +193,17 @@ median, and documented the environment variable in `README.md`. Validation
 included `make test`, `make all`, `git diff --check`, and
 `env COB_BENCH_REPEATS=9 ./build/cob_gemm_bench 1024 1280`.
 
+### 2026-05-05: packed-B medium-width dispatch narrowed
+
+Commit `8143b9f` excluded `n = 832` and `n = 960` from the public packed-`B`
+SME route, so those widths use AMX packed-`B` instead.
+
+Result: a focused `COB_BENCH_REPEATS=9` benchmark after the change showed
+packed-`B` medians about 2003-2014 GF/s at `n = 832` and about 2018 GF/s at
+`n = 960`, better than the prior SME-dispatch baseline observed around
+1969 GF/s at `832` and 1977-1988 GF/s at `960`. Validation passed with
+`make test` across 28 shapes, and `git diff --check` passed.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
