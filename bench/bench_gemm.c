@@ -46,6 +46,11 @@ extern void sgemm_(
 
 typedef void (*bench_fn)(int n, const float* a, const float* b, float* c);
 
+typedef struct bench_stats {
+    double best;
+    double median;
+} bench_stats;
+
 static uint32_t rng_next(uint32_t* state)
 {
     *state = *state * 1664525u + 1013904223u;
@@ -106,6 +111,28 @@ static int timed_iterations(int n)
         return 32;
     }
     return 1;
+}
+
+static void sort_doubles(double* values, int count)
+{
+    for (int i = 1; i < count; ++i) {
+        const double value = values[i];
+        int j = i - 1;
+        while (j >= 0 && values[j] > value) {
+            values[j + 1] = values[j];
+            --j;
+        }
+        values[j + 1] = value;
+    }
+}
+
+static bench_stats summarize_times(double* times, int count)
+{
+    sort_doubles(times, count);
+    bench_stats stats;
+    stats.best = times[0];
+    stats.median = times[count / 2];
+    return stats;
 }
 
 static void bench_cob_direct(int n, const float* a, const float* b, float* c)
@@ -190,7 +217,7 @@ static double run_case(const char* name, bench_fn fn, int n, const float* a, con
     const int warmups = n <= 256 ? 2 : 1;
     const int repeats = n <= 256 ? 7 : 4;
     const int iters = timed_iterations(n);
-    double best = 1.0e100;
+    double times[7];
 
     for (int i = 0; i < warmups; ++i) {
         fn(n, a, b, c);
@@ -202,20 +229,21 @@ static double run_case(const char* name, bench_fn fn, int n, const float* a, con
             fn(n, a, b, c);
         }
         const double t1 = now_seconds();
-        const double elapsed = (t1 - t0) / (double)iters;
-        if (elapsed < best) {
-            best = elapsed;
-        }
+        times[i] = (t1 - t0) / (double)iters;
     }
 
-    const double gflops = (2.0 * (double)n * (double)n * (double)n) / best / 1.0e9;
-    printf("%-18s n=%4d  %8.2f GF/s  %9.6f s  checksum=% .5e\n",
+    const bench_stats stats = summarize_times(times, repeats);
+    const double ops = 2.0 * (double)n * (double)n * (double)n;
+    const double best_gflops = ops / stats.best / 1.0e9;
+    const double median_gflops = ops / stats.median / 1.0e9;
+    printf("%-18s n=%4d  best %8.2f GF/s  med %8.2f GF/s  %9.6f s  checksum=% .5e\n",
         name,
         n,
-        gflops,
-        best,
+        best_gflops,
+        median_gflops,
+        stats.best,
         (double)checksum(c, n * n));
-    return gflops;
+    return best_gflops;
 }
 
 static double run_case_cob_packed_reuse(int n, const float* a, const float* b, float* c)
@@ -229,7 +257,7 @@ static double run_case_cob_packed_reuse(int n, const float* a, const float* b, f
     const int warmups = n <= 256 ? 2 : 1;
     const int repeats = n <= 256 ? 7 : 4;
     const int iters = timed_iterations(n);
-    double best = 1.0e100;
+    double times[7];
 
     for (int i = 0; i < warmups; ++i) {
         cob_sgemm_rowmajor_packed_b(n, n, n, a, n, &packed_b, c, n);
@@ -241,22 +269,23 @@ static double run_case_cob_packed_reuse(int n, const float* a, const float* b, f
             cob_sgemm_rowmajor_packed_b(n, n, n, a, n, &packed_b, c, n);
         }
         const double t1 = now_seconds();
-        const double elapsed = (t1 - t0) / (double)iters;
-        if (elapsed < best) {
-            best = elapsed;
-        }
+        times[i] = (t1 - t0) / (double)iters;
     }
 
-    const double gflops = (2.0 * (double)n * (double)n * (double)n) / best / 1.0e9;
-    printf("%-18s n=%4d  %8.2f GF/s  %9.6f s  checksum=% .5e\n",
+    const bench_stats stats = summarize_times(times, repeats);
+    const double ops = 2.0 * (double)n * (double)n * (double)n;
+    const double best_gflops = ops / stats.best / 1.0e9;
+    const double median_gflops = ops / stats.median / 1.0e9;
+    printf("%-18s n=%4d  best %8.2f GF/s  med %8.2f GF/s  %9.6f s  checksum=% .5e\n",
         "cob packed-B",
         n,
-        gflops,
-        best,
+        best_gflops,
+        median_gflops,
+        stats.best,
         (double)checksum(c, n * n));
 
     cob_sgemm_free_packed_b(&packed_b);
-    return gflops;
+    return best_gflops;
 }
 
 int main(int argc, char** argv)
