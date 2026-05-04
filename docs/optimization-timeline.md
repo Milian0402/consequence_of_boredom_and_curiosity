@@ -394,6 +394,34 @@ versus the existing panel-wise packing. In a 15-repeat
 baseline of roughly 90-114 GB/s, and especially worse at larger sizes. The
 experiment was reverted, so the existing panel-wise packing remains.
 
+### 2026-05-05: skinny one-shot GEMM dispatch
+
+Commit `32e0221` improved one-shot dispatch for LLM-style skinny shapes after
+comparing COB against MpGEMM-style workloads. The public MpGEMM repository
+currently has no license file, but its README calls the project open-source and
+targets skinny DeepSeek/LLaMA workloads.
+
+COB's public packed-`B` path was already strong on examples such as
+`64x2112x7168`, `64x24576x1536`, and `64x32768x512`. The weak point was
+one-shot dispatch, where full `B` packing dominated runtime. The commit added
+an AMX direct-`B` skinny fallback for `m <= 128` and `n >= 1024`, plus a
+256-column chunked packed-`B` one-shot path for `m = 96..128`. It also added
+direct-vs-packed correctness coverage for `64x2112x512`, `96x4096x1024`, and
+`128x2048x2048`.
+
+Full chunking was rejected for `m = 64` because it hurt that row count, so
+`m = 64` uses direct-`B`. Skinny SME direct-`B` was worse for larger `K`; only
+a narrow `k = 512` fallback remains after chunk allocation. The new path
+improves COB one-shot skinny performance, but still does not universally beat
+Accelerate on skinny shapes.
+
+Result: validation passed with `make test` across 34 shapes, and
+`git diff --check` passed. A focused skinny benchmark showed `m = 64` one-shot
+improving from older full-pack medians around 254-413 GF/s to about
+349-704 GF/s depending on shape. The `m = 96/128` chunked path reached roughly
+650-820 GF/s on sampled shapes, while packed-`B` remains much faster at about
+1.3-1.8 TF/s.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
