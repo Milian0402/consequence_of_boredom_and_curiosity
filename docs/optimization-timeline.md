@@ -204,6 +204,21 @@ packed-`B` medians about 2003-2014 GF/s at `n = 832` and about 2018 GF/s at
 1969 GF/s at `832` and 1977-1988 GF/s at `960`. Validation passed with
 `make test` across 28 shapes, and `git diff --check` passed.
 
+### 2026-05-05: SME direct-B row block split
+
+Two strided-`B` SME loop experiments were tested and rejected. A B-block-first
+loop order passed tests, but regressed key one-shot sizes, especially `n = 896`
+and `n = 1216`, so it was reverted. A pointer-increment rewrite inside the same
+loop also passed tests, but regressed `n = 896`, so it was reverted.
+
+Commit `73cb130` added a separate 256-row SME direct-`B` row block while
+keeping public packed-`B` SME on the 384-row AMX block.
+
+Result: a focused `COB_BENCH_REPEATS=9` benchmark improved several one-shot
+routed sizes, including medians around 2013 GF/s at `n = 960`, 1962 GF/s at
+`n = 1088`, 1922 GF/s at `n = 1152`, and 1926 GF/s at `n = 1216`. Validation
+passed with `make test` across 28 shapes, and `git diff --check` passed.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
