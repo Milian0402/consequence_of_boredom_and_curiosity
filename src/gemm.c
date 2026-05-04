@@ -679,6 +679,62 @@ static int cob_sgemm_rowmajor_sme_medium_contiguous_strided_b32(
     free(packed_a);
     return 1;
 }
+
+static int cob_sgemm_rowmajor_sme_skinny_contiguous_strided_b32(
+    int m,
+    int n,
+    int k,
+    const float* a,
+    int lda,
+    const float* b,
+    int ldb,
+    float* c,
+    int ldc)
+{
+    if (m < 96 || m > 128 || n < 1024 || k < 512 || k > 512 ||
+        lda != k || ldb != n ||
+        (m % COB_SGEMM_AMX_MR) != 0 ||
+        (n % 64) != 0 || !cob_apple_sme2p1_available()) {
+        return 0;
+    }
+
+    const int b_panels64 = n / 64;
+    const int max_a32_panels = COB_SGEMM_SME_DIRECT_MC / COB_SGEMM_AMX_MR;
+    const size_t a_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_MR;
+    float* packed_a =
+        (float*)cob_aligned_alloc(128, (size_t)max_a32_panels * a_panel_floats * sizeof(float));
+    if (packed_a == NULL) {
+        return 0;
+    }
+
+    for (int ib = 0; ib < m; ib += COB_SGEMM_SME_DIRECT_MC) {
+        const int mc = cob_min_i32(COB_SGEMM_SME_DIRECT_MC, m - ib);
+        const int a32_panels = mc / COB_SGEMM_AMX_MR;
+        cob_amx_set();
+        for (int ap = 0; ap < a32_panels; ++ap) {
+            const int ic = ib + ap * COB_SGEMM_AMX_MR;
+            cob_sgemm_pack_a32_full(
+                packed_a + (size_t)ap * a_panel_floats,
+                k,
+                a + (size_t)ic * (size_t)lda,
+                lda);
+        }
+        cob_amx_clr();
+
+        cob_sgemm_16x64_sme_strided_b32(
+            a32_panels * 2,
+            b_panels64,
+            k,
+            packed_a,
+            b,
+            ldb,
+            c + (size_t)ib * (size_t)ldc,
+            ldc);
+    }
+
+    free(packed_a);
+    return 1;
+}
 #endif
 #endif
 
@@ -1143,6 +1199,104 @@ static int cob_sgemm_rowmajor_amx_from_packed_b8(
 
     return 1;
 }
+
+static void cob_sgemm_pack_b32_chunk_rowwise(
+    float* packed,
+    int k,
+    int n,
+    const float* b,
+    int ldb)
+{
+    const int panels = (n + COB_SGEMM_AMX_NR - 1) / COB_SGEMM_AMX_NR;
+    for (int p = 0; p < k; ++p) {
+        const float* brow = b + (size_t)p * (size_t)ldb;
+        for (int panel = 0; panel < panels; ++panel) {
+            const int col0 = panel * COB_SGEMM_AMX_NR;
+            const int nr = cob_min_i32(COB_SGEMM_AMX_NR, n - col0);
+            float* dst = packed +
+                ((size_t)panel * (size_t)k + (size_t)p) * (size_t)COB_SGEMM_AMX_NR;
+            if (nr == COB_SGEMM_AMX_NR) {
+                memcpy(dst, brow + col0, COB_SGEMM_AMX_NR * sizeof(float));
+            } else {
+                for (int j = 0; j < COB_SGEMM_AMX_NR; ++j) {
+                    dst[j] = j < nr ? brow[(size_t)col0 + (size_t)j] : 0.0f;
+                }
+            }
+        }
+    }
+}
+
+static int cob_sgemm_rowmajor_amx_skinny_pack_b_chunks(
+    int m,
+    int n,
+    int k,
+    const float* a,
+    int lda,
+    const float* b,
+    int ldb,
+    float* c,
+    int ldc)
+{
+    enum {
+        COB_SGEMM_SKINNY_NC = 256
+    };
+
+    if (m < 96 || m > 128 || n < 1024 || k < 512 ||
+        lda != k || ldb != n ||
+        (m % COB_SGEMM_AMX_MR) != 0 ||
+        (n % COB_SGEMM_AMX_NR) != 0) {
+        return 0;
+    }
+
+    const int a_panels = m / COB_SGEMM_AMX_MR;
+    const int max_b_panels = COB_SGEMM_SKINNY_NC / COB_SGEMM_AMX_NR;
+    const size_t a_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_MR;
+    const size_t b_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_NR;
+    float* packed_a =
+        (float*)cob_aligned_alloc(128, (size_t)a_panels * a_panel_floats * sizeof(float));
+    float* packed_b =
+        (float*)cob_aligned_alloc(128, (size_t)max_b_panels * b_panel_floats * sizeof(float));
+    if (packed_a == NULL || packed_b == NULL) {
+        free(packed_a);
+        free(packed_b);
+        return 0;
+    }
+
+    cob_amx_set();
+    for (int ap = 0; ap < a_panels; ++ap) {
+        const int ic = ap * COB_SGEMM_AMX_MR;
+        cob_sgemm_pack_a32_full(
+            packed_a + (size_t)ap * a_panel_floats,
+            k,
+            a + (size_t)ic * (size_t)lda,
+            lda);
+    }
+
+    for (int jc = 0; jc < n; jc += COB_SGEMM_SKINNY_NC) {
+        const int nc = cob_min_i32(COB_SGEMM_SKINNY_NC, n - jc);
+        const int b_panels = nc / COB_SGEMM_AMX_NR;
+        cob_sgemm_pack_b32_chunk_rowwise(packed_b, k, nc, b + jc, ldb);
+
+        for (int panel = 0; panel < b_panels; ++panel) {
+            const int col = jc + panel * COB_SGEMM_AMX_NR;
+            const float* bp = packed_b + (size_t)panel * b_panel_floats;
+            for (int ap = 0; ap < a_panels; ++ap) {
+                const int ic = ap * COB_SGEMM_AMX_MR;
+                cob_sgemm_32x32_amx_packed_full(
+                    k,
+                    packed_a + (size_t)ap * a_panel_floats,
+                    bp,
+                    c + (size_t)ic * (size_t)ldc + col,
+                    ldc);
+            }
+        }
+    }
+    cob_amx_clr();
+
+    free(packed_a);
+    free(packed_b);
+    return 1;
+}
 #endif
 
 void cob_sgemm_rowmajor_packed_b(
@@ -1221,9 +1375,11 @@ static int cob_sgemm_rowmajor_amx(
         m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0;
     const int use_strided_b_large_extra =
         n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N3 || n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N4;
+    const int use_strided_b_skinny_extra = m <= 128 && n >= 1024;
     const int use_strided_b_extra =
         n <= COB_SGEMM_AMX_STRIDED_B_MAX_N || n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N ||
-        n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N2 || use_strided_b_large_extra;
+        n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N2 || use_strided_b_large_extra ||
+        use_strided_b_skinny_extra;
     const int use_strided_b =
         (!use_large_block || use_strided_b_large_extra) && use_strided_b_extra &&
         ldb != COB_SGEMM_AMX_STRIDED_B_CONFLICT_LDB &&
@@ -1232,6 +1388,16 @@ static int cob_sgemm_rowmajor_amx(
     const size_t a_block_floats = (size_t)max_a_panels * a_panel_floats;
     const size_t a_scratch_floats = use_large_block ? a_block_floats : a_panel_floats;
     const size_t scratch_bytes = b_bytes + a_scratch_floats * sizeof(float);
+
+    if (cob_sgemm_rowmajor_amx_skinny_pack_b_chunks(m, n, k, a, lda, b, ldb, c, ldc)) {
+        return 1;
+    }
+
+#if defined(COB_USE_APPLE_SME)
+    if (cob_sgemm_rowmajor_sme_skinny_contiguous_strided_b32(m, n, k, a, lda, b, ldb, c, ldc)) {
+        return 1;
+    }
+#endif
 
     if (use_strided_b) {
         float* packed_a = (float*)cob_aligned_alloc(128, a_panel_floats * sizeof(float));

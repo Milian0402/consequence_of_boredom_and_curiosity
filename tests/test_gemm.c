@@ -227,8 +227,11 @@ int main(void)
     failures += test_packed_matches_direct_aligned_shape(1152, 1152, 1152);
     failures += test_packed_matches_direct_aligned_shape(1216, 1216, 1216);
     failures += test_packed_matches_direct_aligned_shape(832, 960, 896);
+    failures += test_packed_matches_direct_aligned_shape(64, 2112, 512);
+    failures += test_packed_matches_direct_aligned_shape(96, 4096, 1024);
+    failures += test_packed_matches_direct_aligned_shape(128, 2048, 2048);
     failures += test_packed_matches_direct_aligned_shape(1280, 1280, 1280);
-    total_shapes += 7;
+    total_shapes += 10;
 #endif
 
     if (failures != 0) {
