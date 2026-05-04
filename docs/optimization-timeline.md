@@ -91,6 +91,20 @@ about 1.65-1.70 TF/s with the route enabled. A CMake build and
 `ctest --test-dir build-cmake --output-on-failure` also passed. This improves
 one-shot 512, but still does not complete the universal fastest claim.
 
+### 2026-05-05: post-0182f31 ACL and SME direct-B attempts
+
+ACL CMake SVE/SME builds crashed on Apple M5 Max with `SIGILL`, traced to a
+non-streaming SVE instruction in `CpuGemmAssemblyDispatch::configure`. An ACL
+NEON-only build ran, but measured only about 120-126 GF/s single-thread, far
+below COB.
+
+An SME packed-`B` loop-order experiment was tested and not kept because results
+were mixed and noisy.
+
+A conservative local SME direct-`B` one-shot route was added for medium
+contiguous square sizes `832-1216`, excluding `1024`. Paired runs improved the
+one-shot benchmark results. `1280` was excluded as unstable.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
@@ -102,4 +116,6 @@ The universal "fastest" claim is not achieved if MpGEMM counts, because MpGEMM
 won several same-process one-shot FP32 single-thread square benchmarks.
 Accelerate also still wins some small cases. The SME packed-`B` path improves
 COB's packed-`B` result, and the narrow SME route improves one-shot `n = 512`,
-but not enough to change that conclusion.
+but not enough to change that conclusion. Later ACL attempts were either
+crashing or far slower, and the local direct-`B` SME route remains promising but
+shape-limited.
