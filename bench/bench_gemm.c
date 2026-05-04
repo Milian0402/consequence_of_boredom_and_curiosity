@@ -74,16 +74,16 @@ static float checksum(const float* c, int count)
 static int timed_iterations(int n)
 {
     if (n <= 64) {
-        return 256;
+        return 8192;
     }
     if (n <= 128) {
-        return 128;
+        return 2048;
     }
     if (n <= 256) {
-        return 32;
+        return 256;
     }
     if (n <= 512) {
-        return 8;
+        return 32;
     }
     return 1;
 }
