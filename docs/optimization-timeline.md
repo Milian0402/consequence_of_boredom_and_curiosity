@@ -111,6 +111,20 @@ direct-`B` SME path. Validation passed with `make test`, a CMake build, and
 extending the route to `768` was rejected after integrated benchmarks regressed
 at `768`, so the final gate remains `832-1216`, excluding `1024`.
 
+### 2026-05-05: rectangular SME direct-B route
+
+Commit `3f4ea03` broadened the direct-`B` SME route from square-only to selected
+medium contiguous rectangular cases. It also added an Apple-arm64 rectangular
+direct-vs-packed test.
+
+Result: `make test` passed with 26 shapes, plus a CMake build and
+`ctest --test-dir build-cmake --output-on-failure`. A temporary rectangular
+benchmark showed direct around 1.94-2.01 TF/s on the tested rectangular cases.
+
+A temporary two-step SME inner-loop unroll in
+`/private/tmp/cob_sme_unroll2_exp` passed tests, but was rejected because it
+slowed important routed sizes and hurt packed-`B` stability.
+
 ### 2026-05-05: post-841ee51 rejected experiments
 
 Widening the post-pack SME route beyond `n == 512` was tested in
