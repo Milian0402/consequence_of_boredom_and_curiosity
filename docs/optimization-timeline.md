@@ -159,6 +159,16 @@ appeared while patch-editing a `/private/tmp` worktree. `AGENTS.md` and
 `.codex-reminder.md` now tell agents to treat that as client/tooling friction,
 avoid that edit path, and continue in the repo checkout without asking.
 
+### 2026-05-05: packed-B SME dispatch capped
+
+Commit `c699b56` capped the public packed-`B` SME dispatch to `n <= 1216`.
+Benchmarks showed the AMX packed-`B` path was faster and more stable for large
+packed-`B` cases, especially `n = 1536`.
+
+Result: `make test` passed. A selected benchmark after the change showed
+packed-`B` median around 1.94-1.96 TF/s at `n = 1536`, versus the earlier broad
+SME route around roughly 1.45-1.53 TF/s in the same session.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
