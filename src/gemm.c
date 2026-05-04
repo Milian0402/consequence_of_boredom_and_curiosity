@@ -19,7 +19,8 @@
 enum {
     COB_SGEMM_AMX_MR = 32,
     COB_SGEMM_AMX_NR = 32,
-    COB_SGEMM_AMX_MC = 384
+    COB_SGEMM_AMX_MC = 384,
+    COB_SGEMM_AMX_STRIDED_B_MAX_N = 768
 };
 
 static int cob_min_i32(int a, int b)
@@ -941,7 +942,7 @@ static int cob_sgemm_rowmajor_amx(
         m >= COB_SGEMM_AMX_MC && n >= 1152 && k >= 512 &&
         m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0;
     const int use_strided_b =
-        !use_large_block && n <= 384 &&
+        !use_large_block && n <= COB_SGEMM_AMX_STRIDED_B_MAX_N &&
         m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0;
     const int max_a_panels = COB_SGEMM_AMX_MC / COB_SGEMM_AMX_MR;
     const size_t a_block_floats = (size_t)max_a_panels * a_panel_floats;
