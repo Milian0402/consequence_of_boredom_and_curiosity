@@ -165,6 +165,26 @@ static int timed_repeats(bench_shape shape)
     return env_int_clamped("COB_BENCH_REPEATS", fallback, 1, COB_BENCH_MAX_REPEATS);
 }
 
+static int bench_pack_setup_enabled(void)
+{
+    return env_int_clamped("COB_BENCH_PACK_SETUP", 0, 0, 1) != 0;
+}
+
+static int pack_setup_iterations(bench_shape shape)
+{
+    const int n = shape_max_dim(shape);
+    if (n <= 128) {
+        return 512;
+    }
+    if (n <= 256) {
+        return 128;
+    }
+    if (n <= 512) {
+        return 16;
+    }
+    return 1;
+}
+
 static void sort_doubles(double* values, int count)
 {
     for (int i = 1; i < count; ++i) {
@@ -364,6 +384,55 @@ static double run_case_cob_packed_reuse(bench_shape shape, const float* a, const
     return best_gflops;
 }
 
+static double run_case_cob_pack_setup(bench_shape shape, const float* b)
+{
+    const int repeats = timed_repeats(shape);
+    const int iters = pack_setup_iterations(shape);
+    double times[COB_BENCH_MAX_REPEATS];
+    size_t bytes_per_iter = 0;
+
+    cob_packed_b_f32 warmup;
+    if (cob_sgemm_pack_b(&warmup, shape.k, shape.n, b, shape.n) != 0) {
+        fprintf(stderr, "packed-B setup allocation failed for %dx%dx%d\n",
+            shape.m,
+            shape.n,
+            shape.k);
+        return 0.0;
+    }
+    bytes_per_iter = (size_t)shape.k * (size_t)shape.n * sizeof(float) + warmup.bytes;
+    cob_sgemm_free_packed_b(&warmup);
+
+    for (int i = 0; i < repeats; ++i) {
+        const double t0 = now_seconds();
+        for (int iter = 0; iter < iters; ++iter) {
+            cob_packed_b_f32 packed_b;
+            if (cob_sgemm_pack_b(&packed_b, shape.k, shape.n, b, shape.n) != 0) {
+                fprintf(stderr, "packed-B setup allocation failed for %dx%dx%d\n",
+                    shape.m,
+                    shape.n,
+                    shape.k);
+                return 0.0;
+            }
+            cob_sgemm_free_packed_b(&packed_b);
+        }
+        const double t1 = now_seconds();
+        times[i] = (t1 - t0) / (double)iters;
+    }
+
+    const bench_stats stats = summarize_times(times, repeats);
+    const double best_gbs = (double)bytes_per_iter / stats.best / 1.0e9;
+    const double median_gbs = (double)bytes_per_iter / stats.median / 1.0e9;
+    char shape_text[32];
+    format_shape(shape_text, sizeof(shape_text), shape);
+    printf("%-18s %-14s  best %8.2f GB/s  med %8.2f GB/s  %9.6f s\n",
+        "cob pack-B setup",
+        shape_text,
+        best_gbs,
+        median_gbs,
+        stats.best);
+    return best_gbs;
+}
+
 static int is_shape_separator(char ch)
 {
     return ch == 'x' || ch == 'X' || ch == ',' || ch == ':';
@@ -447,6 +516,7 @@ int main(int argc, char** argv)
 
     printf("single-thread FP32 row-major GEMM\n");
     printf("cob one-shot includes B packing; cob packed-B excludes B packing after setup\n\n");
+    const int show_pack_setup = bench_pack_setup_enabled();
 
     for (int si = 0; si < shape_count; ++si) {
         const bench_shape shape = shapes[si];
@@ -471,6 +541,9 @@ int main(int argc, char** argv)
 
         run_case("cob one-shot", bench_cob_direct, shape, a, b, c);
         run_case_cob_packed_reuse(shape, a, b, c);
+        if (show_pack_setup) {
+            run_case_cob_pack_setup(shape, b);
+        }
 #if defined(COB_HAVE_ACCELERATE)
         run_case("Accelerate", bench_accelerate, shape, a, b, c);
 #endif
