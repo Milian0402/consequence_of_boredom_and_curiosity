@@ -240,6 +240,19 @@ medians around 2014-2021 GF/s, versus the old cutoff control around roughly
 1983-2003 GF/s. Validation passed with `make test` across 29 shapes, and
 `git diff --check` passed.
 
+### 2026-05-05: one-shot n=960 AMX direct-B extension
+
+Commit `c99f5d5` extended the AMX direct-`B` max `N` from `832` to `960`, so
+one-shot `n = 960` uses AMX direct-`B`.
+
+Result: a focused `COB_BENCH_REPEATS=15` benchmark showed `n = 960` one-shot
+medians about 2029-2036 GF/s, improving over the previous 832-cutoff control
+range around roughly 1995-2006 GF/s. Accelerate still remained around
+2058-2067 GF/s. An `n = 896` extension check was also tried during this
+boundary work and was not kept because the explicit 832-cutoff control was as
+good or better at `896`. Validation passed with `make test` across 29 shapes,
+and `git diff --check` passed.
+
 ### 2026-05-05: latest post-1088 rejected experiments
 
 After commits `04f2a91` and `822123c`, several follow-up experiments were
