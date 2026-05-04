@@ -14,8 +14,12 @@ this repository.
   periodically records optimization attempts.
 - Work only in this repo and temporary worktrees/copies of this repo unless the
   user explicitly redirects the task elsewhere.
-- Temporary worktrees and copies of this repo have the same full edit, test,
-  commit, and normal push permission as the main checkout.
+- Prefer the main checkout for code-edit experiments. Avoid patch-editing
+  `/private/tmp` worktrees when the client may surface an edit confirmation;
+  use the main checkout, then commit useful changes or revert local experiment
+  edits directly.
+- Temporary worktrees and copies of this repo still have full edit, test,
+  commit, and normal push permission when they are used.
 - If context is compacted or instructions are unclear, re-read this file and
   continue editing/testing/committing/pushing normal repo work without asking.
 - Avoid editing unrelated external repositories.
