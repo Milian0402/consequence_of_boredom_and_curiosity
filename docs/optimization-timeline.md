@@ -111,6 +111,17 @@ direct-`B` SME path. Validation passed with `make test`, a CMake build, and
 extending the route to `768` was rejected after integrated benchmarks regressed
 at `768`, so the final gate remains `832-1216`, excluding `1024`.
 
+### 2026-05-05: post-841ee51 rejected experiments
+
+Widening the post-pack SME route beyond `n == 512` was tested in
+`/private/tmp/cob_postpack_sme_exp` and rejected because it regressed
+`n = 768` and `n = 1536`, and did not beat the existing direct-`B` route for
+gated sizes.
+
+Changing `COB_SGEMM_AMX_MC` from `384` to `512` was tested in
+`/private/tmp/cob_mc512_exp` and rejected because it hurt packed-`B` at larger
+sizes such as `1280` and `1408` without a sufficient one-shot gain.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
