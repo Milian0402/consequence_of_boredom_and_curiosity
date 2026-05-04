@@ -169,6 +169,17 @@ Result: `make test` passed. A selected benchmark after the change showed
 packed-`B` median around 1.94-1.96 TF/s at `n = 1536`, versus the earlier broad
 SME route around roughly 1.45-1.53 TF/s in the same session.
 
+### 2026-05-05: one-shot SME direct-B 1280 experiment
+
+Commit `d68430c` extended the medium direct-`B` SME route from `1216` to `1280`
+and added an Apple-arm64 direct-vs-packed correctness case for `1280`.
+
+Result: with the temporary `1280` gate, repeated `n = 1280` one-shot medians
+were mostly about 1.84-1.89 TF/s. With the original `1216` cap, repeated
+`n = 1280` one-shot medians were mostly about 1.65-1.74 TF/s with one severe
+outlier. Validation passed with `make test` across 27 shapes, and
+`git diff --check` passed.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
