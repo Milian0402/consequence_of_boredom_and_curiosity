@@ -347,6 +347,27 @@ Result: the baseline panel-wise setup measured roughly 90-114 GB/s across
 about 16-67 GB/s depending on size, so it was reverted. The existing panel-wise
 packing order stays.
 
+### 2026-05-05: small-k scalar A-pack rejected
+
+Forcing scalar `A`-panel packing for `k <= 256` passed `make test`, but it was
+a hard regression in the focused small-size sweep.
+
+Result: a 15-repeat sweep dropped COB one-shot and packed-`B` medians for
+`96..256` to roughly 557, 587, 813, 811, 975, and 934 GF/s. That was far below
+the prior AMX-pack small-size range of about 1300-1750 GF/s, so the experiment
+was reverted.
+
+### 2026-05-05: public packed-B SME n=1280 rejected
+
+Re-enabling public packed-`B` SME dispatch through `n = 1280` passed tests, but
+the benchmark results were unstable and mixed.
+
+Result: a focused 15-repeat run had one good `n = 1280` packed-`B` median
+around 1978 GF/s, while a duplicate same-run `n = 1280` packed-`B` median
+collapsed around 1536 GF/s. `n = 1408` remained on AMX packed-`B` around
+1950 GF/s. The change was reverted, keeping the public packed-`B` SME cap at
+`n <= 1216`.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
