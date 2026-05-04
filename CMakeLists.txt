@@ -25,6 +25,10 @@ target_compile_options(cob_matmul
         -Wpedantic
 )
 
+if(APPLE)
+    target_compile_definitions(cob_matmul PRIVATE _DARWIN_C_SOURCE)
+endif()
+
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm64|aarch64|ARM64|AARCH64)$")
     target_compile_definitions(cob_matmul PRIVATE COB_USE_NEON=1)
 endif()
@@ -45,6 +49,10 @@ if(COB_BUILD_BENCH)
         bench/bench_gemm.c
     )
     target_link_libraries(cob_gemm_bench PRIVATE cob_matmul)
+
+    if(APPLE)
+        target_compile_definitions(cob_gemm_bench PRIVATE _DARWIN_C_SOURCE)
+    endif()
 
     if(APPLE)
         find_library(ACCELERATE_FRAMEWORK Accelerate)
