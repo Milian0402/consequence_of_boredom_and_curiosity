@@ -881,12 +881,20 @@ static int cob_sgemm_rowmajor_amx(
     const size_t a_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_MR;
     const size_t b_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_NR;
     const size_t b_bytes = (size_t)b_panels * b_panel_floats * sizeof(float);
+    const int use_large_block =
+        m >= COB_SGEMM_AMX_MC && n >= 1152 && k >= 512 &&
+        m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0;
+    const int max_a_panels = COB_SGEMM_AMX_MC / COB_SGEMM_AMX_MR;
+    const size_t a_block_floats = (size_t)max_a_panels * a_panel_floats;
+    const size_t a_scratch_floats = use_large_block ? a_block_floats : a_panel_floats;
+    const size_t scratch_bytes = b_bytes + a_scratch_floats * sizeof(float);
 
-    float* packed_b = (float*)cob_aligned_alloc(128, b_bytes);
-    if (packed_b == NULL) {
-        free(packed_b);
+    float* scratch = (float*)cob_aligned_alloc(128, scratch_bytes);
+    if (scratch == NULL) {
         return 0;
     }
+    float* packed_b = scratch;
+    float* packed_a_scratch = scratch + (size_t)b_panels * b_panel_floats;
 
     for (int panel = 0; panel < b_panels; ++panel) {
         const int jc = panel * COB_SGEMM_AMX_NR;
@@ -907,16 +915,8 @@ static int cob_sgemm_rowmajor_amx(
         }
     }
 
-    if (m >= COB_SGEMM_AMX_MC && n >= 1152 && k >= 512 &&
-        m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0) {
-        const int max_a_panels = COB_SGEMM_AMX_MC / COB_SGEMM_AMX_MR;
-        const size_t a_block_floats = (size_t)max_a_panels * a_panel_floats;
-        float* packed_a_block = (float*)cob_aligned_alloc(128, a_block_floats * sizeof(float));
-        if (packed_a_block == NULL) {
-            free(packed_b);
-            return 0;
-        }
-
+    if (use_large_block) {
+        float* packed_a_block = packed_a_scratch;
         cob_amx_set();
         for (int ib = 0; ib < m; ib += COB_SGEMM_AMX_MC) {
             const int mc = cob_min_i32(COB_SGEMM_AMX_MC, m - ib);
@@ -946,16 +946,11 @@ static int cob_sgemm_rowmajor_amx(
         }
         cob_amx_clr();
 
-        free(packed_a_block);
-        free(packed_b);
+        free(scratch);
         return 1;
     }
 
-    float* packed_a = (float*)cob_aligned_alloc(128, a_panel_floats * sizeof(float));
-    if (packed_a == NULL) {
-        free(packed_b);
-        return 0;
-    }
+    float* packed_a = packed_a_scratch;
 
     if (m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0) {
         cob_amx_set();
@@ -973,8 +968,7 @@ static int cob_sgemm_rowmajor_amx(
         }
         cob_amx_clr();
 
-        free(packed_a);
-        free(packed_b);
+        free(scratch);
         return 1;
     }
 
@@ -1001,8 +995,7 @@ static int cob_sgemm_rowmajor_amx(
     }
     cob_amx_clr();
 
-    free(packed_a);
-    free(packed_b);
+    free(scratch);
 
     return 1;
 }
