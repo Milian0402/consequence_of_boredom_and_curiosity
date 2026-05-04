@@ -1200,7 +1200,7 @@ static int cob_sgemm_rowmajor_amx_from_packed_b8(
     return 1;
 }
 
-static void cob_sgemm_pack_b32_chunk_rowwise(
+static void cob_sgemm_pack_b32_chunk_panels(
     float* packed,
     int k,
     int n,
@@ -1208,20 +1208,14 @@ static void cob_sgemm_pack_b32_chunk_rowwise(
     int ldb)
 {
     const int panels = (n + COB_SGEMM_AMX_NR - 1) / COB_SGEMM_AMX_NR;
-    for (int p = 0; p < k; ++p) {
-        const float* brow = b + (size_t)p * (size_t)ldb;
-        for (int panel = 0; panel < panels; ++panel) {
-            const int col0 = panel * COB_SGEMM_AMX_NR;
-            const int nr = cob_min_i32(COB_SGEMM_AMX_NR, n - col0);
-            float* dst = packed +
-                ((size_t)panel * (size_t)k + (size_t)p) * (size_t)COB_SGEMM_AMX_NR;
-            if (nr == COB_SGEMM_AMX_NR) {
-                memcpy(dst, brow + col0, COB_SGEMM_AMX_NR * sizeof(float));
-            } else {
-                for (int j = 0; j < COB_SGEMM_AMX_NR; ++j) {
-                    dst[j] = j < nr ? brow[(size_t)col0 + (size_t)j] : 0.0f;
-                }
-            }
+    for (int panel = 0; panel < panels; ++panel) {
+        const int col0 = panel * COB_SGEMM_AMX_NR;
+        const int nr = cob_min_i32(COB_SGEMM_AMX_NR, n - col0);
+        float* dst_panel = packed + (size_t)panel * (size_t)k * (size_t)COB_SGEMM_AMX_NR;
+        if (nr == COB_SGEMM_AMX_NR) {
+            cob_sgemm_pack_b32_panel_full(dst_panel, k, b + col0, ldb);
+        } else {
+            cob_sgemm_pack_b32_panel_partial(dst_panel, k, b + col0, ldb, nr);
         }
     }
 }
@@ -1237,10 +1231,6 @@ static int cob_sgemm_rowmajor_amx_skinny_pack_b_chunks(
     float* c,
     int ldc)
 {
-    enum {
-        COB_SGEMM_SKINNY_NC = 256
-    };
-
     if (m < 96 || m > 128 || n < 1024 || k < 512 ||
         lda != k || ldb != n ||
         (m % COB_SGEMM_AMX_MR) != 0 ||
@@ -1248,8 +1238,9 @@ static int cob_sgemm_rowmajor_amx_skinny_pack_b_chunks(
         return 0;
     }
 
+    const int skinny_nc = (m == 128 && k >= 1024) ? 512 : 256;
     const int a_panels = m / COB_SGEMM_AMX_MR;
-    const int max_b_panels = COB_SGEMM_SKINNY_NC / COB_SGEMM_AMX_NR;
+    const int max_b_panels = skinny_nc / COB_SGEMM_AMX_NR;
     const size_t a_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_MR;
     const size_t b_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_NR;
     float* packed_a =
@@ -1272,10 +1263,10 @@ static int cob_sgemm_rowmajor_amx_skinny_pack_b_chunks(
             lda);
     }
 
-    for (int jc = 0; jc < n; jc += COB_SGEMM_SKINNY_NC) {
-        const int nc = cob_min_i32(COB_SGEMM_SKINNY_NC, n - jc);
+    for (int jc = 0; jc < n; jc += skinny_nc) {
+        const int nc = cob_min_i32(skinny_nc, n - jc);
         const int b_panels = nc / COB_SGEMM_AMX_NR;
-        cob_sgemm_pack_b32_chunk_rowwise(packed_b, k, nc, b + jc, ldb);
+        cob_sgemm_pack_b32_chunk_panels(packed_b, k, nc, b + jc, ldb);
 
         for (int panel = 0; panel < b_panels; ++panel) {
             const int col = jc + panel * COB_SGEMM_AMX_NR;
