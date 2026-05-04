@@ -223,7 +223,8 @@ int main(void)
 #if defined(__APPLE__) && defined(__aarch64__)
     failures += test_packed_matches_direct_aligned_shape(832, 832, 832);
     failures += test_packed_matches_direct_aligned_shape(832, 960, 896);
-    total_shapes += 2;
+    failures += test_packed_matches_direct_aligned_shape(1280, 1280, 1280);
+    total_shapes += 3;
 #endif
 
     if (failures != 0) {

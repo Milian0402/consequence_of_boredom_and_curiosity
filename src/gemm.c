@@ -618,7 +618,7 @@ static int cob_sgemm_rowmajor_sme_medium_contiguous_strided_b32(
     int ldc)
 {
     /* Tuned for medium contiguous cases where skipping one-shot B packing wins. */
-    if (m < 832 || m > 1216 || n < 832 || n > 1216 || k < 832 || k > 1216 ||
+    if (m < 832 || m > 1280 || n < 832 || n > 1280 || k < 832 || k > 1280 ||
         n == 1024 || lda != k || ldb != n ||
         (m % COB_SGEMM_AMX_MR) != 0 ||
         (n % 64) != 0 || !cob_apple_sme2p1_available()) {
