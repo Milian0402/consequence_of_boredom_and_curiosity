@@ -219,6 +219,17 @@ routed sizes, including medians around 2013 GF/s at `n = 960`, 1962 GF/s at
 `n = 1088`, 1922 GF/s at `n = 1152`, and 1926 GF/s at `n = 1216`. Validation
 passed with `make test` across 28 shapes, and `git diff --check` passed.
 
+### 2026-05-05: packed-B n=1088 dispatch narrowed
+
+Commit `04f2a91` excluded `n = 1088` from the public packed-`B` SME route, so
+that width uses AMX packed-`B` instead. It also added an Apple-arm64
+direct-vs-packed correctness case for `1088`.
+
+Result: a focused `COB_BENCH_REPEATS=9` benchmark after the change showed
+`n = 1088` packed-`B` medians about 2027-2044 GF/s, better than the prior SME
+route around roughly 1990-2010 GF/s in nearby runs. Validation passed with
+`make test` across 29 shapes, and `git diff --check` passed.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
