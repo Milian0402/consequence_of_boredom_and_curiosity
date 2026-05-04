@@ -230,6 +230,25 @@ Result: a focused `COB_BENCH_REPEATS=9` benchmark after the change showed
 route around roughly 1990-2010 GF/s in nearby runs. Validation passed with
 `make test` across 29 shapes, and `git diff --check` passed.
 
+### 2026-05-05: latest post-1088 rejected experiments
+
+After commits `04f2a91` and `822123c`, several follow-up experiments were
+tested and rejected. Extending the SME direct-`B` one-shot gate to `n = 1408`
+after the 256-row direct-`B` block change passed tests, but did not improve
+one-shot `1408`, so it was reverted. Lowering the AMX large-block threshold
+from `n >= 1152` to `n >= 1024` in both one-shot and public packed-`B` AMX
+paths passed tests, but did not help one-shot `1024` and created noisy
+regressions around `1152` and `1216`, so it was reverted.
+
+Forcing public packed-`B` AMX at `n = 1152` and `n = 1216` by excluding those
+widths from SME packed-`B` also passed tests, but was mixed and not clearly
+better, so it was reverted. A stack-backed `A` scratch experiment for small AMX
+direct-`B` one-shot, including an overrideable macro cutoff and cutoff `224`,
+passed tests, but a controlled heap-only comparison was faster for `96-224`, so
+it was reverted.
+
+Validation after the reverts included `make test`; the tree returned clean.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
