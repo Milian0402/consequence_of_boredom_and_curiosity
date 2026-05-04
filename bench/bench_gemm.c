@@ -1,3 +1,7 @@
+#if !defined(_POSIX_C_SOURCE)
+#define _POSIX_C_SOURCE 200112L
+#endif
+
 #include "cob_gemm.h"
 
 #include <stdint.h>
@@ -32,6 +36,15 @@ static void fill_random(float* x, int count, uint32_t* state)
     }
 }
 
+static float* alloc_f32_aligned(size_t count)
+{
+    void* ptr = NULL;
+    if (posix_memalign(&ptr, 128, count * sizeof(float)) != 0) {
+        return NULL;
+    }
+    return (float*)ptr;
+}
+
 static double now_seconds(void)
 {
     struct timespec ts;
@@ -46,6 +59,23 @@ static float checksum(const float* c, int count)
         sum += c[i];
     }
     return sum;
+}
+
+static int timed_iterations(int n)
+{
+    if (n <= 64) {
+        return 256;
+    }
+    if (n <= 128) {
+        return 128;
+    }
+    if (n <= 256) {
+        return 32;
+    }
+    if (n <= 512) {
+        return 8;
+    }
+    return 1;
 }
 
 static void bench_cob_direct(int n, const float* a, const float* b, float* c)
@@ -78,19 +108,20 @@ static double run_case(const char* name, bench_fn fn, int n, const float* a, con
 {
     const int warmups = n <= 256 ? 2 : 1;
     const int repeats = n <= 256 ? 7 : 4;
+    const int iters = timed_iterations(n);
     double best = 1.0e100;
 
     for (int i = 0; i < warmups; ++i) {
-        memset(c, 0, (size_t)n * (size_t)n * sizeof(float));
         fn(n, a, b, c);
     }
 
     for (int i = 0; i < repeats; ++i) {
-        memset(c, 0, (size_t)n * (size_t)n * sizeof(float));
         const double t0 = now_seconds();
-        fn(n, a, b, c);
+        for (int iter = 0; iter < iters; ++iter) {
+            fn(n, a, b, c);
+        }
         const double t1 = now_seconds();
-        const double elapsed = t1 - t0;
+        const double elapsed = (t1 - t0) / (double)iters;
         if (elapsed < best) {
             best = elapsed;
         }
@@ -116,19 +147,20 @@ static double run_case_cob_packed_reuse(int n, const float* a, const float* b, f
 
     const int warmups = n <= 256 ? 2 : 1;
     const int repeats = n <= 256 ? 7 : 4;
+    const int iters = timed_iterations(n);
     double best = 1.0e100;
 
     for (int i = 0; i < warmups; ++i) {
-        memset(c, 0, (size_t)n * (size_t)n * sizeof(float));
         cob_sgemm_rowmajor_packed_b(n, n, n, a, n, &packed_b, c, n);
     }
 
     for (int i = 0; i < repeats; ++i) {
-        memset(c, 0, (size_t)n * (size_t)n * sizeof(float));
         const double t0 = now_seconds();
-        cob_sgemm_rowmajor_packed_b(n, n, n, a, n, &packed_b, c, n);
+        for (int iter = 0; iter < iters; ++iter) {
+            cob_sgemm_rowmajor_packed_b(n, n, n, a, n, &packed_b, c, n);
+        }
         const double t1 = now_seconds();
-        const double elapsed = t1 - t0;
+        const double elapsed = (t1 - t0) / (double)iters;
         if (elapsed < best) {
             best = elapsed;
         }
@@ -172,9 +204,9 @@ int main(int argc, char** argv)
     for (int si = 0; si < size_count; ++si) {
         const int n = sizes[si];
         const size_t count = (size_t)n * (size_t)n;
-        float* a = (float*)malloc(count * sizeof(float));
-        float* b = (float*)malloc(count * sizeof(float));
-        float* c = (float*)malloc(count * sizeof(float));
+        float* a = alloc_f32_aligned(count);
+        float* b = alloc_f32_aligned(count);
+        float* c = alloc_f32_aligned(count);
         if (a == NULL || b == NULL || c == NULL) {
             fprintf(stderr, "allocation failed for n=%d\n", n);
             free(a);

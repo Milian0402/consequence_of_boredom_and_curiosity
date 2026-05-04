@@ -1,3 +1,7 @@
+#if !defined(_POSIX_C_SOURCE)
+#define _POSIX_C_SOURCE 200112L
+#endif
+
 #include "cob_gemm.h"
 
 #include <math.h>
@@ -26,6 +30,18 @@ static void fill_random(float* x, int count, uint32_t* state)
     }
 }
 
+static float* alloc_f32(size_t count, int aligned)
+{
+    void* ptr = NULL;
+    if (!aligned) {
+        return (float*)malloc(count * sizeof(float));
+    }
+    if (posix_memalign(&ptr, 128, count * sizeof(float)) != 0) {
+        return NULL;
+    }
+    return (float*)ptr;
+}
+
 static float max_abs_diff(const float* a, const float* b, int count)
 {
     float max_diff = 0.0f;
@@ -38,20 +54,17 @@ static float max_abs_diff(const float* a, const float* b, int count)
     return max_diff;
 }
 
-static int test_shape(int m, int n, int k)
+static int test_shape_ex(int m, int n, int k, int lda, int ldb, int ldc, int aligned_c)
 {
-    const int lda = k + 3;
-    const int ldb = n + 5;
-    const int ldc = n + 7;
     const int a_count = m * lda;
     const int b_count = k * ldb;
     const int c_count = m * ldc;
 
     float* a = (float*)malloc((size_t)a_count * sizeof(float));
     float* b = (float*)malloc((size_t)b_count * sizeof(float));
-    float* cref = (float*)malloc((size_t)c_count * sizeof(float));
-    float* cgot = (float*)malloc((size_t)c_count * sizeof(float));
-    float* cpacked = (float*)malloc((size_t)c_count * sizeof(float));
+    float* cref = alloc_f32((size_t)c_count, aligned_c);
+    float* cgot = alloc_f32((size_t)c_count, aligned_c);
+    float* cpacked = alloc_f32((size_t)c_count, aligned_c);
 
     if (a == NULL || b == NULL || cref == NULL || cgot == NULL || cpacked == NULL) {
         fprintf(stderr, "allocation failed for %dx%dx%d\n", m, n, k);
@@ -109,6 +122,16 @@ static int test_shape(int m, int n, int k)
     return failed;
 }
 
+static int test_shape(int m, int n, int k)
+{
+    return test_shape_ex(m, n, k, k + 3, n + 5, n + 7, 0);
+}
+
+static int test_aligned_shape(int m, int n, int k)
+{
+    return test_shape_ex(m, n, k, k, n, n, 1);
+}
+
 int main(void)
 {
     static const int shapes[][3] = {
@@ -122,6 +145,11 @@ int main(void)
         {15, 15, 15},
         {16, 16, 16},
         {17, 19, 23},
+        {32, 32, 1},
+        {32, 32, 32},
+        {32, 64, 31},
+        {64, 32, 33},
+        {65, 65, 67},
         {31, 33, 37},
         {64, 64, 64},
         {96, 64, 128},
@@ -130,17 +158,23 @@ int main(void)
     };
 
     int failures = 0;
+    int total_shapes = 0;
     const int shape_count = (int)(sizeof(shapes) / sizeof(shapes[0]));
     for (int i = 0; i < shape_count; ++i) {
         failures += test_shape(shapes[i][0], shapes[i][1], shapes[i][2]);
     }
+    total_shapes += shape_count;
+
+    failures += test_aligned_shape(32, 32, 32);
+    failures += test_aligned_shape(64, 64, 64);
+    failures += test_aligned_shape(128, 128, 129);
+    total_shapes += 3;
 
     if (failures != 0) {
         fprintf(stderr, "%d GEMM test shape(s) failed\n", failures);
         return 1;
     }
 
-    printf("all GEMM tests passed (%d shapes)\n", shape_count);
+    printf("all GEMM tests passed (%d shapes)\n", total_shapes);
     return 0;
 }
-

@@ -15,8 +15,14 @@ matrix is reused.
 - Row-major only
 - `alpha = 1`, `beta = 0`
 - Public packed-`B` API
+- Apple Silicon AMX `32x32` FP32 microkernel when available
 - ARM64 NEON `8x8` microkernel when available
 - Scalar reference and scalar edge path
+
+On Apple Silicon, the AMX path is enabled by default and can be disabled with
+`-DCOB_DISABLE_APPLE_AMX=1`. The AMX kernel uses a safe buffered store for
+arbitrary output matrices and a faster direct-store path when `C` is 128-byte
+aligned with a row stride that is a multiple of 32 floats.
 
 ## Build
 
@@ -41,7 +47,8 @@ make bench
 ```
 
 On macOS the benchmark also builds an Apple Accelerate comparison when the
-framework is available.
+framework is available. The benchmark allocates aligned matrices so it measures
+the fastest AMX output path.
 
 ## API
 
@@ -66,8 +73,9 @@ void cob_sgemm_rowmajor_packed_b(
 
 ## Next Work
 
-- Benchmark packed-`B` reuse separately from one-shot packing.
+- Add an AMX-native packed-`B` public API instead of translating the current
+  `8`-column packed format internally.
 - Add `4x8`, `12x8`, and `16x4` NEON kernels and shape dispatch.
-- Add packed-`A` panels and tune `MC`, `NC`, and `KC`.
+- Add cache-blocked AMX scheduling and tune `MC`, `NC`, and `KC`.
 - Replace scalar edges with vector edge kernels.
 - Add BLIS/OpenBLAS/BLASFEO comparison harnesses.
