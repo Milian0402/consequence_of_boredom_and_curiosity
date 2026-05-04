@@ -34,7 +34,7 @@ enum {
 };
 
 #ifndef COB_SGEMM_AMX_STRIDED_B_MAX_N
-#define COB_SGEMM_AMX_STRIDED_B_MAX_N 832
+#define COB_SGEMM_AMX_STRIDED_B_MAX_N 960
 #endif
 
 /* Direct source-B loads are slower for this power-of-two row stride; packed B avoids the conflict. */
