@@ -29,7 +29,8 @@
 enum {
     COB_SGEMM_AMX_MR = 32,
     COB_SGEMM_AMX_NR = 32,
-    COB_SGEMM_AMX_MC = 384
+    COB_SGEMM_AMX_MC = 384,
+    COB_SGEMM_SME_DIRECT_MC = 256
 };
 
 #ifndef COB_SGEMM_AMX_STRIDED_B_MAX_N
@@ -626,7 +627,7 @@ static int cob_sgemm_rowmajor_sme_medium_contiguous_strided_b32(
     }
 
     const int b_panels64 = n / 64;
-    const int max_a32_panels = COB_SGEMM_AMX_MC / COB_SGEMM_AMX_MR;
+    const int max_a32_panels = COB_SGEMM_SME_DIRECT_MC / COB_SGEMM_AMX_MR;
     const size_t a_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_MR;
     float* packed_a =
         (float*)cob_aligned_alloc(128, (size_t)max_a32_panels * a_panel_floats * sizeof(float));
@@ -634,8 +635,8 @@ static int cob_sgemm_rowmajor_sme_medium_contiguous_strided_b32(
         return 0;
     }
 
-    for (int ib = 0; ib < m; ib += COB_SGEMM_AMX_MC) {
-        const int mc = cob_min_i32(COB_SGEMM_AMX_MC, m - ib);
+    for (int ib = 0; ib < m; ib += COB_SGEMM_SME_DIRECT_MC) {
+        const int mc = cob_min_i32(COB_SGEMM_SME_DIRECT_MC, m - ib);
         const int a32_panels = mc / COB_SGEMM_AMX_MR;
         cob_amx_set();
         for (int ap = 0; ap < a32_panels; ++ap) {
