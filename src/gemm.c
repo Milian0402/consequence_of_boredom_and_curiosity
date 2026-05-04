@@ -265,12 +265,25 @@ static void cob_sgemm_32x32_amx_compute(int k, const float* packed_a, const floa
     }
 }
 
-static void cob_sgemm_32x32_amx_packed_full(
+static void cob_sgemm_32x32_amx_compute_strided_b(
     int k,
     const float* packed_a,
-    const float* packed_b,
-    float* c,
-    int ldc)
+    const float* b,
+    int ldb)
+{
+    for (int p = 0; p < k; ++p) {
+        const int zero_z = p == 0;
+        cob_amx_ldy_pair(packed_a + (size_t)p * (size_t)COB_SGEMM_AMX_MR, 0);
+        cob_amx_ldx_pair(b + (size_t)p * (size_t)ldb, 0);
+
+        cob_amx_fma32_16x16(0, 0, 0, zero_z);
+        cob_amx_fma32_16x16(0, 64, 1, zero_z);
+        cob_amx_fma32_16x16(64, 0, 2, zero_z);
+        cob_amx_fma32_16x16(64, 64, 3, zero_z);
+    }
+}
+
+static void cob_sgemm_32x32_amx_store_full(float* c, int ldc)
 {
     float row[COB_SGEMM_AMX_NR] __attribute__((aligned(128)));
     const int direct_store_128 =
@@ -280,8 +293,6 @@ static void cob_sgemm_32x32_amx_packed_full(
         !direct_store_128 &&
         (((uintptr_t)c & 63ull) == 0) &&
         (((uintptr_t)ldc * sizeof(float) & 63ull) == 0);
-
-    cob_sgemm_32x32_amx_compute(k, packed_a, packed_b);
 
     if (direct_store_128) {
         for (int i = 0; i < 16; ++i) {
@@ -317,6 +328,29 @@ static void cob_sgemm_32x32_amx_packed_full(
         cob_amx_stz_pair(row, (uint64_t)i * 4ull + 2ull);
         memcpy(c + (size_t)(i + 16) * (size_t)ldc, row, sizeof(row));
     }
+}
+
+static void cob_sgemm_32x32_amx_packed_full(
+    int k,
+    const float* packed_a,
+    const float* packed_b,
+    float* c,
+    int ldc)
+{
+    cob_sgemm_32x32_amx_compute(k, packed_a, packed_b);
+    cob_sgemm_32x32_amx_store_full(c, ldc);
+}
+
+static void cob_sgemm_32x32_amx_strided_b_full(
+    int k,
+    const float* packed_a,
+    const float* b,
+    int ldb,
+    float* c,
+    int ldc)
+{
+    cob_sgemm_32x32_amx_compute_strided_b(k, packed_a, b, ldb);
+    cob_sgemm_32x32_amx_store_full(c, ldc);
 }
 
 static void cob_sgemm_32x32_amx_packed_partial(
@@ -906,10 +940,39 @@ static int cob_sgemm_rowmajor_amx(
     const int use_large_block =
         m >= COB_SGEMM_AMX_MC && n >= 1152 && k >= 512 &&
         m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0;
+    const int use_strided_b =
+        !use_large_block && n <= 384 &&
+        m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0;
     const int max_a_panels = COB_SGEMM_AMX_MC / COB_SGEMM_AMX_MR;
     const size_t a_block_floats = (size_t)max_a_panels * a_panel_floats;
     const size_t a_scratch_floats = use_large_block ? a_block_floats : a_panel_floats;
     const size_t scratch_bytes = b_bytes + a_scratch_floats * sizeof(float);
+
+    if (use_strided_b) {
+        float* packed_a = (float*)cob_aligned_alloc(128, a_panel_floats * sizeof(float));
+        if (packed_a == NULL) {
+            return 0;
+        }
+
+        cob_amx_set();
+        for (int ic = 0; ic < m; ic += COB_SGEMM_AMX_MR) {
+            cob_sgemm_pack_a32_full(packed_a, k, a + (size_t)ic * (size_t)lda, lda);
+            for (int panel = 0; panel < b_panels; ++panel) {
+                const int jc = panel * COB_SGEMM_AMX_NR;
+                cob_sgemm_32x32_amx_strided_b_full(
+                    k,
+                    packed_a,
+                    b + jc,
+                    ldb,
+                    c + (size_t)ic * (size_t)ldc + jc,
+                    ldc);
+            }
+        }
+        cob_amx_clr();
+
+        free(packed_a);
+        return 1;
+    }
 
     float* scratch = (float*)cob_aligned_alloc(128, scratch_bytes);
     if (scratch == NULL) {

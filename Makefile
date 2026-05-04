@@ -35,7 +35,7 @@ FORTRAN_BLAS_NAME ?= external_sgemm_
 FORTRAN_BLAS_LDFLAGS ?=
 FORTRAN_BLAS_BENCH_CFLAGS := -DCOB_HAVE_EXTERNAL_FORTRAN_SGEMM=1 -DCOB_EXTERNAL_FORTRAN_SGEMM_NAME=\"$(FORTRAN_BLAS_NAME)\"
 
-.PHONY: all test bench bench-cblas bench-fortran-blas clean
+.PHONY: all test bench bench-cblas bench-fortran-blas clean FORCE
 
 all: $(TEST_BIN) $(BENCH_BIN)
 
@@ -51,10 +51,10 @@ $(TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(LIB_OBJ) | $(BUILD_DIR)
 $(BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(BENCH_LDFLAGS) -o $@
 
-$(CBLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) | $(BUILD_DIR)
+$(CBLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) FORCE | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(CBLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(CBLAS_LDFLAGS) -o $@
 
-$(FORTRAN_BLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) | $(BUILD_DIR)
+$(FORTRAN_BLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) FORCE | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(FORTRAN_BLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(FORTRAN_BLAS_LDFLAGS) -o $@
 
 test: $(TEST_BIN)
@@ -71,3 +71,5 @@ bench-fortran-blas: $(FORTRAN_BLAS_BENCH_BIN)
 
 clean:
 	rm -rf $(BUILD_DIR)
+
+FORCE:
