@@ -416,11 +416,15 @@ improves COB one-shot skinny performance, but still does not universally beat
 Accelerate on skinny shapes.
 
 Result: validation passed with `make test` across 34 shapes, and
-`git diff --check` passed. A focused skinny benchmark showed `m = 64` one-shot
-improving from older full-pack medians around 254-413 GF/s to about
-349-704 GF/s depending on shape. The `m = 96/128` chunked path reached roughly
-650-820 GF/s on sampled shapes, while packed-`B` remains much faster at about
-1.3-1.8 TF/s.
+`git diff --check` passed. Correction after the latest isolated validation:
+the earlier `m = 64` direct-`B` medians were noisy and overstated. Isolated
+15-repeat runs showed `m = 64` skinny direct-`B` is only a modest improvement
+over the old full-pack path, with examples around 365-373 GF/s median for
+`64x2112x7168`, about 384 GF/s for `64x4096x7168`, about 452 GF/s for
+`64x7168x2048`, and about 295 GF/s for `64x32768x512`. It remains below
+Accelerate on those one-shot cases, but avoids some full-pack overhead. The
+`m = 96/128` chunked path was later improved by `40454ae`; see the follow-up
+note below.
 
 ### 2026-05-05: skinny chunk packer follow-up
 
