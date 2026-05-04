@@ -38,6 +38,15 @@ static void* cob_aligned_alloc(size_t alignment, size_t size)
     return ptr;
 }
 
+static int cob_sgemm_pack_nr(void)
+{
+#if defined(COB_USE_APPLE_AMX)
+    return COB_SGEMM_AMX_NR;
+#else
+    return COB_SGEMM_NR;
+#endif
+}
+
 #if defined(COB_USE_APPLE_AMX)
 static void cob_amx_set(void)
 {
@@ -94,7 +103,22 @@ static void cob_amx_fma32_16x16(
     COB_AMX_OP(12, operand);
 }
 
-static void cob_sgemm_pack_a32(float* packed, int k, const float* a, int lda)
+static void cob_sgemm_pack_a32_partial(
+    float* packed,
+    int k,
+    const float* a,
+    int lda,
+    int mr)
+{
+    for (int p = 0; p < k; ++p) {
+        float* dst = packed + (size_t)p * (size_t)COB_SGEMM_AMX_MR;
+        for (int i = 0; i < COB_SGEMM_AMX_MR; ++i) {
+            dst[i] = i < mr ? a[(size_t)i * (size_t)lda + p] : 0.0f;
+        }
+    }
+}
+
+static void cob_sgemm_pack_a32_full(float* packed, int k, const float* a, int lda)
 {
     for (int p = 0; p < k; ++p) {
         float* dst = packed + (size_t)p * (size_t)COB_SGEMM_AMX_MR;
@@ -104,7 +128,26 @@ static void cob_sgemm_pack_a32(float* packed, int k, const float* a, int lda)
     }
 }
 
-static void cob_sgemm_pack_b32_panel(float* packed, int k, const float* b, int ldb)
+static void cob_sgemm_pack_b32_panel_partial(
+    float* packed,
+    int k,
+    const float* b,
+    int ldb,
+    int nr)
+{
+    for (int p = 0; p < k; ++p) {
+        float* dst = packed + (size_t)p * (size_t)COB_SGEMM_AMX_NR;
+        if (nr == COB_SGEMM_AMX_NR) {
+            memcpy(dst, b + (size_t)p * (size_t)ldb, COB_SGEMM_AMX_NR * sizeof(float));
+        } else {
+            for (int j = 0; j < COB_SGEMM_AMX_NR; ++j) {
+                dst[j] = j < nr ? b[(size_t)p * (size_t)ldb + j] : 0.0f;
+            }
+        }
+    }
+}
+
+static void cob_sgemm_pack_b32_panel_full(float* packed, int k, const float* b, int ldb)
 {
     for (int p = 0; p < k; ++p) {
         float* dst = packed + (size_t)p * (size_t)COB_SGEMM_AMX_NR;
@@ -112,7 +155,7 @@ static void cob_sgemm_pack_b32_panel(float* packed, int k, const float* b, int l
     }
 }
 
-static void cob_sgemm_32x32_amx_packed(
+static void cob_sgemm_32x32_amx_packed_full(
     int k,
     const float* packed_a,
     const float* packed_b,
@@ -156,6 +199,45 @@ static void cob_sgemm_32x32_amx_packed(
         memcpy(c + (size_t)(i + 16) * (size_t)ldc, row, sizeof(row));
     }
 }
+
+static void cob_sgemm_32x32_amx_packed_partial(
+    int k,
+    const float* packed_a,
+    const float* packed_b,
+    float* c,
+    int ldc,
+    int mr,
+    int nr)
+{
+    if (mr == COB_SGEMM_AMX_MR && nr == COB_SGEMM_AMX_NR) {
+        cob_sgemm_32x32_amx_packed_full(k, packed_a, packed_b, c, ldc);
+        return;
+    }
+
+    float row[COB_SGEMM_AMX_NR] __attribute__((aligned(128)));
+
+    for (int p = 0; p < k; ++p) {
+        const int zero_z = p == 0;
+        cob_amx_ldy_pair(packed_a + (size_t)p * (size_t)COB_SGEMM_AMX_MR, 0);
+        cob_amx_ldx_pair(packed_b + (size_t)p * (size_t)COB_SGEMM_AMX_NR, 0);
+
+        cob_amx_fma32_16x16(0, 0, 0, zero_z);
+        cob_amx_fma32_16x16(0, 64, 1, zero_z);
+        cob_amx_fma32_16x16(64, 0, 2, zero_z);
+        cob_amx_fma32_16x16(64, 64, 3, zero_z);
+    }
+
+    const int top_rows = cob_min_i32(mr, 16);
+    for (int i = 0; i < top_rows; ++i) {
+        cob_amx_stz_pair(row, (uint64_t)i * 4ull);
+        memcpy(c + (size_t)i * (size_t)ldc, row, (size_t)nr * sizeof(float));
+    }
+    const int bottom_rows = mr > 16 ? mr - 16 : 0;
+    for (int i = 0; i < bottom_rows; ++i) {
+        cob_amx_stz_pair(row, (uint64_t)i * 4ull + 2ull);
+        memcpy(c + (size_t)(i + 16) * (size_t)ldc, row, (size_t)nr * sizeof(float));
+    }
+}
 #endif
 
 void cob_sgemm_ref_rowmajor(
@@ -197,7 +279,7 @@ int cob_sgemm_pack_b(
 
     packed->k = 0;
     packed->n = 0;
-    packed->nr = COB_SGEMM_NR;
+    packed->nr = cob_sgemm_pack_nr();
     packed->bytes = 0;
     packed->data = NULL;
 
@@ -205,21 +287,23 @@ int cob_sgemm_pack_b(
         return -1;
     }
 
-    const int panels = (n + COB_SGEMM_NR - 1) / COB_SGEMM_NR;
-    const size_t count = (size_t)panels * (size_t)k * (size_t)COB_SGEMM_NR;
+    const int nr_pack = cob_sgemm_pack_nr();
+    const int panels = (n + nr_pack - 1) / nr_pack;
+    const size_t count = (size_t)panels * (size_t)k * (size_t)nr_pack;
     const size_t bytes = count * sizeof(float);
-    float* data = (float*)cob_aligned_alloc(64, bytes);
+    const size_t alignment = nr_pack == COB_SGEMM_AMX_NR ? 128 : 64;
+    float* data = (float*)cob_aligned_alloc(alignment, bytes);
     if (data == NULL) {
         return -1;
     }
 
     for (int panel = 0; panel < panels; ++panel) {
-        const int col0 = panel * COB_SGEMM_NR;
-        float* dst_panel = data + (size_t)panel * (size_t)k * (size_t)COB_SGEMM_NR;
+        const int col0 = panel * nr_pack;
+        float* dst_panel = data + (size_t)panel * (size_t)k * (size_t)nr_pack;
 
         for (int p = 0; p < k; ++p) {
-            float* dst = dst_panel + (size_t)p * (size_t)COB_SGEMM_NR;
-            for (int j = 0; j < COB_SGEMM_NR; ++j) {
+            float* dst = dst_panel + (size_t)p * (size_t)nr_pack;
+            for (int j = 0; j < nr_pack; ++j) {
                 const int col = col0 + j;
                 dst[j] = col < n ? b[p * ldb + col] : 0.0f;
             }
@@ -228,7 +312,7 @@ int cob_sgemm_pack_b(
 
     packed->k = k;
     packed->n = n;
-    packed->nr = COB_SGEMM_NR;
+    packed->nr = nr_pack;
     packed->bytes = bytes;
     packed->data = data;
     return 0;
@@ -243,7 +327,7 @@ void cob_sgemm_free_packed_b(cob_packed_b_f32* packed)
     free(packed->data);
     packed->k = 0;
     packed->n = 0;
-    packed->nr = COB_SGEMM_NR;
+    packed->nr = cob_sgemm_pack_nr();
     packed->bytes = 0;
     packed->data = NULL;
 }
@@ -255,6 +339,7 @@ static void cob_sgemm_tile_scalar_packed_b(
     const float* a,
     int lda,
     const float* packed_b,
+    int packed_nr,
     float* c,
     int ldc)
 {
@@ -262,7 +347,7 @@ static void cob_sgemm_tile_scalar_packed_b(
         for (int j = 0; j < nr; ++j) {
             float sum = 0.0f;
             for (int p = 0; p < k; ++p) {
-                sum += a[i * lda + p] * packed_b[(size_t)p * (size_t)COB_SGEMM_NR + j];
+                sum += a[i * lda + p] * packed_b[(size_t)p * (size_t)packed_nr + j];
             }
             c[i * ldc + j] = sum;
         }
@@ -358,15 +443,16 @@ static void cob_sgemm_rowmajor_packed_b_fallback(
 {
     if (m <= 0 || n <= 0 || k <= 0 || a == NULL || packed_b == NULL || c == NULL ||
         packed_b->data == NULL || packed_b->k != k || packed_b->n < n ||
-        lda < k || ldc < n) {
+        packed_b->nr <= 0 || lda < k || ldc < n) {
         return;
     }
 
-    for (int jc = 0; jc < n; jc += COB_SGEMM_NR) {
-        const int nr = cob_min_i32(COB_SGEMM_NR, n - jc);
-        const int panel = jc / COB_SGEMM_NR;
+    const int packed_nr = packed_b->nr;
+    for (int jc = 0; jc < n; jc += packed_nr) {
+        const int nr = cob_min_i32(packed_nr, n - jc);
+        const int panel = jc / packed_nr;
         const float* bp = packed_b->data +
-            (size_t)panel * (size_t)k * (size_t)COB_SGEMM_NR;
+            (size_t)panel * (size_t)k * (size_t)packed_nr;
 
         for (int ic = 0; ic < m; ic += COB_SGEMM_MR) {
             const int mr = cob_min_i32(COB_SGEMM_MR, m - ic);
@@ -374,18 +460,87 @@ static void cob_sgemm_rowmajor_packed_b_fallback(
             float* ct = c + (size_t)ic * (size_t)ldc + jc;
 
 #if defined(COB_USE_NEON)
-            if (mr == COB_SGEMM_MR && nr == COB_SGEMM_NR) {
+            if (packed_nr == COB_SGEMM_NR && mr == COB_SGEMM_MR && nr == COB_SGEMM_NR) {
                 cob_sgemm_8x8_neon_packed_b(k, at, lda, bp, ct, ldc);
             } else
 #endif
             {
-                cob_sgemm_tile_scalar_packed_b(mr, nr, k, at, lda, bp, ct, ldc);
+                cob_sgemm_tile_scalar_packed_b(mr, nr, k, at, lda, bp, packed_nr, ct, ldc);
             }
         }
     }
 }
 
 #if defined(COB_USE_APPLE_AMX)
+static int cob_sgemm_rowmajor_amx_from_packed_b32(
+    int m,
+    int n,
+    int k,
+    const float* a,
+    int lda,
+    const cob_packed_b_f32* packed_b,
+    float* c,
+    int ldc)
+{
+    if (packed_b->nr != COB_SGEMM_AMX_NR) {
+        return 0;
+    }
+
+    const size_t a_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_MR;
+    const int b_panels = (n + COB_SGEMM_AMX_NR - 1) / COB_SGEMM_AMX_NR;
+    const size_t b_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_NR;
+    float* packed_a = (float*)cob_aligned_alloc(128, a_panel_floats * sizeof(float));
+    if (packed_a == NULL) {
+        return 0;
+    }
+
+    if (m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0) {
+        cob_amx_set();
+        for (int ic = 0; ic < m; ic += COB_SGEMM_AMX_MR) {
+            cob_sgemm_pack_a32_full(packed_a, k, a + (size_t)ic * (size_t)lda, lda);
+            for (int panel = 0; panel < b_panels; ++panel) {
+                cob_sgemm_32x32_amx_packed_full(
+                    k,
+                    packed_a,
+                    packed_b->data + (size_t)panel * b_panel_floats,
+                    c + (size_t)ic * (size_t)ldc +
+                        (size_t)panel * (size_t)COB_SGEMM_AMX_NR,
+                    ldc);
+            }
+        }
+        cob_amx_clr();
+
+        free(packed_a);
+        return 1;
+    }
+
+    cob_amx_set();
+    for (int ic = 0; ic < m; ic += COB_SGEMM_AMX_MR) {
+        const int mr = cob_min_i32(COB_SGEMM_AMX_MR, m - ic);
+        if (mr == COB_SGEMM_AMX_MR) {
+            cob_sgemm_pack_a32_full(packed_a, k, a + (size_t)ic * (size_t)lda, lda);
+        } else {
+            cob_sgemm_pack_a32_partial(packed_a, k, a + (size_t)ic * (size_t)lda, lda, mr);
+        }
+
+        for (int panel = 0; panel < b_panels; ++panel) {
+            const int jc = panel * COB_SGEMM_AMX_NR;
+            const int nr = cob_min_i32(COB_SGEMM_AMX_NR, n - jc);
+            const float* bp = packed_b->data + (size_t)panel * b_panel_floats;
+            float* ct = c + (size_t)ic * (size_t)ldc + jc;
+            if (mr == COB_SGEMM_AMX_MR && nr == COB_SGEMM_AMX_NR) {
+                cob_sgemm_32x32_amx_packed_full(k, packed_a, bp, ct, ldc);
+            } else {
+                cob_sgemm_32x32_amx_packed_partial(k, packed_a, bp, ct, ldc, mr, nr);
+            }
+        }
+    }
+    cob_amx_clr();
+
+    free(packed_a);
+    return 1;
+}
+
 static int cob_sgemm_rowmajor_amx_from_packed_b8(
     int m,
     int n,
@@ -432,9 +587,9 @@ static int cob_sgemm_rowmajor_amx_from_packed_b8(
 
     cob_amx_set();
     for (int ic = 0; ic < m32; ic += COB_SGEMM_AMX_MR) {
-        cob_sgemm_pack_a32(packed_a, k, a + (size_t)ic * (size_t)lda, lda);
+        cob_sgemm_pack_a32_full(packed_a, k, a + (size_t)ic * (size_t)lda, lda);
         for (int panel = 0; panel < b32_panels; ++panel) {
-            cob_sgemm_32x32_amx_packed(
+            cob_sgemm_32x32_amx_packed_full(
                 k,
                 packed_a,
                 packed_b32 + (size_t)panel * b32_panel_floats,
@@ -497,7 +652,8 @@ void cob_sgemm_rowmajor_packed_b(
     if (m > 0 && n > 0 && k > 0 && a != NULL && packed_b != NULL && c != NULL &&
         packed_b->data != NULL && packed_b->k == k && packed_b->n >= n &&
         lda >= k && ldc >= n &&
-        cob_sgemm_rowmajor_amx_from_packed_b8(m, n, k, a, lda, packed_b, c, ldc)) {
+        (cob_sgemm_rowmajor_amx_from_packed_b32(m, n, k, a, lda, packed_b, c, ldc) ||
+            cob_sgemm_rowmajor_amx_from_packed_b8(m, n, k, a, lda, packed_b, c, ldc))) {
         return;
     }
 #endif
@@ -543,19 +699,12 @@ static int cob_sgemm_rowmajor_amx(
     float* c,
     int ldc)
 {
-    const int m32 = (m / COB_SGEMM_AMX_MR) * COB_SGEMM_AMX_MR;
-    const int n32 = (n / COB_SGEMM_AMX_NR) * COB_SGEMM_AMX_NR;
-    if (m32 == 0 || n32 == 0) {
-        return 0;
-    }
-
-    const int b_panels = n32 / COB_SGEMM_AMX_NR;
-    const size_t a_bytes =
-        (size_t)k * (size_t)COB_SGEMM_AMX_MR * sizeof(float);
+    const int b_panels = (n + COB_SGEMM_AMX_NR - 1) / COB_SGEMM_AMX_NR;
+    const size_t a_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_MR;
     const size_t b_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_NR;
     const size_t b_bytes = (size_t)b_panels * b_panel_floats * sizeof(float);
 
-    float* packed_a = (float*)cob_aligned_alloc(128, a_bytes);
+    float* packed_a = (float*)cob_aligned_alloc(128, a_panel_floats * sizeof(float));
     float* packed_b = (float*)cob_aligned_alloc(128, b_bytes);
     if (packed_a == NULL || packed_b == NULL) {
         free(packed_a);
@@ -564,55 +713,70 @@ static int cob_sgemm_rowmajor_amx(
     }
 
     for (int panel = 0; panel < b_panels; ++panel) {
-        cob_sgemm_pack_b32_panel(
-            packed_b + (size_t)panel * b_panel_floats,
-            k,
-            b + (size_t)panel * (size_t)COB_SGEMM_AMX_NR,
-            ldb);
+        const int jc = panel * COB_SGEMM_AMX_NR;
+        const int nr = cob_min_i32(COB_SGEMM_AMX_NR, n - jc);
+        if (nr == COB_SGEMM_AMX_NR) {
+            cob_sgemm_pack_b32_panel_full(
+                packed_b + (size_t)panel * b_panel_floats,
+                k,
+                b + jc,
+                ldb);
+        } else {
+            cob_sgemm_pack_b32_panel_partial(
+                packed_b + (size_t)panel * b_panel_floats,
+                k,
+                b + jc,
+                ldb,
+                nr);
+        }
+    }
+
+    if (m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0) {
+        cob_amx_set();
+        for (int ic = 0; ic < m; ic += COB_SGEMM_AMX_MR) {
+            cob_sgemm_pack_a32_full(packed_a, k, a + (size_t)ic * (size_t)lda, lda);
+            for (int panel = 0; panel < b_panels; ++panel) {
+                cob_sgemm_32x32_amx_packed_full(
+                    k,
+                    packed_a,
+                    packed_b + (size_t)panel * b_panel_floats,
+                    c + (size_t)ic * (size_t)ldc +
+                        (size_t)panel * (size_t)COB_SGEMM_AMX_NR,
+                    ldc);
+            }
+        }
+        cob_amx_clr();
+
+        free(packed_a);
+        free(packed_b);
+        return 1;
     }
 
     cob_amx_set();
-    for (int ic = 0; ic < m32; ic += COB_SGEMM_AMX_MR) {
-        cob_sgemm_pack_a32(packed_a, k, a + (size_t)ic * (size_t)lda, lda);
+    for (int ic = 0; ic < m; ic += COB_SGEMM_AMX_MR) {
+        const int mr = cob_min_i32(COB_SGEMM_AMX_MR, m - ic);
+        if (mr == COB_SGEMM_AMX_MR) {
+            cob_sgemm_pack_a32_full(packed_a, k, a + (size_t)ic * (size_t)lda, lda);
+        } else {
+            cob_sgemm_pack_a32_partial(packed_a, k, a + (size_t)ic * (size_t)lda, lda, mr);
+        }
+
         for (int panel = 0; panel < b_panels; ++panel) {
-            cob_sgemm_32x32_amx_packed(
-                k,
-                packed_a,
-                packed_b + (size_t)panel * b_panel_floats,
-                c + (size_t)ic * (size_t)ldc +
-                    (size_t)panel * (size_t)COB_SGEMM_AMX_NR,
-                ldc);
+            const int jc = panel * COB_SGEMM_AMX_NR;
+            const int nr = cob_min_i32(COB_SGEMM_AMX_NR, n - jc);
+            const float* bp = packed_b + (size_t)panel * b_panel_floats;
+            float* ct = c + (size_t)ic * (size_t)ldc + jc;
+            if (mr == COB_SGEMM_AMX_MR && nr == COB_SGEMM_AMX_NR) {
+                cob_sgemm_32x32_amx_packed_full(k, packed_a, bp, ct, ldc);
+            } else {
+                cob_sgemm_32x32_amx_packed_partial(k, packed_a, bp, ct, ldc, mr, nr);
+            }
         }
     }
     cob_amx_clr();
 
     free(packed_a);
     free(packed_b);
-
-    if (n32 < n) {
-        cob_sgemm_rowmajor_fallback(
-            m32,
-            n - n32,
-            k,
-            a,
-            lda,
-            b + n32,
-            ldb,
-            c + n32,
-            ldc);
-    }
-    if (m32 < m) {
-        cob_sgemm_rowmajor_fallback(
-            m - m32,
-            n,
-            k,
-            a + (size_t)m32 * (size_t)lda,
-            lda,
-            b,
-            ldb,
-            c + (size_t)m32 * (size_t)ldc,
-            ldc);
-    }
 
     return 1;
 }
