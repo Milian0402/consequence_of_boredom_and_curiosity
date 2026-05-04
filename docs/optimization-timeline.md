@@ -75,6 +75,22 @@ CMake build and `ctest --test-dir build-cmake --output-on-failure` also passed.
 This improves COB packed-`B`, but still does not close the one-shot gap to
 MpGEMM.
 
+### 2026-05-05: narrow SME route for one-shot 512
+
+Commit `bc00b5c Route 512 one-shot GEMM through SME` added a narrow one-shot
+optimization for the 512-wide direct-`B` conflict case. After `B` has already
+been packed, that case reuses the guarded SME packed-`B` kernel.
+
+The route is limited to `n == 512`, aligned AMX rows, and `k >= 512`. Broader
+SME direct-`B` experiments were backed out because they were noisy and
+shape-sensitive.
+
+Result: `make test` passed with 24 shapes. In repeated same-session `n = 512`
+benchmarks, one-shot improved from roughly 1.58-1.61 TF/s with SME disabled to
+about 1.65-1.70 TF/s with the route enabled. A CMake build and
+`ctest --test-dir build-cmake --output-on-failure` also passed. This improves
+one-shot 512, but still does not complete the universal fastest claim.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
@@ -85,4 +101,5 @@ BLASFEO, Rust `matrixmultiply`, Eigen, `coral-aarch64`, LIBXSMM exact
 The universal "fastest" claim is not achieved if MpGEMM counts, because MpGEMM
 won several same-process one-shot FP32 single-thread square benchmarks.
 Accelerate also still wins some small cases. The SME packed-`B` path improves
-COB's packed-`B` result, but not enough to change that conclusion.
+COB's packed-`B` result, and the narrow SME route improves one-shot `n = 512`,
+but not enough to change that conclusion.
