@@ -1155,6 +1155,23 @@ static int cob_sgemm_rowmajor_amx(
         }
     }
 
+#if defined(COB_USE_APPLE_SME)
+    if (n == COB_SGEMM_AMX_STRIDED_B_CONFLICT_LDB &&
+        m % COB_SGEMM_AMX_MR == 0 && k >= 512) {
+        cob_packed_b_f32 packed_b_view;
+        packed_b_view.k = k;
+        packed_b_view.n = n;
+        packed_b_view.nr = COB_SGEMM_AMX_NR;
+        packed_b_view.bytes = b_bytes;
+        packed_b_view.data = packed_b;
+        if (cob_sgemm_rowmajor_sme_from_packed_b32(
+                m, n, k, a, lda, &packed_b_view, c, ldc)) {
+            free(scratch);
+            return 1;
+        }
+    }
+#endif
+
     if (use_large_block) {
         float* packed_a_block = packed_a_scratch;
         cob_amx_set();

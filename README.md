@@ -29,7 +29,9 @@ portable `8`-column layout elsewhere. Aligned Apple Silicon inputs use AMX for
 the `A` panel transpose/pack step and direct AMX stores for both 128-byte and
 64-byte aligned output strides. Larger AMX problems use an `MC` block to reuse
 packed `B` panels across multiple `A` panels. On Apple Silicon with SME2.1, the
-packed-`B` API can use a `16x64` SME kernel for larger reused-`B` problems.
+packed-`B` API can use a `16x64` SME kernel for larger reused-`B` problems, and
+the one-shot path can reuse that kernel for the `512`-wide direct-`B` conflict
+case.
 
 ## Build
 
