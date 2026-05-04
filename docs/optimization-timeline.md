@@ -230,6 +230,16 @@ Result: a focused `COB_BENCH_REPEATS=9` benchmark after the change showed
 route around roughly 1990-2010 GF/s in nearby runs. Validation passed with
 `make test` across 29 shapes, and `git diff --check` passed.
 
+### 2026-05-05: one-shot n=832 AMX direct-B extension
+
+Commit `50bcead` extended the AMX direct-`B` max `N` from `768` to `832`, so
+one-shot `n = 832` uses AMX direct-`B` instead of the SME medium route.
+
+Result: a focused `COB_BENCH_REPEATS=15` benchmark showed `n = 832` one-shot
+medians around 2014-2021 GF/s, versus the old cutoff control around roughly
+1983-2003 GF/s. Validation passed with `make test` across 29 shapes, and
+`git diff --check` passed.
+
 ### 2026-05-05: latest post-1088 rejected experiments
 
 After commits `04f2a91` and `822123c`, several follow-up experiments were
