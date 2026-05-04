@@ -9,10 +9,13 @@ set(CMAKE_C_EXTENSIONS OFF)
 option(COB_BUILD_TESTS "Build correctness tests" ON)
 option(COB_BUILD_BENCH "Build benchmark runner" ON)
 option(COB_BENCH_EXTERNAL_CBLAS "Build benchmark with an external CBLAS comparison" OFF)
+option(COB_BENCH_EXTERNAL_FORTRAN_SGEMM "Build benchmark with an external Fortran SGEMM comparison" OFF)
 set(COB_EXTERNAL_CBLAS_NAME "external_CBLAS" CACHE STRING "Label for the external CBLAS benchmark row")
 set(COB_EXTERNAL_CBLAS_HEADER "cblas.h" CACHE STRING "Header to include for the external CBLAS benchmark")
 set(COB_EXTERNAL_CBLAS_INCLUDE_DIRS "" CACHE STRING "Include directories for the external CBLAS benchmark")
 set(COB_EXTERNAL_CBLAS_LIBRARIES "" CACHE STRING "Libraries for the external CBLAS benchmark")
+set(COB_EXTERNAL_FORTRAN_SGEMM_NAME "external_sgemm_" CACHE STRING "Label for the external Fortran SGEMM benchmark row")
+set(COB_EXTERNAL_FORTRAN_SGEMM_LIBRARIES "" CACHE STRING "Libraries for the external Fortran SGEMM benchmark")
 
 add_library(cob_matmul STATIC
     src/gemm.c
@@ -70,6 +73,14 @@ if(COB_BUILD_BENCH)
         endif()
         if(COB_EXTERNAL_CBLAS_LIBRARIES)
             target_link_libraries(cob_gemm_bench PRIVATE ${COB_EXTERNAL_CBLAS_LIBRARIES})
+        endif()
+    elseif(COB_BENCH_EXTERNAL_FORTRAN_SGEMM)
+        target_compile_definitions(cob_gemm_bench PRIVATE
+            COB_HAVE_EXTERNAL_FORTRAN_SGEMM=1
+            COB_EXTERNAL_FORTRAN_SGEMM_NAME="${COB_EXTERNAL_FORTRAN_SGEMM_NAME}"
+        )
+        if(COB_EXTERNAL_FORTRAN_SGEMM_LIBRARIES)
+            target_link_libraries(cob_gemm_bench PRIVATE ${COB_EXTERNAL_FORTRAN_SGEMM_LIBRARIES})
         endif()
     elseif(APPLE)
         find_library(ACCELERATE_FRAMEWORK Accelerate)

@@ -68,6 +68,15 @@ make bench-cblas \
 
 The benchmark pins common BLAS thread environment variables to `1`.
 
+For libraries that export the standard Fortran `sgemm_` symbol, use the
+Fortran-BLAS target. For example, with a local BLASFEO build:
+
+```sh
+make bench-fortran-blas \
+  FORTRAN_BLAS_NAME=blasfeo \
+  FORTRAN_BLAS_LDFLAGS=/path/to/blasfeo/lib/libblasfeo.a
+```
+
 ## API
 
 ```c
@@ -94,4 +103,4 @@ void cob_sgemm_rowmajor_packed_b(
 - Add `4x8`, `12x8`, and `16x4` NEON kernels and shape dispatch.
 - Tune the AMX `MC` threshold and add `KC`/`NC` blocking.
 - Replace scalar edges with vector edge kernels.
-- Use the CBLAS comparison target to track BLIS/OpenBLAS/BLASFEO results.
+- Use the CBLAS and Fortran-BLAS comparison targets to track external results.

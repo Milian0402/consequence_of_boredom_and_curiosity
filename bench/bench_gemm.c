@@ -24,6 +24,26 @@
 #endif
 #endif
 
+#if defined(COB_HAVE_EXTERNAL_FORTRAN_SGEMM)
+#ifndef COB_EXTERNAL_FORTRAN_SGEMM_NAME
+#define COB_EXTERNAL_FORTRAN_SGEMM_NAME "external_sgemm_"
+#endif
+extern void sgemm_(
+    char* transa,
+    char* transb,
+    int* m,
+    int* n,
+    int* k,
+    float* alpha,
+    float* a,
+    int* lda,
+    float* b,
+    int* ldb,
+    float* beta,
+    float* c,
+    int* ldc);
+#endif
+
 typedef void (*bench_fn)(int n, const float* a, const float* b, float* c);
 
 static uint32_t rng_next(uint32_t* state)
@@ -132,6 +152,36 @@ static void bench_external_cblas(int n, const float* a, const float* b, float* c
         0.0f,
         c,
         n);
+}
+#endif
+
+#if defined(COB_HAVE_EXTERNAL_FORTRAN_SGEMM)
+static void bench_external_fortran_sgemm(int n, const float* a, const float* b, float* c)
+{
+    char trans = 'N';
+    int dim = n;
+    const float alpha_in = 1.0f;
+    const float beta_in = 0.0f;
+    float alpha = alpha_in;
+    float beta = beta_in;
+
+    /*
+     * Row-major C = A * B is column-major C^T = B^T * A^T over the same buffers.
+     */
+    sgemm_(
+        &trans,
+        &trans,
+        &dim,
+        &dim,
+        &dim,
+        &alpha,
+        (float*)b,
+        &dim,
+        (float*)a,
+        &dim,
+        &beta,
+        c,
+        &dim);
 }
 #endif
 
@@ -261,6 +311,9 @@ int main(int argc, char** argv)
 #endif
 #if defined(COB_HAVE_EXTERNAL_CBLAS)
         run_case(COB_EXTERNAL_CBLAS_NAME, bench_external_cblas, n, a, b, c);
+#endif
+#if defined(COB_HAVE_EXTERNAL_FORTRAN_SGEMM)
+        run_case(COB_EXTERNAL_FORTRAN_SGEMM_NAME, bench_external_fortran_sgemm, n, a, b, c);
 #endif
         printf("\n");
 
