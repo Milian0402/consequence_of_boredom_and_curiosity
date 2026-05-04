@@ -136,6 +136,15 @@ Changing `COB_SGEMM_AMX_MC` from `384` to `512` was tested in
 `/private/tmp/cob_mc512_exp` and rejected because it hurt packed-`B` at larger
 sizes such as `1280` and `1408` without a sufficient one-shot gain.
 
+A narrow `n = 384` SME direct-`B` gate was tested in
+`/private/tmp/cob_sme384_exp`. It passed tests, but did not beat the current
+integrated AMX one-shot path at `n = 384`, so it was rejected.
+
+A strided-`B` AMX row-blocking experiment was tested in
+`/private/tmp/cob_strided_b_block_exp`. It passed tests, but regressed small
+one-shot sizes such as `64`, `128`, and `256`, so the existing per-32-row `A`
+packing stayed.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
