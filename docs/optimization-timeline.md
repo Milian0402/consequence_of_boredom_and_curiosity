@@ -105,6 +105,12 @@ A conservative local SME direct-`B` one-shot route was added for medium
 contiguous square sizes `832-1216`, excluding `1024`. Paired runs improved the
 one-shot benchmark results. `1280` was excluded as unstable.
 
+Final pushed route commit `faf4401` uses blocked `A` packing for the medium
+direct-`B` SME path. Validation passed with `make test`, a CMake build, and
+`ctest --test-dir build-cmake --output-on-failure`. A lower-size gate experiment
+extending the route to `768` was rejected after integrated benchmarks regressed
+at `768`, so the final gate remains `832-1216`, excluding `1024`.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
