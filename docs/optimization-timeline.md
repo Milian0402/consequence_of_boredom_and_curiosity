@@ -145,6 +145,20 @@ A strided-`B` AMX row-blocking experiment was tested in
 one-shot sizes such as `64`, `128`, and `256`, so the existing per-32-row `A`
 packing stayed.
 
+### 2026-05-05: median benchmark output and admin follow-up
+
+Commit `7ea85c5` added median-aware throughput output to the benchmark harness,
+so benchmark rows now show median GF/s alongside the existing timing summary.
+
+Removing the `n == 1024` exclusion from the SME direct-`B` medium gate was
+tested and rejected. The change passed tests, but did not improve `1024` median
+throughput and caused instability around the gated range, so it was reverted.
+
+Commit `a27a03d` documented an admin/tooling fix after an edit-confirmation UI
+appeared while patch-editing a `/private/tmp` worktree. `AGENTS.md` and
+`.codex-reminder.md` now tell agents to treat that as client/tooling friction,
+avoid that edit path, and continue in the repo checkout without asking.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
