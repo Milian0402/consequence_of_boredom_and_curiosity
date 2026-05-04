@@ -326,6 +326,27 @@ Validation passed with `make test` across 31 shapes after adding `1152` and
 showed acceptable behavior for `832x1152x896`, `896x1152x1152`,
 `1280x1152x960`, `1152x1216x896`, and `1216x1216x1024`.
 
+### 2026-05-05: packed-B setup benchmark row
+
+Commit `0a7de51` added an opt-in `COB_BENCH_PACK_SETUP=1` benchmark row for
+the public packed-`B` setup cost and documented the environment variable in
+`README.md`.
+
+Result: validation passed with `make test`, a benchmark build, and a smoke run
+using `COB_BENCH_REPEATS=3 COB_BENCH_PACK_SETUP=1 ./build/cob_gemm_bench 64
+832x960x896`.
+
+### 2026-05-05: row-wise public B-pack order rejected
+
+A row-wise public `B`-pack order experiment changed source traversal during
+setup. It passed tests, but setup throughput collapsed compared with the
+existing panel-wise packing order.
+
+Result: the baseline panel-wise setup measured roughly 90-114 GB/s across
+`512..1536` in a 15-repeat pack-setup run. The row-wise traversal measured only
+about 16-67 GB/s depending on size, so it was reverted. The existing panel-wise
+packing order stays.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
