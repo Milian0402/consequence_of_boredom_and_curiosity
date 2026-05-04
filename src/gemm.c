@@ -562,6 +562,7 @@ static int cob_sgemm_rowmajor_sme_from_packed_b32(
     int ldc)
 {
     if (packed_b->nr != COB_SGEMM_AMX_NR || m < 512 || n < 512 || k < 512 ||
+        n > 1216 ||
         (m % COB_SGEMM_AMX_MR) != 0 || (n % 64) != 0 ||
         !cob_apple_sme2p1_available()) {
         return 0;
