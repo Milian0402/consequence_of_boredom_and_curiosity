@@ -132,6 +132,56 @@ static int test_aligned_shape(int m, int n, int k)
     return test_shape_ex(m, n, k, k, n, n, 1);
 }
 
+static int test_packed_matches_direct_aligned_shape(int m, int n, int k)
+{
+    const int count = m * n;
+    float* a = alloc_f32((size_t)m * (size_t)k, 1);
+    float* b = alloc_f32((size_t)k * (size_t)n, 1);
+    float* cdirect = alloc_f32((size_t)count, 1);
+    float* cpacked = alloc_f32((size_t)count, 1);
+
+    if (a == NULL || b == NULL || cdirect == NULL || cpacked == NULL) {
+        fprintf(stderr, "allocation failed for packed/direct %dx%dx%d\n", m, n, k);
+        free(a);
+        free(b);
+        free(cdirect);
+        free(cpacked);
+        return 1;
+    }
+
+    uint32_t state = 0xfeed5eedu ^ (uint32_t)(m * 131 + n * 17 + k);
+    fill_random(a, m * k, &state);
+    fill_random(b, k * n, &state);
+    memset(cdirect, 0, (size_t)count * sizeof(float));
+    memset(cpacked, 0, (size_t)count * sizeof(float));
+
+    cob_sgemm_rowmajor(m, n, k, a, k, b, n, cdirect, n);
+
+    cob_packed_b_f32 packed_b;
+    if (cob_sgemm_pack_b(&packed_b, k, n, b, n) != 0) {
+        fprintf(stderr, "pack failed for packed/direct %dx%dx%d\n", m, n, k);
+        free(a);
+        free(b);
+        free(cdirect);
+        free(cpacked);
+        return 1;
+    }
+    cob_sgemm_rowmajor_packed_b(m, n, k, a, k, &packed_b, cpacked, n);
+    cob_sgemm_free_packed_b(&packed_b);
+
+    const float diff = max_abs_diff(cdirect, cpacked, count);
+    const int failed = diff > 2.0e-3f;
+    if (failed) {
+        fprintf(stderr, "packed/direct %dx%dx%d failed: diff=%g\n", m, n, k, (double)diff);
+    }
+
+    free(a);
+    free(b);
+    free(cdirect);
+    free(cpacked);
+    return failed;
+}
+
 int main(void)
 {
     static const int shapes[][3] = {
@@ -168,7 +218,8 @@ int main(void)
     failures += test_aligned_shape(32, 32, 32);
     failures += test_aligned_shape(64, 64, 64);
     failures += test_aligned_shape(128, 128, 129);
-    total_shapes += 3;
+    failures += test_packed_matches_direct_aligned_shape(512, 512, 512);
+    total_shapes += 4;
 
     if (failures != 0) {
         fprintf(stderr, "%d GEMM test shape(s) failed\n", failures);

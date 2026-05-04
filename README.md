@@ -16,6 +16,7 @@ matrix is reused.
 - `alpha = 1`, `beta = 0`
 - Public packed-`B` API
 - Apple Silicon AMX `32x32` FP32 microkernel when available
+- Apple Silicon SME2.1 packed-`B` path for larger reused-`B` cases when available
 - ARM64 NEON `8x8` microkernel when available
 - Scalar reference and scalar edge path
 
@@ -27,7 +28,8 @@ Packed `B` uses a native `32`-column AMX layout on Apple Silicon and the
 portable `8`-column layout elsewhere. Aligned Apple Silicon inputs use AMX for
 the `A` panel transpose/pack step and direct AMX stores for both 128-byte and
 64-byte aligned output strides. Larger AMX problems use an `MC` block to reuse
-packed `B` panels across multiple `A` panels.
+packed `B` panels across multiple `A` panels. On Apple Silicon with SME2.1, the
+packed-`B` API can use a `16x64` SME kernel for larger reused-`B` problems.
 
 ## Build
 
