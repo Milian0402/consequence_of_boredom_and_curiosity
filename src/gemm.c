@@ -34,7 +34,11 @@ enum {
 };
 
 #ifndef COB_SGEMM_AMX_STRIDED_B_MAX_N
-#define COB_SGEMM_AMX_STRIDED_B_MAX_N 960
+#define COB_SGEMM_AMX_STRIDED_B_MAX_N 832
+#endif
+
+#ifndef COB_SGEMM_AMX_STRIDED_B_EXTRA_N
+#define COB_SGEMM_AMX_STRIDED_B_EXTRA_N 960
 #endif
 
 /* Direct source-B loads are slower for this power-of-two row stride; packed B avoids the conflict. */
@@ -1204,7 +1208,8 @@ static int cob_sgemm_rowmajor_amx(
         m >= COB_SGEMM_AMX_MC && n >= 1152 && k >= 512 &&
         m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0;
     const int use_strided_b =
-        !use_large_block && n <= COB_SGEMM_AMX_STRIDED_B_MAX_N &&
+        !use_large_block &&
+        (n <= COB_SGEMM_AMX_STRIDED_B_MAX_N || n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N) &&
         ldb != COB_SGEMM_AMX_STRIDED_B_CONFLICT_LDB &&
         m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0;
     const int max_a_panels = COB_SGEMM_AMX_MC / COB_SGEMM_AMX_MR;
