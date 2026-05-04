@@ -7,6 +7,8 @@ and `C = A * B`. The implementation is built around a packed-`B` path, because
 that gives us a clean route to beat general BLAS calls when the right-hand
 matrix is reused.
 
+"game is so boring that it made me give up gaming and led me to design and code the fastest open-source matrix multiplication software available. It only supports single threaded operations for now, I am working on to give it a multi-threaded support."
+
 ## Current Scope
 
 - CPU only
