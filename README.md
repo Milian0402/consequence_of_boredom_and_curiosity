@@ -110,3 +110,7 @@ void cob_sgemm_rowmajor_packed_b(
 - Tune the AMX `MC` threshold and add `KC`/`NC` blocking.
 - Replace scalar edges with vector edge kernels.
 - Use the CBLAS and Fortran-BLAS comparison targets to track external results.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
