@@ -24,7 +24,9 @@ On Apple Silicon, the AMX path is enabled by default and can be disabled with
 arbitrary output matrices and a faster direct-store path when `C` is 128-byte
 aligned with a row stride that is a multiple of 32 floats.
 Packed `B` uses a native `32`-column AMX layout on Apple Silicon and the
-portable `8`-column layout elsewhere.
+portable `8`-column layout elsewhere. Aligned Apple Silicon inputs use AMX for
+the `A` panel transpose/pack step and direct AMX stores for both 128-byte and
+64-byte aligned output strides.
 
 ## Build
 
@@ -75,7 +77,6 @@ void cob_sgemm_rowmajor_packed_b(
 
 ## Next Work
 
-- Add AMX-assisted `A` packing to reduce the remaining one-shot overhead.
 - Add `4x8`, `12x8`, and `16x4` NEON kernels and shape dispatch.
 - Add cache-blocked AMX scheduling and tune `MC`, `NC`, and `KC`.
 - Replace scalar edges with vector edge kernels.

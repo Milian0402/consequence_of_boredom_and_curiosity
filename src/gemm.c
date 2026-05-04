@@ -75,6 +75,13 @@ static void cob_amx_ldx_pair(const float* ptr, uint64_t reg)
     COB_AMX_OP(0, operand);
 }
 
+static void cob_amx_ldx_64(const float* ptr, uint64_t reg)
+{
+    const uint64_t operand =
+        ((reg & 7ull) << 56) | ((uintptr_t)ptr & ((1ull << 56) - 1ull));
+    COB_AMX_OP(0, operand);
+}
+
 static void cob_amx_ldy_pair(const float* ptr, uint64_t reg)
 {
     const uint64_t operand =
@@ -82,10 +89,24 @@ static void cob_amx_ldy_pair(const float* ptr, uint64_t reg)
     COB_AMX_OP(1, operand);
 }
 
+static void cob_amx_ldy_64(const float* ptr, uint64_t reg)
+{
+    const uint64_t operand =
+        ((reg & 7ull) << 56) | ((uintptr_t)ptr & ((1ull << 56) - 1ull));
+    COB_AMX_OP(1, operand);
+}
+
 static void cob_amx_stz_pair(float* ptr, uint64_t row)
 {
     const uint64_t operand =
         (1ull << 62) | ((row & 63ull) << 56) | ((uintptr_t)ptr & ((1ull << 56) - 1ull));
+    COB_AMX_OP(5, operand);
+}
+
+static void cob_amx_stz_64(float* ptr, uint64_t row)
+{
+    const uint64_t operand =
+        ((row & 63ull) << 56) | ((uintptr_t)ptr & ((1ull << 56) - 1ull));
     COB_AMX_OP(5, operand);
 }
 
@@ -103,6 +124,22 @@ static void cob_amx_fma32_16x16(
     COB_AMX_OP(12, operand);
 }
 
+static void cob_amx_fmul32_selrow(uint64_t row, uint64_t xreg, uint64_t yreg, uint64_t zrow)
+{
+    const uint64_t operand =
+        (((yreg & 7ull) << 6) & 0x1ffull) |
+        ((((xreg & 7ull) << 6) & 0x1ffull) << 10) |
+        ((zrow & 63ull) << 20) |
+        (1ull << 27) |
+        (((0x20ull | row) & 0x3full) << 41);
+    COB_AMX_OP(12, operand);
+}
+
+static const float cob_amx_ones_f32[16] __attribute__((aligned(64))) = {
+    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
+};
+
 static void cob_sgemm_pack_a32_partial(
     float* packed,
     int k,
@@ -118,9 +155,67 @@ static void cob_sgemm_pack_a32_partial(
     }
 }
 
-static void cob_sgemm_pack_a32_full(float* packed, int k, const float* a, int lda)
+static void cob_sgemm_pack_a32_full_scalar(float* packed, int k, const float* a, int lda)
 {
     for (int p = 0; p < k; ++p) {
+        float* dst = packed + (size_t)p * (size_t)COB_SGEMM_AMX_MR;
+        for (int i = 0; i < COB_SGEMM_AMX_MR; ++i) {
+            dst[i] = a[(size_t)i * (size_t)lda + p];
+        }
+    }
+}
+
+static void cob_sgemm_pack_a32_full(float* packed, int k, const float* a, int lda)
+{
+    if ((((uintptr_t)a & 63ull) != 0) ||
+        (((uintptr_t)lda * sizeof(float) & 63ull) != 0)) {
+        cob_sgemm_pack_a32_full_scalar(packed, k, a, lda);
+        return;
+    }
+
+    cob_amx_ldx_64(cob_amx_ones_f32, 0);
+    int p = 0;
+    for (; p + 15 < k; p += 16) {
+        const float* ap = a + p;
+        float* pp = packed + (size_t)p * (size_t)COB_SGEMM_AMX_MR;
+
+        for (int i = 0; i < 8; ++i) {
+            cob_amx_ldy_64(ap + (size_t)i * (size_t)lda, (uint64_t)i);
+        }
+        for (int i = 0; i < 8; ++i) {
+            cob_amx_fmul32_selrow((uint64_t)i, 0, (uint64_t)i, 0);
+        }
+
+        for (int i = 0; i < 8; ++i) {
+            cob_amx_ldy_64(ap + (size_t)(i + 8) * (size_t)lda, (uint64_t)i);
+        }
+        for (int i = 0; i < 8; ++i) {
+            cob_amx_fmul32_selrow((uint64_t)(i + 8), 0, (uint64_t)i, 0);
+        }
+
+        for (int i = 0; i < 8; ++i) {
+            cob_amx_ldy_64(ap + (size_t)(i + 16) * (size_t)lda, (uint64_t)i);
+        }
+        for (int i = 0; i < 8; ++i) {
+            cob_amx_fmul32_selrow((uint64_t)i, 0, (uint64_t)i, 1);
+        }
+
+        for (int i = 0; i < 8; ++i) {
+            cob_amx_ldy_64(ap + (size_t)(i + 24) * (size_t)lda, (uint64_t)i);
+        }
+        for (int i = 0; i < 8; ++i) {
+            cob_amx_fmul32_selrow((uint64_t)(i + 8), 0, (uint64_t)i, 1);
+        }
+
+        for (int i = 0; i < 16; ++i) {
+            cob_amx_stz_64(pp + (size_t)i * (size_t)COB_SGEMM_AMX_MR, (uint64_t)i * 4ull);
+            cob_amx_stz_64(
+                pp + (size_t)i * (size_t)COB_SGEMM_AMX_MR + 16,
+                (uint64_t)i * 4ull + 1ull);
+        }
+    }
+
+    for (; p < k; ++p) {
         float* dst = packed + (size_t)p * (size_t)COB_SGEMM_AMX_MR;
         for (int i = 0; i < COB_SGEMM_AMX_MR; ++i) {
             dst[i] = a[(size_t)i * (size_t)lda + p];
@@ -155,18 +250,8 @@ static void cob_sgemm_pack_b32_panel_full(float* packed, int k, const float* b, 
     }
 }
 
-static void cob_sgemm_32x32_amx_packed_full(
-    int k,
-    const float* packed_a,
-    const float* packed_b,
-    float* c,
-    int ldc)
+static void cob_sgemm_32x32_amx_compute(int k, const float* packed_a, const float* packed_b)
 {
-    float row[COB_SGEMM_AMX_NR] __attribute__((aligned(128)));
-    const int direct_store =
-        (((uintptr_t)c & 127ull) == 0) &&
-        (((uintptr_t)ldc * sizeof(float) & 127ull) == 0);
-
     for (int p = 0; p < k; ++p) {
         const int zero_z = p == 0;
         cob_amx_ldy_pair(packed_a + (size_t)p * (size_t)COB_SGEMM_AMX_MR, 0);
@@ -177,8 +262,27 @@ static void cob_sgemm_32x32_amx_packed_full(
         cob_amx_fma32_16x16(64, 0, 2, zero_z);
         cob_amx_fma32_16x16(64, 64, 3, zero_z);
     }
+}
 
-    if (direct_store) {
+static void cob_sgemm_32x32_amx_packed_full(
+    int k,
+    const float* packed_a,
+    const float* packed_b,
+    float* c,
+    int ldc)
+{
+    float row[COB_SGEMM_AMX_NR] __attribute__((aligned(128)));
+    const int direct_store_128 =
+        (((uintptr_t)c & 127ull) == 0) &&
+        (((uintptr_t)ldc * sizeof(float) & 127ull) == 0);
+    const int direct_store_64 =
+        !direct_store_128 &&
+        (((uintptr_t)c & 63ull) == 0) &&
+        (((uintptr_t)ldc * sizeof(float) & 63ull) == 0);
+
+    cob_sgemm_32x32_amx_compute(k, packed_a, packed_b);
+
+    if (direct_store_128) {
         for (int i = 0; i < 16; ++i) {
             cob_amx_stz_pair(c + (size_t)i * (size_t)ldc, (uint64_t)i * 4ull);
         }
@@ -186,6 +290,20 @@ static void cob_sgemm_32x32_amx_packed_full(
             cob_amx_stz_pair(
                 c + (size_t)(i + 16) * (size_t)ldc,
                 (uint64_t)i * 4ull + 2ull);
+        }
+        return;
+    }
+
+    if (direct_store_64) {
+        for (int i = 0; i < 16; ++i) {
+            float* rowp = c + (size_t)i * (size_t)ldc;
+            cob_amx_stz_64(rowp, (uint64_t)i * 4ull);
+            cob_amx_stz_64(rowp + 16, (uint64_t)i * 4ull + 1ull);
+        }
+        for (int i = 0; i < 16; ++i) {
+            float* rowp = c + (size_t)(i + 16) * (size_t)ldc;
+            cob_amx_stz_64(rowp, (uint64_t)i * 4ull + 2ull);
+            cob_amx_stz_64(rowp + 16, (uint64_t)i * 4ull + 3ull);
         }
         return;
     }
@@ -216,18 +334,34 @@ static void cob_sgemm_32x32_amx_packed_partial(
 
     float row[COB_SGEMM_AMX_NR] __attribute__((aligned(128)));
 
-    for (int p = 0; p < k; ++p) {
-        const int zero_z = p == 0;
-        cob_amx_ldy_pair(packed_a + (size_t)p * (size_t)COB_SGEMM_AMX_MR, 0);
-        cob_amx_ldx_pair(packed_b + (size_t)p * (size_t)COB_SGEMM_AMX_NR, 0);
-
-        cob_amx_fma32_16x16(0, 0, 0, zero_z);
-        cob_amx_fma32_16x16(0, 64, 1, zero_z);
-        cob_amx_fma32_16x16(64, 0, 2, zero_z);
-        cob_amx_fma32_16x16(64, 64, 3, zero_z);
-    }
+    cob_sgemm_32x32_amx_compute(k, packed_a, packed_b);
 
     const int top_rows = cob_min_i32(mr, 16);
+    const int direct_store_64 =
+        (nr == 16 || nr == COB_SGEMM_AMX_NR) &&
+        (((uintptr_t)c & 63ull) == 0) &&
+        (((uintptr_t)ldc * sizeof(float) & 63ull) == 0);
+
+    if (direct_store_64) {
+        for (int i = 0; i < top_rows; ++i) {
+            float* rowp = c + (size_t)i * (size_t)ldc;
+            cob_amx_stz_64(rowp, (uint64_t)i * 4ull);
+            if (nr == COB_SGEMM_AMX_NR) {
+                cob_amx_stz_64(rowp + 16, (uint64_t)i * 4ull + 1ull);
+            }
+        }
+
+        const int bottom_rows = mr > 16 ? mr - 16 : 0;
+        for (int i = 0; i < bottom_rows; ++i) {
+            float* rowp = c + (size_t)(i + 16) * (size_t)ldc;
+            cob_amx_stz_64(rowp, (uint64_t)i * 4ull + 2ull);
+            if (nr == COB_SGEMM_AMX_NR) {
+                cob_amx_stz_64(rowp + 16, (uint64_t)i * 4ull + 3ull);
+            }
+        }
+        return;
+    }
+
     for (int i = 0; i < top_rows; ++i) {
         cob_amx_stz_pair(row, (uint64_t)i * 4ull);
         memcpy(c + (size_t)i * (size_t)ldc, row, (size_t)nr * sizeof(float));
