@@ -4,6 +4,7 @@
 
 #include "cob_gemm.h"
 
+#include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,7 +45,13 @@ extern void sgemm_(
     int* ldc);
 #endif
 
-typedef void (*bench_fn)(int n, const float* a, const float* b, float* c);
+typedef struct bench_shape {
+    int m;
+    int n;
+    int k;
+} bench_shape;
+
+typedef void (*bench_fn)(bench_shape shape, const float* a, const float* b, float* c);
 
 typedef struct bench_stats {
     double best;
@@ -68,9 +75,9 @@ static float rng_f32(uint32_t* state)
     return (float)value / 997.0f;
 }
 
-static void fill_random(float* x, int count, uint32_t* state)
+static void fill_random(float* x, size_t count, uint32_t* state)
 {
-    for (int i = 0; i < count; ++i) {
+    for (size_t i = 0; i < count; ++i) {
         x[i] = rng_f32(state);
     }
 }
@@ -91,17 +98,30 @@ static double now_seconds(void)
     return (double)ts.tv_sec + (double)ts.tv_nsec * 1.0e-9;
 }
 
-static float checksum(const float* c, int count)
+static float checksum(const float* c, size_t count)
 {
     float sum = 0.0f;
-    for (int i = 0; i < count; i += 97) {
+    for (size_t i = 0; i < count; i += 97) {
         sum += c[i];
     }
     return sum;
 }
 
-static int timed_iterations(int n)
+static int shape_max_dim(bench_shape shape)
 {
+    int max_dim = shape.m;
+    if (shape.n > max_dim) {
+        max_dim = shape.n;
+    }
+    if (shape.k > max_dim) {
+        max_dim = shape.k;
+    }
+    return max_dim;
+}
+
+static int timed_iterations(bench_shape shape)
+{
+    const int n = shape_max_dim(shape);
     if (n <= 64) {
         return 8192;
     }
@@ -138,8 +158,9 @@ static int env_int_clamped(const char* name, int fallback, int min_value, int ma
     return (int)parsed;
 }
 
-static int timed_repeats(int n)
+static int timed_repeats(bench_shape shape)
 {
+    const int n = shape_max_dim(shape);
     const int fallback = n <= 256 ? 7 : 5;
     return env_int_clamped("COB_BENCH_REPEATS", fallback, 1, COB_BENCH_MAX_REPEATS);
 }
@@ -166,58 +187,68 @@ static bench_stats summarize_times(double* times, int count)
     return stats;
 }
 
-static void bench_cob_direct(int n, const float* a, const float* b, float* c)
+static void format_shape(char* dst, size_t dst_size, bench_shape shape)
 {
-    cob_sgemm_rowmajor(n, n, n, a, n, b, n, c, n);
+    snprintf(dst, dst_size, "%dx%dx%d", shape.m, shape.n, shape.k);
+}
+
+static void bench_cob_direct(bench_shape shape, const float* a, const float* b, float* c)
+{
+    cob_sgemm_rowmajor(shape.m, shape.n, shape.k, a, shape.k, b, shape.n, c, shape.n);
 }
 
 #if defined(COB_HAVE_ACCELERATE)
-static void bench_accelerate(int n, const float* a, const float* b, float* c)
+static void bench_accelerate(bench_shape shape, const float* a, const float* b, float* c)
 {
     cblas_sgemm(
         CblasRowMajor,
         CblasNoTrans,
         CblasNoTrans,
-        n,
-        n,
-        n,
+        shape.m,
+        shape.n,
+        shape.k,
         1.0f,
         a,
-        n,
+        shape.k,
         b,
-        n,
+        shape.n,
         0.0f,
         c,
-        n);
+        shape.n);
 }
 #endif
 
 #if defined(COB_HAVE_EXTERNAL_CBLAS)
-static void bench_external_cblas(int n, const float* a, const float* b, float* c)
+static void bench_external_cblas(bench_shape shape, const float* a, const float* b, float* c)
 {
     cblas_sgemm(
         CblasRowMajor,
         CblasNoTrans,
         CblasNoTrans,
-        n,
-        n,
-        n,
+        shape.m,
+        shape.n,
+        shape.k,
         1.0f,
         a,
-        n,
+        shape.k,
         b,
-        n,
+        shape.n,
         0.0f,
         c,
-        n);
+        shape.n);
 }
 #endif
 
 #if defined(COB_HAVE_EXTERNAL_FORTRAN_SGEMM)
-static void bench_external_fortran_sgemm(int n, const float* a, const float* b, float* c)
+static void bench_external_fortran_sgemm(bench_shape shape, const float* a, const float* b, float* c)
 {
     char trans = 'N';
-    int dim = n;
+    int fm = shape.n;
+    int fn = shape.m;
+    int fk = shape.k;
+    int lda = shape.n;
+    int ldb = shape.k;
+    int ldc = shape.n;
     const float alpha_in = 1.0f;
     const float beta_in = 0.0f;
     float alpha = alpha_in;
@@ -229,94 +260,158 @@ static void bench_external_fortran_sgemm(int n, const float* a, const float* b, 
     sgemm_(
         &trans,
         &trans,
-        &dim,
-        &dim,
-        &dim,
+        &fm,
+        &fn,
+        &fk,
         &alpha,
         (float*)b,
-        &dim,
+        &lda,
         (float*)a,
-        &dim,
+        &ldb,
         &beta,
         c,
-        &dim);
+        &ldc);
 }
 #endif
 
-static double run_case(const char* name, bench_fn fn, int n, const float* a, const float* b, float* c)
+static double run_case(
+    const char* name,
+    bench_fn fn,
+    bench_shape shape,
+    const float* a,
+    const float* b,
+    float* c)
 {
-    const int warmups = n <= 256 ? 2 : 1;
-    const int repeats = timed_repeats(n);
-    const int iters = timed_iterations(n);
+    const int max_dim = shape_max_dim(shape);
+    const int warmups = max_dim <= 256 ? 2 : 1;
+    const int repeats = timed_repeats(shape);
+    const int iters = timed_iterations(shape);
     double times[COB_BENCH_MAX_REPEATS];
 
     for (int i = 0; i < warmups; ++i) {
-        fn(n, a, b, c);
+        fn(shape, a, b, c);
     }
 
     for (int i = 0; i < repeats; ++i) {
         const double t0 = now_seconds();
         for (int iter = 0; iter < iters; ++iter) {
-            fn(n, a, b, c);
+            fn(shape, a, b, c);
         }
         const double t1 = now_seconds();
         times[i] = (t1 - t0) / (double)iters;
     }
 
     const bench_stats stats = summarize_times(times, repeats);
-    const double ops = 2.0 * (double)n * (double)n * (double)n;
+    const double ops = 2.0 * (double)shape.m * (double)shape.n * (double)shape.k;
     const double best_gflops = ops / stats.best / 1.0e9;
     const double median_gflops = ops / stats.median / 1.0e9;
-    printf("%-18s n=%4d  best %8.2f GF/s  med %8.2f GF/s  %9.6f s  checksum=% .5e\n",
+    char shape_text[32];
+    format_shape(shape_text, sizeof(shape_text), shape);
+    printf("%-18s %-14s  best %8.2f GF/s  med %8.2f GF/s  %9.6f s  checksum=% .5e\n",
         name,
-        n,
+        shape_text,
         best_gflops,
         median_gflops,
         stats.best,
-        (double)checksum(c, n * n));
+        (double)checksum(c, (size_t)shape.m * (size_t)shape.n));
     return best_gflops;
 }
 
-static double run_case_cob_packed_reuse(int n, const float* a, const float* b, float* c)
+static double run_case_cob_packed_reuse(bench_shape shape, const float* a, const float* b, float* c)
 {
     cob_packed_b_f32 packed_b;
-    if (cob_sgemm_pack_b(&packed_b, n, n, b, n) != 0) {
-        fprintf(stderr, "packed-B allocation failed for n=%d\n", n);
+    if (cob_sgemm_pack_b(&packed_b, shape.k, shape.n, b, shape.n) != 0) {
+        fprintf(stderr, "packed-B allocation failed for %dx%dx%d\n", shape.m, shape.n, shape.k);
         return 0.0;
     }
 
-    const int warmups = n <= 256 ? 2 : 1;
-    const int repeats = timed_repeats(n);
-    const int iters = timed_iterations(n);
+    const int max_dim = shape_max_dim(shape);
+    const int warmups = max_dim <= 256 ? 2 : 1;
+    const int repeats = timed_repeats(shape);
+    const int iters = timed_iterations(shape);
     double times[COB_BENCH_MAX_REPEATS];
 
     for (int i = 0; i < warmups; ++i) {
-        cob_sgemm_rowmajor_packed_b(n, n, n, a, n, &packed_b, c, n);
+        cob_sgemm_rowmajor_packed_b(
+            shape.m, shape.n, shape.k, a, shape.k, &packed_b, c, shape.n);
     }
 
     for (int i = 0; i < repeats; ++i) {
         const double t0 = now_seconds();
         for (int iter = 0; iter < iters; ++iter) {
-            cob_sgemm_rowmajor_packed_b(n, n, n, a, n, &packed_b, c, n);
+            cob_sgemm_rowmajor_packed_b(
+                shape.m, shape.n, shape.k, a, shape.k, &packed_b, c, shape.n);
         }
         const double t1 = now_seconds();
         times[i] = (t1 - t0) / (double)iters;
     }
 
     const bench_stats stats = summarize_times(times, repeats);
-    const double ops = 2.0 * (double)n * (double)n * (double)n;
+    const double ops = 2.0 * (double)shape.m * (double)shape.n * (double)shape.k;
     const double best_gflops = ops / stats.best / 1.0e9;
     const double median_gflops = ops / stats.median / 1.0e9;
-    printf("%-18s n=%4d  best %8.2f GF/s  med %8.2f GF/s  %9.6f s  checksum=% .5e\n",
+    char shape_text[32];
+    format_shape(shape_text, sizeof(shape_text), shape);
+    printf("%-18s %-14s  best %8.2f GF/s  med %8.2f GF/s  %9.6f s  checksum=% .5e\n",
         "cob packed-B",
-        n,
+        shape_text,
         best_gflops,
         median_gflops,
         stats.best,
-        (double)checksum(c, n * n));
+        (double)checksum(c, (size_t)shape.m * (size_t)shape.n));
 
     cob_sgemm_free_packed_b(&packed_b);
     return best_gflops;
+}
+
+static int is_shape_separator(char ch)
+{
+    return ch == 'x' || ch == 'X' || ch == ',' || ch == ':';
+}
+
+static int parse_positive_int(const char** cursor, int* out)
+{
+    char* end = NULL;
+    const long parsed = strtol(*cursor, &end, 10);
+    if (end == *cursor || parsed <= 0 || parsed > INT_MAX) {
+        return 0;
+    }
+
+    *cursor = end;
+    *out = (int)parsed;
+    return 1;
+}
+
+static int parse_shape_arg(const char* arg, bench_shape* shape)
+{
+    const char* cursor = arg;
+    if (!parse_positive_int(&cursor, &shape->m)) {
+        return 0;
+    }
+
+    if (*cursor == '\0') {
+        shape->n = shape->m;
+        shape->k = shape->m;
+        return 1;
+    }
+
+    if (!is_shape_separator(*cursor)) {
+        return 0;
+    }
+    ++cursor;
+    if (!parse_positive_int(&cursor, &shape->n)) {
+        return 0;
+    }
+
+    if (!is_shape_separator(*cursor)) {
+        return 0;
+    }
+    ++cursor;
+    if (!parse_positive_int(&cursor, &shape->k)) {
+        return 0;
+    }
+
+    return *cursor == '\0';
 }
 
 int main(int argc, char** argv)
@@ -329,51 +424,61 @@ int main(int argc, char** argv)
     setenv("OPENBLAS_NUM_THREADS", "1", 1);
     setenv("OMP_NUM_THREADS", "1", 1);
 
-    int sizes[32];
-    int size_count = 0;
+    bench_shape shapes[32];
+    int shape_count = 0;
     if (argc > 1) {
-        for (int i = 1; i < argc && size_count < 32; ++i) {
-            const int n = atoi(argv[i]);
-            if (n > 0) {
-                sizes[size_count++] = n;
+        for (int i = 1; i < argc && shape_count < 32; ++i) {
+            bench_shape shape;
+            if (parse_shape_arg(argv[i], &shape)) {
+                shapes[shape_count++] = shape;
+            } else {
+                fprintf(stderr, "invalid shape: %s (use N or MxNxK)\n", argv[i]);
+                return 1;
             }
         }
     } else {
-        size_count = (int)(sizeof(default_sizes) / sizeof(default_sizes[0]));
-        memcpy(sizes, default_sizes, sizeof(default_sizes));
+        shape_count = (int)(sizeof(default_sizes) / sizeof(default_sizes[0]));
+        for (int i = 0; i < shape_count; ++i) {
+            shapes[i].m = default_sizes[i];
+            shapes[i].n = default_sizes[i];
+            shapes[i].k = default_sizes[i];
+        }
     }
 
-    printf("single-thread FP32 row-major square GEMM\n");
+    printf("single-thread FP32 row-major GEMM\n");
     printf("cob one-shot includes B packing; cob packed-B excludes B packing after setup\n\n");
 
-    for (int si = 0; si < size_count; ++si) {
-        const int n = sizes[si];
-        const size_t count = (size_t)n * (size_t)n;
-        float* a = alloc_f32_aligned(count);
-        float* b = alloc_f32_aligned(count);
-        float* c = alloc_f32_aligned(count);
+    for (int si = 0; si < shape_count; ++si) {
+        const bench_shape shape = shapes[si];
+        const size_t a_count = (size_t)shape.m * (size_t)shape.k;
+        const size_t b_count = (size_t)shape.k * (size_t)shape.n;
+        const size_t c_count = (size_t)shape.m * (size_t)shape.n;
+        float* a = alloc_f32_aligned(a_count);
+        float* b = alloc_f32_aligned(b_count);
+        float* c = alloc_f32_aligned(c_count);
         if (a == NULL || b == NULL || c == NULL) {
-            fprintf(stderr, "allocation failed for n=%d\n", n);
+            fprintf(stderr, "allocation failed for %dx%dx%d\n", shape.m, shape.n, shape.k);
             free(a);
             free(b);
             free(c);
             return 1;
         }
 
-        uint32_t state = 0x9e3779b9u ^ (uint32_t)n;
-        fill_random(a, (int)count, &state);
-        fill_random(b, (int)count, &state);
+        uint32_t state =
+            0x9e3779b9u ^ (uint32_t)(shape.m * 131 + shape.n * 17 + shape.k);
+        fill_random(a, a_count, &state);
+        fill_random(b, b_count, &state);
 
-        run_case("cob one-shot", bench_cob_direct, n, a, b, c);
-        run_case_cob_packed_reuse(n, a, b, c);
+        run_case("cob one-shot", bench_cob_direct, shape, a, b, c);
+        run_case_cob_packed_reuse(shape, a, b, c);
 #if defined(COB_HAVE_ACCELERATE)
-        run_case("Accelerate", bench_accelerate, n, a, b, c);
+        run_case("Accelerate", bench_accelerate, shape, a, b, c);
 #endif
 #if defined(COB_HAVE_EXTERNAL_CBLAS)
-        run_case(COB_EXTERNAL_CBLAS_NAME, bench_external_cblas, n, a, b, c);
+        run_case(COB_EXTERNAL_CBLAS_NAME, bench_external_cblas, shape, a, b, c);
 #endif
 #if defined(COB_HAVE_EXTERNAL_FORTRAN_SGEMM)
-        run_case(COB_EXTERNAL_FORTRAN_SGEMM_NAME, bench_external_fortran_sgemm, n, a, b, c);
+        run_case(COB_EXTERNAL_FORTRAN_SGEMM_NAME, bench_external_fortran_sgemm, shape, a, b, c);
 #endif
         printf("\n");
 

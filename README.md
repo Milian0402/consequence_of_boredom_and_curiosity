@@ -57,12 +57,15 @@ ctest --test-dir build --output-on-failure
 ```sh
 make bench
 ./build/cob_gemm_bench 128 256 512
+./build/cob_gemm_bench 832x960x896
 ```
 
 On macOS the benchmark also builds an Apple Accelerate comparison when the
 framework is available. The benchmark allocates aligned matrices so it measures
 the fastest AMX output path. Set `COB_BENCH_REPEATS` to use more benchmark
 repeats for noisier large shapes, for example `COB_BENCH_REPEATS=11`.
+Arguments can be square sizes (`512`) or rectangular `MxNxK` shapes
+(`832x960x896`).
 
 To compare against an open-source CBLAS implementation, build the separate
 external CBLAS benchmark target. For example, with a local BLIS build:
