@@ -12,9 +12,12 @@ this repository.
 - Do not ask for permission to make normal commits or pushes for this repo.
 - Use subagents when useful, including a notes/timeline subagent that
   periodically records optimization attempts.
-- Work primarily in this repo and temporary worktrees/copies of this repo.
+- Work only in this repo and temporary worktrees/copies of this repo unless the
+  user explicitly redirects the task elsewhere.
+- Temporary worktrees and copies of this repo have the same full edit, test,
+  commit, and normal push permission as the main checkout.
 - If context is compacted or instructions are unclear, re-read this file and
   continue editing/testing/committing/pushing normal repo work without asking.
+- Avoid editing unrelated external repositories.
 - Ask or avoid the action only for destructive operations, force-pushes, spending
-  money, publishing outside the normal repo push flow, or editing unrelated
-  external repositories.
+  money, or publishing outside the normal push flow for this repo.
