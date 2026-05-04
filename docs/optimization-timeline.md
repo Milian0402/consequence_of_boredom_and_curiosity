@@ -368,6 +368,18 @@ collapsed around 1536 GF/s. `n = 1408` remained on AMX packed-`B` around
 1950 GF/s. The change was reverted, keeping the public packed-`B` SME cap at
 `n <= 1216`.
 
+### 2026-05-05: 32x64 AMX tile mapping rejected
+
+After commit `7523ab7`, a 32x64 AMX tile experiment tried to reuse one
+packed-`A` load across two adjacent 32-column `B` panels. The mapping used
+`z` rows `0..7` with paired `X` loads.
+
+Result: the experiment did not pass correctness. `make test` failed on multiple
+shapes, including `32x64x31`, `64x64x64`, `96x64x128`, `64x96x128`,
+`128x128x129`, and the large direct-vs-packed checks for `1152`, `1216`, and
+`1280`, with large max diffs. The attempted 32x64 mapping over AMX `Z` storage
+is invalid. The patch was reverted, and `make test` then passed 31 shapes.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
