@@ -422,6 +422,22 @@ improving from older full-pack medians around 254-413 GF/s to about
 650-820 GF/s on sampled shapes, while packed-`B` remains much faster at about
 1.3-1.8 TF/s.
 
+### 2026-05-05: skinny chunk packer follow-up
+
+Commit `40454ae` tuned the skinny one-shot chunk packer added after the earlier
+dispatch change. Packing panels within each chunk was faster than the initial
+row-wise chunk packing order, so the chunked skinny path now keeps the
+panel-wise setup shape. The chunk width is also conditional: `m = 128` with
+`k >= 1024` uses 512-column chunks, while the other chunked skinny shapes stay
+at 256 columns.
+
+Result: validation passed with `make test` across 34 shapes, and
+`git diff --check` passed. Focused skinny samples showed about 733 and
+839 GF/s medians for `96x4096x1024` and `96x8192x512`, plus about 944, 1007,
+and 1008 GF/s medians for `128x4096x1024`, `128x2048x2048`, and
+`128x8192x512`. These are still below the packed-`B` path, but closer to
+Accelerate than the first chunked one-shot version.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
