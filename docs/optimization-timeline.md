@@ -380,6 +380,20 @@ shapes, including `32x64x31`, `64x64x64`, `96x64x128`, `64x96x128`,
 `1280`, with large max diffs. The attempted 32x64 mapping over AMX `Z` storage
 is invalid. The patch was reverted, and `make test` then passed 31 shapes.
 
+### 2026-05-05: two-panel public B-pack setup rejected
+
+After commit `ad43943`, a public `B`-pack setup experiment packed two adjacent
+32-column `B` panels in one pass over each source row. The intent was to improve
+source locality without creating the full write-stream explosion from the
+earlier row-wise setup order.
+
+Result: the experiment passed `make test`, but pack setup throughput regressed
+versus the existing panel-wise packing. In a 15-repeat
+`COB_BENCH_PACK_SETUP=1` run over `512..1536`, setup medians were roughly 106,
+94, 96, 92, 90, 90, 83, and 68 GB/s. That was below the earlier panel-wise
+baseline of roughly 90-114 GB/s, and especially worse at larger sizes. The
+experiment was reverted, so the existing panel-wise packing remains.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
