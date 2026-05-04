@@ -248,10 +248,19 @@ one-shot `n = 960` uses AMX direct-`B`.
 Result: a focused `COB_BENCH_REPEATS=15` benchmark showed `n = 960` one-shot
 medians about 2029-2036 GF/s, improving over the previous 832-cutoff control
 range around roughly 1995-2006 GF/s. Accelerate still remained around
-2058-2067 GF/s. An `n = 896` extension check was also tried during this
-boundary work and was not kept because the explicit 832-cutoff control was as
-good or better at `896`. Validation passed with `make test` across 29 shapes,
-and `git diff --check` passed.
+2058-2067 GF/s. Later split-gate work kept `n = 896` on the SME medium route
+while preserving the `n = 960` AMX win. Validation passed with `make test`
+across 29 shapes, and `git diff --check` passed.
+
+### 2026-05-05: one-shot n=896/960 AMX direct-B split gate
+
+Commit `7fec4b5` split the AMX direct-`B` medium gate so AMX handles
+`n <= 832` plus an explicit extra `n == 960`, letting `n = 896` fall back to
+the SME medium route.
+
+Result: focused `COB_BENCH_REPEATS=15` validation showed one-shot medians about
+1976 GF/s at `n = 896` and about 2029 GF/s at `n = 960`. Validation passed
+with `make test` across 29 shapes, and `git diff --check` passed.
 
 ### 2026-05-05: latest post-1088 rejected experiments
 
