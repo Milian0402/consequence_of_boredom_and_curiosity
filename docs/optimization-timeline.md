@@ -310,6 +310,22 @@ Result: the same-session old SME one-shot `1088` baseline was about
 2025-2033 GF/s median in focused 15-repeat runs, with a later 7-repeat sanity
 run around 2009-2011 GF/s median.
 
+### 2026-05-05: one-shot n=1152/1216 AMX direct-B gate
+
+Commit `f45bb5e` routes one-shot `n = 1152` and `n = 1216` through AMX
+direct-`B` as large extra direct-`B` sizes. It leaves `n = 1280` on the
+previous path because testing there was mixed.
+
+Result: focused 15-repeat square validation showed the old baseline around
+1911-1916 GF/s median at `n = 1152` and 1925-1927 GF/s at `n = 1216`. The new
+direct-`B` route measured about 1985-1991 GF/s at `n = 1152` and
+2027-2032 GF/s at `n = 1216` in final validation.
+
+Validation passed with `make test` across 31 shapes after adding `1152` and
+`1216` direct-vs-packed coverage. Rectangular smoke with the `MxNxK` benchmark
+showed acceptable behavior for `832x1152x896`, `896x1152x1152`,
+`1280x1152x960`, `1152x1216x896`, and `1216x1216x1024`.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
