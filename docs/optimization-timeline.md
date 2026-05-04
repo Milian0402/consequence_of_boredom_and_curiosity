@@ -279,6 +279,16 @@ direct-`B` one-shot, including an overrideable macro cutoff and cutoff `224`,
 passed tests, but a controlled heap-only comparison was faster for `96-224`, so
 it was reverted.
 
+Excluding `n = 1088` from the SME direct-`B` one-shot route was also tested and
+rejected. It made one-shot `1088` fall back to the slower packed/large path and
+benchmarked clearly worse, with medians around 1841-1857 GF/s versus the
+committed SME route around 1966-1970 GF/s, so the experiment was reverted.
+
+Workflow note: patch-editing detached `/private/tmp` worktrees can still trigger
+client edit-confirmation friction despite standing repo permission. Future
+experiments should prefer the main checkout, or use non-editing toggles when a
+detached worktree is only needed for measurement.
+
 Validation after the reverts included `make test`; the tree returned clean.
 
 ## Current Conclusion
