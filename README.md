@@ -61,7 +61,8 @@ make bench
 
 On macOS the benchmark also builds an Apple Accelerate comparison when the
 framework is available. The benchmark allocates aligned matrices so it measures
-the fastest AMX output path.
+the fastest AMX output path. Set `COB_BENCH_REPEATS` to use more benchmark
+repeats for noisier large shapes, for example `COB_BENCH_REPEATS=11`.
 
 To compare against an open-source CBLAS implementation, build the separate
 external CBLAS benchmark target. For example, with a local BLIS build:

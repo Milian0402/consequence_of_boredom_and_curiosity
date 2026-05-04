@@ -51,6 +51,10 @@ typedef struct bench_stats {
     double median;
 } bench_stats;
 
+enum {
+    COB_BENCH_MAX_REPEATS = 31
+};
+
 static uint32_t rng_next(uint32_t* state)
 {
     *state = *state * 1664525u + 1013904223u;
@@ -111,6 +115,33 @@ static int timed_iterations(int n)
         return 32;
     }
     return 1;
+}
+
+static int env_int_clamped(const char* name, int fallback, int min_value, int max_value)
+{
+    const char* value = getenv(name);
+    if (value == NULL || value[0] == '\0') {
+        return fallback;
+    }
+
+    char* end = NULL;
+    const long parsed = strtol(value, &end, 10);
+    if (end == value || *end != '\0') {
+        return fallback;
+    }
+    if (parsed < min_value) {
+        return min_value;
+    }
+    if (parsed > max_value) {
+        return max_value;
+    }
+    return (int)parsed;
+}
+
+static int timed_repeats(int n)
+{
+    const int fallback = n <= 256 ? 7 : 5;
+    return env_int_clamped("COB_BENCH_REPEATS", fallback, 1, COB_BENCH_MAX_REPEATS);
 }
 
 static void sort_doubles(double* values, int count)
@@ -215,9 +246,9 @@ static void bench_external_fortran_sgemm(int n, const float* a, const float* b, 
 static double run_case(const char* name, bench_fn fn, int n, const float* a, const float* b, float* c)
 {
     const int warmups = n <= 256 ? 2 : 1;
-    const int repeats = n <= 256 ? 7 : 4;
+    const int repeats = timed_repeats(n);
     const int iters = timed_iterations(n);
-    double times[7];
+    double times[COB_BENCH_MAX_REPEATS];
 
     for (int i = 0; i < warmups; ++i) {
         fn(n, a, b, c);
@@ -255,9 +286,9 @@ static double run_case_cob_packed_reuse(int n, const float* a, const float* b, f
     }
 
     const int warmups = n <= 256 ? 2 : 1;
-    const int repeats = n <= 256 ? 7 : 4;
+    const int repeats = timed_repeats(n);
     const int iters = timed_iterations(n);
-    double times[7];
+    double times[COB_BENCH_MAX_REPEATS];
 
     for (int i = 0; i < warmups; ++i) {
         cob_sgemm_rowmajor_packed_b(n, n, n, a, n, &packed_b, c, n);
