@@ -291,6 +291,25 @@ detached worktree is only needed for measurement.
 
 Validation after the reverts included `make test`; the tree returned clean.
 
+### 2026-05-05: rectangular benchmark arguments
+
+Commit `4074513` added rectangular `MxNxK` benchmark arguments, such as
+`832x960x896`, while preserving the previous square `N` arguments.
+
+Result: validation passed with `make test` and a `COB_BENCH_REPEATS=1`
+benchmark smoke run.
+
+### 2026-05-05: one-shot n=1088 AMX direct-B gate
+
+Commit `2306377` routes one-shot `n = 1088` through AMX direct-`B` by adding a
+second extra direct-`B` gate. It leaves `n = 1024` on the previous packed path,
+because testing AMX direct-`B` at `n = 1024` did not improve it.
+
+Result: the same-session old SME one-shot `1088` baseline was about
+1954-1963 GF/s median. The new AMX direct-`B` gate measured about
+2025-2033 GF/s median in focused 15-repeat runs, with a later 7-repeat sanity
+run around 2009-2011 GF/s median.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
