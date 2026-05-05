@@ -731,6 +731,32 @@ compute-only path is an interesting upper-bound/reference, but it requires both
 LHS and RHS prepacking, so it is not directly comparable to COB's public
 one-shot SGEMM path.
 
+### 2026-05-05: skinny AP-first loop order rejected
+
+An AP-first skinny AMX chunk-loop experiment in
+`/private/tmp/cob_skinny_apfirst_exp` swapped the packed-`B` chunk loop from
+panel-first to `A`-panel-first. It passed `make all` and `make test`, but the
+paired A/B signal was mixed and noisy.
+
+Result: repeat-31, 8-iteration validation showed `96x4096x1024` median
+`0.9992x` CI `[0.9909,1.0209]`, `96x8192x512` `1.0012x`
+`[0.9934,1.0092]`, `128x4096x1024` `1.0038x` with mean-log `0.9928x`
+`[0.9691,1.0101]`, `128x2048x2048` `1.0067x` `[1.0017,1.0126]`, and
+`128x8192x512` `1.0077x` `[0.9997,1.0145]`. Smaller-N validation was also
+noisy: `96x1024x512` `0.9981x` `[0.9926,1.0087]`, `96x2048x512` `0.9981x`
+`[0.9753,1.0367]`, `128x1024x512` `1.0096x` `[0.9993,1.0574]`, and
+`128x2048x512` `1.0174x` `[0.9730,1.1025]`. There was no broad
+no-regression signal, so the kernel change was not committed.
+
+### 2026-05-05: paired A/B repeat extension
+
+Commit `edfc327` added optional CV-based automatic repeat extension to the
+paired A/B benchmark harness. The new knobs are `COB_AB_MAX_REPEATS`,
+`COB_AB_REPEAT_BATCH`, and `COB_AB_CV_TARGET`.
+
+Result: default behavior remains fixed-repeat. The harness only extends beyond
+`COB_AB_REPEATS` when `COB_AB_MAX_REPEATS` is set above it.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
