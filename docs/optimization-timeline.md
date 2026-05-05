@@ -618,6 +618,16 @@ focused repeat-25 rebuild measured COB one-shot / packed-`B` / Accelerate at
 Accelerate across those wide one-shot cases and narrows the MpGEMM gap, but
 still does not universally overtake MpGEMM.
 
+Tuning follow-up, not a new route: after the wide gate, the reuse K chunk was
+tuned separately so `m = 64, n >= 7168, k >= 1536` now uses `KC = 768`; the
+`n = 4096` large-`K` gate and `k = 1024` wide cases stay at `KC = 512`.
+Validation again passed with all 37 `make test` shapes and `git diff --check`.
+After rebuild, repeat-25 measured COB one-shot / packed-`B` / Accelerate at
+`64x24576x1536` 932.25 / 1592.04 / 668.03 GF/s, `64x7168x2048` 971.08 /
+1632.54 / 695.69 GF/s, `64x7168x16384` 951.84 / 1699.92 / 695.85 GF/s,
+`64x8192x1024` 1011.06 / 1698.96 / 697.23 GF/s, `64x4096x7168` 959.43 /
+1708.23 / 688.80 GF/s, and `64x32768x512` 906.11 / 1205.10 / 403.28 GF/s.
+
 This still does not close the MpGEMM gap on `64x2112x7168` or
 `64x4096x7168`, but it narrows `64x4096x7168` and beats the earlier local
 MpGEMM `64x32768x512` baseline of about 833 GF/s.

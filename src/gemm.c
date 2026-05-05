@@ -66,6 +66,10 @@ enum {
 #define COB_SGEMM_M64_SME_REUSE_NC 1024
 #endif
 
+#ifndef COB_SGEMM_M64_SME_WIDE_KC
+#define COB_SGEMM_M64_SME_WIDE_KC 768
+#endif
+
 static int cob_min_i32(int a, int b)
 {
     return a < b ? a : b;
@@ -724,7 +728,9 @@ static int cob_sgemm_rowmajor_sme_m64_pack_b_reuse(
     if (nc_max < 64 || (nc_max % 64) != 0) {
         return 0;
     }
-    const int kc_max = use_long_n_k512 ? k : COB_SGEMM_SKINNY_SME_KC;
+    const int kc_max =
+        use_long_n_k512 ? k :
+        (use_wide && k >= 1536 ? COB_SGEMM_M64_SME_WIDE_KC : COB_SGEMM_SKINNY_SME_KC);
     const size_t a_panel_floats =
         (size_t)kc_max * (size_t)COB_SGEMM_AMX_MR;
     float* packed_a =
