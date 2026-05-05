@@ -4,6 +4,7 @@ set -eu
 if [ "$#" -lt 2 ]; then
     echo "usage: sh tools/paired_ab_bench.sh BASELINE_GEMM_C CANDIDATE_GEMM_C [SHAPE...]" >&2
     echo "       COB_AB_MODE=packed compares the packed-B API instead of one-shot SGEMM." >&2
+    echo "       COB_AB_MAX_REPEATS and COB_AB_CV_TARGET enable automatic repeat extension." >&2
     exit 2
 fi
 

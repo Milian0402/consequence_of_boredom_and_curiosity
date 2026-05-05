@@ -146,6 +146,27 @@ static int env_int_clamped(const char* name, int fallback, int min_value, int ma
     return (int)parsed;
 }
 
+static double env_double_clamped(const char* name, double fallback, double min_value, double max_value)
+{
+    const char* value = getenv(name);
+    if (value == NULL || value[0] == '\0') {
+        return fallback;
+    }
+
+    char* end = NULL;
+    const double parsed = strtod(value, &end);
+    if (end == value || *end != '\0' || !isfinite(parsed)) {
+        return fallback;
+    }
+    if (parsed < min_value) {
+        return min_value;
+    }
+    if (parsed > max_value) {
+        return max_value;
+    }
+    return parsed;
+}
+
 static int shape_max_dim(bench_shape shape)
 {
     int max_dim = shape.m;
@@ -304,7 +325,16 @@ static void bootstrap_log_speedup_ci(const double* log_speedups, int repeats, in
     free(means);
 }
 
-static int bench_one_shape(bench_shape shape, int repeats, int iterations, int warmups, int packed_mode, int bootstrap_draws)
+static int bench_one_shape(
+    bench_shape shape,
+    int min_repeats,
+    int max_repeats,
+    int repeat_batch,
+    double cv_target_percent,
+    int iterations,
+    int warmups,
+    int packed_mode,
+    int bootstrap_draws)
 {
     const impl_api impl_a = {
         "A",
@@ -329,12 +359,12 @@ static int bench_one_shape(bench_shape shape, int repeats, int iterations, int w
     float* b = alloc_f32_aligned(b_count);
     float* c_a = alloc_f32_aligned(c_count);
     float* c_b = alloc_f32_aligned(c_count);
-    double* times_a = (double*)malloc((size_t)repeats * sizeof(double));
-    double* times_b = (double*)malloc((size_t)repeats * sizeof(double));
-    double* gf_a = (double*)malloc((size_t)repeats * sizeof(double));
-    double* gf_b = (double*)malloc((size_t)repeats * sizeof(double));
-    double* speedups = (double*)malloc((size_t)repeats * sizeof(double));
-    double* log_speedups = (double*)malloc((size_t)repeats * sizeof(double));
+    double* times_a = (double*)malloc((size_t)max_repeats * sizeof(double));
+    double* times_b = (double*)malloc((size_t)max_repeats * sizeof(double));
+    double* gf_a = (double*)malloc((size_t)max_repeats * sizeof(double));
+    double* gf_b = (double*)malloc((size_t)max_repeats * sizeof(double));
+    double* speedups = (double*)malloc((size_t)max_repeats * sizeof(double));
+    double* log_speedups = (double*)malloc((size_t)max_repeats * sizeof(double));
 
     if (a == NULL || b == NULL || c_a == NULL || c_b == NULL || times_a == NULL ||
         times_b == NULL || gf_a == NULL || gf_b == NULL || speedups == NULL ||
@@ -394,31 +424,49 @@ static int bench_one_shape(bench_shape shape, int repeats, int iterations, int w
     }
 
     const double ops = 2.0 * (double)shape.m * (double)shape.n * (double)shape.k * (double)iterations;
-    int b_faster = 0;
-    for (int r = 0; r < repeats; ++r) {
-        if ((r & 1) == 0) {
-            times_a[r] = packed_mode ? time_packed(&impl_a, shape, iterations, a, &packed_a, c_a)
-                                     : time_direct(&impl_a, shape, iterations, a, b, c_a);
-            times_b[r] = packed_mode ? time_packed(&impl_b, shape, iterations, a, &packed_b, c_b)
-                                     : time_direct(&impl_b, shape, iterations, a, b, c_b);
-        } else {
-            times_b[r] = packed_mode ? time_packed(&impl_b, shape, iterations, a, &packed_b, c_b)
-                                     : time_direct(&impl_b, shape, iterations, a, b, c_b);
-            times_a[r] = packed_mode ? time_packed(&impl_a, shape, iterations, a, &packed_a, c_a)
-                                     : time_direct(&impl_a, shape, iterations, a, b, c_a);
+    int repeats = 0;
+    sample_stats a_stats = {0.0, 0.0, 0.0, 0.0};
+    sample_stats b_stats = {0.0, 0.0, 0.0, 0.0};
+    while (repeats < max_repeats) {
+        int target_repeats = repeats == 0 ? min_repeats : repeats + repeat_batch;
+        if (target_repeats > max_repeats) {
+            target_repeats = max_repeats;
+        }
+        for (int r = repeats; r < target_repeats; ++r) {
+            if ((r & 1) == 0) {
+                times_a[r] = packed_mode ? time_packed(&impl_a, shape, iterations, a, &packed_a, c_a)
+                                         : time_direct(&impl_a, shape, iterations, a, b, c_a);
+                times_b[r] = packed_mode ? time_packed(&impl_b, shape, iterations, a, &packed_b, c_b)
+                                         : time_direct(&impl_b, shape, iterations, a, b, c_b);
+            } else {
+                times_b[r] = packed_mode ? time_packed(&impl_b, shape, iterations, a, &packed_b, c_b)
+                                         : time_direct(&impl_b, shape, iterations, a, b, c_b);
+                times_a[r] = packed_mode ? time_packed(&impl_a, shape, iterations, a, &packed_a, c_a)
+                                         : time_direct(&impl_a, shape, iterations, a, b, c_a);
+            }
+
+            gf_a[r] = ops / times_a[r] * 1.0e-9;
+            gf_b[r] = ops / times_b[r] * 1.0e-9;
+            speedups[r] = times_a[r] / times_b[r];
+            log_speedups[r] = log(speedups[r]);
         }
 
-        gf_a[r] = ops / times_a[r] * 1.0e-9;
-        gf_b[r] = ops / times_b[r] * 1.0e-9;
-        speedups[r] = times_a[r] / times_b[r];
-        log_speedups[r] = log(speedups[r]);
+        repeats = target_repeats;
+        a_stats = summarize_samples(gf_a, repeats);
+        b_stats = summarize_samples(gf_b, repeats);
+        if (repeats >= min_repeats &&
+            (a_stats.cv_percent <= cv_target_percent && b_stats.cv_percent <= cv_target_percent)) {
+            break;
+        }
+    }
+
+    int b_faster = 0;
+    for (int r = 0; r < repeats; ++r) {
         if (speedups[r] > 1.0) {
             ++b_faster;
         }
     }
 
-    const sample_stats a_stats = summarize_samples(gf_a, repeats);
-    const sample_stats b_stats = summarize_samples(gf_b, repeats);
     const sample_stats speedup_stats = summarize_samples(speedups, repeats);
     double mean_log = 0.0;
     for (int r = 0; r < repeats; ++r) {
@@ -438,6 +486,14 @@ static int bench_one_shape(bench_shape shape, int repeats, int iterations, int w
         packed_mode ? "packed-b" : "one-shot",
         repeats,
         iterations);
+    if (repeats > min_repeats) {
+        printf(
+            "  auto-repeats: requested %d, max %d, batch %d, cv target %.2f%%\n",
+            min_repeats,
+            max_repeats,
+            repeat_batch,
+            cv_target_percent);
+    }
     printf(
         "  A median %8.2f GF/s best %8.2f GF/s cv %5.2f%% checksum=% .6e\n",
         a_stats.median,
@@ -458,8 +514,10 @@ static int bench_one_shape(bench_shape shape, int repeats, int iterations, int w
         printf(" bootstrap95 [%.4fx, %.4fx]", ci_low, ci_high);
     }
     printf(" B-faster %d/%d\n", b_faster, repeats);
-    if (a_stats.cv_percent > 2.0 || b_stats.cv_percent > 2.0) {
-        printf("  warning: sample CV above 2%%; treat this shape as noisy\n");
+    if (a_stats.cv_percent > cv_target_percent || b_stats.cv_percent > cv_target_percent) {
+        printf(
+            "  warning: sample CV above %.2f%%; treat this shape as noisy\n",
+            cv_target_percent);
     }
 
     impl_a.free_packed_b(&packed_a);
@@ -480,6 +538,15 @@ static int bench_one_shape(bench_shape shape, int repeats, int iterations, int w
 int main(int argc, char** argv)
 {
     const int repeats = env_int_clamped("COB_AB_REPEATS", 31, 1, COB_AB_MAX_REPEATS);
+    int max_repeats = env_int_clamped("COB_AB_MAX_REPEATS", repeats, 1, COB_AB_MAX_REPEATS);
+    if (max_repeats < repeats) {
+        max_repeats = repeats;
+    }
+    int repeat_batch = env_int_clamped("COB_AB_REPEAT_BATCH", repeats, 1, COB_AB_MAX_REPEATS);
+    if (repeat_batch > max_repeats) {
+        repeat_batch = max_repeats;
+    }
+    const double cv_target_percent = env_double_clamped("COB_AB_CV_TARGET", 2.0, 0.1, 100.0);
     const int warmups = env_int_clamped("COB_AB_WARMUPS", 2, 0, 100);
     const int bootstrap_draws = env_int_clamped("COB_AB_BOOTSTRAP", 2000, 0, 100000);
     const int forced_iterations = env_int_clamped("COB_AB_ITERS", 0, 0, 100000000);
@@ -498,7 +565,16 @@ int main(int argc, char** argv)
         const int count = (int)(sizeof(defaults) / sizeof(defaults[0]));
         for (int i = 0; i < count; ++i) {
             const int iterations = forced_iterations > 0 ? forced_iterations : default_iterations(defaults[i]);
-            status |= bench_one_shape(defaults[i], repeats, iterations, warmups, packed_mode, bootstrap_draws);
+            status |= bench_one_shape(
+                defaults[i],
+                repeats,
+                max_repeats,
+                repeat_batch,
+                cv_target_percent,
+                iterations,
+                warmups,
+                packed_mode,
+                bootstrap_draws);
         }
         return status;
     }
@@ -511,7 +587,16 @@ int main(int argc, char** argv)
             continue;
         }
         const int iterations = forced_iterations > 0 ? forced_iterations : default_iterations(shape);
-        status |= bench_one_shape(shape, repeats, iterations, warmups, packed_mode, bootstrap_draws);
+        status |= bench_one_shape(
+            shape,
+            repeats,
+            max_repeats,
+            repeat_batch,
+            cv_target_percent,
+            iterations,
+            warmups,
+            packed_mode,
+            bootstrap_draws);
     }
     return status;
 }
