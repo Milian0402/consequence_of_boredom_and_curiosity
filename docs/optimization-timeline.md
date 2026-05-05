@@ -685,6 +685,21 @@ retests with 512-row and 256-row blocks both passed tests but reduced packed-`B`
 medians at `768` and `1024` versus the current 384-row block. None were
 committed.
 
+Additional post-`1c1e827` rejected probes: exact `256` direct-SME routing was
+A/B tested and rejected after the repeat-31 broad low-threshold worktree route
+measured about 1491 GF/s median versus current AMX around 1633 GF/s. Medium
+exact `1088` direct-SME also failed to hold up after the `384`/`768` wins:
+repeat-31 current one-shot was around 1808-1868 GF/s median versus direct-SME
+around 1687-1784 GF/s. For `m = 64`, `COB_SGEMM_SKINNY_SME_KC=256` was below
+current, with repeat-25 medians around 914 GF/s at `64x8192x1024`, 870 at
+`64x4096x7168`, and 775 at `64x32768x512`. Row-major full-panel `B` packing
+traversal preserved the packed layout and passed tests, but pack setup fell to
+about 19-20 GB/s and one-shot `512`/`1024` collapsed. A fixed NEON 128-byte
+copy for `B` panel packing passed tests but did not beat current `memcpy`, whose
+main-branch pack setup bandwidth was higher under the same harness. Finally,
+the B-panel-first loop order for the SME packed-`B` kernel passed tests but
+reduced packed-`B` medians at `768`, `1024`, and `1280`. None were committed.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
