@@ -645,6 +645,29 @@ those cases. The better-looking `64x4096x7168` at 946.39 GF/s and
 `64x32768x512` at 924.84 GF/s were not useful enough to justify broad AMX
 routing, so the AMX chunk route was rejected.
 
+### 2026-05-05: exact 768 one-shot SME direct route
+
+Commit `931daf0` (`Route square 768 through SME direct`) added one narrow
+one-shot dispatch exception: exact `768x768x768` now bypasses the AMX
+strided-`B` route and uses the existing SME medium direct-`B` path.
+
+Result: full `make test` passed. Focused repeat-25 single-shape runs measured
+one-shot medians around 1956.7 and 1961.0 GF/s, versus about 1915.4 GF/s in an
+unchanged baseline worktree. Packed-`B` for the same shape stayed around
+1969-1974 GF/s.
+
+Rejected follow-ups after `a80d7d4`: Arm's BSD-licensed April 2026 SME2
+learning-path sample was built and timed with a throwaway driver, but it was
+educational rather than competitive: about 1552 GF/s median at `512`, 1713 at
+`1024`, and about 500 on `m = 64` wide shapes. An AMX-only build with
+`COB_DISABLE_APPLE_SME=1` confirmed the current SME dispatch is needed for
+`m = 64` one-shot and is not a better global square route. Revisited
+one-shot `1024` SME-from-packed routing passed tests but was equal or worse
+than the current path. A low-threshold SME-before-AMX experiment hurt `192` and
+`512` and was mixed at `256` and `384`, so only exact `768` was isolated and
+kept. `m = 64` reuse `NC = 256` and `NC = 1024` probes were much slower, and a
+`K = 1024` chunk-size probe stayed noisy; none were committed.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
