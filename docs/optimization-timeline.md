@@ -219,6 +219,17 @@ routed sizes, including medians around 2013 GF/s at `n = 960`, 1962 GF/s at
 `n = 1088`, 1922 GF/s at `n = 1152`, and 1926 GF/s at `n = 1216`. Validation
 passed with `make test` across 28 shapes, and `git diff --check` passed.
 
+### 2026-05-05: paired A/B harness refinement
+
+The paired A/B benchmark harness was refined to add split-half holdout
+reporting while keeping the existing speedup-CV, sign-test, and checksum-fail
+diagnostics.
+
+This addresses part of the benchmark critique by making overfit-looking wins
+easier to spot. Heavier follow-ups remain open, including grid boundary
+modeling, hardware counter collection, dispatcher refactoring, and
+visualization.
+
 ### 2026-05-05: packed-B n=1088 dispatch narrowed
 
 Commit `04f2a91` excluded `n = 1088` from the public packed-`B` SME route, so
