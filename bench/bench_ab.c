@@ -76,6 +76,15 @@ typedef struct sample_stats {
     double cv_percent;
 } sample_stats;
 
+typedef struct paired_stats {
+    sample_stats speedup;
+    double mean_log_speedup;
+    double ci_low;
+    double ci_high;
+    double sign_pvalue;
+    int b_faster;
+} paired_stats;
+
 enum {
     COB_AB_MAX_REPEATS = 1001
 };
@@ -84,6 +93,11 @@ static uint32_t rng_next(uint32_t* state)
 {
     *state = *state * 1664525u + 1013904223u;
     return *state;
+}
+
+static int rng_bounded(uint32_t* state, int bound)
+{
+    return (int)(((uint64_t)rng_next(state) * (uint64_t)(uint32_t)bound) >> 32);
 }
 
 static float rng_f32(uint32_t* state)
@@ -310,7 +324,7 @@ static void bootstrap_log_speedup_ci(const double* log_speedups, int repeats, in
     for (int i = 0; i < draws; ++i) {
         double sum = 0.0;
         for (int j = 0; j < repeats; ++j) {
-            const int pick = (int)(rng_next(&rng) % (uint32_t)repeats);
+            const int pick = rng_bounded(&rng, repeats);
             sum += log_speedups[pick];
         }
         means[i] = sum / (double)repeats;
@@ -358,6 +372,37 @@ static int checksums_match(float checksum_a, float checksum_b)
     return fabs((double)checksum_a - (double)checksum_b) / scale <= 1.0e-4;
 }
 
+static paired_stats summarize_paired(
+    const double* speedups,
+    const double* log_speedups,
+    int repeats,
+    int bootstrap_draws)
+{
+    paired_stats stats;
+    stats.speedup = summarize_samples(speedups, repeats);
+    stats.mean_log_speedup = 0.0;
+    stats.ci_low = 0.0;
+    stats.ci_high = 0.0;
+    stats.sign_pvalue = 1.0;
+    stats.b_faster = 0;
+
+    for (int r = 0; r < repeats; ++r) {
+        stats.mean_log_speedup += log_speedups[r];
+        if (speedups[r] > 1.0) {
+            ++stats.b_faster;
+        }
+    }
+    stats.mean_log_speedup /= (double)repeats;
+    bootstrap_log_speedup_ci(
+        log_speedups,
+        repeats,
+        bootstrap_draws,
+        &stats.ci_low,
+        &stats.ci_high);
+    stats.sign_pvalue = sign_test_two_tailed_pvalue(stats.b_faster, repeats);
+    return stats;
+}
+
 static int bench_one_shape(
     bench_shape shape,
     int min_repeats,
@@ -367,7 +412,8 @@ static int bench_one_shape(
     int iterations,
     int warmups,
     int packed_mode,
-    int bootstrap_draws)
+    int bootstrap_draws,
+    int holdout_reporting)
 {
     const impl_api impl_a = {
         "A",
@@ -496,23 +542,7 @@ static int bench_one_shape(
         }
     }
 
-    int b_faster = 0;
-    for (int r = 0; r < repeats; ++r) {
-        if (speedups[r] > 1.0) {
-            ++b_faster;
-        }
-    }
-
-    double mean_log = 0.0;
-    for (int r = 0; r < repeats; ++r) {
-        mean_log += log_speedups[r];
-    }
-    mean_log /= (double)repeats;
-
-    double ci_low = 0.0;
-    double ci_high = 0.0;
-    bootstrap_log_speedup_ci(log_speedups, repeats, bootstrap_draws, &ci_low, &ci_high);
-    const double sign_pvalue = sign_test_two_tailed_pvalue(b_faster, repeats);
+    const paired_stats all_stats = summarize_paired(speedups, log_speedups, repeats, bootstrap_draws);
     const float checksum_a = checksum(c_a, c_count);
     const float checksum_b = checksum(c_b, c_count);
     const int checksum_ok = checksums_match(checksum_a, checksum_b);
@@ -547,13 +577,38 @@ static int bench_one_shape(
         checksum_b);
     printf(
         "  paired B/A median %.4fx mean-log %.4fx cv %5.2f%%",
-        speedup_stats.median,
-        exp(mean_log),
-        speedup_stats.cv_percent);
-    if (ci_low > 0.0 && ci_high > 0.0) {
-        printf(" bootstrap95 [%.4fx, %.4fx]", ci_low, ci_high);
+        all_stats.speedup.median,
+        exp(all_stats.mean_log_speedup),
+        all_stats.speedup.cv_percent);
+    if (all_stats.ci_low > 0.0 && all_stats.ci_high > 0.0) {
+        printf(" bootstrap95 [%.4fx, %.4fx]", all_stats.ci_low, all_stats.ci_high);
     }
-    printf(" B-faster %d/%d sign-p %.3g\n", b_faster, repeats, sign_pvalue);
+    printf(" B-faster %d/%d sign-p %.3g\n", all_stats.b_faster, repeats, all_stats.sign_pvalue);
+    if (holdout_reporting && repeats >= 8) {
+        const int split = repeats / 2;
+        const int holdout_count = repeats - split;
+        const paired_stats holdout_stats = summarize_paired(
+            speedups + split,
+            log_speedups + split,
+            holdout_count,
+            bootstrap_draws);
+        printf(
+            "  split-half holdout B/A median %.4fx mean-log %.4fx cv %5.2f%%",
+            holdout_stats.speedup.median,
+            exp(holdout_stats.mean_log_speedup),
+            holdout_stats.speedup.cv_percent);
+        if (holdout_stats.ci_low > 0.0 && holdout_stats.ci_high > 0.0) {
+            printf(
+                " bootstrap95 [%.4fx, %.4fx]",
+                holdout_stats.ci_low,
+                holdout_stats.ci_high);
+        }
+        printf(
+            " B-faster %d/%d sign-p %.3g\n",
+            holdout_stats.b_faster,
+            holdout_count,
+            holdout_stats.sign_pvalue);
+    }
     if (a_stats.cv_percent > cv_target_percent || b_stats.cv_percent > cv_target_percent) {
         printf(
             "  warning: sample CV above %.2f%%; treat this shape as noisy\n",
@@ -600,6 +655,7 @@ int main(int argc, char** argv)
     const int warmups = env_int_clamped("COB_AB_WARMUPS", 2, 0, 100);
     const int bootstrap_draws = env_int_clamped("COB_AB_BOOTSTRAP", 2000, 0, 100000);
     const int forced_iterations = env_int_clamped("COB_AB_ITERS", 0, 0, 100000000);
+    const int holdout_reporting = env_int_clamped("COB_AB_HOLDOUT", 1, 0, 1);
     const char* mode = getenv("COB_AB_MODE");
     const int packed_mode = mode != NULL && strcmp(mode, "packed") == 0;
 
@@ -626,7 +682,8 @@ int main(int argc, char** argv)
                 iterations,
                 warmups,
                 packed_mode,
-                bootstrap_draws);
+                bootstrap_draws,
+                holdout_reporting);
         }
         return status;
     }
@@ -648,7 +705,8 @@ int main(int argc, char** argv)
             iterations,
             warmups,
             packed_mode,
-            bootstrap_draws);
+            bootstrap_draws,
+            holdout_reporting);
     }
     return status;
 }
