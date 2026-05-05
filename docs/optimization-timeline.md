@@ -506,15 +506,18 @@ as `1088`, `1152`, and `1216`. The code change was reverted.
 
 ### 2026-05-05: rejected AMX loop-control experiments
 
-Two more low-risk control-flow experiments were tested and rejected. Unrolling
-the AMX direct-`B` panel loop by four kept the same independent `32x32` kernels,
-but did not reliably improve `1088` or `1216` and produced a severe duplicate
-regression at `1152`, so it was reverted.
+Two more low-risk control-flow experiments were tested and rejected, then
+re-evaluated with the paired A/B harness. The AMX fixed-width strided-`B`
+panel-loop unroll in `/private/tmp/cob_amx_unroll_exp` passed `make test`, but
+paired B/A results for `960`, `1088`, `1152`, and `1216` showed no convincing
+win: medians were `0.9954x`, `0.9992x`, `0.9993x`, and `0.9928x`, with
+negative trends at `960` and `1216`.
 
-The skinny chunked path also tried a single aligned scratch allocation for both
-packed `A` and packed `B`, replacing two separate heap allocations. It passed
-`make test`, but the focused skinny sweep was mixed and weaker on important
-`m = 96` and `m = 128, k = 512` samples, so the separate allocations stayed.
+The skinny AMX single-allocation scratch experiment in
+`/private/tmp/cob_skinny_single_alloc_exp` also passed `make test`, but paired
+skinny-case results were mixed and noisy: medians ranged from `0.9828x` to
+`1.0070x`, with one negative trend at `128x8192x512`. No code from either
+experiment was kept.
 
 ### 2026-05-05: rejected skinny direct-B bypass
 
