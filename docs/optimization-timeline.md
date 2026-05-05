@@ -1039,6 +1039,23 @@ Tooling note: `tools/bench_gap_report.py` was added to rank route-labelled CSV
 benchmark gaps reproducibly. Validation covered `python3 -m py_compile`, a live
 CSV smoke through the helper, and `git diff --check`.
 
+### 2026-05-05: SME medium direct cap tightened
+
+The route-aware gap report highlighted medium-square gaps. A no-SME paired A/B
+rejected disabling SME for `384`, `768`, and `896`: candidate medians were
+roughly `0.9625x`, `0.9858x`, and `0.8788x`. The same sweep showed the `1280`
+SME medium direct route had become harmful.
+
+An isolated gate probe with `COB_SGEMM_SME_DIRECT_MAX_N=1216` improved `1280`
+by `1.2640x` at 101 repeats, bootstrap95 `[1.2428x, 1.2813x]`, with B faster
+in `100/101` samples. `1216` and `1152` were neutral/noisy, so the accepted
+change capped SME medium direct at `1216`.
+
+Post-change A/B against the old `1280` default still showed `1280` at
+`1.0545x`, bootstrap95 `[1.0534x, 1.0870x]`, while `1216` stayed neutral.
+Validation passed with `make test` across 49 shapes, `make all`, and
+`git diff --check`.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
