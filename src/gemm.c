@@ -691,7 +691,7 @@ static int cob_sgemm_rowmajor_sme_skinny_contiguous_strided_b32(
     float* c,
     int ldc)
 {
-    if (m < 96 || m > 128 || n < 1024 || k < 512 || k > 512 ||
+    if (m < 64 || m > 128 || n < 32768 || k < 512 || k > 512 ||
         lda != k || ldb != n ||
         (m % COB_SGEMM_AMX_MR) != 0 ||
         (n % 64) != 0 || !cob_apple_sme2p1_available()) {

@@ -462,6 +462,22 @@ A temporary `build-nosme` directory was used for A/B runs against an SME-disable
 build. `.gitignore` now ignores `build-*` directories so those local comparison
 builds stay out of status.
 
+### 2026-05-05: m=64 k=512 large-N SME direct-B route
+
+The existing skinny SME direct-`B` fallback was narrowed into a useful large-`N`
+case: it now allows `m = 64` only when `n >= 32768` and `k = 512`. This catches
+`64x32768x512` after the AMX chunked path rejects `m = 64`.
+
+Wider gates were rejected. Allowing the route from `n >= 1024` hurt smaller
+`m = 64, k = 512` cases such as `64x2112x512` and `64x4096x512`. A threshold
+at `n >= 8192` was still mixed and noisy, with weak results around `24576`.
+The final narrow route improved duplicate 15-repeat `64x32768x512` one-shot
+medians from the AMX/no-SME control around 252-256 GF/s to about 316-317 GF/s.
+Accelerate was still faster on that case at roughly 410-415 GF/s.
+
+Validation passed with `make test` across 35 shapes after adding
+`64x32768x512` direct-vs-packed correctness coverage.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
