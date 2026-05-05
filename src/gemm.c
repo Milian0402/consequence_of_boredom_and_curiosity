@@ -74,6 +74,10 @@ enum {
 #define COB_SGEMM_M64_SME_LONG_N_K512_MIN_N 4096
 #endif
 
+#ifndef COB_SGEMM_M96_128_SME_REUSE_K512_MIN_N
+#define COB_SGEMM_M96_128_SME_REUSE_K512_MIN_N 4096
+#endif
+
 #ifndef COB_SGEMM_M64_SME_WIDE_KC
 #define COB_SGEMM_M64_SME_WIDE_KC 768
 #endif
@@ -832,7 +836,7 @@ static void cob_sgemm_16x64_sme_from_packed_b64_tuple(
     }
 }
 
-static int cob_sgemm_rowmajor_sme_m64_pack_b_reuse(
+static int cob_sgemm_rowmajor_sme_skinny_pack_b_reuse(
     int m,
     int n,
     int k,
@@ -843,15 +847,22 @@ static int cob_sgemm_rowmajor_sme_m64_pack_b_reuse(
     float* c,
     int ldc)
 {
-    const int use_long_n_k512 = n >= COB_SGEMM_M64_SME_LONG_N_K512_MIN_N && k == 512;
-    const int use_n4096_large_k = n == 4096 && k >= 7168;
-    const int use_wide = n >= 7168 && k >= 1024;
-    if (m != 64 || (!use_long_n_k512 && !use_n4096_large_k && !use_wide) ||
+    const int use_m64 = m == 64;
+    const int use_m96_128_k512 =
+        (m == 96 || m == 128) && n >= COB_SGEMM_M96_128_SME_REUSE_K512_MIN_N && k == 512;
+    const int use_long_n_k512 =
+        (use_m64 && n >= COB_SGEMM_M64_SME_LONG_N_K512_MIN_N && k == 512) ||
+        use_m96_128_k512;
+    const int use_n4096_large_k = use_m64 && n == 4096 && k >= 7168;
+    const int use_wide = use_m64 && n >= 7168 && k >= 1024;
+    if ((!use_m64 && !use_m96_128_k512) ||
+        (!use_long_n_k512 && !use_n4096_large_k && !use_wide) ||
         lda != k || ldb != n || (n % 64) != 0 || !cob_apple_sme2p1_available()) {
         return 0;
     }
 
     const int a32_panels = m / COB_SGEMM_AMX_MR;
+    const int a16_panels = m / 16;
     const int nc_max =
         (use_wide && n >= 24576 && k == 1536) ?
             COB_SGEMM_M64_SME_LONG_WIDE_NC : COB_SGEMM_M64_SME_REUSE_NC;
@@ -887,39 +898,35 @@ static int cob_sgemm_rowmajor_sme_m64_pack_b_reuse(
         }
         cob_amx_clr();
 
-        const float* a0 = packed_a;
-        const float* a1 = packed_a + 16;
-        const float* a2 = packed_a + a_kc_panel_floats;
-        const float* a3 = packed_a + a_kc_panel_floats + 16;
         for (int jc = 0; jc < n; jc += nc_max) {
             const int nc = cob_min_i32(nc_max, n - jc);
             const int b_panels64 = nc / 64;
             if (use_long_n_k512) {
                 cob_sgemm_16x64_sme_strided_b_pack_b32(
-                    b_panels64, kc, a0, b + (size_t)pc * (size_t)ldb + jc,
+                    b_panels64, kc, packed_a, b + (size_t)pc * (size_t)ldb + jc,
                     ldb, packed_b64, c + jc, ldc, pc != 0);
-                cob_sgemm_16x64_sme_from_packed_b64(
-                    b_panels64, kc, a1, packed_b64,
-                    c + (size_t)16 * (size_t)ldc + jc, ldc, pc != 0);
-                cob_sgemm_16x64_sme_from_packed_b64(
-                    b_panels64, kc, a2, packed_b64,
-                    c + (size_t)32 * (size_t)ldc + jc, ldc, pc != 0);
-                cob_sgemm_16x64_sme_from_packed_b64(
-                    b_panels64, kc, a3, packed_b64,
-                    c + (size_t)48 * (size_t)ldc + jc, ldc, pc != 0);
+                for (int a16 = 1; a16 < a16_panels; ++a16) {
+                    const int a32 = a16 / 2;
+                    const int row = a16 * 16;
+                    const float* ap =
+                        packed_a + (size_t)a32 * a_kc_panel_floats + (size_t)(a16 & 1) * 16u;
+                    cob_sgemm_16x64_sme_from_packed_b64(
+                        b_panels64, kc, ap, packed_b64,
+                        c + (size_t)row * (size_t)ldc + jc, ldc, pc != 0);
+                }
             } else {
                 cob_sgemm_16x64_sme_strided_b_pack_b32_tuple(
-                    b_panels64, kc, a0, b + (size_t)pc * (size_t)ldb + jc,
+                    b_panels64, kc, packed_a, b + (size_t)pc * (size_t)ldb + jc,
                     ldb, packed_b64, c + jc, ldc, pc != 0);
-                cob_sgemm_16x64_sme_from_packed_b64_tuple(
-                    b_panels64, kc, a1, packed_b64,
-                    c + (size_t)16 * (size_t)ldc + jc, ldc, pc != 0);
-                cob_sgemm_16x64_sme_from_packed_b64_tuple(
-                    b_panels64, kc, a2, packed_b64,
-                    c + (size_t)32 * (size_t)ldc + jc, ldc, pc != 0);
-                cob_sgemm_16x64_sme_from_packed_b64_tuple(
-                    b_panels64, kc, a3, packed_b64,
-                    c + (size_t)48 * (size_t)ldc + jc, ldc, pc != 0);
+                for (int a16 = 1; a16 < a16_panels; ++a16) {
+                    const int a32 = a16 / 2;
+                    const int row = a16 * 16;
+                    const float* ap =
+                        packed_a + (size_t)a32 * a_kc_panel_floats + (size_t)(a16 & 1) * 16u;
+                    cob_sgemm_16x64_sme_from_packed_b64_tuple(
+                        b_panels64, kc, ap, packed_b64,
+                        c + (size_t)row * (size_t)ldc + jc, ldc, pc != 0);
+                }
             }
         }
     }
@@ -1751,15 +1758,17 @@ static int cob_sgemm_rowmajor_amx(
     const size_t a_scratch_floats = use_large_block ? a_block_floats : a_panel_floats;
     const size_t scratch_bytes = b_bytes + a_scratch_floats * sizeof(float);
 
+#if defined(COB_USE_APPLE_SME)
+    if (cob_sgemm_rowmajor_sme_skinny_pack_b_reuse(m, n, k, a, lda, b, ldb, c, ldc)) {
+        return 1;
+    }
+#endif
+
     if (cob_sgemm_rowmajor_amx_skinny_pack_b_chunks(m, n, k, a, lda, b, ldb, c, ldc)) {
         return 1;
     }
 
 #if defined(COB_USE_APPLE_SME)
-    if (cob_sgemm_rowmajor_sme_m64_pack_b_reuse(m, n, k, a, lda, b, ldb, c, ldc)) {
-        return 1;
-    }
-
     if (cob_sgemm_rowmajor_sme_skinny_contiguous_strided_b32(m, n, k, a, lda, b, ldb, c, ldc)) {
         return 1;
     }
