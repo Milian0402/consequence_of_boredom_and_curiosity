@@ -78,6 +78,10 @@ enum {
 #define COB_SGEMM_M96_128_SME_REUSE_K512_MIN_N 4096
 #endif
 
+#ifndef COB_SGEMM_M96_128_SME_REUSE_K1024_MIN_N
+#define COB_SGEMM_M96_128_SME_REUSE_K1024_MIN_N 4096
+#endif
+
 #ifndef COB_SGEMM_M64_SME_WIDE_KC
 #define COB_SGEMM_M64_SME_WIDE_KC 768
 #endif
@@ -850,13 +854,15 @@ static int cob_sgemm_rowmajor_sme_skinny_pack_b_reuse(
     const int use_m64 = m == 64;
     const int use_m96_128_k512 =
         (m == 96 || m == 128) && n >= COB_SGEMM_M96_128_SME_REUSE_K512_MIN_N && k == 512;
+    const int use_m96_128_k1024 =
+        (m == 96 || m == 128) && n >= COB_SGEMM_M96_128_SME_REUSE_K1024_MIN_N && k >= 1024;
     const int use_long_n_k512 =
         (use_m64 && n >= COB_SGEMM_M64_SME_LONG_N_K512_MIN_N && k == 512) ||
         use_m96_128_k512;
     const int use_n4096_large_k = use_m64 && n == 4096 && k >= 7168;
     const int use_wide = use_m64 && n >= 7168 && k >= 1024;
-    if ((!use_m64 && !use_m96_128_k512) ||
-        (!use_long_n_k512 && !use_n4096_large_k && !use_wide) ||
+    if ((!use_m64 && !use_m96_128_k512 && !use_m96_128_k1024) ||
+        (!use_long_n_k512 && !use_n4096_large_k && !use_wide && !use_m96_128_k1024) ||
         lda != k || ldb != n || (n % 64) != 0 || !cob_apple_sme2p1_available()) {
         return 0;
     }
