@@ -654,6 +654,21 @@ BLASFEO, Rust `matrixmultiply`, Eigen, `coral-aarch64`, LIBXSMM exact
 
 Post-`5e6da0a` rejected/probed follow-ups:
 
+- Successful tuple-B load/store follow-up: ACLE tuple `svld1_x4` / `svst1` was
+  tested in `/private/tmp/cob_tuple_b_exp` and passed all 37 tests. The full
+  tuple experiment improved several blockers, with repeat-25 medians of
+  `64x24576x1536` 975.14 GF/s, `64x7168x2048` 1029.62 GF/s,
+  `64x7168x16384` 980.65 GF/s, `64x4096x7168` 982.00 GF/s, and
+  `64x2112x7168` 1214.90 GF/s, but regressed `64x32768x512` to
+  767.23 GF/s. The main selective patch keeps tuple direct strided and tuple
+  `m = 64` B-reuse except long-`n`, `k = 512`, which stays on the old helper.
+  Selective validation passed `make test` across 37 shapes and
+  `git diff --check`. Focused repeat-25 selective medians were
+  `64x24576x1536` 971.42 GF/s, `64x7168x2048` 1017.35 GF/s,
+  `64x7168x16384` 988.00 GF/s, `64x8192x1024` 999.76 GF/s,
+  `64x4096x7168` 989.23 GF/s, and `64x2112x7168` 1210.35 GF/s;
+  `64x32768x512` was noisy, but A/B repeat-31 measured default 896.28 GF/s
+  versus selective 916.16 GF/s.
 - Direct-SME-wide worktree `/private/tmp/cob_sme_direct_wide_exp` disabled wide
   B-reuse and let direct strided SME cover `n >= 7168, k >= 1024`. It passed
   all 37 GEMM tests, but repeat-25 one-shot results were much worse on wide
