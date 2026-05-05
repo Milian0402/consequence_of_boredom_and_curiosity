@@ -8,6 +8,17 @@ and `beta = 0`.
 
 ## Timeline
 
+### 2026-05-05: route-aware benchmark reporting
+
+Added optional route-aware benchmark reporting with `COB_BENCH_ROUTE=1`, so
+CSV/text benchmark rows can include COB dispatch route labels. This helps
+boundary/grid analysis without changing GEMM hot paths.
+
+Route labels were smoke-tested on square and skinny shapes. The test count was
+corrected to 49 after adding the `64x1024x7168` correctness shape.
+
+Validation passed: `make test`, `make all`, and `git diff --check`.
+
 ### 2026-05-04: AMX packed-B path
 
 The first major speed path used Apple Silicon AMX with a public packed-`B` API,
