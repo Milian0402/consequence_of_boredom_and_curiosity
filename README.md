@@ -76,6 +76,7 @@ For repeated boundary sweeps, use the CSV wrapper:
 ```sh
 sh tools/bench_grid.sh 832 896 960
 COB_GRID_M="64 96 128" COB_GRID_N="1024 2048" COB_GRID_K="512 1024" sh tools/bench_grid.sh
+COB_BENCH_ROUTE=1 sh tools/bench_grid.sh 832 896 960 | python3 tools/bench_gap_report.py
 ```
 
 To compare against an open-source CBLAS implementation, build the separate
