@@ -516,6 +516,19 @@ packed `A` and packed `B`, replacing two separate heap allocations. It passed
 `make test`, but the focused skinny sweep was mixed and weaker on important
 `m = 96` and `m = 128, k = 512` samples, so the separate allocations stayed.
 
+### 2026-05-05: rejected skinny direct-B bypass
+
+The AMX skinny chunked path was temporarily disabled for `m = 96/128` below
+`n = 32768`, forcing those shapes onto the AMX direct-`B` path instead. This
+tested whether avoiding one-shot chunk packing would help when `B` packing
+dominates.
+
+Result: the bypass helped one huge `96x24576x1536` sample, improving the
+one-shot median from roughly 380 GF/s to about 472 GF/s, but it badly regressed
+common skinny shapes such as `96x4096x1024`, `96x8192x512`, `128x4096x1024`,
+`128x2048x2048`, and `128x8192x512`. Large `k = 512` cases still lost to
+Accelerate. The experiment was reverted.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
