@@ -900,6 +900,44 @@ about 1032-1038 GF/s, matching the paired neutral result. This closes another
 skinny `k = 512` one-shot gap for `n >= 4096`; the universal fastest claim is
 still not fully proven.
 
+### 2026-05-05: wider skinny k1024 SME B-reuse route
+
+Commit `ff0332b` extended the generalized SME B-reuse helper from `85e7afb`
+to `m = 96/128, k >= 1024, n >= 4096`, using
+`COB_SGEMM_M96_128_SME_REUSE_K1024_MIN_N=4096`. It added direct-vs-packed
+tests for `96x8192x1024`, `128x4096x1024`, and `128x8192x1024`, raising
+`make test` coverage to 46 shapes.
+
+After the k512 route, the grid still showed k1024 gaps: `96x4096x1024`
+measured about 679.58 GF/s COB median versus 891.81 Accelerate,
+`96x8192x1024` 580.19 versus 801.70, `96x16384x1024` 456.85 versus 694.98,
+`128x4096x1024` 756.69 versus 992.37, `128x8192x1024` 680.88 versus 911.88,
+and `128x16384x1024` 549.09 versus 854.21. A compile-flag probe was neutral at
+`2048` and strongly positive at `4096+`: `96x4096x1024` median `1.6868x` CI
+`[1.6560,1.6986]`, `96x8192x1024` `1.9255x` CI `[1.8973,1.9606]`,
+`96x16384x1024` `2.2737x` CI `[2.1768,2.2854]`, `128x4096x1024` `1.6486x` CI
+`[1.6269,1.6692]`, `128x8192x1024` `1.8273x` CI `[1.7853,1.8423]`, and
+`128x16384x1024` `2.1552x` CI `[2.1216,2.1888]`, with `51/51` B-faster on the
+winners.
+
+HEAD-vs-candidate paired validation against the pre-`ff0332b` baseline was
+neutral at `96x2048x1024` and `128x2048x1024`, while the routed shapes won:
+`96x4096x1024` median `1.7352x` CI `[1.6622,1.7840]`, `96x8192x1024`
+`2.0858x` CI `[1.9582,2.0931]`, `128x4096x1024` `1.6755x` CI
+`[1.6364,1.7290]`, and `128x8192x1024` `1.9331x` CI `[1.8644,1.9405]`.
+Existing k512 shapes also remained strong.
+
+Result: accepted. Validation before commit passed with `make all`,
+`make test` across 46 shapes, and `git diff --check`. Focused post-change
+COB one-shot medians versus Accelerate were mostly strong wins:
+`96x8192x1024` 1141.47 versus 826.80 GF/s, `96x16384x1024` 1147.98 versus
+767.51, `128x4096x1024` 1350.62 versus 975.24, `128x8192x1024` 1336.33
+versus 981.93, and `128x16384x1024` 1256.21 versus 803.85. The first
+`96x4096x1024` median was noisy, but duplicate reruns measured COB one-shot
+1066.63 and 1214.64 GF/s versus Accelerate 731.43 and 759.01. This closes
+another skinny one-shot k1024 gap for `n >= 4096`; the universal fastest claim
+is still not fully proven.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
