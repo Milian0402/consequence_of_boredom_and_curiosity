@@ -987,9 +987,10 @@ static int cob_sgemm_rowmajor_sme_medium_contiguous_strided_b32(
     float* c,
     int ldc)
 {
+    const int use_square_384 = m == 384 && n == 384 && k == 384;
     const int use_square_768 = m == 768 && n == 768 && k == 768;
     /* Tuned for medium contiguous cases where skipping one-shot B packing wins. */
-    if ((!use_square_768 &&
+    if ((!use_square_384 && !use_square_768 &&
             (m < 832 || m > 1280 || n < 832 || n > 1280 || k < 832 || k > 1280)) ||
         n == 1024 || lda != k || ldb != n ||
         (m % COB_SGEMM_AMX_MR) != 0 ||
@@ -1753,7 +1754,7 @@ static int cob_sgemm_rowmajor_amx(
         return 1;
     }
 
-    if (m == 768 && n == 768 && k == 768 &&
+    if (((m == 384 && n == 384 && k == 384) || (m == 768 && n == 768 && k == 768)) &&
         cob_sgemm_rowmajor_sme_medium_contiguous_strided_b32(m, n, k, a, lda, b, ldb, c, ldc)) {
         return 1;
     }
