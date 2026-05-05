@@ -861,6 +861,45 @@ neutral at `4096`, but clearly worse for larger `n`: `96x4096x512` median
 `[0.5851,0.6274]`, sign-p `8.88e-16`. Keep the chunked skinny route for these
 shapes; no source behavior change came from the probe.
 
+### 2026-05-05: wider skinny k512 SME B-reuse route
+
+Commit `85e7afb` generalized the internal SME B-pack/reuse helper from a
+hard-coded `m = 64` / four-16-row-panel shape into a loop over 16-row panels.
+The existing `m = 64` routes stayed in place, and the same reuse path is now
+enabled for `m = 96/128, k = 512, n >= 4096`. It also added direct-vs-packed
+tests for `96x4096x512`, `96x8192x512`, `128x4096x512`, and `128x8192x512`,
+raising `make test` coverage to 43 shapes.
+
+Before the change, the grid still showed long-`N` one-shot gaps for
+`m = 96/128, k = 512`: examples included `96x8192x512` around 483.96 GF/s COB
+median versus 665.54 Accelerate, `96x16384x512` 269.33 versus 657.39,
+`128x8192x512` 809.15 versus 924.84, and `128x16384x512` 639.32 versus
+765.32. A compile-flag probe with
+`COB_SGEMM_M96_128_SME_REUSE_K512_MIN_N=8192` was strongly positive at
+`8192` and `16384`, and neutral at `4096`.
+
+Result: accepted with threshold `4096`. Paired threshold validation was neutral
+at `2048`, then strongly positive: `96x4096x512` median `1.6720x` CI
+`[1.6374,1.6768]` with B faster `61/61`, `96x8192x512` `1.8655x` CI
+`[1.8486,1.8806]`, `128x4096x512` `1.5446x` CI `[1.5343,1.5572]`, and
+`128x8192x512` `1.6819x` CI `[1.6780,1.6983]`. HEAD-vs-candidate paired runs
+checked existing `m = 64` route risk: `64x4096x512`, `64x8192x512`,
+`64x4096x7168`, and `64x8192x1024` were neutral/noisy, while the new shapes
+won strongly: `96x4096x512` `1.7104x`, `96x8192x512` `1.6743x`,
+`128x4096x512` `1.5913x`, and `128x8192x512` `1.5505x`, all B faster
+`61/61`.
+
+Validation before commit passed with `make all`, `make test` across 43 shapes,
+and `git diff --check`. A focused post-change benchmark measured COB one-shot
+median versus Accelerate at `96x4096x512` 1443.20 versus 1011.69 GF/s,
+`96x8192x512` 1167.11 versus 837.99, `96x16384x512` 1089.72 versus 672.21,
+`128x4096x512` 1542.73 versus 1195.70, `128x8192x512` 1439.33 versus 975.24,
+and `128x16384x512` 1138.04 versus 388.83. `96x2048x512` is outside the new
+route; one outlier row collapsed, but an immediate duplicate rerun returned to
+about 1032-1038 GF/s, matching the paired neutral result. This closes another
+skinny `k = 512` one-shot gap for `n >= 4096`; the universal fastest claim is
+still not fully proven.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
