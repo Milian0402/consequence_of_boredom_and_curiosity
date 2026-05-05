@@ -94,7 +94,7 @@ enum {
 #endif
 
 #ifndef COB_SGEMM_SME_DIRECT_MAX_N
-#define COB_SGEMM_SME_DIRECT_MAX_N 1280
+#define COB_SGEMM_SME_DIRECT_MAX_N 1216
 #endif
 
 #ifndef COB_SGEMM_SME_PACKED_MAX_N
