@@ -418,6 +418,23 @@ Result: a 15-repeat sweep dropped COB one-shot and packed-`B` medians for
 the prior AMX-pack small-size range of about 1300-1750 GF/s, so the experiment
 was reverted.
 
+### 2026-05-05: probe-only route-gap follow-up
+
+After the packed-`B` row-block change, route-aware gap reporting still showed
+`1088` and some large-square shapes as possible gaps.
+
+A focused `1088` route flip, compiled with
+`COB_SGEMM_AMX_STRIDED_B_EXTRA_N2=0`, was rejected at 101 repeats. The median
+was about `0.9914x`, bootstrap95 `[0.9669, 1.0078]`, and holdout was also not
+positive.
+
+Disabling the AMX large-block path for `1280`, `1408`, `1536`, `1792`, and
+`2048` by compiling with `COB_SGEMM_AMX_MC=4096` was also rejected because all
+tested shapes regressed, including `1408` at about `0.945x` and `2048` at about
+`0.911x`.
+
+Result: these were probe-only measurements. No source behavior changed.
+
 ### 2026-05-05: public packed-B SME n=1280 rejected
 
 Re-enabling public packed-`B` SME dispatch through `n = 1280` passed tests, but
