@@ -668,6 +668,23 @@ than the current path. A low-threshold SME-before-AMX experiment hurt `192` and
 kept. `m = 64` reuse `NC = 256` and `NC = 1024` probes were much slower, and a
 `K = 1024` chunk-size probe stayed noisy; none were committed.
 
+Commit `1f5bb7e` (`Route square 384 through SME direct`) added the matching
+narrow exception for exact `384x384x384`: it now bypasses AMX strided-`B` and
+uses the existing SME medium direct path. `make test` passed. Focused repeat-31
+A/B measured main/baseline one-shot around 1696-1705 GF/s median, while the
+direct-SME route measured around 1762-1766 GF/s median; the final focused rerun
+after the patch measured about 1765 GF/s median at `384` and kept `768` around
+1957 GF/s median.
+
+Rejected follow-ups after `1f5bb7e`: a one-shot `1024` direct-SME exception
+passed tests but measured around 1750 GF/s median, worse than current
+one-shot/Accelerate in that run. A B64 one-shot SME layout for exact `512` and
+`1024` passed tests but was not useful: `512` one-shot dropped to about
+1583 GF/s median and `1024` was about 1760 GF/s median. Packed-`B` SME A-block
+retests with 512-row and 256-row blocks both passed tests but reduced packed-`B`
+medians at `768` and `1024` versus the current 384-row block. None were
+committed.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
