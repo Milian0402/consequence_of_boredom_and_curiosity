@@ -1197,6 +1197,39 @@ distance `16` was also a hard regression on `m = 64` skinny shapes, including
 Validation passed with `make test` across 50 shapes, `make all`, and
 `git diff --check`.
 
+### 2026-05-05: wide m64 SME large-K chunk
+
+Commit `0a20d56` (`Tune wide m64 large-K chunk`) added
+`COB_SGEMM_M64_SME_WIDE_LARGE_KC=1280` and uses it only for the wide `m = 64`
+SME reuse route when `k >= 8192`. Exact `k == 1536` keeps the previous full-K
+chunk, while `k = 2048` and `k = 4096` keep `WIDE_KC=1024`.
+
+Rejected wider defaults stayed out of source. `WIDE_KC=2048` regressed
+`k >= 2048` shapes in the A/B sweep, including `64x7168x2048` median
+`0.9848x`, `64x7168x4096` `0.9843x`, and `64x7168x16384` `0.9871x`.
+`WIDE_KC=1280` as a global non-1536 replacement was mixed: neutral/worse at
+`k = 2048` and `k = 4096`, but positive at `64x7168x16384` median `1.0061x`,
+CI `[1.0024,1.0182]`.
+
+Focused large-K validation for the guarded `k >= 8192` rule compared against
+old `1024`. The first sweep showed `64x7168x8192` median `1.0057x` with
+holdout `1.0067x`, `64x7168x16384` median `1.0074x` CI
+`[1.0051,1.0385]`, and `64x24576x8192` median `1.0073x` with holdout
+`1.0067x`. Post-change repeat-101 validation was weaker but acceptable:
+`64x7168x8192` median `1.0026x` with positive holdout `1.0048x`,
+`64x7168x16384` median `1.0040x` with sign-p `0.00265` but weak holdout, and
+`64x24576x8192` median `1.0064x` CI `[1.0002,1.0189]` with holdout `1.0061x`.
+Guard shapes stayed neutral: `64x7168x2048` median `1.0006x`,
+`64x7168x4096` `1.0018x`, and `64x8192x1024` `0.9970x`.
+
+Other rejected probes from the same pass: `-Ofast` and `-mcpu=native` were not
+broadly useful; disabling m64 reuse with `REUSE_NC=0` caused hard regressions;
+forcing small `192` / `256` off AMX strided-`B` also hard-regressed; and SME
+skinny `B` prefetch distance `16` hard-regressed m64 skinny shapes.
+
+Validation passed with `make test` across 50 shapes, `make all`, and
+`git diff --check`.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
