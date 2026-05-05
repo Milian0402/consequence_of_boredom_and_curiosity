@@ -712,6 +712,27 @@ Post-`5e6da0a` rejected/probed follow-ups:
   `/private/tmp/cob_sme_64x16_exp` passed all 37 tests but was much slower:
   `64x24576x1536` median 564.27 GF/s, `64x7168x2048` 708.54 GF/s,
   `64x4096x7168` 667.99 GF/s, and `64x2112x7168` 887.26 GF/s. Reject.
+- Post-`030448f` direct-SME-wide route in
+  `/private/tmp/cob_sme_direct_wide_exp` disabled wide B-reuse and let direct
+  strided SME cover `n >= 7168, k >= 1024`. It was correct, but much slower on
+  wide `m = 64` shapes, so reject.
+- Post-`030448f` tuple chunk sweeps were rejected. Global `NC = 256` helped
+  `64x24576x1536` but hurt broader targets, and `KC = 640`, `896`, and `1024`
+  variants were worse than the current `KC = 768`.
+- The `n = 2112` B-reuse gate was correct but regressed to about 995 GF/s
+  median. Direct tuple SME remains better, so reject.
+- The 64x16 SME strided kernel was correct but much slower. Reject.
+- Panel-immediate reuse and fused-four helper variants were correct but slower.
+  Reject.
+- Tuple pack-only and tuple reuse-only split experiments were correct but worse
+  or noisy. Reject.
+- One-shot SME packed `n = 1024` plus the medium gate, low gate, and
+  packed-384 experiments were correct but did not close the `768` / `1024` /
+  `1280` gaps. Reject.
+- Packed-B micro-experiments were rejected. `x2` loads and K-loop unroll were
+  correct but slower; the first `vg4` column-store failed correctness, and the
+  corrected `vg4` row-group store passed tests but lost packed-B median at
+  `768`, `1024`, and `1280`.
 - MpGEMM checkout `/private/tmp/mpgemm_latest` was refreshed and was already up
   to date at `8d83011`.
 
