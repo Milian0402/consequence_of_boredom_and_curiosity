@@ -692,6 +692,18 @@ Post-`5e6da0a` rejected/probed follow-ups:
   `64x8192x1024` 1053.72 GF/s. This improves the tuple-era B-reuse route, but
   MpGEMM still remains ahead on some shapes, especially `64x4096x7168`,
   `64x7168x16384`, and `64x8192x1024`.
+- `47e5e7a` (`Tune long wide m64 SME chunks`) followed up after `703de33` made
+  `NC = 512` the default. A narrow long-wide gate was tested and committed:
+  use `COB_SGEMM_M64_SME_LONG_WIDE_NC=256` only when `m = 64`, wide B-reuse
+  applies, `n >= 24576`, and `k == 1536`; otherwise keep `NC = 512`.
+  Validation before the source commit passed `make test` across 37 shapes,
+  `make all`, and `git diff --check`. Focused repeat-25 after the source change
+  measured `64x24576x1536` median 1020.02 GF/s, `64x32768x512` median
+  937.77 GF/s, `64x7168x16384` median 1025.75 GF/s, and `64x4096x7168`
+  median 1029.62 GF/s. This targets the `64x24576x1536` MpGEMM comparison:
+  MpGEMM's `O0` timing driver measured best 1042.92 GF/s and median
+  853.23 GF/s in a noisy but usable separate-process run, while COB now
+  measured best 1031.78 GF/s and median 1020.02 GF/s in the focused bench.
 - `KC` probes also stayed uncommitted. `NC512 + KC1024` and targeted
   `k == 2048` / `k == 1024` variants were not clean enough to commit; the
   `k == 1024`-only repeat-31 gave `64x8192x1024` median 970.83 GF/s and
