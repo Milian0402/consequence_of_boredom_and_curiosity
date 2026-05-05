@@ -1168,6 +1168,35 @@ Validation passed with `make test` across 50 shapes, `make all`, and
 showed targeted COB wide-shape best/median uplift. The fastest claim is still
 not complete because MpGEMM remains ahead on several `m = 64` shapes.
 
+### 2026-05-05: exact k1536 wide m64 full chunk
+
+Commit `1b23220` (`Use full K chunk for wide m64 k1536`) added
+`COB_SGEMM_M64_SME_WIDE_K1536_KC=1536` and uses the full K chunk only for the
+wide `m = 64` SME reuse route when `k == 1536`. Other wide `k >= 1536` cases
+keep `COB_SGEMM_M64_SME_WIDE_KC=1024`.
+
+A broader replacement making `WIDE_KC=1536` the global default was rejected: it
+helped exact `k = 1536`, but was weak or worse at `k >= 2048`, including
+`64x7168x2048` median `0.9906x` in one sweep, and was noisy elsewhere.
+
+The accepted narrow candidate was compared against the old exact-`k1536` value
+with `COB_AB_A_FLAGS=-DCOB_SGEMM_M64_SME_WIDE_K1536_KC=1024` and
+`repeats=101`. Results: `64x7168x1536` median `1.0246x`, bootstrap95
+`[1.0046,1.0396]`, B-faster `92/101`, holdout `1.0258x`; and
+`64x24576x1536` median `1.0395x`, bootstrap95 `[1.0364,1.0521]`, B-faster
+`98/101`, holdout `1.0389x`. Guard shapes were neutral/noisy:
+`64x7168x2048` median `0.9983x`, `64x7168x4096` `1.0011x`, and
+`64x8192x1024` `0.9971x`.
+
+Rejected probes from the same pass stayed out of source. Forcing `192` and
+`256` off AMX strided-`B` with `COB_SGEMM_AMX_STRIDED_B_MAX_N=128` was a hard
+regression, with medians `0.7040x` and `0.7809x`. SME skinny `B` prefetch
+distance `16` was also a hard regression on `m = 64` skinny shapes, including
+`64x7168x2048` median `0.7693x` and `64x8192x1024` `0.8273x`.
+
+Validation passed with `make test` across 50 shapes, `make all`, and
+`git diff --check`.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
