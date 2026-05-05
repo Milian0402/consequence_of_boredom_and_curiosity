@@ -223,7 +223,9 @@ passed with `make test` across 28 shapes, and `git diff --check` passed.
 
 The paired A/B benchmark harness was refined to add split-half holdout
 reporting while keeping the existing speedup-CV, sign-test, and checksum-fail
-diagnostics.
+diagnostics. The bootstrap sampler was also changed to avoid low-bit modulo
+artifacts that can degenerate confidence intervals at power-of-two repeat
+counts.
 
 This addresses part of the benchmark critique by making overfit-looking wins
 easier to spot. Heavier follow-ups remain open, including grid boundary
