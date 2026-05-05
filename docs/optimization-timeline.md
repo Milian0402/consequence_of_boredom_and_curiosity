@@ -1135,6 +1135,39 @@ shapes, and `git diff --check`. A broader post-change run showed `512` as tiny
 positive/noisy and `1024` as neutral/noisy, so the accepted win is for larger
 one-shot packed-`B` route shapes.
 
+### 2026-05-05: wide m64 SME K chunk increase
+
+Commit `ea7c963` increased `COB_SGEMM_M64_SME_WIDE_KC` from `768` to `1024`
+for the wide `m = 64` SME `B`-reuse route when `k >= 1536`.
+
+Rejected probes stayed out of source. Adding `192x192x192` to the existing SME
+medium direct route passed `make test`, but paired A/B measured only `0.8329x`
+median, bootstrap95 `[0.8263,0.8469]`, B-faster `1/101`, and holdout
+`0.8305x`, so it was reverted. `m = 64` reuse probes also failed to hold:
+`REUSE_NC=1024` regressed, `REUSE_NC=256` was weak/noisy, `REUSE_NC=768`
+regressed guard shapes, and `SKINNY_SME_KC=768` / `384` regressed or did not
+help `64x2112x7168` and `64x4096x7168`.
+
+The accepted `WIDE_KC=1024` change was positive in broad A/B against old `768`:
+`64x7168x1536` median `1.0031x` CI `[1.0017,1.0116]`,
+`64x7168x2048` `1.0187x` CI `[1.0161,1.0317]` with holdout `1.0166x`,
+`64x7168x4096` `1.0139x` CI `[1.0055,1.0157]` with holdout `1.0139x`,
+`64x7168x16384` `1.0089x` CI `[1.0031,1.0136]`, and `64x24576x1536`
+`1.0077x` CI `[1.0066,1.0244]`. Guard shapes `64x8192x1024`,
+`64x4096x7168`, and `64x32768x512` were neutral/noisy.
+
+Post-change repeat-101 validation comparing old `768` against the new default
+confirmed the target gains: `64x7168x2048` median `1.0181x` CI
+`[1.0136,1.0203]`, B-faster `86/101`; `64x7168x4096` `1.0175x` CI
+`[1.0096,1.0412]`, B-faster `83/101`; `64x7168x16384` `1.0121x` with noisy CI
+`[0.9958,1.0416]`, B-faster `79/101`; and `64x24576x1536` `1.0095x` with
+noisy CI `[0.9902,1.0186]`, B-faster `68/101`. Guard shapes stayed neutral.
+
+Validation passed with `make test` across 50 shapes, `make all`, and
+`git diff --check`. The MpGEMM O0-driver refresh after the change was noisy but
+showed targeted COB wide-shape best/median uplift. The fastest claim is still
+not complete because MpGEMM remains ahead on several `m = 64` shapes.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
