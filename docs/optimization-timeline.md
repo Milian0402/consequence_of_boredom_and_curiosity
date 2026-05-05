@@ -632,6 +632,19 @@ This still does not close the MpGEMM gap on `64x2112x7168` or
 `64x4096x7168`, but it narrows `64x4096x7168` and beats the earlier local
 MpGEMM `64x32768x512` baseline of about 833 GF/s.
 
+Rejected AMX follow-up: from main commit `5744026`, a temporary experiment in
+`/private/tmp/cob_amx_m64_chunk_exp` changed
+`cob_sgemm_rowmajor_amx_skinny_pack_b_chunks` to allow
+`m == 64, n >= 7168, k >= 1024` with `skinny_nc = 256`. The experiment passed
+`/private/tmp/cob_amx_m64_chunk_exp/build/cob_gemm_test` across all 37 shapes,
+but repeat-25 one-shot benchmarks were much worse than the existing SME
+B-reuse route: `64x24576x1536` measured 271.24 GF/s,
+`64x7168x2048` 506.07 GF/s, `64x7168x16384` 238.27 GF/s, and
+`64x8192x1024` 474.27 GF/s, versus roughly 930-1010 GF/s for SME B-reuse on
+those cases. The better-looking `64x4096x7168` at 946.39 GF/s and
+`64x32768x512` at 924.84 GF/s were not useful enough to justify broad AMX
+routing, so the AMX chunk route was rejected.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
