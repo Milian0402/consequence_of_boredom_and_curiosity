@@ -543,6 +543,7 @@ static void cob_sgemm_16x64_sme_strided_b32(
     int accumulate)
 {
     const svbool_t pg = svptrue_b32();
+    const svcount_t pg4 = svptrue_c32();
 
     for (int ap16 = 0; ap16 < a_panels16; ++ap16) {
         const int ap32 = ap16 / 2;
@@ -560,10 +561,11 @@ static void cob_sgemm_16x64_sme_strided_b32(
                 const svfloat32_t av =
                     svld1(pg, a_panel + (size_t)p * (size_t)COB_SGEMM_AMX_MR);
                 const float* brow = b + (size_t)p * (size_t)ldb + (size_t)col0;
-                const svfloat32_t bv0 = svld1(pg, brow);
-                const svfloat32_t bv1 = svld1(pg, brow + 16);
-                const svfloat32_t bv2 = svld1(pg, brow + 32);
-                const svfloat32_t bv3 = svld1(pg, brow + 48);
+                const svfloat32x4_t bv = svld1_x4(pg4, brow);
+                const svfloat32_t bv0 = svget4(bv, 0);
+                const svfloat32_t bv1 = svget4(bv, 1);
+                const svfloat32_t bv2 = svget4(bv, 2);
+                const svfloat32_t bv3 = svget4(bv, 3);
                 svmopa_za32_f32_m(0, pg, pg, av, bv0);
                 svmopa_za32_f32_m(1, pg, pg, av, bv1);
                 svmopa_za32_f32_m(2, pg, pg, av, bv2);
@@ -704,6 +706,120 @@ static void cob_sgemm_16x64_sme_from_packed_b64(
     }
 }
 
+__arm_new("za") __arm_locally_streaming __attribute__((target("sme,sme2,sme2p1")))
+static void cob_sgemm_16x64_sme_strided_b_pack_b32_tuple(
+    int b_panels64,
+    int k,
+    const float* a_panel,
+    const float* b,
+    int ldb,
+    float* packed_b64,
+    float* c,
+    int ldc,
+    int accumulate)
+{
+    const svbool_t pg = svptrue_b32();
+    const svcount_t pg4 = svptrue_c32();
+    const size_t b_panel_floats = (size_t)k * 64u;
+
+    for (int bp64 = 0; bp64 < b_panels64; ++bp64) {
+        const int col0 = bp64 * 64;
+        float* ct = c + (size_t)col0;
+        float* packed_panel = packed_b64 + (size_t)bp64 * b_panel_floats;
+
+        svzero_za();
+        for (int p = 0; p < k; ++p) {
+            const svfloat32_t av =
+                svld1(pg, a_panel + (size_t)p * (size_t)COB_SGEMM_AMX_MR);
+            const float* brow = b + (size_t)p * (size_t)ldb + (size_t)col0;
+            float* pbrow = packed_panel + (size_t)p * 64u;
+            const svfloat32x4_t bv = svld1_x4(pg4, brow);
+            const svfloat32_t bv0 = svget4(bv, 0);
+            const svfloat32_t bv1 = svget4(bv, 1);
+            const svfloat32_t bv2 = svget4(bv, 2);
+            const svfloat32_t bv3 = svget4(bv, 3);
+            svmopa_za32_f32_m(0, pg, pg, av, bv0);
+            svmopa_za32_f32_m(1, pg, pg, av, bv1);
+            svmopa_za32_f32_m(2, pg, pg, av, bv2);
+            svmopa_za32_f32_m(3, pg, pg, av, bv3);
+            svst1(pg4, pbrow, bv);
+        }
+
+        for (int i = 0; i < 16; ++i) {
+            float* row = ct + (size_t)i * (size_t)ldc;
+            svfloat32_t c0 = svreadz_hor_za32_f32(0, (uint32_t)i);
+            svfloat32_t c1 = svreadz_hor_za32_f32(1, (uint32_t)i);
+            svfloat32_t c2 = svreadz_hor_za32_f32(2, (uint32_t)i);
+            svfloat32_t c3 = svreadz_hor_za32_f32(3, (uint32_t)i);
+            if (accumulate) {
+                c0 = svadd_f32_x(pg, c0, svld1(pg, row));
+                c1 = svadd_f32_x(pg, c1, svld1(pg, row + 16));
+                c2 = svadd_f32_x(pg, c2, svld1(pg, row + 32));
+                c3 = svadd_f32_x(pg, c3, svld1(pg, row + 48));
+            }
+            svst1(pg, row, c0);
+            svst1(pg, row + 16, c1);
+            svst1(pg, row + 32, c2);
+            svst1(pg, row + 48, c3);
+        }
+    }
+}
+
+__arm_new("za") __arm_locally_streaming __attribute__((target("sme,sme2,sme2p1")))
+static void cob_sgemm_16x64_sme_from_packed_b64_tuple(
+    int b_panels64,
+    int k,
+    const float* a_panel,
+    const float* packed_b64,
+    float* c,
+    int ldc,
+    int accumulate)
+{
+    const svbool_t pg = svptrue_b32();
+    const svcount_t pg4 = svptrue_c32();
+    const size_t b_panel_floats = (size_t)k * 64u;
+
+    for (int bp64 = 0; bp64 < b_panels64; ++bp64) {
+        const int col0 = bp64 * 64;
+        const float* packed_panel = packed_b64 + (size_t)bp64 * b_panel_floats;
+        float* ct = c + (size_t)col0;
+
+        svzero_za();
+        for (int p = 0; p < k; ++p) {
+            const svfloat32_t av =
+                svld1(pg, a_panel + (size_t)p * (size_t)COB_SGEMM_AMX_MR);
+            const float* pbrow = packed_panel + (size_t)p * 64u;
+            const svfloat32x4_t bv = svld1_x4(pg4, pbrow);
+            const svfloat32_t bv0 = svget4(bv, 0);
+            const svfloat32_t bv1 = svget4(bv, 1);
+            const svfloat32_t bv2 = svget4(bv, 2);
+            const svfloat32_t bv3 = svget4(bv, 3);
+            svmopa_za32_f32_m(0, pg, pg, av, bv0);
+            svmopa_za32_f32_m(1, pg, pg, av, bv1);
+            svmopa_za32_f32_m(2, pg, pg, av, bv2);
+            svmopa_za32_f32_m(3, pg, pg, av, bv3);
+        }
+
+        for (int i = 0; i < 16; ++i) {
+            float* row = ct + (size_t)i * (size_t)ldc;
+            svfloat32_t c0 = svreadz_hor_za32_f32(0, (uint32_t)i);
+            svfloat32_t c1 = svreadz_hor_za32_f32(1, (uint32_t)i);
+            svfloat32_t c2 = svreadz_hor_za32_f32(2, (uint32_t)i);
+            svfloat32_t c3 = svreadz_hor_za32_f32(3, (uint32_t)i);
+            if (accumulate) {
+                c0 = svadd_f32_x(pg, c0, svld1(pg, row));
+                c1 = svadd_f32_x(pg, c1, svld1(pg, row + 16));
+                c2 = svadd_f32_x(pg, c2, svld1(pg, row + 32));
+                c3 = svadd_f32_x(pg, c3, svld1(pg, row + 48));
+            }
+            svst1(pg, row, c0);
+            svst1(pg, row + 16, c1);
+            svst1(pg, row + 32, c2);
+            svst1(pg, row + 48, c3);
+        }
+    }
+}
+
 static int cob_sgemm_rowmajor_sme_m64_pack_b_reuse(
     int m,
     int n,
@@ -764,18 +880,33 @@ static int cob_sgemm_rowmajor_sme_m64_pack_b_reuse(
         for (int jc = 0; jc < n; jc += nc_max) {
             const int nc = cob_min_i32(nc_max, n - jc);
             const int b_panels64 = nc / 64;
-            cob_sgemm_16x64_sme_strided_b_pack_b32(
-                b_panels64, kc, a0, b + (size_t)pc * (size_t)ldb + jc,
-                ldb, packed_b64, c + jc, ldc, pc != 0);
-            cob_sgemm_16x64_sme_from_packed_b64(
-                b_panels64, kc, a1, packed_b64,
-                c + (size_t)16 * (size_t)ldc + jc, ldc, pc != 0);
-            cob_sgemm_16x64_sme_from_packed_b64(
-                b_panels64, kc, a2, packed_b64,
-                c + (size_t)32 * (size_t)ldc + jc, ldc, pc != 0);
-            cob_sgemm_16x64_sme_from_packed_b64(
-                b_panels64, kc, a3, packed_b64,
-                c + (size_t)48 * (size_t)ldc + jc, ldc, pc != 0);
+            if (use_long_n_k512) {
+                cob_sgemm_16x64_sme_strided_b_pack_b32(
+                    b_panels64, kc, a0, b + (size_t)pc * (size_t)ldb + jc,
+                    ldb, packed_b64, c + jc, ldc, pc != 0);
+                cob_sgemm_16x64_sme_from_packed_b64(
+                    b_panels64, kc, a1, packed_b64,
+                    c + (size_t)16 * (size_t)ldc + jc, ldc, pc != 0);
+                cob_sgemm_16x64_sme_from_packed_b64(
+                    b_panels64, kc, a2, packed_b64,
+                    c + (size_t)32 * (size_t)ldc + jc, ldc, pc != 0);
+                cob_sgemm_16x64_sme_from_packed_b64(
+                    b_panels64, kc, a3, packed_b64,
+                    c + (size_t)48 * (size_t)ldc + jc, ldc, pc != 0);
+            } else {
+                cob_sgemm_16x64_sme_strided_b_pack_b32_tuple(
+                    b_panels64, kc, a0, b + (size_t)pc * (size_t)ldb + jc,
+                    ldb, packed_b64, c + jc, ldc, pc != 0);
+                cob_sgemm_16x64_sme_from_packed_b64_tuple(
+                    b_panels64, kc, a1, packed_b64,
+                    c + (size_t)16 * (size_t)ldc + jc, ldc, pc != 0);
+                cob_sgemm_16x64_sme_from_packed_b64_tuple(
+                    b_panels64, kc, a2, packed_b64,
+                    c + (size_t)32 * (size_t)ldc + jc, ldc, pc != 0);
+                cob_sgemm_16x64_sme_from_packed_b64_tuple(
+                    b_panels64, kc, a3, packed_b64,
+                    c + (size_t)48 * (size_t)ldc + jc, ldc, pc != 0);
+            }
         }
     }
 
