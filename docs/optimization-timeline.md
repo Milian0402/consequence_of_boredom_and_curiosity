@@ -529,6 +529,29 @@ common skinny shapes such as `96x4096x1024`, `96x8192x512`, `128x4096x1024`,
 `128x2048x2048`, and `128x8192x512`. Large `k = 512` cases still lost to
 Accelerate. The experiment was reverted.
 
+### 2026-05-05: K-blocked m=64 SME skinny route
+
+MpGEMM's live FP32 row-SGEMM benchmark was rebuilt from the current checkout
+and used as the external skinny target. It measured about 1285 GF/s on
+`64x2112x7168`, 1071 GF/s on `64x4096x7168`, and 833 GF/s on
+`64x32768x512`, confirming that COB's remaining largest gap was `m = 64`
+one-shot skinny performance.
+
+COB added a clean-room K-blocked SME direct-`B` route for selected `m = 64`
+skinny cases. The route uses `KC = 512`, packs only the current `A` K block,
+streams `B`, and accumulates later K blocks into `C`. The dispatch is narrow:
+`n = 1024..4096, k >= 7168`, plus the existing long-`N` `k = 512` case.
+Wider routing was rejected because it hurt shapes such as `64x24576x1536` and
+`64x7168x2048`.
+
+Result: validation passed with `make test` across 37 shapes after adding
+`64x2112x7168` and `64x4096x7168` direct-vs-packed coverage. A focused
+15-repeat benchmark showed one-shot medians around 1104 GF/s for
+`64x2112x7168` and 920 GF/s for `64x4096x7168`, versus same-session
+SME-disabled controls around 703 GF/s and 489 GF/s. `64x4096x7168` beat
+Accelerate in that run; `64x2112x7168` remained slightly behind Accelerate and
+MpGEMM.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
