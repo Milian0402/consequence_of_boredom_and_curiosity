@@ -108,6 +108,10 @@ enum {
 #define COB_SGEMM_SME_PACKED_MAX_N 1152
 #endif
 
+#ifndef COB_SGEMM_PACK_B_PREFETCH_DISTANCE
+#define COB_SGEMM_PACK_B_PREFETCH_DISTANCE 16
+#endif
+
 static int cob_min_i32(int a, int b)
 {
     return a < b ? a : b;
@@ -333,6 +337,14 @@ static void cob_sgemm_pack_b32_panel_full(float* packed, int k, const float* b, 
 {
     for (int p = 0; p < k; ++p) {
         float* dst = packed + (size_t)p * (size_t)COB_SGEMM_AMX_NR;
+#if COB_SGEMM_PACK_B_PREFETCH_DISTANCE > 0
+        if (p + COB_SGEMM_PACK_B_PREFETCH_DISTANCE < k) {
+            __builtin_prefetch(
+                b + (size_t)(p + COB_SGEMM_PACK_B_PREFETCH_DISTANCE) * (size_t)ldb,
+                0,
+                1);
+        }
+#endif
         memcpy(dst, b + (size_t)p * (size_t)ldb, COB_SGEMM_AMX_NR * sizeof(float));
     }
 }
