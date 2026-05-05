@@ -219,6 +219,27 @@ routed sizes, including medians around 2013 GF/s at `n = 960`, 1962 GF/s at
 `n = 1088`, 1922 GF/s at `n = 1152`, and 1926 GF/s at `n = 1216`. Validation
 passed with `make test` across 28 shapes, and `git diff --check` passed.
 
+### 2026-05-05: skinny SME KC calibration
+
+Refreshed current COB versus MpGEMM O0-driver calibration showed COB still
+trailing MpGEMM on six `m = 64` skinny shapes. The largest prior usable gap was
+around `64x8192x1024`.
+
+A global `COB_SGEMM_SKINNY_SME_KC=1024` probe helped `64x8192x1024` and
+`m = 96/128` shapes with `k >= 1024`, but regressed `64x4096x7168`, so it was
+rejected. The accepted change was selective: large `KC = 1024` only for
+`m = 64` wide `k = 1024`, exact `m = 64, n = 1024` large-`K` skinny cases, and
+`m = 96/128` only when `k == 1024` or `n >= 8192`.
+
+Key paired evidence: `64x7168x1024` was about `1.04x`, `64x8192x1024` was about
+`1.04-1.05x`, `96x4096x1024` was `1.0206x` at 101 repeats, and
+`128x4096x1024` was `1.0304x` at 101 repeats. `64x4096x7168` stayed neutral
+after the selective rule. A broader `n < 4096` rule was rejected after focused
+101-repeat regression work on `64x2112x7168`, keeping that shape neutral.
+
+Validation passed with `make test`, `make all`, and `git diff --check`. A
+direct-vs-packed test was also added for `64x1024x7168`.
+
 ### 2026-05-05: direct SME row-block probes and packed-B cap
 
 Direct SME row-block compile-time probes with `COB_SGEMM_SME_DIRECT_MC=384`
