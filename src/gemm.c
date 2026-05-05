@@ -29,9 +29,12 @@
 enum {
     COB_SGEMM_AMX_MR = 32,
     COB_SGEMM_AMX_NR = 32,
-    COB_SGEMM_AMX_MC = 384,
-    COB_SGEMM_SME_DIRECT_MC = 256
+    COB_SGEMM_AMX_MC = 384
 };
+
+#ifndef COB_SGEMM_SME_DIRECT_MC
+#define COB_SGEMM_SME_DIRECT_MC 256
+#endif
 
 #ifndef COB_SGEMM_AMX_STRIDED_B_MAX_N
 #define COB_SGEMM_AMX_STRIDED_B_MAX_N 832
@@ -88,6 +91,10 @@ enum {
 
 #ifndef COB_SGEMM_SME_DIRECT_MAX_N
 #define COB_SGEMM_SME_DIRECT_MAX_N 1280
+#endif
+
+#ifndef COB_SGEMM_SME_PACKED_MAX_N
+#define COB_SGEMM_SME_PACKED_MAX_N 1152
 #endif
 
 static int cob_min_i32(int a, int b)
@@ -953,7 +960,7 @@ static int cob_sgemm_rowmajor_sme_from_packed_b32(
     int ldc)
 {
     if (packed_b->nr != COB_SGEMM_AMX_NR || m < 512 || n < 512 || k < 512 ||
-        n > 1216 || n == 832 || n == 960 || n == 1088 ||
+        n > COB_SGEMM_SME_PACKED_MAX_N || n == 832 || n == 960 || n == 1088 ||
         (m % COB_SGEMM_AMX_MR) != 0 || (n % 64) != 0 ||
         !cob_apple_sme2p1_available()) {
         return 0;
