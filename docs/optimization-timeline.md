@@ -1111,6 +1111,30 @@ The accepted source change uses packed-`B`-only
 and `git diff --check`. A route smoke in that session showed `2048` packed-`B`
 median above Accelerate.
 
+### 2026-05-05: B-pack prefetch distance increase
+
+Commit `7fae628` increased the default
+`COB_SGEMM_PACK_B_PREFETCH_DISTANCE` from `16` to `64`. An earlier sweep after
+the default-16 baseline tested candidate distances `32`, `64`, and `128`
+against `16`; `64` was best overall.
+
+Focused post-change A/B compared the new default against the old distance with:
+`env COB_AB_REPEATS=101 COB_AB_MAX_REPEATS=101 COB_AB_REPEAT_BATCH=10
+COB_AB_CV_TARGET=2 COB_AB_A_FLAGS=-DCOB_SGEMM_PACK_B_PREFETCH_DISTANCE=16 sh
+tools/paired_ab_bench.sh src/gemm.c src/gemm.c 1280 1536 2048`.
+
+Result: `1280` median `1.0074x`, bootstrap95 `[0.9979,1.0275]`, B faster
+`76/101`, sign-p `3.72e-07`, holdout median `1.0069x`
+`[1.0030,1.0139]`; `1536` median `1.0109x`, `[1.0009,1.0120]`, B faster
+`86/101`, sign-p `2.83e-13`, holdout `1.0109x` `[1.0023,1.0143]`; and `2048`
+median `1.0198x`, `[1.0146,1.0454]`, B faster `95/101`, sign-p `1.07e-21`,
+holdout `1.0193x` `[1.0044,1.0478]`.
+
+Checksums matched. Validation passed with `make all`, `make test` across 50
+shapes, and `git diff --check`. A broader post-change run showed `512` as tiny
+positive/noisy and `1024` as neutral/noisy, so the accepted win is for larger
+one-shot packed-`B` route shapes.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
