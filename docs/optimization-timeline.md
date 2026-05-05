@@ -787,6 +787,34 @@ paired A/B benchmark harness. The new knobs are `COB_AB_MAX_REPEATS`,
 Result: default behavior remains fixed-repeat. The harness only extends beyond
 `COB_AB_REPEATS` when `COB_AB_MAX_REPEATS` is set above it.
 
+### 2026-05-05: benchmark-boundary infrastructure
+
+Commit `f024172 Add CSV benchmark output` added `COB_BENCH_CSV=1` to
+`bench/bench_gemm.c`, emitting
+`kind,implementation,m,n,k,best_throughput,median_throughput,unit,best_seconds,median_seconds,checksum`.
+README documents the env var. Validation passed `make all`, `make test` across
+37 shapes, `git diff --check`, a default text smoke with
+`COB_BENCH_REPEATS=1 ./build/cob_gemm_bench 64`, and a CSV plus pack-setup
+smoke with `COB_BENCH_REPEATS=1 COB_BENCH_CSV=1 COB_BENCH_PACK_SETUP=1
+./build/cob_gemm_bench 64`.
+
+Commit `732453f Add benchmark grid helper` added `tools/bench_grid.sh`, a CSV
+wrapper for explicit shape arguments or env Cartesian grids via `COB_GRID_M`,
+`COB_GRID_N`, and `COB_GRID_K`, plus `COB_GRID_SIZES`, `COB_GRID_BATCH`, and
+`COB_GRID_BENCH`. README documents examples. Validation passed
+`sh -n tools/bench_grid.sh`, an explicit-shape smoke with `64 128`, and a grid
+smoke with `COB_GRID_M="64 96" COB_GRID_N="1024" COB_GRID_K="512"`.
+
+Result: forcing `832` off current AMX direct-B by compiling with
+`COB_SGEMM_AMX_STRIDED_B_MAX_N=768` was rejected. Paired A/B for
+`832x832x832` repeat-61 showed candidate median `0.9931x`, mean-log `0.9983x`,
+CI `[0.9911,1.0070]`, B-faster `15/61`, sign-p `8.84e-05`; the candidate was
+consistently slower despite noisy CV. `896x896x896` stayed neutral with median
+`1.0000x`, mean-log `0.9998x`, CI `[0.9900,1.0080]`, sign-p `1`. Keep the
+current `832` AMX route; no source behavior change. `/usr/bin/xctrace` was
+unusable because the active developer directory is CommandLineTools, so
+hardware-counter profiling was deferred.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
