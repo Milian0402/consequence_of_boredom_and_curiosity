@@ -170,6 +170,11 @@ static int bench_pack_setup_enabled(void)
     return env_int_clamped("COB_BENCH_PACK_SETUP", 0, 0, 1) != 0;
 }
 
+static int bench_csv_enabled(void)
+{
+    return env_int_clamped("COB_BENCH_CSV", 0, 0, 1) != 0;
+}
+
 static int pack_setup_iterations(bench_shape shape)
 {
     const int n = shape_max_dim(shape);
@@ -300,7 +305,8 @@ static double run_case(
     bench_shape shape,
     const float* a,
     const float* b,
-    float* c)
+    float* c,
+    int csv)
 {
     const int max_dim = shape_max_dim(shape);
     const int warmups = max_dim <= 256 ? 2 : 1;
@@ -325,19 +331,39 @@ static double run_case(
     const double ops = 2.0 * (double)shape.m * (double)shape.n * (double)shape.k;
     const double best_gflops = ops / stats.best / 1.0e9;
     const double median_gflops = ops / stats.median / 1.0e9;
-    char shape_text[32];
-    format_shape(shape_text, sizeof(shape_text), shape);
-    printf("%-18s %-14s  best %8.2f GF/s  med %8.2f GF/s  %9.6f s  checksum=% .5e\n",
-        name,
-        shape_text,
-        best_gflops,
-        median_gflops,
-        stats.best,
-        (double)checksum(c, (size_t)shape.m * (size_t)shape.n));
+    const double sum = (double)checksum(c, (size_t)shape.m * (size_t)shape.n);
+    if (csv) {
+        printf(
+            "gemm,%s,%d,%d,%d,%.6f,%.6f,GF/s,%.9f,%.9f,%.9e\n",
+            name,
+            shape.m,
+            shape.n,
+            shape.k,
+            best_gflops,
+            median_gflops,
+            stats.best,
+            stats.median,
+            sum);
+    } else {
+        char shape_text[32];
+        format_shape(shape_text, sizeof(shape_text), shape);
+        printf("%-18s %-14s  best %8.2f GF/s  med %8.2f GF/s  %9.6f s  checksum=% .5e\n",
+            name,
+            shape_text,
+            best_gflops,
+            median_gflops,
+            stats.best,
+            sum);
+    }
     return best_gflops;
 }
 
-static double run_case_cob_packed_reuse(bench_shape shape, const float* a, const float* b, float* c)
+static double run_case_cob_packed_reuse(
+    bench_shape shape,
+    const float* a,
+    const float* b,
+    float* c,
+    int csv)
 {
     cob_packed_b_f32 packed_b;
     if (cob_sgemm_pack_b(&packed_b, shape.k, shape.n, b, shape.n) != 0) {
@@ -370,21 +396,35 @@ static double run_case_cob_packed_reuse(bench_shape shape, const float* a, const
     const double ops = 2.0 * (double)shape.m * (double)shape.n * (double)shape.k;
     const double best_gflops = ops / stats.best / 1.0e9;
     const double median_gflops = ops / stats.median / 1.0e9;
-    char shape_text[32];
-    format_shape(shape_text, sizeof(shape_text), shape);
-    printf("%-18s %-14s  best %8.2f GF/s  med %8.2f GF/s  %9.6f s  checksum=% .5e\n",
-        "cob packed-B",
-        shape_text,
-        best_gflops,
-        median_gflops,
-        stats.best,
-        (double)checksum(c, (size_t)shape.m * (size_t)shape.n));
+    const double sum = (double)checksum(c, (size_t)shape.m * (size_t)shape.n);
+    if (csv) {
+        printf(
+            "gemm,cob packed-B,%d,%d,%d,%.6f,%.6f,GF/s,%.9f,%.9f,%.9e\n",
+            shape.m,
+            shape.n,
+            shape.k,
+            best_gflops,
+            median_gflops,
+            stats.best,
+            stats.median,
+            sum);
+    } else {
+        char shape_text[32];
+        format_shape(shape_text, sizeof(shape_text), shape);
+        printf("%-18s %-14s  best %8.2f GF/s  med %8.2f GF/s  %9.6f s  checksum=% .5e\n",
+            "cob packed-B",
+            shape_text,
+            best_gflops,
+            median_gflops,
+            stats.best,
+            sum);
+    }
 
     cob_sgemm_free_packed_b(&packed_b);
     return best_gflops;
 }
 
-static double run_case_cob_pack_setup(bench_shape shape, const float* b)
+static double run_case_cob_pack_setup(bench_shape shape, const float* b, int csv)
 {
     const int repeats = timed_repeats(shape);
     const int iters = pack_setup_iterations(shape);
@@ -422,14 +462,26 @@ static double run_case_cob_pack_setup(bench_shape shape, const float* b)
     const bench_stats stats = summarize_times(times, repeats);
     const double best_gbs = (double)bytes_per_iter / stats.best / 1.0e9;
     const double median_gbs = (double)bytes_per_iter / stats.median / 1.0e9;
-    char shape_text[32];
-    format_shape(shape_text, sizeof(shape_text), shape);
-    printf("%-18s %-14s  best %8.2f GB/s  med %8.2f GB/s  %9.6f s\n",
-        "cob pack-B setup",
-        shape_text,
-        best_gbs,
-        median_gbs,
-        stats.best);
+    if (csv) {
+        printf(
+            "pack_b_setup,cob,%d,%d,%d,%.6f,%.6f,GB/s,%.9f,%.9f,\n",
+            shape.m,
+            shape.n,
+            shape.k,
+            best_gbs,
+            median_gbs,
+            stats.best,
+            stats.median);
+    } else {
+        char shape_text[32];
+        format_shape(shape_text, sizeof(shape_text), shape);
+        printf("%-18s %-14s  best %8.2f GB/s  med %8.2f GB/s  %9.6f s\n",
+            "cob pack-B setup",
+            shape_text,
+            best_gbs,
+            median_gbs,
+            stats.best);
+    }
     return best_gbs;
 }
 
@@ -514,9 +566,14 @@ int main(int argc, char** argv)
         }
     }
 
-    printf("single-thread FP32 row-major GEMM\n");
-    printf("cob one-shot includes B packing; cob packed-B excludes B packing after setup\n\n");
     const int show_pack_setup = bench_pack_setup_enabled();
+    const int csv = bench_csv_enabled();
+    if (csv) {
+        printf("kind,implementation,m,n,k,best_throughput,median_throughput,unit,best_seconds,median_seconds,checksum\n");
+    } else {
+        printf("single-thread FP32 row-major GEMM\n");
+        printf("cob one-shot includes B packing; cob packed-B excludes B packing after setup\n\n");
+    }
 
     for (int si = 0; si < shape_count; ++si) {
         const bench_shape shape = shapes[si];
@@ -539,21 +596,23 @@ int main(int argc, char** argv)
         fill_random(a, a_count, &state);
         fill_random(b, b_count, &state);
 
-        run_case("cob one-shot", bench_cob_direct, shape, a, b, c);
-        run_case_cob_packed_reuse(shape, a, b, c);
+        run_case("cob one-shot", bench_cob_direct, shape, a, b, c, csv);
+        run_case_cob_packed_reuse(shape, a, b, c, csv);
         if (show_pack_setup) {
-            run_case_cob_pack_setup(shape, b);
+            run_case_cob_pack_setup(shape, b, csv);
         }
 #if defined(COB_HAVE_ACCELERATE)
-        run_case("Accelerate", bench_accelerate, shape, a, b, c);
+        run_case("Accelerate", bench_accelerate, shape, a, b, c, csv);
 #endif
 #if defined(COB_HAVE_EXTERNAL_CBLAS)
-        run_case(COB_EXTERNAL_CBLAS_NAME, bench_external_cblas, shape, a, b, c);
+        run_case(COB_EXTERNAL_CBLAS_NAME, bench_external_cblas, shape, a, b, c, csv);
 #endif
 #if defined(COB_HAVE_EXTERNAL_FORTRAN_SGEMM)
-        run_case(COB_EXTERNAL_FORTRAN_SGEMM_NAME, bench_external_fortran_sgemm, shape, a, b, c);
+        run_case(COB_EXTERNAL_FORTRAN_SGEMM_NAME, bench_external_fortran_sgemm, shape, a, b, c, csv);
 #endif
-        printf("\n");
+        if (!csv) {
+            printf("\n");
+        }
 
         free(a);
         free(b);

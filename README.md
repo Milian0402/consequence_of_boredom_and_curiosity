@@ -67,6 +67,8 @@ repeats for noisier large shapes, for example `COB_BENCH_REPEATS=11`.
 Arguments can be square sizes (`512`) or rectangular `MxNxK` shapes
 (`832x960x896`).
 Set `COB_BENCH_PACK_SETUP=1` to also print the one-time packed-`B` setup cost.
+Set `COB_BENCH_CSV=1` to print machine-readable benchmark rows for grid sweeps
+and plotting.
 
 To compare against an open-source CBLAS implementation, build the separate
 external CBLAS benchmark target. For example, with a local BLIS build:
