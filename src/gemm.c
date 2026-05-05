@@ -66,6 +66,10 @@ enum {
 #define COB_SGEMM_M64_SME_REUSE_NC 512
 #endif
 
+#ifndef COB_SGEMM_M64_SME_LONG_WIDE_NC
+#define COB_SGEMM_M64_SME_LONG_WIDE_NC 256
+#endif
+
 #ifndef COB_SGEMM_M64_SME_WIDE_KC
 #define COB_SGEMM_M64_SME_WIDE_KC 768
 #endif
@@ -840,7 +844,9 @@ static int cob_sgemm_rowmajor_sme_m64_pack_b_reuse(
     }
 
     const int a32_panels = m / COB_SGEMM_AMX_MR;
-    const int nc_max = COB_SGEMM_M64_SME_REUSE_NC;
+    const int nc_max =
+        (use_wide && n >= 24576 && k == 1536) ?
+            COB_SGEMM_M64_SME_LONG_WIDE_NC : COB_SGEMM_M64_SME_REUSE_NC;
     if (nc_max < 64 || (nc_max % 64) != 0) {
         return 0;
     }
