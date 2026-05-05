@@ -100,6 +100,10 @@ enum {
 #define COB_SGEMM_M64_SME_WIDE_KC 1024
 #endif
 
+#ifndef COB_SGEMM_M64_SME_WIDE_K1536_KC
+#define COB_SGEMM_M64_SME_WIDE_K1536_KC 1536
+#endif
+
 #ifndef COB_SGEMM_SME_DIRECT_MAX_N
 #define COB_SGEMM_SME_DIRECT_MAX_N 1216
 #endif
@@ -910,7 +914,8 @@ static int cob_sgemm_rowmajor_sme_skinny_pack_b_reuse(
     const int kc_max =
         use_long_n_k512 ? k :
         use_large_kc ? COB_SGEMM_SKINNY_SME_LARGE_KC :
-        (use_wide && k >= 1536 ? COB_SGEMM_M64_SME_WIDE_KC : COB_SGEMM_SKINNY_SME_KC);
+        (use_wide && k == 1536) ? COB_SGEMM_M64_SME_WIDE_K1536_KC :
+        (use_wide && k >= 1536) ? COB_SGEMM_M64_SME_WIDE_KC : COB_SGEMM_SKINNY_SME_KC;
     const size_t a_panel_floats =
         (size_t)kc_max * (size_t)COB_SGEMM_AMX_MR;
     float* packed_a =
