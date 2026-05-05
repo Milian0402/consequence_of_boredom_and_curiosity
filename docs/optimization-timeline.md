@@ -815,6 +815,36 @@ current `832` AMX route; no source behavior change. `/usr/bin/xctrace` was
 unusable because the active developer directory is CommandLineTools, so
 hardware-counter profiling was deferred.
 
+### 2026-05-05: m=64 k=512 SME reuse threshold lowered
+
+Commit `e5f758d` lowered the default
+`COB_SGEMM_M64_SME_LONG_N_K512_MIN_N` from the old implicit `32768` to `4096`,
+so the `m = 64, k = 512` SME `B`-reuse route applies from `n >= 4096`. It also
+added direct-vs-packed correctness coverage for `64x4096x512` and
+`64x8192x512`, raising coverage to 39 shapes.
+
+Before the source change, the grid showed weak old one-shot medians around
+561.58 GF/s at `64x6144x512`, 484.54 GF/s at `64x8192x512`, and 259.11 GF/s
+at `64x16384x512`, while `64x32768x512` jumped to 809.45 GF/s under the
+existing `B`-reuse route. A paired old-threshold versus new-threshold
+comparison, with the old threshold forced by
+`COB_AB_A_FLAGS=-DCOB_SGEMM_M64_SME_LONG_N_K512_MIN_N=32768`, was neutral at
+`64x3072x512` and `64x32768x512` but clearly positive from `n = 4096` through
+`16384`: median ratios were `1.0164x` CI `[0.9991,1.0330]` at `3072`,
+`1.2932x` CI `[1.2646,1.3234]` at `4096` with B faster `61/61` and sign-p
+`8.67e-19`, `1.5324x` CI `[1.4818,1.5686]` at `6144`, `2.2419x` CI
+`[2.2258,2.3454]` at `8192`, `2.5033x` CI `[2.4697,2.6239]` at `16384`, and
+`0.9942x` CI `[0.9860,1.0059]` at `32768`.
+
+Result: accepted. Final validation passed with `make all`, `make test` across
+39 shapes, and `git diff --check`. A focused 15-repeat run after the source
+commit measured COB one-shot medians of 1390.86 GF/s versus Accelerate 1109.24
+at `64x4096x512`, 1290.55 versus 1021.96 at `64x6144x512`, 1182.53 versus
+769.16 at `64x8192x512`, 1017.76 versus 599.86 at `64x16384x512`, and 942.71
+versus 621.92 at `64x32768x512`. This closes a clear `m = 64, k = 512`
+one-shot gap against Accelerate for `n >= 4096`; the universal fastest claim
+is still not fully proven because other MpGEMM and square gaps may remain.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
