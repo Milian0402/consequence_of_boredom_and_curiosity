@@ -9,6 +9,7 @@ These rules summarize repeated findings from the optimization timeline. They are
 - Check the split-half holdout line before shipping a small change. If the full-run result looks positive but the reporting half is neutral or reversed, rerun cold instead of tuning a gate from that sample.
 - Prefer candidates whose bootstrap interval and sign-test p-value agree. If they disagree, rerun instead of shipping the change.
 - Recheck any candidate win in a fresh process before committing a performance route.
+- Use `COB_AB_A_FLAGS` / `COB_AB_B_FLAGS` for compile-time threshold or constant sweeps before forking source; it keeps A/B probes cheap and reproducible.
 - Keep one-shot and packed-B claims separate. Packed-B compute-only results are useful ceilings but do not prove the public one-shot path is faster.
 
 ## Dispatch
@@ -25,9 +26,30 @@ These rules summarize repeated findings from the optimization timeline. They are
 - One-shot 1024 via public packed-B or direct SME routes has not beaten the current path.
 - Increasing expression-level unrolling in the C SME packed-B kernel did not beat the compiler's current schedule.
 - m=64 B-reuse changes are shape-sensitive; do not assume a NC/KC knob alone will close the MpGEMM gap.
+- SME streaming-B prefetch is route-specific. It helped `m = 64`, large-`K`
+  skinny direct widths whose row stride is not a 512-float multiple, plus the
+  exact `n = 4096` reuse path, but broad medium, m=96/128, and wide-`N`
+  prefetch probes regressed or stayed noisy.
+- Keep `COB_SGEMM_M64_SME_B_PREFETCH_DISTANCE=32` as the default. Distance
+  `64` helps a few high-`K` widths but the boundary is discontinuous; do not
+  add exact-width distance gates without counter evidence or a smoother rule.
+- For `m = 64`, the SME skinny direct route is useful from `k >= 2048` through
+  `n <= 4096`; at `k = 1536`, keep the narrower `n >= 1408` gate because
+  lower widths regressed.
+- For `m = 64, k = 2048`, `KC=1024` is useful only in the low-width SME skinny
+  band currently gated as `n = 1088..1280` plus `n = 1600`. Global
+  `COB_SGEMM_SKINNY_SME_KC=384/768/1024` probes regressed important high-`K`
+  and `n >= 2048` shapes, so keep cache-blocking changes route-specific.
+- Hand-written K=2/K=4 unrolls in the prefetched m64 SME streaming-B C
+  intrinsic kernel did not improve the remaining large-`K` gaps. Do not revisit
+  that schedule without counter evidence or a dedicated assembly kernel.
+- Do not port cache-blocking constants from other Apple Silicon generations. On this M5 Max, per-P-cluster L2 is 8 MB, page size is 16 KB, and route-specific cache-fit probes still need paired A/B proof.
+- Do not prioritize fused inline B-packing rewrites unless a profiler shows packing is the bottleneck on an in-scope licensed-baseline gap.
 
 ## External Baselines
 
 - Treat MpGEMM as a calibration target, not a source to copy from. Its checkout has no license file in the local scan.
 - Treat KleidiAI FP32 SME2 compute-only results as an upper-bound/reference. Its direct one-shot path includes both LHS and RHS packing and was not faster on the tested public one-shot shapes.
+- Treat packages that wrap Accelerate or ship no inspectable source separately from licensed open-source GEMM implementations.
 - If a source-available project has unclear licensing, document its numbers separately from the "open-source" claim.
+- State the speed claim as "fastest among tested licensed/open-source baselines on the routed shape ranges" unless a fresh source scan and benchmark run cover a broader claim.

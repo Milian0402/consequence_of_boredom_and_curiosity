@@ -609,9 +609,14 @@ static int bench_one_shape(
             holdout_count,
             holdout_stats.sign_pvalue);
     }
-    if (a_stats.cv_percent > cv_target_percent || b_stats.cv_percent > cv_target_percent) {
+    if ((a_stats.cv_percent > cv_target_percent || b_stats.cv_percent > cv_target_percent) &&
+        all_stats.speedup.cv_percent > cv_target_percent) {
         printf(
             "  warning: sample CV above %.2f%%; treat this shape as noisy\n",
+            cv_target_percent);
+    } else if (a_stats.cv_percent > cv_target_percent || b_stats.cv_percent > cv_target_percent) {
+        printf(
+            "  note: implementation CV above %.2f%%, but paired speedup CV met target\n",
             cv_target_percent);
     }
     if (!checksum_ok) {

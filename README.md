@@ -7,7 +7,14 @@ and `C = A * B`. The implementation is built around a packed-`B` path, because
 that gives us a clean route to beat general BLAS calls when the right-hand
 matrix is reused.
 
-"game is so boring that it made me give up gaming and led me to design and code the fastest open-source matrix multiplication software available. It only supports single threaded operations for now, I am working on to give it a multi-threaded support."
+Goal: become the fastest open-source single-threaded matrix multiplication
+software in this repo's chosen scope.
+
+Current audited evidence: fastest among the tested licensed/open-source
+baselines for single-thread FP32 row-major SGEMM on Apple Silicon, in the routed
+shape ranges. See [docs/claims.md](docs/claims.md) for the audit recipe and
+[docs/optimization-design-rules.md](docs/optimization-design-rules.md) for the
+measurement rules and exclusions.
 
 ## Current Scope
 
@@ -77,7 +84,20 @@ For repeated boundary sweeps, use the CSV wrapper:
 sh tools/bench_grid.sh 832 896 960
 COB_GRID_M="64 96 128" COB_GRID_N="1024 2048" COB_GRID_K="512 1024" sh tools/bench_grid.sh
 COB_BENCH_ROUTE=1 sh tools/bench_grid.sh 832 896 960 | python3 tools/bench_gap_report.py
+COB_BENCH_ROUTE=1 sh tools/bench_grid.sh 832 896 960 > /tmp/cob-grid.csv
+python3 tools/bench_heatmap.py /tmp/cob-grid.csv --output /tmp/cob-grid.png
 ```
+
+## Comparison Status
+
+Current evidence is scoped to the benchmarked shape set and this repo's narrow
+single-threaded FP32 row-major contract. In the routed shape ranges, COB beats
+the tested licensed/open-source baselines so far: BLIS, OpenBLAS, BLASFEO,
+Eigen, Rust `matrixmultiply`, `coral-aarch64`, LIBXSMM, `tract-linalg`, and
+KleidiAI's comparable public one-shot path. Accelerate is still reported
+separately and still leads on some small or pack-overhead-heavy cases.
+Source-available projects without a clear license, such as MpGEMM, are tracked
+as calibration targets rather than folded into the open-source claim.
 
 To compare against an open-source CBLAS implementation, build the separate
 external CBLAS benchmark target. For example, with a local BLIS build:
@@ -125,7 +145,8 @@ void cob_sgemm_rowmajor_packed_b(
 ## Next Work
 
 - Add `4x8`, `12x8`, and `16x4` NEON kernels and shape dispatch.
-- Tune the AMX `MC` threshold and add `KC`/`NC` blocking.
+- Keep expanding route-aware grid sweeps before adding new dispatch gates.
+- Add hardware-counter profiling when local tooling is available.
 - Replace scalar edges with vector edge kernels.
 - Use the CBLAS and Fortran-BLAS comparison targets to track external results.
 

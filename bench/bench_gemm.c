@@ -72,6 +72,14 @@ enum {
 #define COB_SGEMM_SME_DIRECT_MAX_N 1216
 #endif
 
+#ifndef COB_SGEMM_SME_DIRECT_EXTRA_N_MIN
+#define COB_SGEMM_SME_DIRECT_EXTRA_N_MIN 1280
+#endif
+
+#ifndef COB_SGEMM_SME_DIRECT_EXTRA_N_MAX
+#define COB_SGEMM_SME_DIRECT_EXTRA_N_MAX 1472
+#endif
+
 #ifndef COB_SGEMM_SME_PACKED_MAX_N
 #define COB_SGEMM_SME_PACKED_MAX_N 1152
 #endif
@@ -295,6 +303,22 @@ static int is_apple_sme_build(void)
 #endif
 }
 
+static int cob_sme_direct_extra_n_shape(int m, int n, int k)
+{
+    if (n < COB_SGEMM_SME_DIRECT_EXTRA_N_MIN ||
+        n > COB_SGEMM_SME_DIRECT_EXTRA_N_MAX ||
+        ((n - COB_SGEMM_SME_DIRECT_EXTRA_N_MIN) % 64) != 0) {
+        return 0;
+    }
+    if (m >= 832 && m <= 960 && k >= 832 && k <= 1152) {
+        return 1;
+    }
+    if (m == n && n <= 1408 && k >= 832 && k <= 960) {
+        return 1;
+    }
+    return 0;
+}
+
 static const char* cob_one_shot_route(bench_shape shape)
 {
     const int m = shape.m;
@@ -328,7 +352,10 @@ static const char* cob_one_shot_route(bench_shape shape)
     }
 
     if (is_apple_sme_build()) {
-        const int use_large_k_skinny = m == 64 && n >= 1024 && n <= 4096 && k >= 7168;
+        const int use_large_k_skinny =
+            m == 64 &&
+            ((n >= 1024 && n <= 4096 && k >= 2048) ||
+                (n >= 1408 && n <= 4096 && k == 1536));
         const int use_long_n_k512 =
             m == 64 && n >= COB_SGEMM_M64_SME_LONG_N_K512_MIN_N && k == 512;
         if ((use_large_k_skinny || use_long_n_k512) && (n % 64) == 0) {
@@ -359,7 +386,8 @@ static const char* cob_one_shot_route(bench_shape shape)
     if (is_apple_sme_build()) {
         const int use_square_384 = m == 384 && n == 384 && k == 384;
         const int use_square_768 = m == 768 && n == 768 && k == 768;
-        if ((use_square_384 || use_square_768 ||
+        const int use_extra_n = cob_sme_direct_extra_n_shape(m, n, k);
+        if ((use_square_384 || use_square_768 || use_extra_n ||
                 (m >= 832 && m <= COB_SGEMM_SME_DIRECT_MAX_N &&
                     n >= 832 && n <= COB_SGEMM_SME_DIRECT_MAX_N &&
                     k >= 832 && k <= COB_SGEMM_SME_DIRECT_MAX_N)) &&

@@ -6,6 +6,20 @@ This tracks the matrix-multiplication speed work so far. The narrow comparison
 scope is single-threaded FP32 row-major GEMM for `C = A * B` with `alpha = 1`
 and `beta = 0`.
 
+Entries on 2026-05-05 are ordered top-to-bottom from newest to oldest in the
+recent work block, then older historical material follows. For exact ordering,
+use the git history for this file; the current recent sequence is anchored by:
+
+- `d2468c3` Broaden medium SME direct route.
+- `aef6118` Document wide m64 large-K tuning.
+- `0a20d56` Tune wide m64 large-K chunk.
+- `19c331b` Document wide m64 k1536 chunk tuning.
+- `1b23220` Use full K chunk for wide m64 k1536.
+- `9ad4f50` Document wide m64 K chunk tuning.
+- `ea7c963` Increase wide m64 SME K chunk.
+- `fc657ef` Document B-pack prefetch distance increase.
+- `7fae628` Increase B-pack prefetch distance.
+
 ## Timeline
 
 ### 2026-05-05: B-pack prefetch accepted
@@ -1230,14 +1244,342 @@ skinny `B` prefetch distance `16` hard-regressed m64 skinny shapes.
 Validation passed with `make test` across 50 shapes, `make all`, and
 `git diff --check`.
 
+### 2026-05-05 local-uncommitted: n1280-1408 SME direct route
+
+The route-aware gap sweep pointed at extra medium widths where the SME direct
+path was still useful, but broad caps were too blunt. The local candidate routes
+rectangular `m = 832..960, n = 1280..1472, k = 832..1152` and same-M/N
+`n = 1280..1408, k = 832..960`. Same-M/N `1472` and `k = 1280` stay on AMX
+packed after paired validation failed to hold up cleanly.
+
+Paired validation against `/private/tmp/cob_gemm_baseline_before_strided192_block.c`
+with `COB_AB_ITERS=3` showed accepted-shape wins:
+
+- `832x1280x832` median `1.1276x`, B-faster `60/61`, holdout `1.1263x`.
+- `960x1280x960` median `1.1169x`, B-faster `60/61`, holdout `1.1135x`.
+- `1280x1280x832` median `1.0881x`, B-faster `59/61`, holdout `1.0877x`.
+- `832x1344x832` median `1.0968x`, B-faster `61/61`, holdout `1.0983x`.
+- `960x1344x960` median `1.0971x`, B-faster `60/61`, holdout `1.0933x`.
+- `1344x1344x832` median `1.0600x`, B-faster `52/61`, holdout `1.0605x`.
+- `832x1408x832` median `1.1281x`, B-faster `61/61`, holdout `1.1281x`.
+- `960x1408x960` median `1.1131x`, B-faster `61/61`, holdout `1.1109x`.
+- `1408x1408x832` median `1.0847x`, B-faster `61/61`, holdout `1.0845x`.
+- Rectangular `k = 1152` extension wins included `832x1280x1152` median
+  `1.1328x`, `960x1280x1152` `1.1257x`, `832x1344x1152` `1.1098x`,
+  `960x1344x1152` `1.0950x`, `832x1408x1152` `1.1205x`,
+  `960x1408x1152` `1.0824x`, `832x1472x1152` `1.1076x`, and
+  `960x1472x1152` `1.0928x`, all with positive holdouts.
+
+Focused repeat-101 validation with `COB_AB_ITERS=5` kept the same-M/N `k = 960`
+cases: `1280x1280x960` median `1.0901x`, `1344x1344x960` `1.0698x`, and
+`1408x1408x960` `1.0881x`, all with positive holdouts and sign-p below
+`1e-18`.
+
+Guard shapes stayed neutral or were rejected: `1280x1280x1152` median
+`0.9987x`, `1344x1344x1152` `1.0001x`, `1408x1408x1152` `1.0011x`, and
+same-M/N `1472x1472x832` stayed off the route. Validation passed with
+`make test` across 60 shapes, `make all`, route-label smoke, and
+`git diff --check`.
+
+### 2026-05-05 local-uncommitted: cache-fit wide m64 blocking rejected
+
+Apple M5 Max reports `hw.l2cachesize = 8388608` and `hw.cachelinesize = 128`.
+That makes larger `m = 64` `NC/KC` combinations look plausible under the
+`mc*kc + kc*nc + mc*nc < L2` capacity model, but the local paired probe did not
+validate the idea.
+
+Using `COB_AB_B_FLAGS='-DCOB_SGEMM_M64_SME_REUSE_NC=768
+-DCOB_SGEMM_M64_SME_LONG_WIDE_NC=512 -DCOB_SGEMM_M64_SME_WIDE_KC=1536
+-DCOB_SGEMM_M64_SME_WIDE_LARGE_KC=2048'` against current source regressed key
+wide shapes: `64x7168x2048` median `0.9741x`, `64x7168x4096` `0.9722x`, and
+`64x7168x8192` `0.9426x`. `64x4096x7168`, `64x24576x1536`,
+`64x24576x8192`, and `64x8192x1024` were neutral/noisy. Do not promote
+cache-fit blocking parameters without paired validation on this hardware.
+
+### 2026-05-05 local-uncommitted: route-specific cache-fit probes rejected
+
+The route-by-route cache-derived blocking pass was bounded to compile-flag A/B
+probes. Local hardware context: M5 Max, 64 KB L1d, 8 MB L2 per P-cluster,
+16 KB pages, and 128 B cache lines. This makes direct porting of M4 Pro blocking
+constants invalid.
+
+- AMX one-shot large-block interaction: `COB_SGEMM_AMX_MC=512` was neutral/noisy
+  across `512x1152x512`, `768x1152x768`, `1024x1152x1024`,
+  `1152x1152x512`, and `1216x1216x768`; `COB_SGEMM_AMX_MC=256` slightly
+  regressed `768x1152x768` and was otherwise neutral. Keep `384`.
+- AMX public packed-B large block: `COB_SGEMM_AMX_PACKED_LARGE_MC=384`
+  regressed `2048` and `2048x3072x1024`; `768` regressed `2048` and was noisy
+  elsewhere. Keep `512`.
+- SME public packed-B A-blocking: shared `COB_SGEMM_AMX_MC=512` was neutral to
+  slightly worse at `1152`; `256` was neutral/noisy with weak regressions. Keep
+  `384` for the shared SME packed-B A block.
+- SME B-reuse: the combined larger `NC/KC` probe in the previous entry regressed
+  key wide `m = 64` shapes. Keep the empirically tuned current constants.
+
+Conclusion: the current empirically tuned route constants are a better local
+default than simple cache-capacity-derived replacements on this M5 Max.
+
+### 2026-05-05 local-uncommitted: m64 k1536/k2048/k4096 SME skinny threshold accepted
+
+After the large-`K` streaming-B prefetch gate, a route-aware gap sweep showed
+`m = 64, k = 1536/2048/4096, n <= 4096` still trailing badly because those
+shapes used AMX strided-B. A temp source lowered the SME skinny direct route
+from `k >= 7168` to `k >= 2048`; a follow-up accepted a narrower `k = 1536`
+gate from `n >= 1536`. The existing prefetch gate applies on non-512 `n`
+widths, while 512-multiple widths use the unprefetched SME direct kernel.
+
+Paired validation versus the pre-change source was strongly positive:
+
+- `64x1088x2048` median `1.1000x`, bootstrap95 `[1.1029,1.1416]`,
+  B-faster `61/61`; holdout median `1.1000x`.
+- `64x1024x2048` repeat-101 median `1.2267x`, bootstrap95
+  `[1.2042,1.2772]`, B-faster `100/101`; holdout median `1.2256x`.
+- `64x1856x2048` median `1.3531x`, bootstrap95 `[1.3307,1.3781]`,
+  B-faster `61/61`; holdout median `1.3675x`.
+- `64x2048x2048` median `1.8954x`, bootstrap95 `[1.8057,1.9081]`,
+  B-faster `60/61`; holdout median `1.8899x`.
+- `64x4032x2048` median `2.4147x`, bootstrap95 `[2.3907,2.4454]`,
+  B-faster `61/61`; holdout median `2.4147x`.
+- `64x1088x4096` median `1.4040x`, bootstrap95 `[1.3874,1.4312]`,
+  B-faster `61/61`; holdout median `1.3803x`.
+- `64x1024x4096` repeat-101 median `1.9355x`, bootstrap95
+  `[1.8937,1.9584]`, B-faster `101/101`; holdout median `1.9539x`.
+- `64x2048x4096` median `2.0111x`, bootstrap95 `[2.0104,2.0342]`,
+  B-faster `61/61`; holdout median `2.0111x`.
+- `64x4032x4096` median `2.4947x`, bootstrap95 `[2.4742,2.5060]`,
+  B-faster `31/31`; holdout median `2.4858x`.
+
+The `k = 1536` follow-up is narrower because low widths regressed:
+`64x1088x1536` median `0.9464x`, `64x1152x1536` `0.9580x`, and
+`64x1280x1536` `0.9706x`. From `n >= 1536`, the route was positive:
+`64x1536x1536` repeat-101 median `1.1390x`, `64x1856x1536` `1.0890x`,
+`64x2048x1536` `1.3593x`, `64x2560x1536` `1.8034x`,
+`64x3328x1536` `1.9378x`, `64x4032x1536` `2.1315x`, and
+`64x4096x1536` `1.5214x`, all with positive holdouts. The paired harness
+checksum guard fired at `64x2560x1536` because the sampled checksum was near
+zero; a direct-vs-packed max-diff check on that shape measured `0.000118`,
+inside the existing `0.002` correctness tolerance, so the narrow gate was
+accepted with added correctness coverage.
+
+Follow-up rejected: compiling the candidate side with `-funroll-loops` did not
+improve the m64 SME tuple/reuse routes. Paired checks were neutral or slightly
+negative on `64x7168x1024`, `64x7168x2048`, `64x7168x4096`,
+`64x8192x1024`, `64x8192x2048`, `64x16384x2048`, `64x24576x1536`,
+`64x4096x7168`, and `64x2112x7168`; guard shapes `96x4096x1024` and
+`832x1472x1152` were also neutral. This does not rule out a hand-written
+targeted K-unroll, but a broad compiler-unroll flag is not useful.
+
+Follow-up rejected: hand-written K-unrolls in the prefetched m64 SME
+streaming-B kernel did not beat the current single-iteration loop. A K=4
+variant in `/private/tmp/cob_m64_unroll_exp` passed all 63 correctness shapes,
+but paired A/B regressed the remaining high-`K` gaps: `64x4032x8192` median
+`0.8264x`, `64x3712x12288` `0.9220x`, `64x3328x12288` `0.9383x`, and
+`64x2112x7168` `0.8741x`. A lower-pressure K=2 variant in
+`/private/tmp/cob_m64_unroll2_exp` also passed correctness but stayed
+noise-grade: `64x4032x8192` median `0.9987x`, `64x3712x12288` `1.0019x`,
+`64x3328x12288` `1.0026x`, `64x4096x7168` `1.0006x`,
+`64x2048x2048` `0.9933x`, and `64x2560x1536` `0.9976x`. The only positive
+line was `64x2112x7168` median `1.0061x`, bootstrap95 `[1.0047,1.0125]`,
+B-faster `65/93`, holdout median `1.0038x`, which is too small and isolated to
+justify extra inner-loop complexity. Keep the compiler's current K loop until
+counter evidence or an assembly kernel shows a different schedule is needed.
+
+Follow-up rejected: retuning `COB_SGEMM_M64_SME_B_PREFETCH_DISTANCE` away from
+the default `32` did not produce a broad improvement. Distance `16` regressed
+`64x2112x7168` (`0.9859x`) and was neutral/mixed on the remaining high-`K`
+checks. Distance `64` improved `64x4032x8192` (`1.0310x`) and slightly helped
+`64x2112x7168` (`1.0105x`), but was neutral or negative on neighboring
+`64x3712x12288`, `64x3328x12288`, `64x4096x8192`, and `64x3968x8192`.
+Keep distance `32`.
+
+Hardware-counter follow-up remains blocked in this local environment. `mperf`
+is not installed, Homebrew search does not expose an `mperf`/`kperf` formula,
+`/Applications/Xcode.app` is absent, and `/usr/bin/xctrace` still exits with
+`tool 'xctrace' requires Xcode` because the active developer directory is
+`/Library/Developer/CommandLineTools`. Skip counter-driven tuning until full
+Xcode or a working local counter tool is available.
+
+Follow-up accepted: a cache-blocking probe found a narrow `m = 64, k = 2048`
+band where `COB_SGEMM_SKINNY_SME_LARGE_KC=1024` beats the default `KC=512`.
+The source gate now keeps the existing `n = 1024` large-KC case and adds only
+`n = 1088..1280` plus exact `n = 1600`; nearby uncertain or negative widths
+stay on `KC=512`.
+
+The accepted source gate passed `make test` with 67 shapes, `make all`, and
+`git diff --check`. Paired source validation against the pre-change source:
+`64x1088x2048` repeat-101 median `1.0526x`, bootstrap95 `[1.0221,1.0728]`,
+B-faster `95/101`; `64x1152x2048` `1.0373x`, `[1.0163,1.0605]`,
+B-faster `82/101`; `64x1280x2048` `1.0429x`, `[1.0337,1.0595]`,
+B-faster `75/101`; and `64x1600x2048` `1.0446x`, `[1.0343,1.0638]`,
+B-faster `90/101`. Guard shapes not selected by the new gate stayed neutral
+within noise: `64x1408x2048`, `64x1472x2048`, `64x1536x2048`,
+`64x1664x2048`, `64x1792x2048`, `64x2048x2048`, `64x2560x2048`,
+`64x1600x1536`, `64x4032x8192`, and `96x4096x1024`.
+
+Rejected cache-blocking probes: global `COB_SGEMM_SKINNY_SME_KC=384`, `768`,
+or `1024` was not viable. `KC=384` regressed high-`K` shapes such as
+`64x4032x8192` (`0.9764x`), `64x3328x12288` (`0.9811x`), `64x4096x7168`
+(`0.9822x`), and `64x2112x7168` (`0.9638x`). Global `KC=768` regressed
+`64x4032x8192` (`0.9554x`), `64x3712x12288` (`0.9837x`),
+`64x2048x2048` (`0.9081x`), and other guards. Global `KC=1024` exposed the
+accepted low-width `k = 2048` band, but regressed `64x4032x8192` (`0.8297x`),
+`64x3712x12288` (`0.8510x`), `64x3328x12288` (`0.8856x`), `64x2048x2048`
+(`0.9630x`), and `64x2560x1536` (`0.9231x` in the boundary sweep). The
+`k = 1536` and high-`K` low-width positives were too noisy or discontinuous to
+ship.
+
+Follow-up accepted: the `m = 64, k = 1536` SME skinny route was lowered from
+`n >= 1536` to `n >= 1408`, with the streaming-B prefetch subroute lowered to
+the same boundary. This targets the previous `64x1408x1536` and
+`64x1472x1536` front-door gaps without reopening the rejected `1088..1280`
+region. The accepted source behavior passed `make test` with 69 shapes,
+`make all`, and `git diff --check`.
+
+Paired source validation against the pre-change source was strong on the new
+sizes: `64x1408x1536` repeat-101 median `1.2831x`, bootstrap95
+`[1.2460,1.3062]`, B-faster `100/101`, holdout median `1.2919x`; and
+`64x1472x1536` median `1.2395x`, bootstrap95 `[1.2382,1.3011]`, B-faster
+`100/101`, holdout median `1.2312x`. Guard shapes stayed neutral within noise:
+`64x1152x1536`, `64x1280x1536`, `64x1536x1536`, `64x1600x1536`,
+`64x1728x1536`, and `64x2048x1536`.
+
+Follow-up rejected: routing `64x1408x2048` and `64x1472x2048` back to the old
+AMX path did not close their remaining small gaps. The AMX fallback candidate
+in `/private/tmp/cob_k2048_1408_amx_exp` passed correctness but paired A/B
+regressed `64x1408x2048` to median `0.8164x`, bootstrap95 `[0.8014,0.8381]`,
+and `64x1472x2048` to `0.7508x`, `[0.7363,0.7548]`. Keep those shapes on the
+SME skinny route.
+
+Follow-up rejected: revisiting `COB_SGEMM_M64_SME_B_PREFETCH_DISTANCE=64`
+showed real high-`K` wins but no smooth enough boundary for a runtime gate.
+Positive lines included `64x2112x7168` `1.0102x`, `64x2112x12288`
+`1.0079x`, `64x2240x7168` `1.0157x`, `64x2240x8192` `1.0151x`,
+`64x3904x8192` `1.0330x`, and `64x4032x7168/8192/12288` at
+`1.0383x`/`1.0342x`/`1.0334x`. Neighboring checks were neutral or negative:
+`64x1984x7168` `0.9912x`, `64x2176x7168` `0.9747x`, `64x2176x8192`
+`0.9786x`, `64x3712x12288` `0.9989x`, and `64x3328x12288` `0.9998x`.
+Keep the default distance `32`; do not add exact-width distance gates without
+counter evidence or a smoother rule.
+
+### 2026-05-05 local-uncommitted: m64 large-K SME B-prefetch accepted
+
+A temp source added two-cacheline software prefetching for the SME streaming-B
+load path and tested it with the paired harness. Broad prefetching was rejected:
+medium SME direct shapes were neutral/noisy, `m = 96/128` reuse shapes regressed
+or stayed noisy, and wide `n >= 7168` B-reuse mostly regressed. The useful
+region was the `m = 64`, large-`K` skinny path.
+
+Accepted source behavior is narrowly gated:
+
+- Skinny direct `m = 64`, `k >= 2048`, `1088 <= n <= 4096`, and `n % 512 != 0`
+  uses a prefetched SME strided-B kernel. At `k = 1536`, the prefetched
+  subroute starts from `n >= 1408`.
+- The existing exact `m = 64, n = 4096, k >= 7168` B-reuse path uses a
+  prefetched tuple pack helper.
+- Multiples of 512 such as `1536`, `2048`, `2560`, and `3584` stay on the old
+  unprefetched path.
+
+Key paired validation against the pre-change source:
+
+- `64x1088x7168` repeat-61 median `1.2233x`, bootstrap95
+  `[1.2154,1.2490]`, B-faster `61/61`; holdout median `1.2233x`.
+- `64x1856x7168` repeat-31 median `1.1748x`, bootstrap95
+  `[1.1669,1.1745]`, B-faster `31/31`.
+- `64x3712x7168` repeat-101 median `1.1172x`, bootstrap95
+  `[1.1138,1.1210]`, B-faster `101/101`; holdout median `1.1172x`.
+- `64x4032x8192` repeat-101 median `1.2469x`, bootstrap95
+  `[1.2361,1.2596]`, B-faster `101/101`; holdout median `1.2475x`.
+- `64x4096x7168` repeat-101 median `1.0695x`, bootstrap95
+  `[1.0584,1.0728]`, B-faster `98/101`; holdout median `1.0718x`.
+- `64x4096x12288` repeat-101 median `1.0609x`, bootstrap95
+  `[1.0410,1.0548]`, B-faster `89/101`; holdout median `1.0409x`.
+
+Guard validation stayed neutral: `64x1536x7168`, `64x2048x7168`,
+`64x2560x7168`, `64x3584x7168`, `64x4096x1536`, `64x7168x2048`,
+`832x1472x1152`, `96x4096x1024`, and `128x8192x1024` did not show a
+commit-worthy regression.
+
+### 2026-05-05 local-uncommitted: n1152 SME-before-strided rejected
+
+A temp source moved the medium SME direct route ahead of AMX strided-`B` for
+`n = 1152` candidates. The first paired runs looked promising for some
+`k = 832/960` shapes, but validation against the committed baseline did not
+hold. Repeat-81 with `COB_AB_ITERS=5` showed `832x1152x832` neutral
+(`0.9991x`), `832x1152x960` neutral/negative (`0.9928x`), `832x1152x1152`
+regressive (`0.8835x`), and `1152x1152x832` regressive (`0.9945x`, negative
+CI). Only isolated `1024x1152x832` and `1088x1152x832` stayed positive, which
+is not a smooth enough boundary to ship. Keep AMX strided-`B` priority for
+`n = 1152`.
+
+### 2026-05-05 local-uncommitted: mperf counter setup blocked
+
+`mperf` was found via <https://lambdafoo.com/posts/2026-03-25-mperf-hardware-counters-macos.html>
+and cloned from <https://github.com/tmcgilchrist/mperf> into `/private/tmp`.
+It built cleanly with `make`, producing `mperf-stat`. Running without root
+reported `Root privileges required`; running with `sudo` failed because this
+session cannot provide an interactive password (`sudo: a terminal is required
+to read the password`). Counter profiling remains a local setup task rather
+than a blocker for the current source changes.
+
+### 2026-05-05 local-uncommitted: long-k512 tuple helper rejected
+
+A temp source copy forced the long-`n`, `k = 512` reuse path to use the tuple
+`svld1_x4` / `svst1` helper instead of the non-tuple helper. This rechecked
+whether wider four-Z load/store adoption had become useful after the later
+skinny route changes.
+
+Paired validation rejected the change. It regressed `64x4096x512` median
+`0.9442x` and `64x32768x512` `0.9286x`. `64x8192x512`, `96x4096x512`,
+`96x8192x512`, `128x4096x512`, and `128x8192x512` were neutral/noisy with weak
+or reversed holdout. Keep the current split: non-tuple for long-`n`, `k = 512`,
+tuple helper for the other B-reuse paths.
+
+### 2026-05-05 local-uncommitted: public-source scan refresh
+
+A fresh public scan did not identify a new licensed open-source single-thread
+FP32 row-major CPU GEMM blocker for the current Apple Silicon target. The tested
+licensed/open-source baseline set remains BLIS, OpenBLAS, BLASFEO, Eigen, Rust
+`matrixmultiply`, `coral-aarch64`, LIBXSMM, `tract-linalg`, and KleidiAI's
+comparable public one-shot path. The notable scan hits were:
+
+- <https://github.com/mmperf/mmperf>, a single-core matmul benchmark collection,
+  useful for future comparison ideas but not a directly tested Apple AMX/SME
+  library in this pass.
+- <https://pypi.org/project/sapphire-compute/>, which advertises 1.56 TFLOPS
+  SGEMM and MIT metadata on PyPI, but the release has no source distribution and
+  describes its SGEMM stack as `cblas -> AMX`, so it remains a wrapper/packaging
+  item rather than a separate open-source kernel blocker.
+- <https://github.com/usstq/mm_amx>, an AMX matmul repo focused on Intel
+  AMX/BF16 rather than this Apple FP32 row-major target.
+- <https://github.com/corsix/amx>, an MIT Apple AMX instruction reference, not a
+  competing GEMM implementation.
+
+README wording was tightened to say COB beats the tested licensed/open-source
+baselines on the routed shape ranges in the repo's narrow benchmarked scope,
+while Accelerate, source-available, and non-inspectable projects remain separate
+calibration/comparison targets.
+
 ## Current Conclusion
 
-COB is very competitive in its exact current scope. The packed-`B` AMX path is
-around 1.9-2.0 TF/s on large square cases and beat `blis_apple`, OpenBLAS,
-BLASFEO, Rust `matrixmultiply`, Eigen, `coral-aarch64`, LIBXSMM exact
-`beta = 0`, and the comparable `tract-linalg` paths in the tested cases.
+COB is very competitive in its exact current scope. The qualified claim now is:
+fastest among tested licensed/open-source baselines on the routed shape ranges
+for single-thread FP32 row-major GEMM. MpGEMM remains a source-available
+calibration target with unclear licensing and still wins some one-shot `m = 64`
+shapes. Accelerate also remains ahead on a few small/medium cases, especially
+where one-shot pack overhead dominates.
 
-Post-`5e6da0a` rejected/probed follow-ups:
+The recent methodology loop is now the main asset: route-aware grid sweeps find
+gaps, paired A/B runs validate candidate thresholds, holdout/sign-test output
+filters noise, and the timeline records rejected paths. The strongest structural
+wins since the older conclusion are the skinny SME B-reuse generalization, the
+`m = 64, k = 512` threshold drop, B-pack prefetching, packed-B large-square
+blocking, wide `m = 64` K-chunk tuning, and the local `n = 1280..1472` SME
+direct route, plus the local `m = 64, k >= 2048` SME skinny threshold and
+streaming-B prefetch gates, the narrow `m = 64, k = 2048` large-KC gate, and
+the `m = 64, k = 1536, n >= 1408` SME route. Current correctness coverage is
+69 GEMM shapes.
+
+Historical post-`5e6da0a` rejected/probed follow-ups:
 
 - Successful tuple-B load/store follow-up: ACLE tuple `svld1_x4` / `svst1` was
   tested in `/private/tmp/cob_tuple_b_exp` and passed all 37 tests. The full
@@ -1331,10 +1673,8 @@ Post-`5e6da0a` rejected/probed follow-ups:
 - MpGEMM checkout `/private/tmp/mpgemm_latest` was refreshed and was already up
   to date at `8d83011`.
 
-The universal "fastest" claim is not achieved if MpGEMM counts, because MpGEMM
-won several same-process one-shot FP32 single-thread square benchmarks.
-Accelerate also still wins some small cases. The SME packed-`B` path improves
-COB's packed-`B` result, and the narrow SME route improves one-shot `n = 512`,
-but not enough to change that conclusion. Later ACL attempts were either
-crashing or far slower, and the local direct-`B` SME route remains promising but
-shape-limited.
+Historical note: this older conclusion treated MpGEMM as an in-scope blocker and
+predates the newer paired-harness methodology, skinny SME generalization, and
+medium-width SME direct routes. Keep it as context for the old experiments, but
+use the `Current Conclusion` section above and `docs/claims.md` for the current
+claim boundary.
