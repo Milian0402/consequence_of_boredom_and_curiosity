@@ -700,6 +700,34 @@ main-branch pack setup bandwidth was higher under the same harness. Finally,
 the B-panel-first loop order for the SME packed-`B` kernel passed tests but
 reduced packed-`B` medians at `768`, `1024`, and `1280`. None were committed.
 
+### 2026-05-05: KleidiAI FP32 SME2 scan
+
+ARM-software/kleidiai was cloned to `/private/tmp/kleidiai_latest` at commit
+`7a7da26`. The checkout is Apache-2.0 and reports version `v1.24.0`. It
+contains relevant FP32 SME/SME2 matmul microkernels, not just quantized
+kernels.
+
+The benchmark was built with `KLEIDIAI_BUILD_BENCHMARK=ON` and
+`KLEIDIAI_INTERNAL_EXTRA_ARCH=+sme`. The stock benchmark binary exited before
+printing results on Apple, so a temporary direct driver was written at
+`/private/tmp/kleidiai_fp32_driver.c`.
+
+Direct elastic FP32 SME2 path median results:
+
+| Shape | Compute-only | One-shot |
+| --- | ---: | ---: |
+| `384^3` | 1986.77 GF/s | 1715.85 GF/s |
+| `768^3` | 2063.71 GF/s | 1911.33 GF/s |
+| `1024^3` | 2078.88 GF/s | 1791.06 GF/s |
+| `64x4096x7168` | 1341.22 GF/s | 685.78 GF/s |
+| `64x8192x1024` | 1317.47 GF/s | 630.13 GF/s |
+| `64x32768x512` | 1005.38 GF/s | 535.80 GF/s |
+
+Conclusion: KleidiAI is not a faster one-shot replacement for this repo. Its
+compute-only path is an interesting upper-bound/reference, but it requires both
+LHS and RHS prepacking, so it is not directly comparable to COB's public
+one-shot SGEMM path.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
