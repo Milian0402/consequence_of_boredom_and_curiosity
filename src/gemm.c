@@ -63,7 +63,7 @@ enum {
 #endif
 
 #ifndef COB_SGEMM_M64_SME_REUSE_NC
-#define COB_SGEMM_M64_SME_REUSE_NC 1024
+#define COB_SGEMM_M64_SME_REUSE_NC 512
 #endif
 
 #ifndef COB_SGEMM_M64_SME_WIDE_KC
