@@ -987,8 +987,10 @@ static int cob_sgemm_rowmajor_sme_medium_contiguous_strided_b32(
     float* c,
     int ldc)
 {
+    const int use_square_768 = m == 768 && n == 768 && k == 768;
     /* Tuned for medium contiguous cases where skipping one-shot B packing wins. */
-    if (m < 832 || m > 1280 || n < 832 || n > 1280 || k < 832 || k > 1280 ||
+    if ((!use_square_768 &&
+            (m < 832 || m > 1280 || n < 832 || n > 1280 || k < 832 || k > 1280)) ||
         n == 1024 || lda != k || ldb != n ||
         (m % COB_SGEMM_AMX_MR) != 0 ||
         (n % 64) != 0 || !cob_apple_sme2p1_available()) {
@@ -1748,6 +1750,11 @@ static int cob_sgemm_rowmajor_amx(
     }
 
     if (cob_sgemm_rowmajor_sme_skinny_contiguous_strided_b32(m, n, k, a, lda, b, ldb, c, ldc)) {
+        return 1;
+    }
+
+    if (m == 768 && n == 768 && k == 768 &&
+        cob_sgemm_rowmajor_sme_medium_contiguous_strided_b32(m, n, k, a, lda, b, ldb, c, ldc)) {
         return 1;
     }
 #endif
