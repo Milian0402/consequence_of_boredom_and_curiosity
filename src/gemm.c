@@ -109,7 +109,7 @@ enum {
 #endif
 
 #ifndef COB_SGEMM_PACK_B_PREFETCH_DISTANCE
-#define COB_SGEMM_PACK_B_PREFETCH_DISTANCE 16
+#define COB_SGEMM_PACK_B_PREFETCH_DISTANCE 64
 #endif
 
 static int cob_min_i32(int a, int b)
