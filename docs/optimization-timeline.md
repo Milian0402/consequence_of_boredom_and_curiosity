@@ -1023,6 +1023,22 @@ sign-p `2.42e-10`, and `1536` at `0.9625x`, CI `[0.9445,0.9705]`, sign-p
 was removed, `make test` again passed all 48 shapes, `git diff --check` passed,
 and there is no source behavior change.
 
+### 2026-05-05: route-aware gap sweep follow-up
+
+A route-aware sweep was used to inspect medium-square and `m = 64` skinny gaps.
+Forcing `1024` square onto the AMX strided-`B` route with
+`COB_SGEMM_AMX_STRIDED_B_EXTRA_N2=1024` was rejected: 101 repeats measured
+about `0.934x` median, bootstrap95 `[0.8828x,0.9414x]`, with B faster in
+`18/101` samples.
+
+Forcing `COB_SGEMM_M64_SME_REUSE_NC=256` was also rejected/inconclusive.
+`64x4096x7168` was neutral with holdout around `1.000x`, and the other wide
+shapes did not show a commit-worthy win.
+
+Tooling note: `tools/bench_gap_report.py` was added to rank route-labelled CSV
+benchmark gaps reproducibly. Validation covered `python3 -m py_compile`, a live
+CSV smoke through the helper, and `git diff --check`.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
