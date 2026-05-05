@@ -442,6 +442,26 @@ and 1008 GF/s medians for `128x4096x1024`, `128x2048x2048`, and
 `128x8192x512`. These are still below the packed-`B` path, but closer to
 Accelerate than the first chunked one-shot version.
 
+### 2026-05-05: rejected skinny SME packed-B one-shot route
+
+A temporary `COB_USE_APPLE_SME` path packed `A` once, packed `B` in 256-column
+chunks, and called the existing `16x64` SME packed-`B` kernel for skinny
+one-shot shapes. The experiment passed `make test` while present, but was
+reverted because it was not a reliable win.
+
+The wide `m = 64..128` gate was rejected because `m = 64` became much slower
+than the AMX direct-`B` fallback. Same-session medians included the SME route at
+about 361 GF/s versus AMX/no-SME about 707 GF/s for `64x2112x7168`, about
+272 versus 477 GF/s for `64x24576x1536`, and about 248 versus 380 GF/s for
+`64x32768x512`. Narrowing to `m = 128, k >= 1024` was still inconclusive or
+regressive: duplicate `128x4096x1024` medians with the SME route were about
+801 and 855 GF/s versus AMX/no-SME about 889 and 892 GF/s, while
+`128x2048x2048` was mixed.
+
+A temporary `build-nosme` directory was used for A/B runs against an SME-disabled
+build. `.gitignore` now ignores `build-*` directories so those local comparison
+builds stay out of status.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
