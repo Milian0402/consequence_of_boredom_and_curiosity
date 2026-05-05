@@ -70,6 +70,10 @@ enum {
 #define COB_SGEMM_M64_SME_LONG_WIDE_NC 256
 #endif
 
+#ifndef COB_SGEMM_M64_SME_LONG_N_K512_MIN_N
+#define COB_SGEMM_M64_SME_LONG_N_K512_MIN_N 4096
+#endif
+
 #ifndef COB_SGEMM_M64_SME_WIDE_KC
 #define COB_SGEMM_M64_SME_WIDE_KC 768
 #endif
@@ -839,7 +843,7 @@ static int cob_sgemm_rowmajor_sme_m64_pack_b_reuse(
     float* c,
     int ldc)
 {
-    const int use_long_n_k512 = n >= 32768 && k == 512;
+    const int use_long_n_k512 = n >= COB_SGEMM_M64_SME_LONG_N_K512_MIN_N && k == 512;
     const int use_n4096_large_k = n == 4096 && k >= 7168;
     const int use_wide = n >= 7168 && k >= 1024;
     if (m != 64 || (!use_long_n_k512 && !use_n4096_large_k && !use_wide) ||
@@ -1055,7 +1059,7 @@ static int cob_sgemm_rowmajor_sme_skinny_contiguous_strided_b32(
     int ldc)
 {
     const int use_large_k_skinny = n >= 1024 && n <= 4096 && k >= 7168;
-    const int use_long_n_k512 = n >= 32768 && k == 512;
+    const int use_long_n_k512 = n >= COB_SGEMM_M64_SME_LONG_N_K512_MIN_N && k == 512;
     if (m != 64 || (!use_large_k_skinny && !use_long_n_k512) ||
         lda != k || ldb != n ||
         (m % COB_SGEMM_AMX_MR) != 0 ||
