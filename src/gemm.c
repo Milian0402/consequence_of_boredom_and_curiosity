@@ -97,7 +97,7 @@ enum {
 #endif
 
 #ifndef COB_SGEMM_M64_SME_WIDE_KC
-#define COB_SGEMM_M64_SME_WIDE_KC 768
+#define COB_SGEMM_M64_SME_WIDE_KC 1024
 #endif
 
 #ifndef COB_SGEMM_SME_DIRECT_MAX_N
