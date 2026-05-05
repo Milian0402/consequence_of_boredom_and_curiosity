@@ -532,10 +532,11 @@ Accelerate. The experiment was reverted.
 ### 2026-05-05: K-blocked m=64 SME skinny route
 
 MpGEMM's live FP32 row-SGEMM benchmark was rebuilt from the current checkout
-and used as the external skinny target. It measured about 1285 GF/s on
-`64x2112x7168`, 1071 GF/s on `64x4096x7168`, and 833 GF/s on
-`64x32768x512`, confirming that COB's remaining largest gap was `m = 64`
-one-shot skinny performance.
+and remains the stronger open-source one-shot skinny blocker. The latest local
+baseline measured about 1285 GF/s on `64x2112x7168`, 1071 GF/s on
+`64x4096x7168`, 833 GF/s on `64x32768x512`, 1045 GF/s on
+`64x24576x1536`, 1099 GF/s on `64x7168x2048`, and 1056 GF/s on
+`64x7168x16384`.
 
 COB added a clean-room K-blocked SME direct-`B` route for selected `m = 64`
 skinny cases. The route uses `KC = 512`, packs only the current `A` K block,
@@ -545,12 +546,44 @@ Wider routing was rejected because it hurt shapes such as `64x24576x1536` and
 `64x7168x2048`.
 
 Result: validation passed with `make test` across 37 shapes after adding
-`64x2112x7168` and `64x4096x7168` direct-vs-packed coverage. A focused
-15-repeat benchmark showed one-shot medians around 1104 GF/s for
-`64x2112x7168` and 920 GF/s for `64x4096x7168`, versus same-session
-SME-disabled controls around 703 GF/s and 489 GF/s. `64x4096x7168` beat
-Accelerate in that run; `64x2112x7168` remained slightly behind Accelerate and
-MpGEMM.
+`64x2112x7168` and `64x4096x7168` direct-vs-packed coverage. After removing
+the failed 64x16 experiment below, the latest clean working-tree `make test`
+also passed all 37 shapes.
+
+Latest focused 15-repeat skinny medians:
+
+| Shape | COB one-shot | Accelerate | COB packed-B |
+| --- | ---: | ---: | ---: |
+| `64x2112x7168` | 1118.16 GF/s | 1131.87 GF/s | 1686.48 GF/s |
+| `64x4096x7168` | 785.56 GF/s | 660.13 GF/s | 1702.81 GF/s |
+| `64x32768x512` | 364.54 GF/s | 433.14 GF/s | 1366.95 GF/s |
+| `64x24576x1536` | 462.60 GF/s | 654.19 GF/s | 1602.07 GF/s |
+| `64x7168x2048` | 480.82 GF/s | 720.77 GF/s | 1712.90 GF/s |
+| `64x7168x16384` | 508.43 GF/s | 696.10 GF/s | 1688.46 GF/s |
+| `64x2112x512` | 1977.31 GF/s | 1949.46 GF/s | n/a |
+| `64x4096x512` | 1322.34 GF/s | 1225.73 GF/s | n/a |
+
+### 2026-05-05: rejected 64x16 B-reuse SME experiment
+
+A 64x16 B-reuse SME experiment was tried after the K-blocked `m = 64` route
+and removed. It regressed large-`K`, moderate-`N` skinny cases, with one run
+around 833 GF/s on `64x2112x7168` and 672 GF/s on `64x4096x7168`. The apparent
+long-`N`, `k = 512` gain did not repeat, later measuring only about
+314-316 GF/s, so no code from the experiment was kept.
+
+### 2026-05-05: Sapphire package checked
+
+An online search found the `sapphire-compute` PyPI package, which advertises
+1.56 TF/s SGEMM on Apple Silicon. The wheel was installed into a temporary
+environment and inspected locally. Its native `libsapphire.dylib` links
+Accelerate and imports `cblas_sgemm`, and the Python SGEMM wrapper documents
+that it uses Apple's Accelerate framework.
+
+Result: it is not a separate open-source single-thread SGEMM blocker for COB's
+scope. With `VECLIB_MAXIMUM_THREADS=1`, local `native.sgemm` medians were about
+604 GF/s on `64x2112x7168`, 395 GF/s on `64x4096x7168`, 230 GF/s on
+`64x32768x512`, 643 GF/s on `64x24576x1536`, 401 GF/s on `64x7168x2048`, and
+684 GF/s on `64x7168x16384`.
 
 ## Current Conclusion
 
