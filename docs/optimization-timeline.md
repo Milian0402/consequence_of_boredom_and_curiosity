@@ -606,6 +606,18 @@ rebuilding `build/cob_gemm_bench`, a final focused repeat-25 benchmark measured
 `64x4096x8192` at 943.74, 1629.35, and 695.88 GF/s; and `64x32768x512` at
 918.91, 1421.23, and 435.15 GF/s.
 
+Follow-up: the B-reuse helper was extended with a third narrow-ish wide gate,
+`m = 64, n >= 7168, k >= 1024`, while leaving `64x2112x7168` on the existing
+direct K-blocked SME route because B-reuse still regressed that shape. After
+that gate, `make test` passed all 37 shapes and `git diff --check` passed. A
+focused repeat-25 rebuild measured COB one-shot / packed-`B` / Accelerate at
+`64x24576x1536` 924.93 / 1605.80 / 660.99 GF/s, `64x7168x2048` 980.71 /
+1739.86 / 721.60 GF/s, `64x7168x16384` 945.91 / 1716.61 / 694.46 GF/s, and
+`64x8192x1024` 985.08 / 1701.65 / 618.87 GF/s; the same run had
+`64x2112x7168` at 1134.52 GF/s and `64x4096x7168` at 957.96 GF/s. This beats
+Accelerate across those wide one-shot cases and narrows the MpGEMM gap, but
+still does not universally overtake MpGEMM.
+
 This still does not close the MpGEMM gap on `64x2112x7168` or
 `64x4096x7168`, but it narrows `64x4096x7168` and beats the earlier local
 MpGEMM `64x32768x512` baseline of about 833 GF/s.

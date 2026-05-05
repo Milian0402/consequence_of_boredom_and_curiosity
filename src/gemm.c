@@ -713,7 +713,8 @@ static int cob_sgemm_rowmajor_sme_m64_pack_b_reuse(
 {
     const int use_long_n_k512 = n >= 32768 && k == 512;
     const int use_n4096_large_k = n == 4096 && k >= 7168;
-    if (m != 64 || (!use_long_n_k512 && !use_n4096_large_k) ||
+    const int use_wide = n >= 7168 && k >= 1024;
+    if (m != 64 || (!use_long_n_k512 && !use_n4096_large_k && !use_wide) ||
         lda != k || ldb != n || (n % 64) != 0 || !cob_apple_sme2p1_available()) {
         return 0;
     }
