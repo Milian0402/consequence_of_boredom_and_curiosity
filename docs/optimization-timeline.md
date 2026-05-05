@@ -938,6 +938,13 @@ versus 981.93, and `128x16384x1024` 1256.21 versus 803.85. The first
 another skinny one-shot k1024 gap for `n >= 4096`; the universal fastest claim
 is still not fully proven.
 
+Follow-up commit `aa1811e` covered higher-`k` samples for the same route. A
+grid check over `m = 96/128`, `n = 4096/8192`, and `k = 1024/2048/4096` kept
+the skinny SME reuse path faster than Accelerate in those samples. It added
+direct-vs-packed correctness tests for `96x4096x2048` and `128x8192x4096`,
+raising `make test` coverage to 48 shapes. Validation passed with `make all`,
+all 48 test shapes, `git diff --check`, and a pushed commit.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
