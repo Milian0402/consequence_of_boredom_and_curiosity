@@ -70,6 +70,13 @@ Set `COB_BENCH_PACK_SETUP=1` to also print the one-time packed-`B` setup cost.
 Set `COB_BENCH_CSV=1` to print machine-readable benchmark rows for grid sweeps
 and plotting.
 
+For repeated boundary sweeps, use the CSV wrapper:
+
+```sh
+sh tools/bench_grid.sh 832 896 960
+COB_GRID_M="64 96 128" COB_GRID_N="1024 2048" COB_GRID_K="512 1024" sh tools/bench_grid.sh
+```
+
 To compare against an open-source CBLAS implementation, build the separate
 external CBLAS benchmark target. For example, with a local BLIS build:
 
