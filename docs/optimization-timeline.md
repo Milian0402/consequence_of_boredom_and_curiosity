@@ -846,6 +846,16 @@ Post-`5e6da0a` rejected/probed follow-ups:
   MpGEMM's `O0` timing driver measured best 1042.92 GF/s and median
   853.23 GF/s in a noisy but usable separate-process run, while COB now
   measured best 1031.78 GF/s and median 1020.02 GF/s in the focused bench.
+- `COB_SGEMM_M64_SME_REUSE_NC=384` was rejected after a broad paired run looked
+  only weakly positive and focused validation did not hold up. Broad paired
+  ratios were `64x4096x7168` median 1.0046x, mean-log 1.0080x, CI
+  [0.9987,1.0223], sign-p 0.349; `64x7168x2048` median 1.0016x, CI
+  [0.9960,1.0127], sign-p 0.755; `64x7168x16384` median 1.0034x, CI
+  [0.9958,1.0089], sign-p 0.0596; and `64x8192x1024` median 1.0049x, CI
+  [1.0006,1.0121], sign-p 0.0784. Focused validation rejected it:
+  `64x7168x16384` repeat-81 median 1.0002x, mean-log 1.0002x, CI
+  [0.9911,1.0077], sign-p 1; `64x8192x1024` repeat-51 median 0.9990x,
+  mean-log 1.0011x, CI [0.9958,1.0068], sign-p 1. No source behavior change.
 - `KC` probes also stayed uncommitted. `NC512 + KC1024` and targeted
   `k == 2048` / `k == 1024` variants were not clean enough to commit; the
   `k == 1024`-only repeat-31 gave `64x8192x1024` median 970.83 GF/s and
