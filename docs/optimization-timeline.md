@@ -442,6 +442,20 @@ and 1008 GF/s medians for `128x4096x1024`, `128x2048x2048`, and
 `128x8192x512`. These are still below the packed-`B` path, but closer to
 Accelerate than the first chunked one-shot version.
 
+### 2026-05-05: rejected skinny AMX chunk experiments
+
+Two skinny AMX chunk-pack experiments were tried after the `40454ae` follow-up
+and reverted. A temporary compile-time chunk-width sweep tested 384, 512, 768,
+and 1024 columns against the default 96=>256, 128/k>=1024=>512, otherwise 256
+policy. Broad variants were mostly worse; the isolated `M128_K1024=768` case
+was mixed and noisy rather than a reliable win, and `M96=1024` was unstable.
+
+The compute loop in `cob_sgemm_rowmajor_amx_skinny_pack_b_chunks` was also
+temporarily changed from chunk->panel->ap to chunk->ap->panel. It passed
+`make test`, but did not improve enough and regressed large skinny cases:
+`128x32768x512` measured around 475 GF/s median versus about 530 GF/s in the
+prior clean run. No code from either experiment was kept.
+
 ### 2026-05-05: rejected skinny SME packed-B one-shot route
 
 A temporary `COB_USE_APPLE_SME` path packed `A` once, packed `B` in 256-column
