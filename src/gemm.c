@@ -74,6 +74,10 @@ enum {
 #define COB_SGEMM_M64_SME_WIDE_KC 768
 #endif
 
+#ifndef COB_SGEMM_SME_DIRECT_MAX_N
+#define COB_SGEMM_SME_DIRECT_MAX_N 1280
+#endif
+
 static int cob_min_i32(int a, int b)
 {
     return a < b ? a : b;
@@ -991,7 +995,9 @@ static int cob_sgemm_rowmajor_sme_medium_contiguous_strided_b32(
     const int use_square_768 = m == 768 && n == 768 && k == 768;
     /* Tuned for medium contiguous cases where skipping one-shot B packing wins. */
     if ((!use_square_384 && !use_square_768 &&
-            (m < 832 || m > 1280 || n < 832 || n > 1280 || k < 832 || k > 1280)) ||
+            (m < 832 || m > COB_SGEMM_SME_DIRECT_MAX_N ||
+                n < 832 || n > COB_SGEMM_SME_DIRECT_MAX_N ||
+                k < 832 || k > COB_SGEMM_SME_DIRECT_MAX_N)) ||
         n == 1024 || lda != k || ldb != n ||
         (m % COB_SGEMM_AMX_MR) != 0 ||
         (n % 64) != 0 || !cob_apple_sme2p1_available()) {

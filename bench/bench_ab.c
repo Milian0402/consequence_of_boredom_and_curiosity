@@ -325,6 +325,39 @@ static void bootstrap_log_speedup_ci(const double* log_speedups, int repeats, in
     free(means);
 }
 
+static double sign_test_two_tailed_pvalue(int successes, int trials)
+{
+    if (trials <= 0) {
+        return 1.0;
+    }
+
+    int tail = successes;
+    if (trials - successes < tail) {
+        tail = trials - successes;
+    }
+
+    double probability = ldexp(1.0, -trials);
+    double tail_sum = probability;
+    for (int i = 0; i < tail; ++i) {
+        probability *= (double)(trials - i) / (double)(i + 1);
+        tail_sum += probability;
+    }
+
+    const double pvalue = 2.0 * tail_sum;
+    return pvalue < 1.0 ? pvalue : 1.0;
+}
+
+static int checksums_match(float checksum_a, float checksum_b)
+{
+    const double a = fabs((double)checksum_a);
+    const double b = fabs((double)checksum_b);
+    double scale = a > b ? a : b;
+    if (scale < 1.0) {
+        scale = 1.0;
+    }
+    return fabs((double)checksum_a - (double)checksum_b) / scale <= 1.0e-4;
+}
+
 static int bench_one_shape(
     bench_shape shape,
     int min_repeats,
@@ -427,6 +460,7 @@ static int bench_one_shape(
     int repeats = 0;
     sample_stats a_stats = {0.0, 0.0, 0.0, 0.0};
     sample_stats b_stats = {0.0, 0.0, 0.0, 0.0};
+    sample_stats speedup_stats = {0.0, 0.0, 0.0, 0.0};
     while (repeats < max_repeats) {
         int target_repeats = repeats == 0 ? min_repeats : repeats + repeat_batch;
         if (target_repeats > max_repeats) {
@@ -454,8 +488,10 @@ static int bench_one_shape(
         repeats = target_repeats;
         a_stats = summarize_samples(gf_a, repeats);
         b_stats = summarize_samples(gf_b, repeats);
+        speedup_stats = summarize_samples(speedups, repeats);
         if (repeats >= min_repeats &&
-            (a_stats.cv_percent <= cv_target_percent && b_stats.cv_percent <= cv_target_percent)) {
+            ((a_stats.cv_percent <= cv_target_percent && b_stats.cv_percent <= cv_target_percent) ||
+                speedup_stats.cv_percent <= cv_target_percent)) {
             break;
         }
     }
@@ -467,7 +503,6 @@ static int bench_one_shape(
         }
     }
 
-    const sample_stats speedup_stats = summarize_samples(speedups, repeats);
     double mean_log = 0.0;
     for (int r = 0; r < repeats; ++r) {
         mean_log += log_speedups[r];
@@ -477,6 +512,10 @@ static int bench_one_shape(
     double ci_low = 0.0;
     double ci_high = 0.0;
     bootstrap_log_speedup_ci(log_speedups, repeats, bootstrap_draws, &ci_low, &ci_high);
+    const double sign_pvalue = sign_test_two_tailed_pvalue(b_faster, repeats);
+    const float checksum_a = checksum(c_a, c_count);
+    const float checksum_b = checksum(c_b, c_count);
+    const int checksum_ok = checksums_match(checksum_a, checksum_b);
 
     printf(
         "%dx%dx%d mode=%s repeats=%d iterations=%d\n",
@@ -499,25 +538,36 @@ static int bench_one_shape(
         a_stats.median,
         a_stats.best,
         a_stats.cv_percent,
-        checksum(c_a, c_count));
+        checksum_a);
     printf(
         "  B median %8.2f GF/s best %8.2f GF/s cv %5.2f%% checksum=% .6e\n",
         b_stats.median,
         b_stats.best,
         b_stats.cv_percent,
-        checksum(c_b, c_count));
+        checksum_b);
     printf(
-        "  paired B/A median %.4fx mean-log %.4fx",
+        "  paired B/A median %.4fx mean-log %.4fx cv %5.2f%%",
         speedup_stats.median,
-        exp(mean_log));
+        exp(mean_log),
+        speedup_stats.cv_percent);
     if (ci_low > 0.0 && ci_high > 0.0) {
         printf(" bootstrap95 [%.4fx, %.4fx]", ci_low, ci_high);
     }
-    printf(" B-faster %d/%d\n", b_faster, repeats);
+    printf(" B-faster %d/%d sign-p %.3g\n", b_faster, repeats, sign_pvalue);
     if (a_stats.cv_percent > cv_target_percent || b_stats.cv_percent > cv_target_percent) {
         printf(
             "  warning: sample CV above %.2f%%; treat this shape as noisy\n",
             cv_target_percent);
+    }
+    if (!checksum_ok) {
+        fprintf(
+            stderr,
+            "checksum mismatch for %dx%dx%d: A=% .6e B=% .6e\n",
+            shape.m,
+            shape.n,
+            shape.k,
+            checksum_a,
+            checksum_b);
     }
 
     impl_a.free_packed_b(&packed_a);
@@ -532,7 +582,7 @@ static int bench_one_shape(
     free(gf_b);
     free(speedups);
     free(log_speedups);
-    return 0;
+    return checksum_ok ? 0 : 2;
 }
 
 int main(int argc, char** argv)
@@ -557,7 +607,9 @@ int main(int argc, char** argv)
         {384, 384, 384},
         {768, 768, 768},
         {1024, 1024, 1024},
+        {1536, 1536, 1536},
         {64, 4096, 7168},
+        {128, 4096, 1024},
     };
 
     int status = 0;

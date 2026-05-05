@@ -5,7 +5,8 @@ These rules summarize repeated findings from the optimization timeline. They are
 ## Measurement
 
 - Prefer paired A/B runs over comparing medians from separate benchmark invocations.
-- Treat runs with sample CV above 2% as noisy, even when the apparent median delta is large. Use `COB_AB_MAX_REPEATS` to let the paired harness collect more samples before deciding.
+- Treat runs with sample CV above 2% as noisy, even when the apparent median delta is large. Use `COB_AB_MAX_REPEATS` to let the paired harness collect more samples before deciding; paired speedup CV can stop a run early when common-mode noise is high but the ratio is stable.
+- Prefer candidates whose bootstrap interval and sign-test p-value agree. If they disagree, rerun instead of shipping the change.
 - Recheck any candidate win in a fresh process before committing a performance route.
 - Keep one-shot and packed-B claims separate. Packed-B compute-only results are useful ceilings but do not prove the public one-shot path is faster.
 
