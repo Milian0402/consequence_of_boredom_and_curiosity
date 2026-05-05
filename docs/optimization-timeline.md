@@ -478,6 +478,18 @@ Accelerate was still faster on that case at roughly 410-415 GF/s.
 Validation passed with `make test` across 35 shapes after adding
 `64x32768x512` direct-vs-packed correctness coverage.
 
+### 2026-05-05: rejected small-square SME direct-B route
+
+A temporary dispatch experiment lowered the SME direct-`B` medium route to also
+try square `192` and `320`, and moved that route ahead of AMX direct-`B` so the
+small cases could reach it.
+
+Result: the experiment passed `make test`, but was rejected. `192` regressed
+badly in one duplicate 15-repeat run, with medians around 1387-1619 GF/s versus
+the AMX direct-`B` baseline around 1696 GF/s. `320` remained below Accelerate,
+and moving the medium SME route earlier also regressed routed medium sizes such
+as `1088`, `1152`, and `1216`. The code change was reverted.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
