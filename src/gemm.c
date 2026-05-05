@@ -28,9 +28,16 @@
 
 enum {
     COB_SGEMM_AMX_MR = 32,
-    COB_SGEMM_AMX_NR = 32,
-    COB_SGEMM_AMX_MC = 384
+    COB_SGEMM_AMX_NR = 32
 };
+
+#ifndef COB_SGEMM_AMX_MC
+#define COB_SGEMM_AMX_MC 384
+#endif
+
+#ifndef COB_SGEMM_AMX_PACKED_LARGE_MC
+#define COB_SGEMM_AMX_PACKED_LARGE_MC 512
+#endif
 
 #ifndef COB_SGEMM_SME_DIRECT_MC
 #define COB_SGEMM_SME_DIRECT_MC 256
@@ -1411,9 +1418,10 @@ static int cob_sgemm_rowmajor_amx_from_packed_b32(
     const int b_panels = (n + COB_SGEMM_AMX_NR - 1) / COB_SGEMM_AMX_NR;
     const size_t b_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_NR;
 
-    if (m >= COB_SGEMM_AMX_MC && n >= 1152 && k >= 512 &&
+    const int packed_mc = n >= 2048 ? COB_SGEMM_AMX_PACKED_LARGE_MC : COB_SGEMM_AMX_MC;
+    if (m >= packed_mc && n >= 1152 && k >= 512 &&
         m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0) {
-        const int max_a_panels = COB_SGEMM_AMX_MC / COB_SGEMM_AMX_MR;
+        const int max_a_panels = packed_mc / COB_SGEMM_AMX_MR;
         const size_t a_block_floats = (size_t)max_a_panels * a_panel_floats;
         float* packed_a_block = (float*)cob_aligned_alloc(128, a_block_floats * sizeof(float));
         if (packed_a_block == NULL) {
@@ -1421,8 +1429,8 @@ static int cob_sgemm_rowmajor_amx_from_packed_b32(
         }
 
         cob_amx_set();
-        for (int ib = 0; ib < m; ib += COB_SGEMM_AMX_MC) {
-            const int mc = cob_min_i32(COB_SGEMM_AMX_MC, m - ib);
+        for (int ib = 0; ib < m; ib += packed_mc) {
+            const int mc = cob_min_i32(packed_mc, m - ib);
             const int a_panels = mc / COB_SGEMM_AMX_MR;
             for (int ap = 0; ap < a_panels; ++ap) {
                 const int ic = ib + ap * COB_SGEMM_AMX_MR;

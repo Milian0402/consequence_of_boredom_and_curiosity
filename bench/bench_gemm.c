@@ -61,9 +61,12 @@ typedef struct bench_stats {
 enum {
     COB_BENCH_MAX_REPEATS = 31,
     COB_BENCH_AMX_MR = 32,
-    COB_BENCH_AMX_NR = 32,
-    COB_BENCH_AMX_MC = 384
+    COB_BENCH_AMX_NR = 32
 };
+
+#ifndef COB_SGEMM_AMX_MC
+#define COB_SGEMM_AMX_MC 384
+#endif
 
 #ifndef COB_SGEMM_SME_DIRECT_MAX_N
 #define COB_SGEMM_SME_DIRECT_MAX_N 1216
@@ -338,7 +341,7 @@ static const char* cob_one_shot_route(bench_shape shape)
     }
 
     const int use_large_block =
-        m >= COB_BENCH_AMX_MC && n >= 1152 && k >= 512 && aligned32;
+        m >= COB_SGEMM_AMX_MC && n >= 1152 && k >= 512 && aligned32;
     const int use_strided_b_large_extra =
         n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N3 || n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N4;
     const int use_strided_b_skinny_extra = m <= 128 && n >= 1024;
@@ -392,7 +395,7 @@ static const char* cob_packed_b_route(bench_shape shape)
         return "packed_sme";
     }
     if ((m % COB_BENCH_AMX_MR) == 0 && (n % COB_BENCH_AMX_NR) == 0) {
-        if (m >= COB_BENCH_AMX_MC && n >= 1152 && k >= 512) {
+        if (m >= COB_SGEMM_AMX_MC && n >= 1152 && k >= 512) {
             return "packed_amx_large_block";
         }
         return "packed_amx_full";
