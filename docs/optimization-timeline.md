@@ -519,6 +519,36 @@ skinny-case results were mixed and noisy: medians ranged from `0.9828x` to
 `1.0070x`, with one negative trend at `128x8192x512`. No code from either
 experiment was kept.
 
+### 2026-05-05: paired benchmark diagnostics tightened
+
+Commit `d36a41c` tightened the paired A/B benchmark harness. It added paired
+speedup CV output, lets auto-repeat stop once the paired ratio is stable, prints
+a two-tailed sign-test p-value, and exits nonzero on checksum divergence. The
+default no-argument shape set was expanded, side-specific compiler flags
+`COB_AB_A_FLAGS` and `COB_AB_B_FLAGS` were added, and the design rules were
+updated.
+
+The commit also added neutral `COB_SGEMM_SME_DIRECT_MAX_N` compile-time routing
+bound for route A/B tests without changing default dispatch.
+
+Result: validation before commit passed with `make all`, `make test` across
+37 shapes, `sh -n tools/paired_ab_bench.sh`, `git diff --check`, a paired
+self-smoke at `128`, and a side-flag smoke forcing
+`COB_SGEMM_AMX_STRIDED_B_MAX_N=128` at `192`.
+
+### 2026-05-05: rejected m=64 skinny KC probe
+
+A compile-flag probe tested `COB_SGEMM_SKINNY_SME_KC=768` against the current
+default on `64x2112x7168`, `64x4096x7168`, `64x8192x1024`, and
+`64x7168x2048`.
+
+Result: the probe was mixed and noisy. Paired results were `0.9969x` median,
+mean-log `1.0046x`, CI `[0.9962,1.0131]` for `64x2112x7168`; `0.9913x`
+median, mean-log `0.9890x`, CI `[0.9795,0.9986]` for `64x4096x7168`;
+`1.0058x` median, CI `[0.9960,1.0083]` for `64x8192x1024`; and `1.0017x`
+median, CI `[0.9952,1.0085]` for `64x7168x2048`. The probe was rejected, with
+no source behavior change.
+
 ### 2026-05-05: rejected skinny direct-B bypass
 
 The AMX skinny chunked path was temporarily disabled for `m = 96/128` below
