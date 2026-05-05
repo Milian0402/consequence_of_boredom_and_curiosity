@@ -8,6 +8,26 @@ and `beta = 0`.
 
 ## Timeline
 
+### 2026-05-05: B-pack prefetch accepted
+
+Added guarded `COB_SGEMM_PACK_B_PREFETCH_DISTANCE` prefetching for full
+32-column `B`-panel packing and accepted default distance `16`. Distance `8`
+was positive at `1280` and broadly helpful but noisy, while distance `4` was
+weaker. Distance `16` gave the best large-square signal.
+
+Key paired evidence, old default vs new default:
+
+- `1536` one-shot median `1.0142x`, bootstrap95 `[1.0109,1.0266]`,
+  B-faster `61/81`.
+- `2048` one-shot median `1.0155x`, bootstrap95 `[1.0019,1.0203]`,
+  B-faster `72/81`.
+- `1280` was positive but noisy, with holdout positive.
+- `512` and `1024` were neutral/noisy.
+
+Validation passed: `make test` across 50 shapes, `make all`, and
+`git diff --check`. A route smoke was noisy at `1024` but showed large-square
+route behavior.
+
 ### 2026-05-05: route-aware benchmark reporting
 
 Added optional route-aware benchmark reporting with `COB_BENCH_ROUTE=1`, so
