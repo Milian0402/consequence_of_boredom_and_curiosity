@@ -652,6 +652,30 @@ around 1.9-2.0 TF/s on large square cases and beat `blis_apple`, OpenBLAS,
 BLASFEO, Rust `matrixmultiply`, Eigen, `coral-aarch64`, LIBXSMM exact
 `beta = 0`, and the comparable `tract-linalg` paths in the tested cases.
 
+Post-`5e6da0a` rejected/probed follow-ups:
+
+- Direct-SME-wide worktree `/private/tmp/cob_sme_direct_wide_exp` disabled wide
+  B-reuse and let direct strided SME cover `n >= 7168, k >= 1024`. It passed
+  all 37 GEMM tests, but repeat-25 one-shot results were much worse on wide
+  shapes: `64x24576x1536` median 437.31 GF/s, `64x7168x2048` 637.61 GF/s,
+  `64x7168x16384` 610.06 GF/s, and `64x8192x1024` 564.24 GF/s. Reject.
+- Compile-time `NC` probes for `m = 64` B-reuse did not produce a commit-worthy
+  default. `NC = 256` improved some medians in one run but hurt or was noisy
+  for `64x32768x512`; `NC = 512` looked modestly better in repeat-25, including
+  `64x24576x1536` median 950.59 GF/s, `64x7168x2048` 997.37 GF/s, and
+  `64x8192x1024` 1024.56 GF/s, but repeat-31 was inconclusive/noisy.
+  `NC = 768` was not better. No source commit yet.
+- `KC` probes also stayed uncommitted. `NC512 + KC1024` and targeted
+  `k == 2048` / `k == 1024` variants were not clean enough to commit; the
+  `k == 1024`-only repeat-31 gave `64x8192x1024` median 970.83 GF/s and
+  `64x7168x1024` 952.86 GF/s, so reject.
+- The 64x16 SME strided kernel temp worktree
+  `/private/tmp/cob_sme_64x16_exp` passed all 37 tests but was much slower:
+  `64x24576x1536` median 564.27 GF/s, `64x7168x2048` 708.54 GF/s,
+  `64x4096x7168` 667.99 GF/s, and `64x2112x7168` 887.26 GF/s. Reject.
+- MpGEMM checkout `/private/tmp/mpgemm_latest` was refreshed and was already up
+  to date at `8d83011`.
+
 The universal "fastest" claim is not achieved if MpGEMM counts, because MpGEMM
 won several same-process one-shot FP32 single-thread square benchmarks.
 Accelerate also still wins some small cases. The SME packed-`B` path improves
