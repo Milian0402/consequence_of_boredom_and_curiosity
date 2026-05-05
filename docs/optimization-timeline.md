@@ -504,6 +504,18 @@ the AMX direct-`B` baseline around 1696 GF/s. `320` remained below Accelerate,
 and moving the medium SME route earlier also regressed routed medium sizes such
 as `1088`, `1152`, and `1216`. The code change was reverted.
 
+### 2026-05-05: rejected AMX loop-control experiments
+
+Two more low-risk control-flow experiments were tested and rejected. Unrolling
+the AMX direct-`B` panel loop by four kept the same independent `32x32` kernels,
+but did not reliably improve `1088` or `1216` and produced a severe duplicate
+regression at `1152`, so it was reverted.
+
+The skinny chunked path also tried a single aligned scratch allocation for both
+packed `A` and packed `B`, replacing two separate heap allocations. It passed
+`make test`, but the focused skinny sweep was mixed and weaker on important
+`m = 96` and `m = 128, k = 512` samples, so the separate allocations stayed.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
