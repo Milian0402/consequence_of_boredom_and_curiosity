@@ -1056,6 +1056,24 @@ Post-change A/B against the old `1280` default still showed `1280` at
 Validation passed with `make test` across 49 shapes, `make all`, and
 `git diff --check`.
 
+### 2026-05-05: packed-B large-square AMX row block
+
+The route-aware gap report showed large-square packed and one-shot areas were
+still worth checking. The AMX `MC` row block was made compile-time tunable and
+`MC = 256` / `512` were probed across one-shot and public packed-`B` routes.
+
+Result: one-shot large-square `MC = 256` and `512` were rejected/neutral, so
+one-shot keeps `MC = 384`. Packed-`B` `MC = 256` was rejected because it
+regressed `1536` and was neutral elsewhere. Packed-`B` `MC = 512` was accepted
+for `n >= 2048`: `2048` packed-`B` improved about `1.007-1.010x`, with an
+agreeing holdout, while `1152`, `1216`, and `1792` were neutral.
+
+The accepted source change uses packed-`B`-only
+`COB_SGEMM_AMX_PACKED_LARGE_MC=512` for `n >= 2048`, leaving one-shot at
+`MC = 384`. Validation passed with `make test` across 50 shapes, `make all`,
+and `git diff --check`. A route smoke in that session showed `2048` packed-`B`
+median above Accelerate.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
