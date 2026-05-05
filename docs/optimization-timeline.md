@@ -585,31 +585,30 @@ scope. With `VECLIB_MAXIMUM_THREADS=1`, local `native.sgemm` medians were about
 `64x32768x512`, 643 GF/s on `64x24576x1536`, 401 GF/s on `64x7168x2048`, and
 684 GF/s on `64x7168x16384`.
 
-### 2026-05-05: narrow 64x32768x512 SME B-pack reuse route
+### 2026-05-05: m=64 SME B-pack reuse route
 
 COB added a clean-room SME fused B-pack/reuse route for
-`m = 64, n >= 32768, k = 512`. It packs all of `A` once, processes `N` in
-1024-column chunks, streams `B` and packs a 64-column panel while computing the
-first 16 rows, then reuses that packed `B` for the other three 16-row panels.
-This was inspired by a high-level read of MpGEMM's row-kernel behavior, but no
-assembly was copied.
+`m = 64, n >= 32768, k = 512`, then generalized it into one `m = 64` SME
+B-reuse helper with two narrow gates: `n >= 32768 && k == 512`, and
+`n == 4096 && k >= 7168`. It packs all of `A` once, streams `B` and packs a
+64-column panel while computing the first 16 rows, then reuses that packed `B`
+for the other three 16-row panels. This was inspired by a high-level read of
+MpGEMM's row-kernel behavior, but no assembly was copied.
 
-A full-`k`/full-`N` fused route was also tested for large-`K`, moderate-`N`
-shapes such as `64x2112x7168` and `64x4096x7168`, then rejected because it
-regressed those cases. The existing K-blocked direct SME route remains better
-there.
+The large-`K` gate is intentionally limited to `n == 4096`; `64x2112x7168`
+stays on the existing K-blocked direct SME route because B-pack reuse regressed
+that shape.
 
-Result: `make test` passed all 37 shapes. After rebuilding `build/cob_gemm_bench`,
-a focused repeat-25 benchmark measured `64x32768x512` at 909.95 GF/s COB
-one-shot, 1422.17 GF/s packed-`B`, and 436.75 GF/s Accelerate. COB one-shot
-medians in the same run were 1137.19 GF/s on `64x2112x7168`, 915.27 GF/s on
-`64x4096x7168`, 366.88 GF/s on `64x24576x1536`, 485.04 GF/s on
-`64x7168x2048`, 504.21 GF/s on `64x7168x16384`, and 1412.82 GF/s on
-`64x4096x512`.
+Result: `make test` passed all 37 shapes, and `git diff --check` passed. After
+rebuilding `build/cob_gemm_bench`, a final focused repeat-25 benchmark measured
+`64x2112x7168` at 1124.00 GF/s COB one-shot, 1705.78 GF/s packed-`B`, and
+1139.19 GF/s Accelerate; `64x4096x7168` at 941.88, 1714.46, and 694.27 GF/s;
+`64x4096x8192` at 943.74, 1629.35, and 695.88 GF/s; and `64x32768x512` at
+918.91, 1421.23, and 435.15 GF/s.
 
-This now exceeds the earlier local MpGEMM `64x32768x512` baseline of about
-833 GF/s, but COB is still not universally fastest because MpGEMM remains ahead
-on other skinny one-shot cases.
+This still does not close the MpGEMM gap on `64x2112x7168` or
+`64x4096x7168`, but it narrows `64x4096x7168` and beats the earlier local
+MpGEMM `64x32768x512` baseline of about 833 GF/s.
 
 ## Current Conclusion
 
