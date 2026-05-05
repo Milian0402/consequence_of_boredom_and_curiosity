@@ -59,8 +59,55 @@ typedef struct bench_stats {
 } bench_stats;
 
 enum {
-    COB_BENCH_MAX_REPEATS = 31
+    COB_BENCH_MAX_REPEATS = 31,
+    COB_BENCH_AMX_MR = 32,
+    COB_BENCH_AMX_NR = 32,
+    COB_BENCH_AMX_MC = 384
 };
+
+#ifndef COB_SGEMM_SME_DIRECT_MAX_N
+#define COB_SGEMM_SME_DIRECT_MAX_N 1280
+#endif
+
+#ifndef COB_SGEMM_SME_PACKED_MAX_N
+#define COB_SGEMM_SME_PACKED_MAX_N 1152
+#endif
+
+#ifndef COB_SGEMM_AMX_STRIDED_B_MAX_N
+#define COB_SGEMM_AMX_STRIDED_B_MAX_N 832
+#endif
+
+#ifndef COB_SGEMM_AMX_STRIDED_B_EXTRA_N
+#define COB_SGEMM_AMX_STRIDED_B_EXTRA_N 960
+#endif
+
+#ifndef COB_SGEMM_AMX_STRIDED_B_EXTRA_N2
+#define COB_SGEMM_AMX_STRIDED_B_EXTRA_N2 1088
+#endif
+
+#ifndef COB_SGEMM_AMX_STRIDED_B_EXTRA_N3
+#define COB_SGEMM_AMX_STRIDED_B_EXTRA_N3 1152
+#endif
+
+#ifndef COB_SGEMM_AMX_STRIDED_B_EXTRA_N4
+#define COB_SGEMM_AMX_STRIDED_B_EXTRA_N4 1216
+#endif
+
+#ifndef COB_SGEMM_AMX_STRIDED_B_CONFLICT_LDB
+#define COB_SGEMM_AMX_STRIDED_B_CONFLICT_LDB 512
+#endif
+
+#ifndef COB_SGEMM_M64_SME_LONG_N_K512_MIN_N
+#define COB_SGEMM_M64_SME_LONG_N_K512_MIN_N 4096
+#endif
+
+#ifndef COB_SGEMM_M96_128_SME_REUSE_K512_MIN_N
+#define COB_SGEMM_M96_128_SME_REUSE_K512_MIN_N 4096
+#endif
+
+#ifndef COB_SGEMM_M96_128_SME_REUSE_K1024_MIN_N
+#define COB_SGEMM_M96_128_SME_REUSE_K1024_MIN_N 4096
+#endif
 
 static uint32_t rng_next(uint32_t* state)
 {
@@ -175,6 +222,11 @@ static int bench_csv_enabled(void)
     return env_int_clamped("COB_BENCH_CSV", 0, 0, 1) != 0;
 }
 
+static int bench_route_enabled(void)
+{
+    return env_int_clamped("COB_BENCH_ROUTE", 0, 0, 1) != 0;
+}
+
 static int pack_setup_iterations(bench_shape shape)
 {
     const int n = shape_max_dim(shape);
@@ -220,6 +272,132 @@ static void format_shape(char* dst, size_t dst_size, bench_shape shape)
 static void bench_cob_direct(bench_shape shape, const float* a, const float* b, float* c)
 {
     cob_sgemm_rowmajor(shape.m, shape.n, shape.k, a, shape.k, b, shape.n, c, shape.n);
+}
+
+static int is_apple_amx_build(void)
+{
+#if defined(__APPLE__) && defined(__aarch64__) && !defined(COB_DISABLE_APPLE_AMX)
+    return 1;
+#else
+    return 0;
+#endif
+}
+
+static int is_apple_sme_build(void)
+{
+#if defined(__APPLE__) && defined(__aarch64__) && !defined(COB_DISABLE_APPLE_SME)
+    return 1;
+#else
+    return 0;
+#endif
+}
+
+static const char* cob_one_shot_route(bench_shape shape)
+{
+    const int m = shape.m;
+    const int n = shape.n;
+    const int k = shape.k;
+    if (!is_apple_amx_build()) {
+        return "fallback";
+    }
+
+    const int aligned32 = (m % COB_BENCH_AMX_MR) == 0 && (n % COB_BENCH_AMX_NR) == 0;
+    if (is_apple_sme_build()) {
+        const int use_m64 = m == 64;
+        const int use_m96_128_k512 =
+            (m == 96 || m == 128) && n >= COB_SGEMM_M96_128_SME_REUSE_K512_MIN_N && k == 512;
+        const int use_m96_128_k1024 =
+            (m == 96 || m == 128) && n >= COB_SGEMM_M96_128_SME_REUSE_K1024_MIN_N && k >= 1024;
+        const int use_long_n_k512 =
+            (use_m64 && n >= COB_SGEMM_M64_SME_LONG_N_K512_MIN_N && k == 512) ||
+            use_m96_128_k512;
+        const int use_n4096_large_k = use_m64 && n == 4096 && k >= 7168;
+        const int use_wide = use_m64 && n >= 7168 && k >= 1024;
+        if ((use_m64 || use_m96_128_k512 || use_m96_128_k1024) &&
+            (use_long_n_k512 || use_n4096_large_k || use_wide || use_m96_128_k1024) &&
+            (n % 64) == 0) {
+            return "sme_skinny_reuse";
+        }
+    }
+
+    if (m >= 96 && m <= 128 && n >= 1024 && k >= 512 && aligned32) {
+        return "amx_skinny_chunks";
+    }
+
+    if (is_apple_sme_build()) {
+        const int use_large_k_skinny = m == 64 && n >= 1024 && n <= 4096 && k >= 7168;
+        const int use_long_n_k512 =
+            m == 64 && n >= COB_SGEMM_M64_SME_LONG_N_K512_MIN_N && k == 512;
+        if ((use_large_k_skinny || use_long_n_k512) && (n % 64) == 0) {
+            return "sme_skinny_strided";
+        }
+
+        if ((m == 384 && n == 384 && k == 384) || (m == 768 && n == 768 && k == 768)) {
+            return "sme_medium_direct";
+        }
+    }
+
+    const int use_large_block =
+        m >= COB_BENCH_AMX_MC && n >= 1152 && k >= 512 && aligned32;
+    const int use_strided_b_large_extra =
+        n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N3 || n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N4;
+    const int use_strided_b_skinny_extra = m <= 128 && n >= 1024;
+    const int use_strided_b_extra =
+        n <= COB_SGEMM_AMX_STRIDED_B_MAX_N || n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N ||
+        n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N2 || use_strided_b_large_extra ||
+        use_strided_b_skinny_extra;
+    const int use_strided_b =
+        (!use_large_block || use_strided_b_large_extra) && use_strided_b_extra &&
+        n != COB_SGEMM_AMX_STRIDED_B_CONFLICT_LDB && aligned32;
+    if (use_strided_b) {
+        return "amx_strided_b";
+    }
+
+    if (is_apple_sme_build()) {
+        const int use_square_384 = m == 384 && n == 384 && k == 384;
+        const int use_square_768 = m == 768 && n == 768 && k == 768;
+        if ((use_square_384 || use_square_768 ||
+                (m >= 832 && m <= COB_SGEMM_SME_DIRECT_MAX_N &&
+                    n >= 832 && n <= COB_SGEMM_SME_DIRECT_MAX_N &&
+                    k >= 832 && k <= COB_SGEMM_SME_DIRECT_MAX_N)) &&
+            n != 1024 && (n % 64) == 0 && (m % COB_BENCH_AMX_MR) == 0) {
+            return "sme_medium_direct";
+        }
+    }
+
+    if (n == COB_SGEMM_AMX_STRIDED_B_CONFLICT_LDB && m >= 512 &&
+        (m % COB_BENCH_AMX_MR) == 0 && k >= 512 && is_apple_sme_build()) {
+        return "pack_b_then_sme";
+    }
+    if (use_large_block) {
+        return "amx_packed_large_block";
+    }
+    if (aligned32) {
+        return "amx_packed_full";
+    }
+    return "amx_packed_partial";
+}
+
+static const char* cob_packed_b_route(bench_shape shape)
+{
+    const int m = shape.m;
+    const int n = shape.n;
+    const int k = shape.k;
+    if (!is_apple_amx_build()) {
+        return "packed_fallback";
+    }
+    if (is_apple_sme_build() && m >= 512 && n >= 512 && k >= 512 &&
+        n <= COB_SGEMM_SME_PACKED_MAX_N && n != 832 && n != 960 && n != 1088 &&
+        (m % COB_BENCH_AMX_MR) == 0 && (n % 64) == 0) {
+        return "packed_sme";
+    }
+    if ((m % COB_BENCH_AMX_MR) == 0 && (n % COB_BENCH_AMX_NR) == 0) {
+        if (m >= COB_BENCH_AMX_MC && n >= 1152 && k >= 512) {
+            return "packed_amx_large_block";
+        }
+        return "packed_amx_full";
+    }
+    return "packed_amx_partial";
 }
 
 #if defined(COB_HAVE_ACCELERATE)
@@ -301,12 +479,14 @@ static void bench_external_fortran_sgemm(bench_shape shape, const float* a, cons
 
 static double run_case(
     const char* name,
+    const char* route,
     bench_fn fn,
     bench_shape shape,
     const float* a,
     const float* b,
     float* c,
-    int csv)
+    int csv,
+    int route_enabled)
 {
     const int max_dim = shape_max_dim(shape);
     const int warmups = max_dim <= 256 ? 2 : 1;
@@ -333,27 +513,47 @@ static double run_case(
     const double median_gflops = ops / stats.median / 1.0e9;
     const double sum = (double)checksum(c, (size_t)shape.m * (size_t)shape.n);
     if (csv) {
-        printf(
-            "gemm,%s,%d,%d,%d,%.6f,%.6f,GF/s,%.9f,%.9f,%.9e\n",
-            name,
-            shape.m,
-            shape.n,
-            shape.k,
-            best_gflops,
-            median_gflops,
-            stats.best,
-            stats.median,
-            sum);
+        if (route_enabled) {
+            printf(
+                "gemm,%s,%d,%d,%d,%.6f,%.6f,GF/s,%.9f,%.9f,%.9e,%s\n",
+                name,
+                shape.m,
+                shape.n,
+                shape.k,
+                best_gflops,
+                median_gflops,
+                stats.best,
+                stats.median,
+                sum,
+                route);
+        } else {
+            printf(
+                "gemm,%s,%d,%d,%d,%.6f,%.6f,GF/s,%.9f,%.9f,%.9e\n",
+                name,
+                shape.m,
+                shape.n,
+                shape.k,
+                best_gflops,
+                median_gflops,
+                stats.best,
+                stats.median,
+                sum);
+        }
     } else {
         char shape_text[32];
         format_shape(shape_text, sizeof(shape_text), shape);
-        printf("%-18s %-14s  best %8.2f GF/s  med %8.2f GF/s  %9.6f s  checksum=% .5e\n",
+        printf(
+            "%-18s %-14s  best %8.2f GF/s  med %8.2f GF/s  %9.6f s  checksum=% .5e",
             name,
             shape_text,
             best_gflops,
             median_gflops,
             stats.best,
             sum);
+        if (route_enabled && route[0] != '\0') {
+            printf("  route=%s", route);
+        }
+        printf("\n");
     }
     return best_gflops;
 }
@@ -363,7 +563,8 @@ static double run_case_cob_packed_reuse(
     const float* a,
     const float* b,
     float* c,
-    int csv)
+    int csv,
+    int route_enabled)
 {
     cob_packed_b_f32 packed_b;
     if (cob_sgemm_pack_b(&packed_b, shape.k, shape.n, b, shape.n) != 0) {
@@ -398,33 +599,51 @@ static double run_case_cob_packed_reuse(
     const double median_gflops = ops / stats.median / 1.0e9;
     const double sum = (double)checksum(c, (size_t)shape.m * (size_t)shape.n);
     if (csv) {
-        printf(
-            "gemm,cob packed-B,%d,%d,%d,%.6f,%.6f,GF/s,%.9f,%.9f,%.9e\n",
-            shape.m,
-            shape.n,
-            shape.k,
-            best_gflops,
-            median_gflops,
-            stats.best,
-            stats.median,
-            sum);
+        if (route_enabled) {
+            printf(
+                "gemm,cob packed-B,%d,%d,%d,%.6f,%.6f,GF/s,%.9f,%.9f,%.9e,%s\n",
+                shape.m,
+                shape.n,
+                shape.k,
+                best_gflops,
+                median_gflops,
+                stats.best,
+                stats.median,
+                sum,
+                cob_packed_b_route(shape));
+        } else {
+            printf(
+                "gemm,cob packed-B,%d,%d,%d,%.6f,%.6f,GF/s,%.9f,%.9f,%.9e\n",
+                shape.m,
+                shape.n,
+                shape.k,
+                best_gflops,
+                median_gflops,
+                stats.best,
+                stats.median,
+                sum);
+        }
     } else {
         char shape_text[32];
         format_shape(shape_text, sizeof(shape_text), shape);
-        printf("%-18s %-14s  best %8.2f GF/s  med %8.2f GF/s  %9.6f s  checksum=% .5e\n",
+        printf("%-18s %-14s  best %8.2f GF/s  med %8.2f GF/s  %9.6f s  checksum=% .5e",
             "cob packed-B",
             shape_text,
             best_gflops,
             median_gflops,
             stats.best,
             sum);
+        if (route_enabled) {
+            printf("  route=%s", cob_packed_b_route(shape));
+        }
+        printf("\n");
     }
 
     cob_sgemm_free_packed_b(&packed_b);
     return best_gflops;
 }
 
-static double run_case_cob_pack_setup(bench_shape shape, const float* b, int csv)
+static double run_case_cob_pack_setup(bench_shape shape, const float* b, int csv, int route_enabled)
 {
     const int repeats = timed_repeats(shape);
     const int iters = pack_setup_iterations(shape);
@@ -463,15 +682,27 @@ static double run_case_cob_pack_setup(bench_shape shape, const float* b, int csv
     const double best_gbs = (double)bytes_per_iter / stats.best / 1.0e9;
     const double median_gbs = (double)bytes_per_iter / stats.median / 1.0e9;
     if (csv) {
-        printf(
-            "pack_b_setup,cob,%d,%d,%d,%.6f,%.6f,GB/s,%.9f,%.9f,\n",
-            shape.m,
-            shape.n,
-            shape.k,
-            best_gbs,
-            median_gbs,
-            stats.best,
-            stats.median);
+        if (route_enabled) {
+            printf(
+                "pack_b_setup,cob,%d,%d,%d,%.6f,%.6f,GB/s,%.9f,%.9f,,pack_b_setup\n",
+                shape.m,
+                shape.n,
+                shape.k,
+                best_gbs,
+                median_gbs,
+                stats.best,
+                stats.median);
+        } else {
+            printf(
+                "pack_b_setup,cob,%d,%d,%d,%.6f,%.6f,GB/s,%.9f,%.9f,\n",
+                shape.m,
+                shape.n,
+                shape.k,
+                best_gbs,
+                median_gbs,
+                stats.best,
+                stats.median);
+        }
     } else {
         char shape_text[32];
         format_shape(shape_text, sizeof(shape_text), shape);
@@ -568,8 +799,15 @@ int main(int argc, char** argv)
 
     const int show_pack_setup = bench_pack_setup_enabled();
     const int csv = bench_csv_enabled();
+    const int route_enabled = bench_route_enabled();
     if (csv) {
-        printf("kind,implementation,m,n,k,best_throughput,median_throughput,unit,best_seconds,median_seconds,checksum\n");
+        if (route_enabled) {
+            printf(
+                "kind,implementation,m,n,k,best_throughput,median_throughput,unit,best_seconds,median_seconds,checksum,route\n");
+        } else {
+            printf(
+                "kind,implementation,m,n,k,best_throughput,median_throughput,unit,best_seconds,median_seconds,checksum\n");
+        }
     } else {
         printf("single-thread FP32 row-major GEMM\n");
         printf("cob one-shot includes B packing; cob packed-B excludes B packing after setup\n\n");
@@ -596,19 +834,46 @@ int main(int argc, char** argv)
         fill_random(a, a_count, &state);
         fill_random(b, b_count, &state);
 
-        run_case("cob one-shot", bench_cob_direct, shape, a, b, c, csv);
-        run_case_cob_packed_reuse(shape, a, b, c, csv);
+        run_case(
+            "cob one-shot",
+            cob_one_shot_route(shape),
+            bench_cob_direct,
+            shape,
+            a,
+            b,
+            c,
+            csv,
+            route_enabled);
+        run_case_cob_packed_reuse(shape, a, b, c, csv, route_enabled);
         if (show_pack_setup) {
-            run_case_cob_pack_setup(shape, b, csv);
+            run_case_cob_pack_setup(shape, b, csv, route_enabled);
         }
 #if defined(COB_HAVE_ACCELERATE)
-        run_case("Accelerate", bench_accelerate, shape, a, b, c, csv);
+        run_case("Accelerate", "", bench_accelerate, shape, a, b, c, csv, route_enabled);
 #endif
 #if defined(COB_HAVE_EXTERNAL_CBLAS)
-        run_case(COB_EXTERNAL_CBLAS_NAME, bench_external_cblas, shape, a, b, c, csv);
+        run_case(
+            COB_EXTERNAL_CBLAS_NAME,
+            "",
+            bench_external_cblas,
+            shape,
+            a,
+            b,
+            c,
+            csv,
+            route_enabled);
 #endif
 #if defined(COB_HAVE_EXTERNAL_FORTRAN_SGEMM)
-        run_case(COB_EXTERNAL_FORTRAN_SGEMM_NAME, bench_external_fortran_sgemm, shape, a, b, c, csv);
+        run_case(
+            COB_EXTERNAL_FORTRAN_SGEMM_NAME,
+            "",
+            bench_external_fortran_sgemm,
+            shape,
+            a,
+            b,
+            c,
+            csv,
+            route_enabled);
 #endif
         if (!csv) {
             printf("\n");

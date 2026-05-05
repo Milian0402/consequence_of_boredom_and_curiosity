@@ -68,7 +68,8 @@ Arguments can be square sizes (`512`) or rectangular `MxNxK` shapes
 (`832x960x896`).
 Set `COB_BENCH_PACK_SETUP=1` to also print the one-time packed-`B` setup cost.
 Set `COB_BENCH_CSV=1` to print machine-readable benchmark rows for grid sweeps
-and plotting.
+and plotting. Set `COB_BENCH_ROUTE=1` to add the benchmark's current COB route
+label to CSV or text output.
 
 For repeated boundary sweeps, use the CSV wrapper:
 
