@@ -219,6 +219,22 @@ routed sizes, including medians around 2013 GF/s at `n = 960`, 1962 GF/s at
 `n = 1088`, 1922 GF/s at `n = 1152`, and 1926 GF/s at `n = 1216`. Validation
 passed with `make test` across 28 shapes, and `git diff --check` passed.
 
+### 2026-05-05: direct SME row-block probes and packed-B cap
+
+Direct SME row-block compile-time probes with `COB_SGEMM_SME_DIRECT_MC=384`
+and `512` were rejected. Paired A/B runs over `n = 960`, `1088`, `1152`,
+`1216`, and `1280` showed neutral/noisy results or small regressions,
+especially at `1280`.
+
+The packed-`B` SME max width was lowered from `1216` to `1152` after paired
+packed-`B` A/B showed `1216` improved by about 1.014x at 101 repeats,
+bootstrap95 `[1.0105x, 1.0180x]`, with B faster in 71/101 samples and holdout
+median 1.0170x.
+
+Result: validation passed with `make test` across 48 shapes, plus `make all`
+and `git diff --check`. A relinked focused benchmark in a noisy session showed
+packed-`B` at `n = 1216` median 1964 GF/s versus Accelerate 1900.68 GF/s.
+
 ### 2026-05-05: paired A/B harness refinement
 
 The paired A/B benchmark harness was refined to add split-half holdout
