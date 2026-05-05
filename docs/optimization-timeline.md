@@ -845,6 +845,22 @@ versus 621.92 at `64x32768x512`. This closes a clear `m = 64, k = 512`
 one-shot gap against Accelerate for `n >= 4096`; the universal fastest claim
 is still not fully proven because other MpGEMM and square gaps may remain.
 
+### 2026-05-05: rejected m=96/128 skinny direct-B fallback probe
+
+A temporary compile-time `COB_SGEMM_AMX_SKINNY_CHUNK_MAX_N` guard was tested
+with `=4096`, so `m = 96/128, n > 4096, k = 512` fell back to AMX direct-`B`
+instead of the chunked skinny route.
+
+Result: rejected, and the temporary guard was removed. Paired results were
+neutral at `4096`, but clearly worse for larger `n`: `96x4096x512` median
+`1.0000x` CI `[0.9980,1.0164]`, sign-p `0.576`; `96x8192x512` `0.8108x` CI
+`[0.7956,0.8247]`, sign-p `8.88e-16`; `96x16384x512` `0.7677x` CI
+`[0.7563,0.7781]`, sign-p `8.88e-16`; `128x4096x512` `1.0000x` CI
+`[0.9934,1.0067]`, sign-p `0.78`; `128x8192x512` `0.7026x` CI
+`[0.6959,0.7086]`, sign-p `8.88e-16`; and `128x16384x512` `0.6396x` CI
+`[0.5851,0.6274]`, sign-p `8.88e-16`. Keep the chunked skinny route for these
+shapes; no source behavior change came from the probe.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
