@@ -680,6 +680,18 @@ Post-`5e6da0a` rejected/probed follow-ups:
   `64x24576x1536` median 950.59 GF/s, `64x7168x2048` 997.37 GF/s, and
   `64x8192x1024` 1024.56 GF/s, but repeat-31 was inconclusive/noisy.
   `NC = 768` was not better. No source commit yet.
+- `703de33` (`Tighten m64 SME reuse chunks`) revisited the `m = 64` B-reuse
+  chunk size after tuple B loads/stores landed in `10849f3` and were documented
+  in `3cb1ee2`. Retesting `COB_SGEMM_M64_SME_REUSE_NC=512` showed it had become
+  a consistent win over the previous `1024` chunk size for the tuple-era
+  B-reuse path. Before the source commit, `make test` passed all 37 shapes,
+  `make all` rebuilt, and `git diff --check` passed. Focused repeat-25 after
+  the source change measured `64x4096x7168` 1029.05 GF/s, `64x7168x16384`
+  1029.47 GF/s, `64x24576x1536` 936.58 GF/s, `64x7168x2048` 1013.51 GF/s,
+  `64x32768x512` 935.72 GF/s, `64x2112x7168` 1235.82 GF/s, and
+  `64x8192x1024` 1053.72 GF/s. This improves the tuple-era B-reuse route, but
+  MpGEMM still remains ahead on some shapes, especially `64x4096x7168`,
+  `64x7168x16384`, and `64x8192x1024`.
 - `KC` probes also stayed uncommitted. `NC512 + KC1024` and targeted
   `k == 2048` / `k == 1024` variants were not clean enough to commit; the
   `k == 1024`-only repeat-31 gave `64x8192x1024` median 970.83 GF/s and
