@@ -945,6 +945,23 @@ direct-vs-packed correctness tests for `96x4096x2048` and `128x8192x4096`,
 raising `make test` coverage to 48 shapes. Validation passed with `make all`,
 all 48 test shapes, `git diff --check`, and a pushed commit.
 
+### 2026-05-05: four-panel B-pack setup rejected
+
+After `9b7ef5f`, a temporary `COB_SGEMM_PACK_B32_GROUP4=1` experiment packed
+four adjacent 32-column `B` panels row-by-row. The intent was to improve large
+one-shot B-pack setup/locality while preserving the packed layout. It built and
+`make test` passed all 48 shapes while present, but performance did not hold.
+
+Result: paired one-shot A/B with the candidate flag showed only weak/noisy
+positive movement at `1280` with median `1.0134x`, CI `[0.9888,1.0489]`, and
+sign-p `0.262`. It regressed `1408` at `0.9545x`, CI `[0.9057,0.9566]`,
+sign-p `2.42e-10`, and `1536` at `0.9625x`, CI `[0.9445,0.9705]`, sign-p
+`1.83e-08`. `2048` was inconclusive/noisy at median `0.9852x`, CI
+`[0.9930,1.0943]`, sign-p `0.161`, and skinny routed checks
+`96x4096x1024` / `128x4096x1024` were neutral/noisy. Reject; the temporary code
+was removed, `make test` again passed all 48 shapes, `git diff --check` passed,
+and there is no source behavior change.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
