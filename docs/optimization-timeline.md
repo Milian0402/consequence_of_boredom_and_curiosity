@@ -585,6 +585,32 @@ scope. With `VECLIB_MAXIMUM_THREADS=1`, local `native.sgemm` medians were about
 `64x32768x512`, 643 GF/s on `64x24576x1536`, 401 GF/s on `64x7168x2048`, and
 684 GF/s on `64x7168x16384`.
 
+### 2026-05-05: narrow 64x32768x512 SME B-pack reuse route
+
+COB added a clean-room SME fused B-pack/reuse route for
+`m = 64, n >= 32768, k = 512`. It packs all of `A` once, processes `N` in
+1024-column chunks, streams `B` and packs a 64-column panel while computing the
+first 16 rows, then reuses that packed `B` for the other three 16-row panels.
+This was inspired by a high-level read of MpGEMM's row-kernel behavior, but no
+assembly was copied.
+
+A full-`k`/full-`N` fused route was also tested for large-`K`, moderate-`N`
+shapes such as `64x2112x7168` and `64x4096x7168`, then rejected because it
+regressed those cases. The existing K-blocked direct SME route remains better
+there.
+
+Result: `make test` passed all 37 shapes. After rebuilding `build/cob_gemm_bench`,
+a focused repeat-25 benchmark measured `64x32768x512` at 909.95 GF/s COB
+one-shot, 1422.17 GF/s packed-`B`, and 436.75 GF/s Accelerate. COB one-shot
+medians in the same run were 1137.19 GF/s on `64x2112x7168`, 915.27 GF/s on
+`64x4096x7168`, 366.88 GF/s on `64x24576x1536`, 485.04 GF/s on
+`64x7168x2048`, 504.21 GF/s on `64x7168x16384`, and 1412.82 GF/s on
+`64x4096x512`.
+
+This now exceeds the earlier local MpGEMM `64x32768x512` baseline of about
+833 GF/s, but COB is still not universally fastest because MpGEMM remains ahead
+on other skinny one-shot cases.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The packed-`B` AMX path is
