@@ -22,6 +22,71 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06 local-uncommitted: medium SME B-panel-first traversal rejected
+
+The broad B-panel-first loop-order probe for the SME direct-B kernel was not
+shippable globally: square and lower-width medium shapes were neutral or
+regressed, and the m64 large-K direct shapes stayed noisy. The useful region was
+initially only the already-routed exact medium pair `384x1280x1536` and
+`512x1280x1536`, but the exact gated version did not survive cold validation.
+
+The exploratory broad source first looked promising in repeat-101 validation:
+
+- `384x1280x1536`: median `1.1108x`, bootstrap95 `[1.0999,1.1358]`,
+  B-faster `95/101`, sign-p `1.07e-21`, holdout median `1.1057x`.
+- `512x1280x1536`: median `1.0718x`, bootstrap95 `[1.0753,1.1091]`,
+  B-faster `90/101`, sign-p `1.42e-16`, holdout median `1.0457x`.
+
+After implementing a narrow candidate and comparing against clean `2a79a71`,
+the result weakened: `384x1280x1536` fell to median `1.0138x` with holdout
+median `1.0059x`, and `512x1280x1536` reversed to median `0.9941x`. The code
+was removed instead of shipping another brittle exact gate.
+
+Rejected broadening evidence from the same probe: `384x384x384`,
+`768x768x768`, `960x896x960`, and `384x512x3072` did not show an acceptable
+win, while `512x512x3072` and `832x1472x1152` failed the acceptance floor on
+repeat-61. Keep the current A-panel-first SME direct-B traversal.
+
+### 2026-05-06 local-uncommitted: m64 SME prefetch locality rejected
+
+The m64 direct-prefetch path was retested with only the `__builtin_prefetch`
+locality hint changed, leaving the accepted distance, issue rate, and route
+gates unchanged.
+
+- Locality `0` was a hard regression on the prefetched m64 large-K direct
+  shapes: `64x1088x7168` median `0.4779x`, `64x2112x7168` `0.3817x`,
+  `64x3328x12288` `0.4611x`, `64x3712x12288` `0.3960x`, and
+  `64x4032x8192` `0.3517x`.
+- Locality `2` was neutral/noisy: `64x2112x7168` median `1.0030x`,
+  `64x3328x12288` `0.9924x`, `64x3712x12288` `1.0040x`,
+  `64x4032x8192` `1.0022x`, and `64x4096x7168` `1.0015x`, all without
+  useful sign-test or holdout support.
+
+Keep `COB_SGEMM_M64_SME_B_PREFETCH_DISTANCE=32` with locality `1`.
+
+### 2026-05-06 local-uncommitted: SME direct epilogue branch hoist rejected
+
+A temp source hoisted the `accumulate` branch out of the per-row epilogue loop
+in `cob_sgemm_16x64_sme_strided_b32` and its prefetched variant. Correctness
+passed, but paired repeat-31 validation did not show a usable win:
+`64x1088x7168` median `0.9958x`, `64x2112x7168` `0.9958x`,
+`64x4032x8192` `0.9878x`, `64x4096x7168` `1.0003x`,
+`384x1280x1536` `0.9957x`, and `832x1472x1152` `1.0021x`.
+
+The remaining m64 large-K gap is not explained by the row epilogue branch in
+the current C intrinsic kernels. Leave the compact epilogue as-is.
+
+### 2026-05-06 local-uncommitted: native CPU compile flag rejected
+
+The candidate side was compiled with `COB_AB_B_FLAGS=-mcpu=native` to check
+whether local M5 code generation alone would improve the current kernels.
+Repeat-31 paired validation was neutral/noisy across the tested set:
+`64x2112x7168` median `0.9891x`, `64x4096x7168` `1.0154x`,
+`384x1280x1536` `1.0301x` with weak holdout, `512x1280x1536` `0.9804x`,
+`1280^3` `0.9974x`, and `2048^3` `1.0066x`.
+
+Do not make `-mcpu=native` a default build flag based on current evidence.
+
 ### 2026-05-06: packed-AB paired A/B mode added
 
 The paired A/B harness now supports `COB_AB_MODE=packed-AB`, so future
