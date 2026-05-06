@@ -1581,6 +1581,25 @@ strided-B route: `384x1216x3072` `1.2450x`, CI `[1.2492,1.2679]`, B-faster
 high-`K` gate and stayed neutral. Correctness coverage added `384x1216x3072`
 and `1024x1216x3072`.
 
+Follow-up rejected: a chunked one-shot packed-B path for exact `m = 384` was
+not a clean replacement for the current full packed-B scratch path. The
+`NC=512` candidate in `/private/tmp/cob_m384_chunked_oneshot_exp` passed
+correctness but was mostly neutral and regressed `384x4096x4096` (`0.9934x`,
+holdout `0.9931x`). `NC=1024` improved `384x2048x4096` (`1.0178x`) and was
+weakly positive at `384x4096x2048`, but still regressed `384x4096x4096`
+(`0.9857x`) and did not help the `1152/1216 x 3072` band. Do not revisit
+chunked one-shot B packing for `m = 384` without a smoother rule or a different
+packing schedule.
+
+Follow-up accepted: public packed-B `n = 1024, k >= 3072` now stays on AMX
+instead of the current SME packed-B kernel. The `k = 3072` packed-B A/B was
+strong across the tested heights: `512x1024x3072` `1.3090x`,
+`768x1024x3072` `1.3784x`, and `1024x1024x3072` `1.4153x`, all with
+B-faster `101/101` or `99/101` and agreeing holdouts. The `k = 2048` neighbor
+was mixed (`512/768` negative, `1024` positive), so the source gate does not
+broaden below `3072`; `k = 4096` was already AMX and stayed neutral.
+Correctness coverage added `512x1024x3072` and `1024x1024x3072`.
+
 Follow-up rejected: routing `64x1408x2048` and `64x1472x2048` back to the old
 AMX path did not close their remaining small gaps. The AMX fallback candidate
 in `/private/tmp/cob_k2048_1408_amx_exp` passed correctness but paired A/B
@@ -1719,7 +1738,8 @@ for high-`K` shapes, the one-shot high-`K` medium AMX packed-path gate, and the
 one-shot `n = 512, k >= 2048` packed-AMX conflict fallback, plus the packed-B
 `m = 384, n >= 2048` AMX block fix and the one-shot `m = 384, n >= 1152`
 high-`K` packed-path gate, plus the one-shot `n = 1216, k >= 3072` packed-path
-gate. Current correctness coverage is 83 GEMM shapes.
+gate and the public packed-B `n = 1024, k >= 3072` AMX fallback. Current
+correctness coverage is 85 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

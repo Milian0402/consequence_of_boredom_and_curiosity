@@ -98,7 +98,7 @@ git diff --check
 
 ## Current Evidence Summary
 
-- Correctness suite currently covers 83 GEMM shapes on Apple Silicon.
+- Correctness suite currently covers 85 GEMM shapes on Apple Silicon.
 - The paired A/B harness reports median ratio, mean-log speedup, bootstrap
   confidence interval, sign-test p-value, and split-half holdout.
 - Route-aware benchmarking and `tools/bench_heatmap.py` make dispatcher
