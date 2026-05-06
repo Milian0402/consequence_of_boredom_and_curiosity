@@ -65,14 +65,17 @@ static int test_shape_ex(int m, int n, int k, int lda, int ldb, int ldc, int ali
     float* cref = alloc_f32((size_t)c_count, aligned_c);
     float* cgot = alloc_f32((size_t)c_count, aligned_c);
     float* cpacked = alloc_f32((size_t)c_count, aligned_c);
+    float* cpacked_ab = alloc_f32((size_t)c_count, aligned_c);
 
-    if (a == NULL || b == NULL || cref == NULL || cgot == NULL || cpacked == NULL) {
+    if (a == NULL || b == NULL || cref == NULL || cgot == NULL || cpacked == NULL ||
+        cpacked_ab == NULL) {
         fprintf(stderr, "allocation failed for %dx%dx%d\n", m, n, k);
         free(a);
         free(b);
         free(cref);
         free(cgot);
         free(cpacked);
+        free(cpacked_ab);
         return 1;
     }
 
@@ -82,6 +85,7 @@ static int test_shape_ex(int m, int n, int k, int lda, int ldb, int ldc, int ali
     memset(cref, 0, (size_t)c_count * sizeof(float));
     memset(cgot, 0, (size_t)c_count * sizeof(float));
     memset(cpacked, 0, (size_t)c_count * sizeof(float));
+    memset(cpacked_ab, 0, (size_t)c_count * sizeof(float));
 
     cob_sgemm_ref_rowmajor(m, n, k, a, lda, b, ldb, cref, ldc);
     cob_sgemm_rowmajor(m, n, k, a, lda, b, ldb, cgot, ldc);
@@ -94,24 +98,42 @@ static int test_shape_ex(int m, int n, int k, int lda, int ldb, int ldc, int ali
         free(cref);
         free(cgot);
         free(cpacked);
+        free(cpacked_ab);
         return 1;
     }
     cob_sgemm_rowmajor_packed_b(m, n, k, a, lda, &packed_b, cpacked, ldc);
+
+    cob_packed_a_f32 packed_a;
+    if (cob_sgemm_pack_a(&packed_a, m, k, a, lda) != 0) {
+        fprintf(stderr, "pack-A failed for %dx%dx%d\n", m, n, k);
+        cob_sgemm_free_packed_b(&packed_b);
+        free(a);
+        free(b);
+        free(cref);
+        free(cgot);
+        free(cpacked);
+        free(cpacked_ab);
+        return 1;
+    }
+    cob_sgemm_rowmajor_packed_ab(m, n, k, &packed_a, &packed_b, cpacked_ab, ldc);
+    cob_sgemm_free_packed_a(&packed_a);
     cob_sgemm_free_packed_b(&packed_b);
 
     const float direct_diff = max_abs_diff(cref, cgot, c_count);
     const float packed_diff = max_abs_diff(cref, cpacked, c_count);
+    const float packed_ab_diff = max_abs_diff(cref, cpacked_ab, c_count);
     const float tol = 2.0e-3f;
-    const int failed = direct_diff > tol || packed_diff > tol;
+    const int failed = direct_diff > tol || packed_diff > tol || packed_ab_diff > tol;
 
     if (failed) {
         fprintf(stderr,
-            "shape %dx%dx%d failed: direct_diff=%g packed_diff=%g\n",
+            "shape %dx%dx%d failed: direct_diff=%g packed_diff=%g packed_ab_diff=%g\n",
             m,
             n,
             k,
             (double)direct_diff,
-            (double)packed_diff);
+            (double)packed_diff,
+            (double)packed_ab_diff);
     }
 
     free(a);
@@ -119,6 +141,7 @@ static int test_shape_ex(int m, int n, int k, int lda, int ldb, int ldc, int ali
     free(cref);
     free(cgot);
     free(cpacked);
+    free(cpacked_ab);
     return failed;
 }
 
@@ -139,13 +162,15 @@ static int test_packed_matches_direct_aligned_shape(int m, int n, int k)
     float* b = alloc_f32((size_t)k * (size_t)n, 1);
     float* cdirect = alloc_f32((size_t)count, 1);
     float* cpacked = alloc_f32((size_t)count, 1);
+    float* cpacked_ab = alloc_f32((size_t)count, 1);
 
-    if (a == NULL || b == NULL || cdirect == NULL || cpacked == NULL) {
+    if (a == NULL || b == NULL || cdirect == NULL || cpacked == NULL || cpacked_ab == NULL) {
         fprintf(stderr, "allocation failed for packed/direct %dx%dx%d\n", m, n, k);
         free(a);
         free(b);
         free(cdirect);
         free(cpacked);
+        free(cpacked_ab);
         return 1;
     }
 
@@ -154,6 +179,7 @@ static int test_packed_matches_direct_aligned_shape(int m, int n, int k)
     fill_random(b, k * n, &state);
     memset(cdirect, 0, (size_t)count * sizeof(float));
     memset(cpacked, 0, (size_t)count * sizeof(float));
+    memset(cpacked_ab, 0, (size_t)count * sizeof(float));
 
     cob_sgemm_rowmajor(m, n, k, a, k, b, n, cdirect, n);
 
@@ -164,21 +190,44 @@ static int test_packed_matches_direct_aligned_shape(int m, int n, int k)
         free(b);
         free(cdirect);
         free(cpacked);
+        free(cpacked_ab);
         return 1;
     }
     cob_sgemm_rowmajor_packed_b(m, n, k, a, k, &packed_b, cpacked, n);
+
+    cob_packed_a_f32 packed_a;
+    if (cob_sgemm_pack_a(&packed_a, m, k, a, k) != 0) {
+        fprintf(stderr, "pack-A failed for packed/direct %dx%dx%d\n", m, n, k);
+        cob_sgemm_free_packed_b(&packed_b);
+        free(a);
+        free(b);
+        free(cdirect);
+        free(cpacked);
+        free(cpacked_ab);
+        return 1;
+    }
+    cob_sgemm_rowmajor_packed_ab(m, n, k, &packed_a, &packed_b, cpacked_ab, n);
+    cob_sgemm_free_packed_a(&packed_a);
     cob_sgemm_free_packed_b(&packed_b);
 
     const float diff = max_abs_diff(cdirect, cpacked, count);
-    const int failed = diff > 2.0e-3f;
+    const float diff_ab = max_abs_diff(cdirect, cpacked_ab, count);
+    const int failed = diff > 2.0e-3f || diff_ab > 2.0e-3f;
     if (failed) {
-        fprintf(stderr, "packed/direct %dx%dx%d failed: diff=%g\n", m, n, k, (double)diff);
+        fprintf(stderr,
+            "packed/direct %dx%dx%d failed: diff=%g diff_ab=%g\n",
+            m,
+            n,
+            k,
+            (double)diff,
+            (double)diff_ab);
     }
 
     free(a);
     free(b);
     free(cdirect);
     free(cpacked);
+    free(cpacked_ab);
     return failed;
 }
 

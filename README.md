@@ -24,6 +24,7 @@ measurement rules and exclusions.
 - Row-major only
 - `alpha = 1`, `beta = 0`
 - Public packed-`B` API
+- Public packed-`A` + packed-`B` API for repeated-use workloads
 - Apple Silicon AMX `32x32` FP32 microkernel when available
 - Apple Silicon SME2.1 packed-`B` path for larger reused-`B` cases when available
 - Apple Silicon SME2.1 direct-`B` one-shot path for selected medium contiguous cases
@@ -77,8 +78,9 @@ Set `COB_BENCH_PACK_SETUP=1` to also print the one-time packed-`B` setup cost.
 Set `COB_BENCH_CSV=1` to print machine-readable benchmark rows for grid sweeps
 and plotting. Set `COB_BENCH_ROUTE=1` to add the benchmark's current COB route
 label to CSV or text output. Set `COB_BENCH_ONLY=one-shot`, `packed`,
-`pack-setup`, or `accelerate` to isolate one benchmark row, which is useful for
-hardware-counter runs; `pack-setup` still requires `COB_BENCH_PACK_SETUP=1`.
+`packed-AB`, `pack-setup`, or `accelerate` to isolate one benchmark row, which
+is useful for hardware-counter runs; `pack-setup` still requires
+`COB_BENCH_PACK_SETUP=1`.
 Set `COB_BENCH_HOT_SECONDS=N` with `COB_BENCH_ONLY` and one shape to run a
 single row in a hot loop for profiler attachment; normal benchmark behavior is
 unchanged when it is unset.
@@ -121,8 +123,10 @@ Current evidence is scoped to the benchmarked shape set and this repo's narrow
 single-threaded FP32 row-major contract. In the routed shape ranges, COB beats
 the tested licensed/open-source baselines so far: BLIS, OpenBLAS, BLASFEO,
 Eigen, Rust `matrixmultiply`, `coral-aarch64`, LIBXSMM, `tract-linalg`, and
-KleidiAI's comparable public one-shot path. Accelerate is still reported
-separately and still leads on some small or pack-overhead-heavy cases.
+KleidiAI's comparable public one-shot path. COB also has a fully prepacked
+`A`+`B` path for repeated-use cases, so tract's packed-both mode is no longer a
+stronger-contract gap on the sampled square calibration. Accelerate is still
+reported separately and still leads on some small or pack-overhead-heavy cases.
 Source-available projects without a clear license, such as MpGEMM, are tracked
 as calibration targets rather than folded into the open-source claim.
 
@@ -162,9 +166,20 @@ int cob_sgemm_pack_b(
     int k, int n,
     const float* b, int ldb);
 
+int cob_sgemm_pack_a(
+    cob_packed_a_f32* packed,
+    int m, int k,
+    const float* a, int lda);
+
 void cob_sgemm_rowmajor_packed_b(
     int m, int n, int k,
     const float* a, int lda,
+    const cob_packed_b_f32* packed_b,
+    float* c, int ldc);
+
+void cob_sgemm_rowmajor_packed_ab(
+    int m, int n, int k,
+    const cob_packed_a_f32* packed_a,
     const cob_packed_b_f32* packed_b,
     float* c, int ldc);
 ```

@@ -298,6 +298,12 @@ static int bench_only_matches(const char* only, const char* name)
     if (strcmp(only, "packed-B") == 0 && strcmp(name, "cob packed-B") == 0) {
         return 1;
     }
+    if (strcmp(only, "packed-AB") == 0 && strcmp(name, "cob packed-AB") == 0) {
+        return 1;
+    }
+    if (strcmp(only, "packed_ab") == 0 && strcmp(name, "cob packed-AB") == 0) {
+        return 1;
+    }
     if (strcmp(only, "pack-setup") == 0 && strcmp(name, "cob pack-B setup") == 0) {
         return 1;
     }
@@ -535,6 +541,12 @@ static const char* cob_packed_b_route(bench_shape shape)
         return "packed_amx_full";
     }
     return "packed_amx_partial";
+}
+
+static const char* cob_packed_ab_route(bench_shape shape)
+{
+    (void)shape;
+    return is_apple_amx_build() ? "packed_ab_amx" : "packed_ab_fallback";
 }
 
 #if defined(COB_HAVE_ACCELERATE)
@@ -899,6 +911,98 @@ static double run_case_cob_packed_reuse(
     return best_gflops;
 }
 
+static double run_case_cob_packed_ab_reuse(
+    bench_shape shape,
+    const float* a,
+    const float* b,
+    float* c,
+    int csv,
+    int route_enabled)
+{
+    cob_packed_a_f32 packed_a;
+    cob_packed_b_f32 packed_b;
+    if (cob_sgemm_pack_a(&packed_a, shape.m, shape.k, a, shape.k) != 0) {
+        fprintf(stderr, "packed-A allocation failed for %dx%dx%d\n", shape.m, shape.n, shape.k);
+        return 0.0;
+    }
+    if (cob_sgemm_pack_b(&packed_b, shape.k, shape.n, b, shape.n) != 0) {
+        fprintf(stderr, "packed-B allocation failed for %dx%dx%d\n", shape.m, shape.n, shape.k);
+        cob_sgemm_free_packed_a(&packed_a);
+        return 0.0;
+    }
+
+    const int max_dim = shape_max_dim(shape);
+    const int warmups = max_dim <= 256 ? 2 : 1;
+    const int repeats = timed_repeats(shape);
+    const int iters = timed_iterations(shape);
+    double times[COB_BENCH_MAX_REPEATS];
+
+    for (int i = 0; i < warmups; ++i) {
+        cob_sgemm_rowmajor_packed_ab(
+            shape.m, shape.n, shape.k, &packed_a, &packed_b, c, shape.n);
+    }
+
+    for (int i = 0; i < repeats; ++i) {
+        const double t0 = now_seconds();
+        for (int iter = 0; iter < iters; ++iter) {
+            cob_sgemm_rowmajor_packed_ab(
+                shape.m, shape.n, shape.k, &packed_a, &packed_b, c, shape.n);
+        }
+        const double t1 = now_seconds();
+        times[i] = (t1 - t0) / (double)iters;
+    }
+
+    const bench_stats stats = summarize_times(times, repeats);
+    const double ops = 2.0 * (double)shape.m * (double)shape.n * (double)shape.k;
+    const double best_gflops = ops / stats.best / 1.0e9;
+    const double median_gflops = ops / stats.median / 1.0e9;
+    const double sum = (double)checksum(c, (size_t)shape.m * (size_t)shape.n);
+    if (csv) {
+        if (route_enabled) {
+            printf(
+                "gemm,cob packed-AB,%d,%d,%d,%.6f,%.6f,GF/s,%.9f,%.9f,%.9e,%s\n",
+                shape.m,
+                shape.n,
+                shape.k,
+                best_gflops,
+                median_gflops,
+                stats.best,
+                stats.median,
+                sum,
+                cob_packed_ab_route(shape));
+        } else {
+            printf(
+                "gemm,cob packed-AB,%d,%d,%d,%.6f,%.6f,GF/s,%.9f,%.9f,%.9e\n",
+                shape.m,
+                shape.n,
+                shape.k,
+                best_gflops,
+                median_gflops,
+                stats.best,
+                stats.median,
+                sum);
+        }
+    } else {
+        char shape_text[32];
+        format_shape(shape_text, sizeof(shape_text), shape);
+        printf("%-18s %-14s  best %8.2f GF/s  med %8.2f GF/s  %9.6f s  checksum=% .5e",
+            "cob packed-AB",
+            shape_text,
+            best_gflops,
+            median_gflops,
+            stats.best,
+            sum);
+        if (route_enabled) {
+            printf("  route=%s", cob_packed_ab_route(shape));
+        }
+        printf("\n");
+    }
+
+    cob_sgemm_free_packed_b(&packed_b);
+    cob_sgemm_free_packed_a(&packed_a);
+    return best_gflops;
+}
+
 static double run_case_cob_pack_setup(bench_shape shape, const float* b, int csv, int route_enabled)
 {
     const int repeats = timed_repeats(shape);
@@ -1067,7 +1171,8 @@ int main(int argc, char** argv)
         }
     } else {
         printf("single-thread FP32 row-major GEMM\n");
-        printf("cob one-shot includes B packing; cob packed-B excludes B packing after setup\n\n");
+        printf(
+            "cob one-shot includes packing; cob packed-B excludes B packing; cob packed-AB excludes A/B packing\n\n");
     }
 
     for (int si = 0; si < shape_count; ++si) {
@@ -1105,6 +1210,9 @@ int main(int argc, char** argv)
         }
         if (bench_only_matches(bench_only, "cob packed-B")) {
             run_case_cob_packed_reuse(shape, a, b, c, csv, route_enabled);
+        }
+        if (bench_only_matches(bench_only, "cob packed-AB")) {
+            run_case_cob_packed_ab_reuse(shape, a, b, c, csv, route_enabled);
         }
         if (show_pack_setup && bench_only_matches(bench_only, "cob pack-B setup")) {
             run_case_cob_pack_setup(shape, b, csv, route_enabled);

@@ -20,6 +20,14 @@ typedef struct cob_packed_b_f32 {
     float* data;
 } cob_packed_b_f32;
 
+typedef struct cob_packed_a_f32 {
+    int m;
+    int k;
+    int mr;
+    size_t bytes;
+    float* data;
+} cob_packed_a_f32;
+
 void cob_sgemm_ref_rowmajor(
     int m,
     int n,
@@ -40,12 +48,30 @@ int cob_sgemm_pack_b(
 
 void cob_sgemm_free_packed_b(cob_packed_b_f32* packed);
 
+int cob_sgemm_pack_a(
+    cob_packed_a_f32* packed,
+    int m,
+    int k,
+    const float* a,
+    int lda);
+
+void cob_sgemm_free_packed_a(cob_packed_a_f32* packed);
+
 void cob_sgemm_rowmajor_packed_b(
     int m,
     int n,
     int k,
     const float* a,
     int lda,
+    const cob_packed_b_f32* packed_b,
+    float* c,
+    int ldc);
+
+void cob_sgemm_rowmajor_packed_ab(
+    int m,
+    int n,
+    int k,
+    const cob_packed_a_f32* packed_a,
     const cob_packed_b_f32* packed_b,
     float* c,
     int ldc);
@@ -66,4 +92,3 @@ void cob_sgemm_rowmajor(
 #endif
 
 #endif
-

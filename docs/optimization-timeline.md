@@ -22,6 +22,107 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: public packed-AB path added
+
+The `tract-linalg` square smoke exposed a stronger-contract calibration target:
+its `packed-both` mode prepacked both operands and reached about `2030 GF/s` on
+sampled square sizes, which could beat COB's public packed-B path even though it
+was not comparable to COB one-shot or packed-B.
+
+COB now exposes the same class of repeated-use contract through
+`cob_sgemm_pack_a`, `cob_sgemm_free_packed_a`, and
+`cob_sgemm_rowmajor_packed_ab`. The AMX implementation reuses the existing
+packed-A/packed-B `32x32` microkernel without repacking either operand during
+the timed multiply. Correctness is covered by the existing 125-shape test suite,
+which now checks one-shot, packed-B, and packed-AB outputs against the reference.
+
+Repeat-31 square smoke after the change:
+
+| shape | COB packed-AB median | COB packed-AB best |
+| --- | ---: | ---: |
+| `64x64x64` | `1715.24 GF/s` | `1753.05 GF/s` |
+| `128x128x128` | `1593.38 GF/s` | `1628.73 GF/s` |
+| `192x192x192` | `1948.32 GF/s` | `1990.05 GF/s` |
+| `256x256x256` | `1830.76 GF/s` | `1861.71 GF/s` |
+| `384x384x384` | `1939.98 GF/s` | `1965.23 GF/s` |
+| `512x512x512` | `1961.17 GF/s` | `1976.52 GF/s` |
+| `768x768x768` | `2031.32 GF/s` | `2073.16 GF/s` |
+| `1024x1024x1024` | `2018.31 GF/s` | `2076.87 GF/s` |
+
+This closes the sampled `tract packed-both` stronger-prepacking gap for the
+large square calibration while keeping the one-shot and packed-B contracts
+separate.
+
+Follow-up `1024/1536/2048` focused runs confirmed the large-block traversal fix
+keeps the fully packed path around `2.0 TF/s` best on larger aligned squares,
+with low-repeat OpenBLAS route audit output in
+`/private/tmp/cob-openblas-packed-ab-audit-20260506` showing no packed-AB gaps
+in square, medium, or skinny suites.
+
+### 2026-05-06: licensed baseline audit refreshed at f2826ec
+
+Fresh route-aware baseline audits at commit `f2826ec` found no current
+route-worthy gaps against OpenBLAS, BLIS, or BLASFEO in the square, medium, and
+skinny families. The working tree before this docs task was clean except for
+pre-existing untracked `.claude/`.
+
+OpenBLAS was built with:
+
+```sh
+make bench-cblas CBLAS_NAME=OpenBLAS CBLAS_HEADER=cblas.h CBLAS_CFLAGS=-I/opt/homebrew/opt/openblas/include CBLAS_LDFLAGS='-L/opt/homebrew/opt/openblas/lib -lopenblas'
+```
+
+The default square smoke had COB one-shot ahead at `64`, `128`, `192`, `256`,
+`384`, `512`, `768`, and `1024`. Route-aware audit output went to
+`/private/tmp/cob-openblas-audit-20260506` with repeats=7. There were no
+one-shot gaps in square/medium/skinny and no packed-B gaps in medium/skinny.
+The only short-run packed-B square blip at `384` was `0.57%` and cleared on a
+repeat-31 rerun: COB packed-B `1729.78 GF/s` versus OpenBLAS `1620.70 GF/s`.
+
+BLIS was built with:
+
+```sh
+make bench-cblas CBLAS_NAME=BLIS CBLAS_HEADER=cblas.h CBLAS_CFLAGS='-I/private/tmp/blis_apple/frame/compat/cblas/src -I/private/tmp/blis_apple/frame/include -I/private/tmp/blis_apple/frame/thread -I/private/tmp/blis_apple/include/aaplmx -I/private/tmp/blis_apple' CBLAS_LDFLAGS=/private/tmp/blis_apple/lib/aaplmx/libblis.a
+```
+
+Route-aware audit output went to `/private/tmp/cob-blis-audit-20260506` with
+repeats=7. The short audit showed possible one-shot losses at
+`512x1280x4096`, `1536x1536x1536`, and `1024x1216x1536`, but repeat-31 focused
+reruns cleared all three: COB one-shot `1554.35` versus BLIS `1411.70`,
+`1776.41` versus `1651.72`, and `1783.31` versus `1678.46` GF/s,
+respectively. There were no packed-B gaps.
+
+BLASFEO was built with:
+
+```sh
+make bench-fortran-blas FORTRAN_BLAS_NAME=BLASFEO FORTRAN_BLAS_LDFLAGS=/private/tmp/blasfeo/lib/libblasfeo.a
+```
+
+The default square smoke showed BLASFEO far behind. Route-aware audit output
+went to `/private/tmp/cob-blasfeo-audit-20260506` with repeats=3, with no
+one-shot or packed-B gaps in square/medium/skinny against non-COB baselines.
+
+Remaining-baseline smokes stayed within the current claim boundary. The Rust
+`matrixmultiply` artifact
+`/private/tmp/matrixmultiply_bench/target/release/matrixmultiply_bench` measured
+only about `103-112 GF/s` across square `n = 64..1024`, far behind COB.
+The `coral-aarch64` artifact `/private/tmp/coral_bench/target/release/coral_bench`
+measured about `39.6`, `47.9`, `101.6`, `81.7`, `115.9`, `88.7`, `114.7`,
+and `104.0 GF/s` for square `n = 64..1024`, also far behind COB.
+
+KleidiAI driver `/private/tmp/kleidiai_fp32_driver` remained below COB on
+sampled comparable one-shot shapes, including square `384` around `1490 GF/s`,
+`768` around `1562 GF/s`, `1024` around `1532 GF/s`, and sampled `m = 64`
+one-shot shapes around `480-765 GF/s`. KleidiAI elastic compute-only can be
+higher, but excludes packing and is not the same public one-shot contract.
+
+The `tract-linalg` artifact `/private/tmp/tract_bench/target/release/tract_bench`
+had pack-each and packed-B samples below COB on sampled squares. Its
+`packed-both` mode measured up to about `2030 GF/s` and can beat COB packed-B
+on some square sizes; record that as an out-of-contract stronger-prepacking
+calibration item for commit `f2826ec`. The later packed-AB entry above adds a
+matching COB contract and closes the sampled square calibration gap.
+
 ### 2026-05-06: one-shot AMX high-K medium MC256 broadened
 
 After the `m512,k2048` chunked-B change, a refreshed medium audit showed the
@@ -2372,7 +2473,8 @@ where one-shot pack overhead dominates.
 The recent methodology loop is now the main asset: route-aware grid sweeps find
 gaps, paired A/B runs validate candidate thresholds, holdout/sign-test output
 filters noise, and the timeline records rejected paths. The strongest structural
-wins since the older conclusion are the skinny SME B-reuse generalization, the
+wins since the older conclusion are the public packed-AB repeated-use path, the
+skinny SME B-reuse generalization, the
 `m = 64, k = 512` threshold drop and mid-width extension, B-pack prefetching,
 packed-B large-square blocking, wide `m = 64` K-chunk tuning, and the local
 `n = 1280..1472` SME
@@ -2396,7 +2498,7 @@ The exact `512x1280x1536`, `512x1024x1536`, and `512x512x3072` SME direct
 routes address one-shot pack overhead in the medium band, exact public
 packed-B `512x1280x2048` now uses the 512-row AMX block, and the `m = 64,
 k = 512` mid-width SME reuse extension covers the newer skinny gaps. Current
-correctness coverage is 115 GEMM shapes.
+correctness coverage is 125 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

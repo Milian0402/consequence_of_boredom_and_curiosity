@@ -10,7 +10,8 @@ These rules summarize repeated findings from the optimization timeline. They are
 - Prefer candidates whose bootstrap interval and sign-test p-value agree. If they disagree, rerun instead of shipping the change.
 - Recheck any candidate win in a fresh process before committing a performance route.
 - Use `COB_AB_A_FLAGS` / `COB_AB_B_FLAGS` for compile-time threshold or constant sweeps before forking source; it keeps A/B probes cheap and reproducible.
-- Keep one-shot and packed-B claims separate. Packed-B compute-only results are useful ceilings but do not prove the public one-shot path is faster.
+- Keep one-shot, packed-B, and packed-AB claims separate. More-prepacked results
+  are useful ceilings but do not prove the less-prepacked public path is faster.
 - Use `COB_BENCH_ONLY` or `tools/counter_probe.sh` for hardware-counter runs so
   the counter totals cover only one implementation row, not the whole comparison
   benchmark.

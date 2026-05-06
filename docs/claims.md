@@ -20,7 +20,8 @@ multi-threaded GEMM, non-FP32 types, transposed operands, arbitrary
 - Row-major inputs and output.
 - No transposition.
 - `C = A * B`, equivalent to `alpha = 1` and `beta = 0`.
-- Public one-shot API and public packed-`B` API are reported separately.
+- Public one-shot API, public packed-`B` API, and public packed-`A`+`B` API are
+  reported separately.
 
 ## Audit Hardware
 
@@ -78,7 +79,7 @@ python3 tools/bench_gap_report.py /tmp/cob-grid.csv
 ```
 
 For a timestamped audit bundle with hardware context, route-aware CSVs, and
-gap reports for both public COB paths:
+gap reports for the public COB paths:
 
 ```sh
 COB_AUDIT_REPEATS=11 COB_AUDIT_COOLDOWN_SEC=60 sh tools/claim_audit.sh
@@ -86,8 +87,8 @@ COB_AUDIT_REPEATS=11 COB_AUDIT_COOLDOWN_SEC=60 sh tools/claim_audit.sh
 
 The script writes `context.txt`, per-suite benchmark CSVs, per-suite gap
 reports against external baselines, one-shot-vs-best reports that also include
-COB packed-B as an internal baseline, sanity reports that flag rows where the
-median is far below the best sample, and `summary.md` into a
+COB packed-B and packed-AB as internal baselines, sanity reports that flag rows
+where the median is far below the best sample, and `summary.md` into a
 `/tmp/cob-claim-audit-*` directory by default. Use `COB_AUDIT_SUITES`,
 `COB_AUDIT_OUT_DIR`, `COB_AUDIT_SANITY_DROP`, and the suite-specific shape
 environment variables when a narrower cold rerun is needed.
@@ -127,11 +128,32 @@ git diff --check
 
 ## Current Evidence Summary
 
-- Correctness suite currently covers 115 GEMM shapes on Apple Silicon.
+- Recent external baseline audits are listed below with their output
+  directories; rerun them before broadening the claim beyond the recorded shape
+  suites.
+- Correctness suite currently covers 125 GEMM shapes on Apple Silicon.
 - The paired A/B harness reports median ratio, mean-log speedup, bootstrap
   confidence interval, sign-test p-value, and split-half holdout.
 - Route-aware benchmarking and `tools/bench_heatmap.py` make dispatcher
   boundaries auditable.
+- Fresh baseline audits on Apple M5 Max found no route-worthy gaps against
+  OpenBLAS, BLIS, or BLASFEO in the square, medium, and skinny routed families.
+  OpenBLAS audit output was `/private/tmp/cob-openblas-audit-20260506`
+  with repeats=7; a packed-B square `384` short-run blip cleared on repeat=31
+  with COB packed-B `1729.78 GF/s` versus OpenBLAS `1620.70 GF/s`.
+  BLIS audit output was `/private/tmp/cob-blis-audit-20260506` with repeats=7;
+  repeat-31 reruns cleared short-run one-shot blips at `512x1280x4096`,
+  `1536x1536x1536`, and `1024x1216x1536`. BLASFEO audit output was
+  `/private/tmp/cob-blasfeo-audit-20260506` with repeats=3; BLASFEO was far
+  behind in the default square smoke and showed no one-shot or packed-B gaps.
+- Remaining baseline smokes also support the current claim boundary:
+  Rust `matrixmultiply` and `coral-aarch64` square smokes were far behind COB;
+  KleidiAI comparable one-shot samples stayed below COB, while its elastic
+  compute-only mode remains out of contract because it excludes packing; and
+  `tract-linalg` pack-each and packed-B samples stayed below COB. Tract
+  `packed-both` reached about `2030 GF/s`, which motivated COB's public
+  packed-AB path; repeat-31 square smoke now shows COB packed-AB at up to
+  `2018.31 GF/s` median and `2076.87 GF/s` best on `1024x1024x1024`.
 - Recent structural wins include skinny SME B-reuse generalization,
   `m = 64, k = 512` threshold lowering, B-pack prefetching, packed-B
   large-square blocking, wide `m = 64` K-chunk tuning, and medium SME direct

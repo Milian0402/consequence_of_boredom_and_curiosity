@@ -80,6 +80,7 @@ run_grid_env() {
     python3 tools/bench_gap_report.py --target "cob one-shot" --include-cob-baselines "$csv" \
         > "$OUT_DIR/$name.one-shot-vs-best.gaps.csv"
     python3 tools/bench_gap_report.py --target "cob packed-B" "$csv" > "$OUT_DIR/$name.packed-b.gaps.csv"
+    python3 tools/bench_gap_report.py --target "cob packed-AB" "$csv" > "$OUT_DIR/$name.packed-ab.gaps.csv"
     python3 tools/bench_sanity_report.py --max-drop-percent "$SANITY_DROP" "$csv" \
         > "$OUT_DIR/$name.sanity.csv"
 }
@@ -99,6 +100,7 @@ run_grid_shapes() {
     python3 tools/bench_gap_report.py --target "cob one-shot" --include-cob-baselines "$csv" \
         > "$OUT_DIR/$name.one-shot-vs-best.gaps.csv"
     python3 tools/bench_gap_report.py --target "cob packed-B" "$csv" > "$OUT_DIR/$name.packed-b.gaps.csv"
+    python3 tools/bench_gap_report.py --target "cob packed-AB" "$csv" > "$OUT_DIR/$name.packed-ab.gaps.csv"
     python3 tools/bench_sanity_report.py --max-drop-percent "$SANITY_DROP" "$csv" \
         > "$OUT_DIR/$name.sanity.csv"
 }
