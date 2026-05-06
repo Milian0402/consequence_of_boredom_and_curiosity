@@ -14,7 +14,9 @@ Current audited evidence: fastest among the tested licensed/open-source
 baselines for single-thread FP32 row-major SGEMM on Apple Silicon, in the routed
 shape ranges. See [docs/claims.md](docs/claims.md) for the audit recipe and
 [docs/optimization-design-rules.md](docs/optimization-design-rules.md) for the
-measurement rules and exclusions.
+measurement rules and exclusions. For the final state of the long optimization
+session and the next serious work items, see
+[docs/project-status.md](docs/project-status.md).
 
 ## Current Scope
 
@@ -197,12 +199,13 @@ void cob_sgemm_rowmajor_packed_ab(
 
 ## Next Work
 
-- Add `4x8`, `12x8`, and `16x4` NEON kernels and shape dispatch.
-- Keep expanding route-aware grid sweeps before adding new dispatch gates.
-- Run hardware-counter profiling with `tools/counter_probe.sh` when sudo is
-  available.
-- Replace scalar edges with vector edge kernels.
-- Use the CBLAS and Fortran-BLAS comparison targets to track external results.
+- Write an original fixed-shape SME kernel for the remaining `m = 64` large-`K`
+  one-shot gaps.
+- Use hardware counters before accepting more exact dispatch gates.
+- Re-audit external baselines before publishing any broader fastest claim.
+- Keep MpGEMM separate unless its license becomes clear, then rerun
+  same-contract benchmarks.
+- Treat any public packed-B layout change as a versioned ABI change.
 
 ## License
 
