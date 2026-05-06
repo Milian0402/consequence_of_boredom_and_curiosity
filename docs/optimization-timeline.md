@@ -22,6 +22,28 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: m64 large-K counter pass and rejected scheduling probes
+
+The local `mperf` sudo prompt succeeded through the macOS authentication
+dialog, unblocking hardware-counter collection on the M5 Max. The default
+counter set still needed splitting because `INST_SME_ENGINE_ALU` cannot be
+mixed into the same pipeline event set on this chip.
+
+Successful repeat-101 pipeline/SME/memory profiles for `64x2112x7168` and
+`64x4096x7168` pointed away from a simple B-memory-wait explanation. Both
+shapes showed high map/dispatch stalls, near-zero
+`LDST_UNIT_WAITING_SME_ENGINE_MEM_DATA`, no SME cross-page events, and mostly
+dispatch/scheduling pressure rather than waiting on SME memory data.
+
+Rejected local probes from the same counter-driven pass:
+
+- Issuing the m64 large-K prefetches only every fourth K iteration regressed.
+- K4 unrolling of the prefetched kernels was neutral/noisy.
+- K4 unrolling of the from-packed B64 tuple kernel was neutral/noisy.
+- Disabling the exact `n = 4096` large-K reuse path hard-regressed
+  `64x4096x7168` and `64x4096x8192`.
+- Forcing B reuse on `64x2112x7168` hard-regressed the exact gap shape.
+
 ### 2026-05-06: exact 384x1280x1536 SME direct route accepted
 
 The one-shot dispatcher now routes exact `384x1280x1536` through the SME

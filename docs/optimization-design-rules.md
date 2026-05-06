@@ -14,6 +14,8 @@ These rules summarize repeated findings from the optimization timeline. They are
 - Use `COB_BENCH_ONLY` or `tools/counter_probe.sh` for hardware-counter runs so
   the counter totals cover only one implementation row, not the whole comparison
   benchmark.
+- On M5, split hardware-counter groups when needed: `INST_SME_ENGINE_ALU`
+  cannot be mixed into the same pipeline event set.
 
 ## Dispatch
 
@@ -62,6 +64,17 @@ These rules summarize repeated findings from the optimization timeline. They are
 - Hand-written K=2/K=4 unrolls in the prefetched m64 SME streaming-B C
   intrinsic kernel did not improve the remaining large-`K` gaps. Do not revisit
   that schedule without counter evidence or a dedicated assembly kernel.
+- For `64x2112x7168` and `64x4096x7168`, repeat counter profiles showed high
+  map/dispatch stalls, near-zero `LDST_UNIT_WAITING_SME_ENGINE_MEM_DATA`, and
+  no SME cross-page events. Treat the remaining gap as dispatch/scheduling
+  pressure, not a simple B-memory-wait problem.
+- Do not reduce m64 large-K prefetch issue rate to every fourth K iteration; it
+  regressed. K4 unrolls of both prefetched kernels and from-packed B64 tuple
+  kernels were neutral/noisy.
+- Keep the exact `n = 4096` large-K reuse path enabled; disabling it
+  hard-regressed `64x4096x7168` and `64x4096x8192`.
+- Keep `64x2112x7168` on the direct streaming-B route; forcing B reuse there
+  hard-regressed the exact gap shape.
 - Full-K chunks are not a substitute for a real single-store epilogue. They
   helped only tiny isolated low-width `k = 2048` cases and badly regressed
   high-`K` m64 SME skinny shapes.

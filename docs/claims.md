@@ -112,7 +112,10 @@ sudo env MPERF_KPEP_DB=as5 COB_COUNTER_ONLY=one-shot sh tools/counter_probe.sh 6
 sudo env MPERF_KPEP_DB=as5 COB_COUNTER_ONLY=packed sh tools/counter_probe.sh 512x1280x1536
 ```
 
-The helper uses `COB_BENCH_ONLY` to isolate the measured implementation.
+The helper uses `COB_BENCH_ONLY` to isolate the measured implementation. Use
+`COB_COUNTER_PROFILE=pipeline`, `sme`, or `memory` for compatible event groups;
+on short-running shapes, set `COB_COUNTER_REPEATS=101` or higher so process
+setup does not dominate the sampled window.
 
 6. Re-run correctness and build checks:
 

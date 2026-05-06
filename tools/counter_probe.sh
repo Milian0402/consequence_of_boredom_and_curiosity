@@ -6,7 +6,27 @@ MPERF=${COB_COUNTER_MPERF:-/private/tmp/mperf/mperf-stat}
 KPEP_DB=${COB_COUNTER_KPEP_DB:-as5}
 ONLY=${COB_COUNTER_ONLY:-one-shot}
 REPEATS=${COB_COUNTER_REPEATS:-3}
-EVENTS=${COB_COUNTER_EVENTS:-"cycles instructions l1d-cache-misses l1d-tlb-misses l2-tlb-misses-data map-stalls dispatch-stalls CORE_WAITING_SME_ENGINE_CYCLE LDST_UNIT_WAITING_SME_ENGINE_MEM_DATA INST_SME_ENGINE_ALU"}
+PROFILE=${COB_COUNTER_PROFILE:-pipeline}
+if [ "${COB_COUNTER_EVENTS+x}" ]; then
+    EVENTS=$COB_COUNTER_EVENTS
+else
+    case "$PROFILE" in
+        pipeline)
+            EVENTS="cycles instructions l1d-cache-misses l1d-tlb-misses l2-tlb-misses-data map-stalls dispatch-stalls CORE_WAITING_SME_ENGINE_CYCLE LDST_UNIT_WAITING_SME_ENGINE_MEM_DATA"
+            ;;
+        sme)
+            EVENTS="cycles instructions INST_SME_ENGINE_LD INST_SME_ENGINE_ST INST_SME_ENGINE_ALU INST_SME_ENGINE_PACKING_FUSED LD_SME_NORMAL_UOP ST_SME_NORMAL_UOP LDST_SME_XPG_UOP LDST_X64_UOP"
+            ;;
+        memory)
+            EVENTS="cycles instructions L1D_CACHE_MISS_LD_NONSPEC L1D_TLB_MISS_NONSPEC LD_SRC_LL_CACHE_NONSPEC LD_SRC_MEMSYS_NONSPEC PL2_CACHE_ACCESS PL2_CACHE_MISS PL2_CACHE_MISS_LD L2_TLB_MISS_DATA"
+            ;;
+        *)
+            echo "unknown COB_COUNTER_PROFILE: $PROFILE" >&2
+            echo "expected one of: pipeline, sme, memory" >&2
+            exit 1
+            ;;
+    esac
+fi
 
 if [ ! -x "$BENCH" ]; then
     echo "benchmark binary not found: $BENCH" >&2
@@ -44,7 +64,7 @@ for event in $EVENTS; do
 done
 
 for shape in "$@"; do
-    echo "== $shape ($ONLY) ==" >&2
+    echo "== $shape ($ONLY, $PROFILE counters) ==" >&2
     # shellcheck disable=SC2086
     MPERF_KPEP_DB="$KPEP_DB" "$MPERF" $event_args -- \
         env \
