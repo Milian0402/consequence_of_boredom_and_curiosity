@@ -1211,7 +1211,7 @@ static int cob_sgemm_rowmajor_sme_from_packed_b32(
 {
     if (packed_b->nr != COB_SGEMM_AMX_NR || m < 512 || n < 512 || k < 512 ||
         n > COB_SGEMM_SME_PACKED_MAX_N || n == 832 || n == 960 || n == 1088 ||
-        (n == 768 && k == 3072) ||
+        (n == 768 && (k == 2048 || k == 3072)) ||
         (n == 1024 && k >= 3072) ||
         k >= 4096 || (n == 1152 && k >= 2048) ||
         (m % COB_SGEMM_AMX_MR) != 0 || (n % 64) != 0 ||
