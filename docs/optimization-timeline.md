@@ -1469,6 +1469,23 @@ with B-faster `97/101`, `1024x1152x2048` `1.1044x` with B-faster `101/101`,
 correctness coverage for `512x1152x2048`, `512x1024x4096`, and
 `1024x1152x4096`.
 
+Follow-up accepted: the one-shot AMX medium dispatcher now avoids strided-B for
+the high-`K` medium shapes where packing B wins even after one-shot pack cost.
+The gate is intentionally narrower than the first probe: `m >= 512, k >= 4096`
+uses the packed path; `n = 1152, k >= 3072` uses the packed path; and
+`n = 1152, k = 2048` only uses the packed path at `m >= 1024`.
+
+The broad `k >= 4096` validation was strong across neighboring widths:
+`512x832x4096` `1.2144x`, `768x960x4096` `1.2667x`,
+`1024x1088x4096` `1.5542x`, and `1024x1216x4096` `1.6352x`, with selected
+checks showing B-faster counts of at least `80/81`. The refined boundary kept
+`512x1152x2048` and `768x1152x2048` neutral, while still improving
+`1024x1152x2048` (`1.0553x`, CI `[1.0485,1.0659]`, B-faster `99/101`),
+`512x1152x3072` (`1.2808x`, B-faster `101/101`), and
+`1024x1152x3072` (`1.4104x`, B-faster `101/101`). The `n = 768, k = 3072`
+guard stayed neutral, so that boundary remains on strided-B. Correctness
+coverage added `1024x1152x2048`, `512x1152x3072`, and `512x960x4096`.
+
 Follow-up rejected: routing `64x1408x2048` and `64x1472x2048` back to the old
 AMX path did not close their remaining small gaps. The AMX fallback candidate
 in `/private/tmp/cob_k2048_1408_amx_exp` passed correctness but paired A/B
@@ -1602,8 +1619,9 @@ wins since the older conclusion are the skinny SME B-reuse generalization, the
 blocking, wide `m = 64` K-chunk tuning, and the local `n = 1280..1472` SME
 direct route, plus the local `m = 64, k >= 2048` SME skinny threshold and
 streaming-B prefetch gates, the narrow `m = 64, k = 2048` large-KC gate, and
-the `m = 64, k = 1536, n >= 1408` SME route, and the public packed-B AMX
-fallback for high-`K` shapes. Current correctness coverage is 72 GEMM shapes.
+the `m = 64, k = 1536, n >= 1408` SME route, the public packed-B AMX fallback
+for high-`K` shapes, and the one-shot high-`K` medium AMX packed-path gate.
+Current correctness coverage is 75 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

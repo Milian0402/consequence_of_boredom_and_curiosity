@@ -120,6 +120,14 @@ enum {
 #define COB_SGEMM_M96_128_SME_REUSE_K1024_MIN_N 4096
 #endif
 
+static int cob_amx_strided_b_prefers_packed_shape(int m, int n, int k)
+{
+    return m >= 512 &&
+        (k >= 4096 ||
+            (n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N3 &&
+                (k >= 3072 || (m >= 1024 && k >= 2048))));
+}
+
 static uint32_t rng_next(uint32_t* state)
 {
     *state = *state * 1664525u + 1013904223u;
@@ -378,6 +386,7 @@ static const char* cob_one_shot_route(bench_shape shape)
         use_strided_b_skinny_extra;
     const int use_strided_b =
         (!use_large_block || use_strided_b_large_extra) && use_strided_b_extra &&
+        !cob_amx_strided_b_prefers_packed_shape(m, n, k) &&
         n != COB_SGEMM_AMX_STRIDED_B_CONFLICT_LDB && aligned32;
     if (use_strided_b) {
         return "amx_strided_b";
@@ -396,7 +405,7 @@ static const char* cob_one_shot_route(bench_shape shape)
         }
     }
 
-    if (n == COB_SGEMM_AMX_STRIDED_B_CONFLICT_LDB && m >= 512 &&
+    if (n == COB_SGEMM_AMX_STRIDED_B_CONFLICT_LDB && m >= 512 && k < 4096 &&
         (m % COB_BENCH_AMX_MR) == 0 && k >= 512 && is_apple_sme_build()) {
         return "pack_b_then_sme";
     }

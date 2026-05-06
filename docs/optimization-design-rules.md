@@ -49,6 +49,9 @@ These rules summarize repeated findings from the optimization timeline. They are
 - For the public packed-B API, AMX beats the current SME packed-B kernel at
   `k >= 4096` and at `n = 1152, k >= 2048`. Keep those shapes on AMX unless a
   future packed-B layout or kernel change is validated directly.
+- In one-shot AMX medium routes, high-`K` strided-B loses to packing B even
+  after pack cost. Keep `m >= 512, k >= 4096` on the packed path, plus
+  `n = 1152, k >= 3072`, and only `m >= 1024` for `n = 1152, k = 2048`.
 - Do not port cache-blocking constants from other Apple Silicon generations. On this M5 Max, per-P-cluster L2 is 8 MB, page size is 16 KB, and route-specific cache-fit probes still need paired A/B proof.
 - Do not prioritize fused inline B-packing rewrites unless a profiler shows packing is the bottleneck on an in-scope licensed-baseline gap.
 

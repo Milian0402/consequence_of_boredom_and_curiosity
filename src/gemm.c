@@ -196,6 +196,14 @@ static int cob_sgemm_m64_sme_large_kc_shape(int n, int k)
     return 0;
 }
 
+static int cob_sgemm_amx_strided_b_prefers_packed_shape(int m, int n, int k)
+{
+    return m >= 512 &&
+        (k >= 4096 ||
+            (n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N3 &&
+                (k >= 3072 || (m >= 1024 && k >= 2048))));
+}
+
 #if defined(COB_USE_APPLE_AMX)
 static void cob_amx_set(void)
 {
@@ -2014,6 +2022,7 @@ static int cob_sgemm_rowmajor_amx(
         use_strided_b_skinny_extra;
     const int use_strided_b =
         (!use_large_block || use_strided_b_large_extra) && use_strided_b_extra &&
+        !cob_sgemm_amx_strided_b_prefers_packed_shape(m, n, k) &&
         ldb != COB_SGEMM_AMX_STRIDED_B_CONFLICT_LDB &&
         m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0;
     const int max_a_panels = COB_SGEMM_AMX_MC / COB_SGEMM_AMX_MR;
