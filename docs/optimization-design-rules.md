@@ -49,6 +49,10 @@ These rules summarize repeated findings from the optimization timeline. They are
 - For the public packed-B API, AMX beats the current SME packed-B kernel at
   `k >= 4096` and at `n = 1152, k >= 2048`. Keep those shapes on AMX unless a
   future packed-B layout or kernel change is validated directly.
+- For public packed-B AMX, keep the `m = 384, n >= 2048, k >= 1024` case on
+  the 384-row large-block schedule. The wider 512-row packed-B block makes this
+  shape miss large-block B-panel reuse entirely. Do not extend this rule to
+  `k = 512` or broader `m >= 512` shapes without fresh paired evidence.
 - In one-shot AMX medium routes, high-`K` strided-B loses to packing B even
   after pack cost. Keep `m >= 512, k >= 4096` on the packed path, plus
   `n = 1152, k >= 3072`, and only `m >= 1024` for `n = 1152, k = 2048`.

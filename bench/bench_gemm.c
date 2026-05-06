@@ -68,6 +68,10 @@ enum {
 #define COB_SGEMM_AMX_MC 384
 #endif
 
+#ifndef COB_SGEMM_AMX_PACKED_LARGE_MC
+#define COB_SGEMM_AMX_PACKED_LARGE_MC 512
+#endif
+
 #ifndef COB_SGEMM_SME_DIRECT_MAX_N
 #define COB_SGEMM_SME_DIRECT_MAX_N 1216
 #endif
@@ -126,6 +130,14 @@ static int cob_amx_strided_b_prefers_packed_shape(int m, int n, int k)
         (k >= 4096 ||
             (n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N3 &&
                 (k >= 3072 || (m >= 1024 && k >= 2048))));
+}
+
+static int cob_amx_packed_b_mc(int m, int n, int k)
+{
+    if (n >= 2048 && m == COB_SGEMM_AMX_MC && k >= 1024) {
+        return COB_SGEMM_AMX_MC;
+    }
+    return n >= 2048 ? COB_SGEMM_AMX_PACKED_LARGE_MC : COB_SGEMM_AMX_MC;
 }
 
 static uint32_t rng_next(uint32_t* state)
@@ -433,7 +445,7 @@ static const char* cob_packed_b_route(bench_shape shape)
         return "packed_sme";
     }
     if ((m % COB_BENCH_AMX_MR) == 0 && (n % COB_BENCH_AMX_NR) == 0) {
-        if (m >= COB_SGEMM_AMX_MC && n >= 1152 && k >= 512) {
+        if (m >= cob_amx_packed_b_mc(m, n, k) && n >= 1152 && k >= 512) {
             return "packed_amx_large_block";
         }
         return "packed_amx_full";

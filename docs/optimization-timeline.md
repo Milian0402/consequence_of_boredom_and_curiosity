@@ -1,6 +1,6 @@
 # Optimization Attempt Timeline
 
-Last updated: 2026-05-05
+Last updated: 2026-05-06
 
 This tracks the matrix-multiplication speed work so far. The narrow comparison
 scope is single-threaded FP32 row-major GEMM for `C = A * B` with `alpha = 1`
@@ -21,6 +21,27 @@ use the git history for this file; the current recent sequence is anchored by:
 - `7fae628` Increase B-pack prefetch distance.
 
 ## Timeline
+
+### 2026-05-06: packed-B m384 high-N AMX block accepted
+
+The public packed-B AMX path now uses the 384-row large-block schedule for
+`m = 384`, `n >= 2048`, and `k >= 1024`. The previous `n >= 2048` packed-B
+threshold raised the row block to 512, which made `m = 384` miss the large-block
+path entirely and lose B-panel reuse.
+
+Paired old-vs-new packed-B evidence on M5 Max:
+
+- `384x2048x1024` median `1.0537x`, bootstrap95 `[1.0439,1.0923]`,
+  B-faster `98/121`.
+- `384x3072x1024` median `1.1301x`, bootstrap95 `[1.1138,1.1618]`,
+  B-faster `120/121`.
+- `384x4096x1024` median `1.1683x`, bootstrap95 `[1.1382,1.1743]`,
+  B-faster `119/121`.
+- `384x2048x1536` median `1.1845x`, bootstrap95 `[1.1662,1.1963]`,
+  B-faster `120/121`.
+
+The guard keeps `k = 512` on the old path and leaves `m >= 512` unchanged.
+Validation passed: `make test`, `make bench`, and `git diff --check`.
 
 ### 2026-05-05: B-pack prefetch accepted
 
@@ -1497,6 +1518,43 @@ B-faster `82/101`; `1024x512x2048` `1.0206x`, B-faster `73/101`; and
 holdout agreement. Correctness coverage added `512x512x2048` and
 `768x512x3072`.
 
+Follow-up accepted: the public packed-B AMX large-block threshold now keeps
+exact `m = 384, n >= 2048, k >= 1024` on a 384-row block instead of requiring
+the generic 512-row block threshold. The source change was found as an
+uncommitted helper extraction and then validated against a clean `HEAD`
+worktree before keeping it. Packed-B paired A/B showed `384x2048x1024`
+`1.0383x`, `384x2048x2048` `1.2262x`, `384x2048x4096` `1.1716x`,
+`384x4096x1024` `1.1510x`, `384x4096x2048` `1.1962x`, and
+`384x4096x4096` `1.1313x`. Guard shapes stayed neutral:
+`512x2048x2048` `1.0033x`, `512x4096x2048` `1.0009x`, and
+`768x2048x2048` `0.9991x`. Correctness coverage added `384x2048x2048` and
+`384x4096x1024`.
+
+Follow-up rejected: forcing `n = 768, k >= 2048` one-shot medium shapes from
+AMX strided-B to packed AMX was a hard regression at `k = 2048` and `3072`,
+including `512x768x2048` `0.8764x`, `768x768x2048` `0.9201x`,
+`1024x768x2048` `0.9313x`, `768x768x3072` `0.8937x`, and
+`1024x768x3072` `0.9366x`. Keep that width on strided-B below the existing
+`k >= 4096` packed-path gate.
+
+Follow-up rejected: extending the SME medium direct path to exact
+`768x768x2048` was neutral/noisy, not an improvement. The candidate passed
+correctness, but paired A/B measured `768x768x2048` `0.9952x` with CI
+`[0.9912,1.0363]` and holdout `0.9984x`. Neighboring guards were also neutral,
+so leave the current AMX strided-B route.
+
+Follow-up rejected: broad `COB_SGEMM_AMX_MC=512` cache blocking was not viable
+for the current high-`K` medium packed routes. It was neutral at some
+`n = 1024` shapes, but regressed the important `n = 1152, k = 4096` one-shot
+band: `512x1152x4096` `0.9548x`, `768x1152x4096` `0.9552x`, and
+`1024x1152x4096` `0.9313x`. Keep the current route-specific 384/512 policy.
+
+Follow-up rejected: changing `COB_SGEMM_PACK_B_PREFETCH_DISTANCE` from the
+current `64` to `128` was neutral/noisy, and lowering it to `32` regressed
+several pack-heavy one-shot cases such as `512x768x4096` `0.9921x`,
+`768x512x4096` `0.9876x`, `512x1152x4096` `0.9756x`, and
+`512x1024x2048` `0.9906x`. Keep the current distance `64`.
+
 Follow-up rejected: routing `64x1408x2048` and `64x1472x2048` back to the old
 AMX path did not close their remaining small gaps. The AMX fallback candidate
 in `/private/tmp/cob_k2048_1408_amx_exp` passed correctness but paired A/B
@@ -1632,8 +1690,9 @@ direct route, plus the local `m = 64, k >= 2048` SME skinny threshold and
 streaming-B prefetch gates, the narrow `m = 64, k = 2048` large-KC gate, and
 the `m = 64, k = 1536, n >= 1408` SME route, the public packed-B AMX fallback
 for high-`K` shapes, the one-shot high-`K` medium AMX packed-path gate, and the
-one-shot `n = 512, k >= 2048` packed-AMX conflict fallback. Current correctness
-coverage is 77 GEMM shapes.
+one-shot `n = 512, k >= 2048` packed-AMX conflict fallback, plus the packed-B
+`m = 384, n >= 2048` AMX block fix. Current correctness coverage is 79 GEMM
+shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
