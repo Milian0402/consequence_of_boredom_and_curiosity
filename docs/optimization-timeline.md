@@ -22,6 +22,20 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: packed-AB paired A/B mode added
+
+The paired A/B harness now supports `COB_AB_MODE=packed-AB`, so future
+fully-prepacked API changes can be measured in the same interleaved process as
+one-shot and packed-B changes. The mode packs A and B once for each side, times
+`cob_sgemm_rowmajor_packed_ab`, keeps the same checksum guard, and still
+reports paired median ratio, bootstrap interval, sign-test p-value, and
+split-half holdout.
+
+Smoke validation with `COB_AB_MODE=packed-AB` against identical source compiled
+and ran on `128` and `64x2048x1536`; checksums matched and output mode labels
+reported `packed-ab`. Large-shape no-change ratios remained noisy, as expected,
+but the setup/timing path is now available for real packed-AB candidates.
+
 ### 2026-05-06: m64 high-K direct SME N-chunking accepted
 
 The remaining m64 large-K counter evidence pointed at dispatch/scheduling

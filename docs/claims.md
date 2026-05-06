@@ -100,6 +100,10 @@ COB_AB_REPEATS=61 COB_AB_MAX_REPEATS=101 COB_AB_CV_TARGET=2 \
   sh tools/paired_ab_bench.sh baseline/src/gemm.c src/gemm.c SHAPE...
 ```
 
+The default mode compares the one-shot API. Use `COB_AB_MODE=packed` for the
+public packed-`B` API and `COB_AB_MODE=packed-AB` for the fully prepacked
+packed-`A`+`B` API.
+
 4. Accept a performance change only when the median ratio, bootstrap interval,
 sign test, and split-half holdout agree. If implementation CV is high but the
 paired ratio is tight, prefer the paired ratio but rerun cold for small deltas.

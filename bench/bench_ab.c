@@ -23,12 +23,22 @@ void cob_a_sgemm_rowmajor(
     int ldc);
 int cob_a_sgemm_pack_b(cob_packed_b_f32* packed, int k, int n, const float* b, int ldb);
 void cob_a_sgemm_free_packed_b(cob_packed_b_f32* packed);
+int cob_a_sgemm_pack_a(cob_packed_a_f32* packed, int m, int k, const float* a, int lda);
+void cob_a_sgemm_free_packed_a(cob_packed_a_f32* packed);
 void cob_a_sgemm_rowmajor_packed_b(
     int m,
     int n,
     int k,
     const float* a,
     int lda,
+    const cob_packed_b_f32* packed_b,
+    float* c,
+    int ldc);
+void cob_a_sgemm_rowmajor_packed_ab(
+    int m,
+    int n,
+    int k,
+    const cob_packed_a_f32* packed_a,
     const cob_packed_b_f32* packed_b,
     float* c,
     int ldc);
@@ -45,12 +55,22 @@ void cob_b_sgemm_rowmajor(
     int ldc);
 int cob_b_sgemm_pack_b(cob_packed_b_f32* packed, int k, int n, const float* b, int ldb);
 void cob_b_sgemm_free_packed_b(cob_packed_b_f32* packed);
+int cob_b_sgemm_pack_a(cob_packed_a_f32* packed, int m, int k, const float* a, int lda);
+void cob_b_sgemm_free_packed_a(cob_packed_a_f32* packed);
 void cob_b_sgemm_rowmajor_packed_b(
     int m,
     int n,
     int k,
     const float* a,
     int lda,
+    const cob_packed_b_f32* packed_b,
+    float* c,
+    int ldc);
+void cob_b_sgemm_rowmajor_packed_ab(
+    int m,
+    int n,
+    int k,
+    const cob_packed_a_f32* packed_a,
     const cob_packed_b_f32* packed_b,
     float* c,
     int ldc);
@@ -66,7 +86,10 @@ typedef struct impl_api {
     void (*rowmajor)(int, int, int, const float*, int, const float*, int, float*, int);
     int (*pack_b)(cob_packed_b_f32*, int, int, const float*, int);
     void (*free_packed_b)(cob_packed_b_f32*);
+    int (*pack_a)(cob_packed_a_f32*, int, int, const float*, int);
+    void (*free_packed_a)(cob_packed_a_f32*);
     void (*rowmajor_packed_b)(int, int, int, const float*, int, const cob_packed_b_f32*, float*, int);
+    void (*rowmajor_packed_ab)(int, int, int, const cob_packed_a_f32*, const cob_packed_b_f32*, float*, int);
 } impl_api;
 
 typedef struct sample_stats {
@@ -88,6 +111,12 @@ typedef struct paired_stats {
 enum {
     COB_AB_MAX_REPEATS = 1001
 };
+
+typedef enum bench_mode {
+    BENCH_MODE_DIRECT,
+    BENCH_MODE_PACKED_B,
+    BENCH_MODE_PACKED_AB
+} bench_mode;
 
 static uint32_t rng_next(uint32_t* state)
 {
@@ -307,6 +336,54 @@ static double time_packed(
     return now_seconds() - t0;
 }
 
+static double time_packed_ab(
+    const impl_api* impl,
+    bench_shape shape,
+    int iterations,
+    const cob_packed_a_f32* packed_a,
+    const cob_packed_b_f32* packed_b,
+    float* c)
+{
+    const double t0 = now_seconds();
+    for (int i = 0; i < iterations; ++i) {
+        impl->rowmajor_packed_ab(shape.m, shape.n, shape.k, packed_a, packed_b, c, shape.n);
+    }
+    return now_seconds() - t0;
+}
+
+static const char* bench_mode_name(bench_mode mode)
+{
+    switch (mode) {
+    case BENCH_MODE_PACKED_B:
+        return "packed-b";
+    case BENCH_MODE_PACKED_AB:
+        return "packed-ab";
+    case BENCH_MODE_DIRECT:
+    default:
+        return "one-shot";
+    }
+}
+
+static double time_impl_sample(
+    const impl_api* impl,
+    bench_shape shape,
+    int iterations,
+    bench_mode mode,
+    const float* a,
+    const float* b,
+    const cob_packed_a_f32* packed_a,
+    const cob_packed_b_f32* packed_b,
+    float* c)
+{
+    if (mode == BENCH_MODE_PACKED_AB) {
+        return time_packed_ab(impl, shape, iterations, packed_a, packed_b, c);
+    }
+    if (mode == BENCH_MODE_PACKED_B) {
+        return time_packed(impl, shape, iterations, a, packed_b, c);
+    }
+    return time_direct(impl, shape, iterations, a, b, c);
+}
+
 static void bootstrap_log_speedup_ci(const double* log_speedups, int repeats, int draws, double* low, double* high)
 {
     *low = 0.0;
@@ -411,7 +488,7 @@ static int bench_one_shape(
     double cv_target_percent,
     int iterations,
     int warmups,
-    int packed_mode,
+    bench_mode mode,
     int bootstrap_draws,
     int holdout_reporting)
 {
@@ -420,14 +497,20 @@ static int bench_one_shape(
         cob_a_sgemm_rowmajor,
         cob_a_sgemm_pack_b,
         cob_a_sgemm_free_packed_b,
+        cob_a_sgemm_pack_a,
+        cob_a_sgemm_free_packed_a,
         cob_a_sgemm_rowmajor_packed_b,
+        cob_a_sgemm_rowmajor_packed_ab,
     };
     const impl_api impl_b = {
         "B",
         cob_b_sgemm_rowmajor,
         cob_b_sgemm_pack_b,
         cob_b_sgemm_free_packed_b,
+        cob_b_sgemm_pack_a,
+        cob_b_sgemm_free_packed_a,
         cob_b_sgemm_rowmajor_packed_b,
+        cob_b_sgemm_rowmajor_packed_ab,
     };
 
     const size_t a_count = (size_t)shape.m * (size_t)shape.k;
@@ -468,13 +551,17 @@ static int bench_one_shape(
     memset(c_a, 0, c_count * sizeof(float));
     memset(c_b, 0, c_count * sizeof(float));
 
-    cob_packed_b_f32 packed_a;
-    cob_packed_b_f32 packed_b;
-    memset(&packed_a, 0, sizeof(packed_a));
-    memset(&packed_b, 0, sizeof(packed_b));
-    if (packed_mode) {
-        if (impl_a.pack_b(&packed_a, shape.k, shape.n, b, shape.n) != 0 ||
-            impl_b.pack_b(&packed_b, shape.k, shape.n, b, shape.n) != 0) {
+    cob_packed_a_f32 packed_a_a;
+    cob_packed_a_f32 packed_a_b;
+    cob_packed_b_f32 packed_b_a;
+    cob_packed_b_f32 packed_b_b;
+    memset(&packed_a_a, 0, sizeof(packed_a_a));
+    memset(&packed_a_b, 0, sizeof(packed_a_b));
+    memset(&packed_b_a, 0, sizeof(packed_b_a));
+    memset(&packed_b_b, 0, sizeof(packed_b_b));
+    if (mode == BENCH_MODE_PACKED_B || mode == BENCH_MODE_PACKED_AB) {
+        if (impl_a.pack_b(&packed_b_a, shape.k, shape.n, b, shape.n) != 0 ||
+            impl_b.pack_b(&packed_b_b, shape.k, shape.n, b, shape.n) != 0) {
             fprintf(stderr, "packed-B setup failed for %dx%dx%d\n", shape.m, shape.n, shape.k);
             free(a);
             free(b);
@@ -486,16 +573,40 @@ static int bench_one_shape(
             free(gf_b);
             free(speedups);
             free(log_speedups);
-            impl_a.free_packed_b(&packed_a);
-            impl_b.free_packed_b(&packed_b);
+            impl_a.free_packed_b(&packed_b_a);
+            impl_b.free_packed_b(&packed_b_b);
+            return 1;
+        }
+    }
+    if (mode == BENCH_MODE_PACKED_AB) {
+        if (impl_a.pack_a(&packed_a_a, shape.m, shape.k, a, shape.k) != 0 ||
+            impl_b.pack_a(&packed_a_b, shape.m, shape.k, a, shape.k) != 0) {
+            fprintf(stderr, "packed-A setup failed for %dx%dx%d\n", shape.m, shape.n, shape.k);
+            free(a);
+            free(b);
+            free(c_a);
+            free(c_b);
+            free(times_a);
+            free(times_b);
+            free(gf_a);
+            free(gf_b);
+            free(speedups);
+            free(log_speedups);
+            impl_a.free_packed_a(&packed_a_a);
+            impl_b.free_packed_a(&packed_a_b);
+            impl_a.free_packed_b(&packed_b_a);
+            impl_b.free_packed_b(&packed_b_b);
             return 1;
         }
     }
 
     for (int i = 0; i < warmups; ++i) {
-        if (packed_mode) {
-            (void)time_packed(&impl_a, shape, 1, a, &packed_a, c_a);
-            (void)time_packed(&impl_b, shape, 1, a, &packed_b, c_b);
+        if (mode == BENCH_MODE_PACKED_AB) {
+            (void)time_packed_ab(&impl_a, shape, 1, &packed_a_a, &packed_b_a, c_a);
+            (void)time_packed_ab(&impl_b, shape, 1, &packed_a_b, &packed_b_b, c_b);
+        } else if (mode == BENCH_MODE_PACKED_B) {
+            (void)time_packed(&impl_a, shape, 1, a, &packed_b_a, c_a);
+            (void)time_packed(&impl_b, shape, 1, a, &packed_b_b, c_b);
         } else {
             (void)time_direct(&impl_a, shape, 1, a, b, c_a);
             (void)time_direct(&impl_b, shape, 1, a, b, c_b);
@@ -514,15 +625,15 @@ static int bench_one_shape(
         }
         for (int r = repeats; r < target_repeats; ++r) {
             if ((r & 1) == 0) {
-                times_a[r] = packed_mode ? time_packed(&impl_a, shape, iterations, a, &packed_a, c_a)
-                                         : time_direct(&impl_a, shape, iterations, a, b, c_a);
-                times_b[r] = packed_mode ? time_packed(&impl_b, shape, iterations, a, &packed_b, c_b)
-                                         : time_direct(&impl_b, shape, iterations, a, b, c_b);
+                times_a[r] =
+                    time_impl_sample(&impl_a, shape, iterations, mode, a, b, &packed_a_a, &packed_b_a, c_a);
+                times_b[r] =
+                    time_impl_sample(&impl_b, shape, iterations, mode, a, b, &packed_a_b, &packed_b_b, c_b);
             } else {
-                times_b[r] = packed_mode ? time_packed(&impl_b, shape, iterations, a, &packed_b, c_b)
-                                         : time_direct(&impl_b, shape, iterations, a, b, c_b);
-                times_a[r] = packed_mode ? time_packed(&impl_a, shape, iterations, a, &packed_a, c_a)
-                                         : time_direct(&impl_a, shape, iterations, a, b, c_a);
+                times_b[r] =
+                    time_impl_sample(&impl_b, shape, iterations, mode, a, b, &packed_a_b, &packed_b_b, c_b);
+                times_a[r] =
+                    time_impl_sample(&impl_a, shape, iterations, mode, a, b, &packed_a_a, &packed_b_a, c_a);
             }
 
             gf_a[r] = ops / times_a[r] * 1.0e-9;
@@ -552,7 +663,7 @@ static int bench_one_shape(
         shape.m,
         shape.n,
         shape.k,
-        packed_mode ? "packed-b" : "one-shot",
+        bench_mode_name(mode),
         repeats,
         iterations);
     if (repeats > min_repeats) {
@@ -630,8 +741,10 @@ static int bench_one_shape(
             checksum_b);
     }
 
-    impl_a.free_packed_b(&packed_a);
-    impl_b.free_packed_b(&packed_b);
+    impl_a.free_packed_a(&packed_a_a);
+    impl_b.free_packed_a(&packed_a_b);
+    impl_a.free_packed_b(&packed_b_a);
+    impl_b.free_packed_b(&packed_b_b);
     free(a);
     free(b);
     free(c_a);
@@ -662,7 +775,15 @@ int main(int argc, char** argv)
     const int forced_iterations = env_int_clamped("COB_AB_ITERS", 0, 0, 100000000);
     const int holdout_reporting = env_int_clamped("COB_AB_HOLDOUT", 1, 0, 1);
     const char* mode = getenv("COB_AB_MODE");
-    const int packed_mode = mode != NULL && strcmp(mode, "packed") == 0;
+    bench_mode mode_kind = BENCH_MODE_DIRECT;
+    if (mode != NULL) {
+        if (strcmp(mode, "packed") == 0 || strcmp(mode, "packed-B") == 0 ||
+            strcmp(mode, "packed_b") == 0) {
+            mode_kind = BENCH_MODE_PACKED_B;
+        } else if (strcmp(mode, "packed-AB") == 0 || strcmp(mode, "packed_ab") == 0) {
+            mode_kind = BENCH_MODE_PACKED_AB;
+        }
+    }
 
     bench_shape defaults[] = {
         {384, 384, 384},
@@ -686,7 +807,7 @@ int main(int argc, char** argv)
                 cv_target_percent,
                 iterations,
                 warmups,
-                packed_mode,
+                mode_kind,
                 bootstrap_draws,
                 holdout_reporting);
         }
@@ -709,7 +830,7 @@ int main(int argc, char** argv)
             cv_target_percent,
             iterations,
             warmups,
-            packed_mode,
+            mode_kind,
             bootstrap_draws,
             holdout_reporting);
     }

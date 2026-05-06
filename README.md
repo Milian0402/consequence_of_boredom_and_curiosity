@@ -95,6 +95,17 @@ COB_BENCH_ROUTE=1 sh tools/bench_grid.sh 832 896 960 > /tmp/cob-grid.csv
 python3 tools/bench_heatmap.py /tmp/cob-grid.csv --output /tmp/cob-grid.png
 ```
 
+For candidate-vs-baseline source changes, use the paired A/B harness. It
+defaults to the one-shot API; set `COB_AB_MODE=packed` for packed-`B`, or
+`COB_AB_MODE=packed-AB` for the fully prepacked API:
+
+```sh
+COB_AB_REPEATS=61 COB_AB_MAX_REPEATS=101 \
+  sh tools/paired_ab_bench.sh baseline/src/gemm.c src/gemm.c 512
+COB_AB_MODE=packed-AB COB_AB_REPEATS=61 \
+  sh tools/paired_ab_bench.sh baseline/src/gemm.c src/gemm.c 512
+```
+
 For Apple Silicon hardware-counter probes, build `mperf-stat` from
 <https://github.com/tmcgilchrist/mperf>. On M5 machines, force the local `as5`
 PMC database; if an upstream `mperf-stat` build cannot load that database, use
