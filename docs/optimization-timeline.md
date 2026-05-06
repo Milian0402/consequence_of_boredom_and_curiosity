@@ -22,6 +22,27 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: exact 64x1024x1536 SME skinny route accepted
+
+The one-shot `m = 64, k = 1536` SME skinny direct route now includes exact
+`n = 1024`, while leaving the existing `n >= 1408` gate unchanged. A broad
+lowering to `n >= 1024` was rejected because `n = 1088`, `1152`, and `1280`
+regressed.
+
+Focused paired one-shot evidence on M5 Max:
+
+- Broad rejected gate: `64x1024x1536` improved `1.0182x`, but
+  `64x1088x1536` regressed `0.9397x`, `64x1152x1536` regressed `0.9576x`,
+  and `64x1280x1536` regressed `0.9485x`.
+- Exact accepted gate: `64x1024x1536` median `1.0303x`, bootstrap95
+  `[1.0160,1.0422]`, B-faster `143/201`, holdout median `1.0233x`.
+- Confirmation with `COB_AB_ITERS=4`: `64x1024x1536` median `1.0536x`,
+  bootstrap95 `[1.0471,1.0632]`, B-faster `96/101`, holdout median `1.0536x`.
+- Guards stayed neutral: `64x1088x1536` median `1.0000x` and
+  `64x1024x2048` median `1.0083x` in the focused confirmation.
+
+Correctness coverage adds `64x1024x1536`.
+
 ### 2026-05-06: public packed-B 512x1280x2048 MC512 accepted
 
 The public packed-`B` AMX path now uses a 512-row block for exact
@@ -2068,8 +2089,9 @@ wins since the older conclusion are the skinny SME B-reuse generalization, the
 blocking, wide `m = 64` K-chunk tuning, and the local `n = 1280..1472` SME
 direct route, plus the local `m = 64, k >= 2048` SME skinny threshold and
 streaming-B prefetch gates, the narrow `m = 64, k = 2048` large-KC gate, and
-the `m = 64, k = 1536, n >= 1408` SME route, the public packed-B AMX fallback
-for high-`K` shapes, the one-shot high-`K` medium AMX packed-path gate, and the
+the `m = 64, k = 1536` SME route at exact `n = 1024` plus `n >= 1408`, the
+public packed-B AMX fallback for high-`K` shapes, the one-shot high-`K` medium
+AMX packed-path gate, and the
 one-shot `n = 512, k >= 2048` packed-AMX conflict fallback, plus the packed-B
 `m = 384, n >= 2048` AMX block fix and the one-shot `m = 384, n >= 1152`
 high-`K` packed-path gate, plus the one-shot `n = 1216, k >= 3072` packed-path
@@ -2083,7 +2105,7 @@ and one-shot large-block threshold for `n >= 768, k >= 3072` and high-row
 large-block AMX, plus the exact public packed-B `512x1024x1536` AMX fallback.
 The exact `512x1280x1536` SME direct route addresses one-shot pack overhead in
 the medium band, and exact public packed-B `512x1280x2048` now uses the
-512-row AMX block. Current correctness coverage is 109 GEMM shapes.
+512-row AMX block. Current correctness coverage is 110 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

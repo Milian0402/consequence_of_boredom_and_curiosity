@@ -37,8 +37,8 @@ These rules summarize repeated findings from the optimization timeline. They are
   `64` helps a few high-`K` widths but the boundary is discontinuous; do not
   add exact-width distance gates without counter evidence or a smoother rule.
 - For `m = 64`, the SME skinny direct route is useful from `k >= 2048` through
-  `n <= 4096`; at `k = 1536`, keep the narrower `n >= 1408` gate because
-  lower widths regressed.
+  `n <= 4096`; at `k = 1536`, keep exact `n = 1024` plus the narrower
+  `n >= 1408` gate because `n = 1088..1280` regressed or stayed noisy.
 - For `m = 64, k = 2048`, `KC=1024` is useful only in the low-width SME skinny
   band currently gated as `n = 1088..1280` plus `n = 1600`. Global
   `COB_SGEMM_SKINNY_SME_KC=384/768/1024` probes regressed important high-`K`

@@ -1351,6 +1351,7 @@ static int cob_sgemm_rowmajor_sme_skinny_contiguous_strided_b32(
 {
     const int use_large_k_skinny =
         (n >= 1024 && n <= 4096 && k >= 2048) ||
+        (n == 1024 && k == 1536) ||
         (n >= 1408 && n <= 4096 && k == 1536);
     const int use_long_n_k512 = n >= COB_SGEMM_M64_SME_LONG_N_K512_MIN_N && k == 512;
     const int use_prefetch = use_large_k_skinny && cob_sgemm_m64_sme_direct_prefetch_shape(n, k);
