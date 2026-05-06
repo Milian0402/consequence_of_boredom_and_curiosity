@@ -56,6 +56,8 @@ These rules summarize repeated findings from the optimization timeline. They are
   The `k = 2048` sibling needed a focused repeat-201 rerun before shipping, and
   the `k = 4096` path is already on AMX; do not broaden this without fresh
   paired evidence.
+- For public packed-B `n = 512, k = 3072`, use AMX only when `m >= 1024`.
+  Lower `m = 512/768` neighbors were neutral/noisy and should stay on SME.
 - For public packed-B AMX, keep the `m = 384, n >= 2048, k >= 1024` case on
   the 384-row large-block schedule. The wider 512-row packed-B block makes this
   shape miss large-block B-panel reuse entirely. Do not extend this rule to

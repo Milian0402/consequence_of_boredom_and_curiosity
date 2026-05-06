@@ -1780,6 +1780,24 @@ The accepted rule keeps public packed-B `n = 1152` on AMX at exact `k = 1536`
 and at the existing `k >= 2048` band. Correctness coverage adds
 `512x1152x1536`, `768x1152x1536`, and `1024x1152x1536`.
 
+### 2026-05-06 7916d8e+local: public packed-B n=512 k=3072 high-m AMX fallback
+
+After the `n = 1152` update, the medium route grid showed `1024x512x3072`
+still on `packed_sme` and trailing Accelerate, while `512x512x3072` and
+`768x512x3072` were not gaps. A candidate excluded the SME packed-B route only
+for `m >= 1024, n = 512, k = 3072`.
+
+Paired packed-B A/B validated the high-`m` exact gate: `1024x512x3072` median
+`1.0323x`, bootstrap95 `[1.0286,1.0558]`, B-faster `130/141`, sign-p
+`5.75e-27`, holdout median `1.0288x`; and `1280x512x3072` median `1.0347x`,
+bootstrap95 `[1.0391,1.0580]`, B-faster `136/141`, sign-p `3.22e-34`,
+holdout median `1.0390x`. The lower-`m` neighbors stayed neutral/noisy:
+`512x512x3072` median `1.0021x`, sign-p `0.238`, holdout median `1.0000x`;
+and `768x512x3072` median `0.9979x`, sign-p `0.4`, holdout median `1.0000x`.
+The `k = 2048` guards were also neutral, so the rule is limited to exact
+`k = 3072` and `m >= 1024`. Correctness coverage adds `1024x512x3072` and
+`1280x512x3072`.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The qualified claim now is:
@@ -1803,8 +1821,9 @@ one-shot `n = 512, k >= 2048` packed-AMX conflict fallback, plus the packed-B
 `m = 384, n >= 2048` AMX block fix and the one-shot `m = 384, n >= 1152`
 high-`K` packed-path gate, plus the one-shot `n = 1216, k >= 3072` packed-path
 gate and the public packed-B `n = 1024, k >= 3072` and exact
-`n = 768, k = 2048/3072` and `n = 1152, k = 1536` AMX fallbacks. Current
-correctness coverage is 93 GEMM shapes.
+`n = 768, k = 2048/3072`, `n = 1152, k = 1536`, and high-`m`
+`n = 512, k = 3072` AMX fallbacks. Current correctness coverage is 95 GEMM
+shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
