@@ -22,6 +22,29 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: one-shot AMX high-K medium MC256 broadened
+
+After the `m512,k2048` chunked-B change, a refreshed medium audit showed the
+largest remaining external gaps in high-`K` AMX large-block one-shot rows. A
+compile-flag paired screen with `COB_SGEMM_AMX_MC=256` showed the smaller row
+block was now broadly useful in the audited high-`K` medium band, while neutral
+rows were left unchanged by capping the source helper to the audited range.
+
+The source helper now uses a 256-row A block for one-shot large-block AMX when:
+`k >= 4096, m >= 768, 512 <= n <= 1280`; `k >= 3072, m = 512,
+768 <= n <= 1280`; `k >= 3072, m >= 1024, 1152 <= n <= 1280`; plus exact
+`768x1024x3072`. This keeps public packed-B blocking unchanged.
+
+Representative paired screen wins (`repeat=61`, `iters=2`) included:
+`512x768x4096` `1.0404x`, `512x1024x3072` `1.0213x`,
+`512x1152x3072` `1.0189x`, `512x1152x4096` `1.0343x`,
+`768x1216x4096` `1.0251x`, `768x1280x4096` `1.0275x`,
+`1024x1152x3072` `1.0587x`, `1024x1152x4096` `1.0280x`,
+`1024x1216x4096` `1.0166x`, and `1024x1280x4096` `1.0239x`.
+
+Correctness coverage adds `512x1152x4096`, `768x1216x4096`, and
+`1024x1280x4096`.
+
 ### 2026-05-06: m512 k2048 chunked one-shot B path accepted
 
 The refreshed medium audit still showed one-shot gaps where COB packed-B was

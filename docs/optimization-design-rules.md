@@ -109,6 +109,11 @@ These rules summarize repeated findings from the optimization timeline. They are
   a 256-row A block for `n = 768, k >= 3072` and `n = 1024, k >= 4096`. A
   global 512-row block regressed, while the narrow 256-row block improved the
   validated audit gaps without changing public packed-B blocking.
+- The one-shot 256-row AMX A-block rule also covers the audited high-`K`
+  medium bands where local paired sweeps stayed positive: `k >= 4096,
+  m >= 768, 512 <= n <= 1280`; `k >= 3072, m = 512, 768 <= n <= 1280`;
+  `k >= 3072, m >= 1024, 1152 <= n <= 1280`; plus exact
+  `768x1024x3072`. Keep it capped to the audited range.
 - In one-shot AMX medium routes, high-`K` strided-B loses to packing B even
   after pack cost. Keep `m >= 512, k >= 4096` on the packed path, plus
   `n = 1152, k >= 3072`, and exact `n = 1152, k = 2048` from `m >= 512`.

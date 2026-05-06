@@ -250,7 +250,19 @@ static int cob_sgemm_amx_large_block_shape(int m, int n, int k)
 
 static int cob_sgemm_amx_one_shot_large_mc(int m, int n, int k)
 {
-    if (m >= 768 && ((n == 768 && k >= 3072) || (n == 1024 && k >= 4096))) {
+    if (k >= 4096 && m >= 768 && n >= 512 && n <= 1280) {
+        return 256;
+    }
+    if (k >= 3072 && m == 512 && n >= 768 && n <= 1280) {
+        return 256;
+    }
+    if (k >= 3072 && m >= 1024 && n >= 1152 && n <= 1280) {
+        return 256;
+    }
+    if (m >= 768 && n == 768 && k >= 3072) {
+        return 256;
+    }
+    if (m == 768 && n == 1024 && k == 3072) {
         return 256;
     }
     return COB_SGEMM_AMX_MC;
