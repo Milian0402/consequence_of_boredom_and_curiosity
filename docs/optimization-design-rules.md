@@ -51,6 +51,9 @@ These rules summarize repeated findings from the optimization timeline. They are
   future packed-B layout or kernel change is validated directly.
 - For public packed-B `n = 1024`, use AMX from `k >= 3072`. The `k = 2048`
   neighbor was mixed, while `k = 3072` was a clear win across `m = 512..1024`.
+- For public packed-B `n = 768`, use AMX only at exact `k = 3072`. The
+  `k = 2048` guard reran neutral/noisy, and the `k = 4096` path is already on
+  AMX; do not broaden this without fresh paired evidence.
 - For public packed-B AMX, keep the `m = 384, n >= 2048, k >= 1024` case on
   the 384-row large-block schedule. The wider 512-row packed-B block makes this
   shape miss large-block B-panel reuse entirely. Do not extend this rule to

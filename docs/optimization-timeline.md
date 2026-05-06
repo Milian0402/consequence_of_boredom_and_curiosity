@@ -1716,6 +1716,34 @@ baselines on the routed shape ranges in the repo's narrow benchmarked scope,
 while Accelerate, source-available, and non-inspectable projects remain separate
 calibration/comparison targets.
 
+### 2026-05-06 faf7106+local: public packed-B n=768 k=3072 AMX fallback
+
+Route-aware packed-B sweeps left one medium-width high-`K` band on the current
+SME packed-B kernel. A paired packed-B A/B probe forced exact `n = 768,
+k = 3072` through AMX while leaving the neighboring `k = 2048` and `k = 4096`
+guards on their existing paths.
+
+The target shapes were positive across the routed `m = 512..1024` band:
+`512x768x3072` median `1.0833x`, bootstrap95 `[1.1139,1.1601]`, B-faster
+`95/101`, sign-p `1.07e-21`, holdout median `1.0426x`; `768x768x3072` median
+`1.0453x`, bootstrap95 `[1.0414,1.0549]`, B-faster `95/101`, sign-p
+`1.07e-21`, holdout median `1.0517x`; and `1024x768x3072` median `1.0583x`,
+bootstrap95 `[1.0548,1.0668]`, B-faster `100/101`, sign-p `8.05e-29`,
+holdout median `1.0634x`.
+
+The first guard run showed a suspicious `768x768x2048` regression even though
+the route was unchanged. A focused repeat-181 rerun reduced it to neutral:
+median `1.0023x`, bootstrap95 `[0.9924,1.0023]`, B-faster `96/181`, sign-p
+`0.457`, holdout median `1.0008x`. `512x768x2048` was also neutral at median
+`1.0023x`, bootstrap95 `[0.9935,1.0040]`, sign-p `0.842`. The `k = 4096`
+guards were already AMX in the baseline; the paired ratios were mixed/noisy and
+not used to broaden the rule.
+
+The accepted patch keeps the rule exact: public packed-B `n = 768, k = 3072`
+uses AMX, while `k = 2048` remains on SME packed-B and `k >= 4096` remains on
+the existing AMX high-`K` path. Correctness coverage adds `512x768x3072` and
+`1024x768x3072`.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The qualified claim now is:
@@ -1738,8 +1766,9 @@ for high-`K` shapes, the one-shot high-`K` medium AMX packed-path gate, and the
 one-shot `n = 512, k >= 2048` packed-AMX conflict fallback, plus the packed-B
 `m = 384, n >= 2048` AMX block fix and the one-shot `m = 384, n >= 1152`
 high-`K` packed-path gate, plus the one-shot `n = 1216, k >= 3072` packed-path
-gate and the public packed-B `n = 1024, k >= 3072` AMX fallback. Current
-correctness coverage is 85 GEMM shapes.
+gate and the public packed-B `n = 1024, k >= 3072` and exact
+`n = 768, k = 3072` AMX fallbacks. Current correctness coverage is 87 GEMM
+shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
