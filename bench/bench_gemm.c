@@ -514,6 +514,32 @@ static const char* cob_one_shot_route(bench_shape shape)
     return "amx_packed_partial";
 }
 
+static int cob_packed_b_sme_excluded_shape(int m, int n, int k)
+{
+    if (n == 832 || n == 960 || n == 1088) {
+        return 1;
+    }
+    if (m >= 1024 && n == 512 && k == 3072) {
+        return 1;
+    }
+    if (n == 768 && (k == 2048 || k == 3072)) {
+        return 1;
+    }
+    if ((n == 1024 && k >= 3072) || (n == 1024 && k == 2048)) {
+        return 1;
+    }
+    if (m == 512 && n == 1024 && k == 1536) {
+        return 1;
+    }
+    if (k >= 4096) {
+        return 1;
+    }
+    if ((n == 1152 && k >= 2048) || (n == 1152 && k == 1536)) {
+        return 1;
+    }
+    return 0;
+}
+
 static const char* cob_packed_b_route(bench_shape shape)
 {
     const int m = shape.m;
@@ -523,12 +549,8 @@ static const char* cob_packed_b_route(bench_shape shape)
         return "packed_fallback";
     }
     if (is_apple_sme_build() && m >= 512 && n >= 512 && k >= 512 &&
-        n <= COB_SGEMM_SME_PACKED_MAX_N && n != 832 && n != 960 && n != 1088 &&
-        !(m >= 1024 && n == 512 && k == 3072) &&
-        !(n == 768 && (k == 2048 || k == 3072)) &&
-        !(n == 1024 && k >= 3072) && !(n == 1024 && k == 2048) &&
-        !(m == 512 && n == 1024 && k == 1536) &&
-        k < 4096 && !(n == 1152 && k >= 2048) && !(n == 1152 && k == 1536) &&
+        n <= COB_SGEMM_SME_PACKED_MAX_N &&
+        !cob_packed_b_sme_excluded_shape(m, n, k) &&
         (m % COB_BENCH_AMX_MR) == 0 && (n % 64) == 0) {
         return "packed_sme";
     }

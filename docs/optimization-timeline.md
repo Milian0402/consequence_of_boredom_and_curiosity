@@ -22,6 +22,22 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: packed-B dispatch cleanup and gate floor
+
+Current cleanup is intended to be behavior-preserving: `src/gemm.c` and
+`bench/bench_gemm.c` extract the SME packed-B exclusion list into named helper
+predicates so implementation dispatch and benchmark route labels stay aligned.
+
+The cleanup also records a stricter acceptance floor for future dispatch gates:
+prefer median speedup at least `3%`, holdout median at least `2%`, and
+sign-p `< 1e-10`. Smaller exact gates remain possible, but should be treated as
+exceptions that need unusually strong context and follow-up evidence.
+
+Validation after the cleanup passed `make test`, `make all`,
+`cmake --build build-cmake`, `ctest --test-dir build-cmake --output-on-failure`,
+`sh -n tools/claim_audit.sh`, `git diff --check`, and a packed-B route smoke
+covering both `packed_sme` and AMX fallback shapes.
+
 ### 2026-05-06: public packed-AB path added
 
 The `tract-linalg` square smoke exposed a stronger-contract calibration target:

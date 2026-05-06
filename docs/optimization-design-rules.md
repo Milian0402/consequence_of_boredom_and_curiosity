@@ -10,6 +10,10 @@ These rules summarize repeated findings from the optimization timeline. They are
 - Prefer candidates whose bootstrap interval and sign-test p-value agree. If they disagree, rerun instead of shipping the change.
 - Recheck any candidate win in a fresh process before committing a performance route.
 - Use `COB_AB_A_FLAGS` / `COB_AB_B_FLAGS` for compile-time threshold or constant sweeps before forking source; it keeps A/B probes cheap and reproducible.
+- For new dispatch gates, default to a higher acceptance bar: median speedup
+  at least 3%, split-half holdout median at least 2%, and sign-test
+  `p < 1e-10`. Treat smaller gates as exceptional and document why they are
+  worth the added route complexity.
 - Keep one-shot, packed-B, and packed-AB claims separate. More-prepacked results
   are useful ceilings but do not prove the less-prepacked public path is faster.
 - Use `COB_BENCH_ONLY` or `tools/counter_probe.sh` for hardware-counter runs so

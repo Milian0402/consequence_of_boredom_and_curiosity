@@ -257,6 +257,32 @@ static int cob_sgemm_amx_large_block_shape(int m, int n, int k)
         (n == 512 && ((m == 768 && k == 4096) || (m >= 1024 && k >= 4096)));
 }
 
+static int cob_sgemm_sme_packed_b_excluded_shape(int m, int n, int k)
+{
+    if (n == 832 || n == 960 || n == 1088) {
+        return 1;
+    }
+    if (m >= 1024 && n == 512 && k == 3072) {
+        return 1;
+    }
+    if (n == 768 && (k == 2048 || k == 3072)) {
+        return 1;
+    }
+    if ((n == 1024 && k >= 3072) || (n == 1024 && k == 2048)) {
+        return 1;
+    }
+    if (m == 512 && n == 1024 && k == 1536) {
+        return 1;
+    }
+    if (k >= 4096) {
+        return 1;
+    }
+    if ((n == 1152 && k >= 2048) || (n == 1152 && k == 1536)) {
+        return 1;
+    }
+    return 0;
+}
+
 static int cob_sgemm_amx_one_shot_large_mc(int m, int n, int k)
 {
     if (k >= 4096 && m >= 768 && n >= 512 && n <= 1280) {
@@ -1285,12 +1311,8 @@ static int cob_sgemm_rowmajor_sme_from_packed_b32(
     int ldc)
 {
     if (packed_b->nr != COB_SGEMM_AMX_NR || m < 512 || n < 512 || k < 512 ||
-        n > COB_SGEMM_SME_PACKED_MAX_N || n == 832 || n == 960 || n == 1088 ||
-        (m >= 1024 && n == 512 && k == 3072) ||
-        (n == 768 && (k == 2048 || k == 3072)) ||
-        (n == 1024 && k >= 3072) || (n == 1024 && k == 2048) ||
-        (m == 512 && n == 1024 && k == 1536) ||
-        k >= 4096 || (n == 1152 && k >= 2048) || (n == 1152 && k == 1536) ||
+        n > COB_SGEMM_SME_PACKED_MAX_N ||
+        cob_sgemm_sme_packed_b_excluded_shape(m, n, k) ||
         (m % COB_SGEMM_AMX_MR) != 0 || (n % 64) != 0 ||
         !cob_apple_sme2p1_available()) {
         return 0;
