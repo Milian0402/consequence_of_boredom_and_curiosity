@@ -118,6 +118,10 @@ These rules summarize repeated findings from the optimization timeline. They are
 - For one-shot `512x1280x1536`, use the SME direct-B route. It avoids B-pack
   setup and beat the packed AMX path, while nearby `k = 1024/2048`, `m = 768`,
   `n = 1216`, and `n = 1344` guards stayed neutral/noisy.
+- For one-shot `m = 512, k = 2048`, use the chunked AMX B-pack path only at
+  exact `n = 896`, `1024`, `1152`, and `1280`. Neighbor widths `832`, `960`,
+  `1088`, and `1216` regressed under the same chunked path, so keep this as an
+  explicit-width rule unless a smoother kernel replaces it.
 - For one-shot `n = 1216`, use the packed path from `k >= 3072`, and also at
   exact `k = 2048` when `m >= 768`. The `m = 512, k = 2048` neighbor and
   `k = 1536` guards are neutral/noisy; `k >= 4096` is covered by the high-`K`

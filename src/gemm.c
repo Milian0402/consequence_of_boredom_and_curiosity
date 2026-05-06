@@ -1943,10 +1943,11 @@ static int cob_sgemm_rowmajor_amx_skinny_pack_b_chunks(
     float* c,
     int ldc)
 {
-    if (m < 96 || m > 128 || n < 1024 || k < 512 ||
-        lda != k || ldb != n ||
-        (m % COB_SGEMM_AMX_MR) != 0 ||
-        (n % COB_SGEMM_AMX_NR) != 0) {
+    const int use_skinny = m >= 96 && m <= 128 && n >= 1024 && k >= 512;
+    const int use_m512 =
+        m == 512 && k == 2048 && (n == 896 || n == 1024 || n == 1152 || n == 1280);
+    if ((!use_skinny && !use_m512) || lda != k || ldb != n ||
+        (m % COB_SGEMM_AMX_MR) != 0 || (n % COB_SGEMM_AMX_NR) != 0) {
         return 0;
     }
 

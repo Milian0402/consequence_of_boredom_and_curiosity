@@ -437,6 +437,10 @@ static const char* cob_one_shot_route(bench_shape shape)
     if (m >= 96 && m <= 128 && n >= 1024 && k >= 512 && aligned32) {
         return "amx_skinny_chunks";
     }
+    if (m == 512 && k == 2048 &&
+        (n == 896 || n == 1024 || n == 1152 || n == 1280) && aligned32) {
+        return "amx_chunked_b";
+    }
 
     if (is_apple_sme_build()) {
         const int use_large_k_skinny =

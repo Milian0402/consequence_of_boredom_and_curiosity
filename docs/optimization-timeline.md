@@ -22,6 +22,36 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: m512 k2048 chunked one-shot B path accepted
+
+The refreshed medium audit still showed one-shot gaps where COB packed-B was
+fast after setup, but full one-shot B packing left too much packed-B scratch
+outside the M5 P-cluster L2. A local candidate reused the existing chunked AMX
+B-pack structure for `m = 512`, packing all A panels once and consuming B in
+256-column chunks.
+
+The accepted gate is intentionally exact-width: `m = 512, k = 2048` and
+`n = 896`, `1024`, `1152`, or `1280`. The same candidate regressed nearby
+widths, so no smooth threshold was inferred.
+
+Paired A/B evidence (`repeat=101`, `iters=4`) for accepted widths:
+
+- `512x896x2048`: median `1.0583x`, bootstrap95 `[1.0564,1.0673]`,
+  B-faster `98/101`, holdout median `1.0561x`.
+- `512x1024x2048`: median `1.0746x`, bootstrap95 `[1.0734,1.0809]`,
+  B-faster `101/101`, holdout median `1.0752x`.
+- `512x1152x2048`: median `1.0197x`, bootstrap95 `[1.0149,1.0215]`,
+  B-faster `90/101`, holdout median `1.0199x`.
+- `512x1280x2048`: median `1.0101x`, bootstrap95 `[1.0055,1.0131]`,
+  B-faster `74/101`, holdout median `1.0091x`.
+
+Rejected neighbor widths with the same path: `512x832x2048` `0.8667x`,
+`512x960x2048` `0.9041x`, `512x1088x2048` `0.9097x`, and
+`512x1216x2048` `0.9754x`. Other guards rejected in the first pass included
+`512x512x4096`, `512x768x3072`, and `512x1216x3072`.
+
+Correctness coverage adds `512x896x2048`.
+
 ### 2026-05-06: one-shot AMX high-K medium MC256 accepted
 
 The medium audit showed remaining one-shot gaps on high-`K` AMX packed
