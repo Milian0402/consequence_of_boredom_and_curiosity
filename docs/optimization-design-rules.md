@@ -50,8 +50,9 @@ These rules summarize repeated findings from the optimization timeline. They are
   `k >= 4096`, at `n = 1152, k >= 2048`, and at exact `n = 1152, k = 1536`.
   Keep those shapes on AMX unless a future packed-B layout or kernel change is
   validated directly.
-- For public packed-B `n = 1024`, use AMX from `k >= 3072`. The `k = 2048`
-  neighbor was mixed, while `k = 3072` was a clear win across `m = 512..1024`.
+- For public packed-B `n = 1024`, use AMX at exact `k = 2048` and from
+  `k >= 3072`. The `k = 2048` `m = 512` holdout sign test was weaker than the
+  higher-row results, but median and bootstrap holdout stayed positive.
 - For public packed-B `n = 768`, use AMX at exact `k = 2048` and `k = 3072`.
   The `k = 2048` sibling needed a focused repeat-201 rerun before shipping, and
   the `k = 4096` path is already on AMX; do not broaden this without fresh

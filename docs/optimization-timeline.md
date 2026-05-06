@@ -1881,6 +1881,29 @@ median `1.0498x`. The `1024/1280 x 512 x 3072` guards were neutral/noisy, so
 the rule starts only at `k >= 4096`. Correctness coverage adds
 `1024x512x4096` and `1280x512x4096`.
 
+### 2026-05-06 5a6cc0a+local: public packed-B n=1024 k=2048 AMX fallback
+
+The public packed-B `n = 1024` rule previously started at `k >= 3072`, leaving
+`k = 2048` on the SME packed-B path. A focused exact-sibling probe kept the old
+`k >= 3072` condition first and added only exact `k = 2048`.
+
+The repeat-201 packed-B rerun was positive on the target band:
+`512x1024x2048` median `1.0199x`, bootstrap95 `[1.0119,1.0283]`, B-faster
+`119/201`, sign-p `0.0109`, holdout median `1.0146x`; `768x1024x2048` median
+`1.0253x`, bootstrap95 `[1.0245,1.0393]`, B-faster `151/201`, sign-p
+`5.57e-13`, holdout median `1.0220x`; and `1024x1024x2048` median `1.0436x`,
+bootstrap95 `[1.0705,1.1142]`, B-faster `185/201`, sign-p `1.25e-37`,
+holdout median `1.0727x`. The `512` row had a weaker holdout sign count
+(`59/101`, sign-p `0.111`), but its median and bootstrap holdout stayed
+positive and no target row reversed.
+
+The `512x1024x1536` guard was behavior-identical/noisy, and the
+`1024x1024x3072` guard stayed neutral at median `0.9986x`, bootstrap95
+`[0.9974,1.0004]`, sign-p `0.467`, holdout median `0.9974x`. The accepted rule
+uses AMX for public packed-B `n = 1024` at exact `k = 2048` and at the existing
+`k >= 3072` band. Correctness coverage adds `512x1024x2048`,
+`768x1024x2048`, and `1024x1024x2048`.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The qualified claim now is:
@@ -1903,11 +1926,11 @@ for high-`K` shapes, the one-shot high-`K` medium AMX packed-path gate, and the
 one-shot `n = 512, k >= 2048` packed-AMX conflict fallback, plus the packed-B
 `m = 384, n >= 2048` AMX block fix and the one-shot `m = 384, n >= 1152`
 high-`K` packed-path gate, plus the one-shot `n = 1216, k >= 3072` packed-path
-gate and the public packed-B `n = 1024, k >= 3072` and exact
+gate and the public packed-B `n = 1024, k = 2048 or k >= 3072` and exact
 `n = 768, k = 2048/3072`, `n = 1152, k = 1536`, and high-`m`
 `n = 512, k = 3072` AMX fallbacks, plus the lowered public packed-B AMX
 and one-shot large-block threshold for `n >= 768, k >= 3072` and high-row
-`n = 512, k >= 4096`. Current correctness coverage is 100 GEMM shapes.
+`n = 512, k >= 4096`. Current correctness coverage is 103 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
