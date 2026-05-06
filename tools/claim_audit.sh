@@ -75,6 +75,8 @@ run_grid_env() {
         COB_GRID_K="$k_values" \
         sh tools/bench_grid.sh > "$csv"
     python3 tools/bench_gap_report.py --target "cob one-shot" "$csv" > "$OUT_DIR/$name.one-shot.gaps.csv"
+    python3 tools/bench_gap_report.py --target "cob one-shot" --include-cob-baselines "$csv" \
+        > "$OUT_DIR/$name.one-shot-vs-best.gaps.csv"
     python3 tools/bench_gap_report.py --target "cob packed-B" "$csv" > "$OUT_DIR/$name.packed-b.gaps.csv"
 }
 
@@ -90,6 +92,8 @@ run_grid_shapes() {
         COB_GRID_BENCH="$BENCH" \
         sh tools/bench_grid.sh "$@" > "$csv"
     python3 tools/bench_gap_report.py --target "cob one-shot" "$csv" > "$OUT_DIR/$name.one-shot.gaps.csv"
+    python3 tools/bench_gap_report.py --target "cob one-shot" --include-cob-baselines "$csv" \
+        > "$OUT_DIR/$name.one-shot-vs-best.gaps.csv"
     python3 tools/bench_gap_report.py --target "cob packed-B" "$csv" > "$OUT_DIR/$name.packed-b.gaps.csv"
 }
 

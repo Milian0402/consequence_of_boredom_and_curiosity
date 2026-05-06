@@ -1919,6 +1919,10 @@ sh tools/claim_audit.sh`, and produced the expected context, CSV, gap, and
 summary files. `docs/claims.md` now points the audit recipe at this wrapper so
 future full-claim checks do not rely on ad hoc terminal output.
 
+Follow-up tooling tweak: the audit bundle also emits one-shot-vs-best gap
+reports that include COB packed-B as an internal baseline. This makes pack/setup
+overhead visible separately from external-baseline misses.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The qualified claim now is:
