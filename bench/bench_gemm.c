@@ -340,6 +340,9 @@ static int is_apple_sme_build(void)
 
 static int cob_sme_direct_extra_n_shape(int m, int n, int k)
 {
+    if (m == 512 && n == 1280 && k == 1536) {
+        return 1;
+    }
     if (n < COB_SGEMM_SME_DIRECT_EXTRA_N_MIN ||
         n > COB_SGEMM_SME_DIRECT_EXTRA_N_MAX ||
         ((n - COB_SGEMM_SME_DIRECT_EXTRA_N_MIN) % 64) != 0) {

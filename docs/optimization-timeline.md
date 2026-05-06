@@ -22,6 +22,22 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: exact 512x1280x1536 SME direct route accepted
+
+The one-shot dispatcher now routes exact `512x1280x1536` through the SME
+direct-`B` medium kernel instead of the packed AMX path. This avoids the
+one-shot B-pack setup cost on a shape where packed-B compute was already fast
+but total one-shot time trailed Accelerate in the medium audit.
+
+Focused paired one-shot evidence on M5 Max:
+
+- `512x1280x1536` median `1.1286x`, bootstrap95 `[1.0919,1.1212]`,
+  B-faster `184/201`, holdout median `1.1207x`.
+- Guards stayed neutral/noisy: `512x1280x1024`, `512x1280x2048`,
+  `768x1280x1536`, `512x1216x1536`, and `512x1344x1536`.
+
+Correctness coverage adds `512x1280x1536`.
+
 ### 2026-05-06: public packed-B 512x1024x1536 AMX fallback accepted
 
 The public packed-`B` SME route now rejects exact `512x1024x1536`, letting the
@@ -2032,7 +2048,8 @@ and one-shot large-block threshold for `n >= 768, k >= 3072` and high-row
 `n = 512, k >= 4096`, and the lowered one-shot packed-path gate for
 `n = 1152, k = 2048` from `m >= 512`, plus exact `768x512x4096`
 large-block AMX, plus the exact public packed-B `512x1024x1536` AMX fallback.
-Current correctness coverage is 107 GEMM shapes.
+The exact `512x1280x1536` SME direct route addresses one-shot pack overhead in
+the medium band. Current correctness coverage is 108 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

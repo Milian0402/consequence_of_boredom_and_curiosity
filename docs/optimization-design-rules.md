@@ -76,6 +76,9 @@ These rules summarize repeated findings from the optimization timeline. They are
 - The same packed-path rule has a lower-height exception at `m = 384`: use the
   packed path for `n >= 1152, k >= 4096` and for exact `n = 1152, k >= 3072`.
   Guard `m = 384` widths below `1152` were neutral/noisy, so do not broaden it.
+- For one-shot `512x1280x1536`, use the SME direct-B route. It avoids B-pack
+  setup and beat the packed AMX path, while nearby `k = 1024/2048`, `m = 768`,
+  `n = 1216`, and `n = 1344` guards stayed neutral/noisy.
 - For one-shot `n = 1216`, use the packed path from `k >= 3072`, and also at
   exact `k = 2048` when `m >= 768`. The `m = 512, k = 2048` neighbor and
   `k = 1536` guards are neutral/noisy; `k >= 4096` is covered by the high-`K`
