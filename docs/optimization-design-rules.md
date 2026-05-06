@@ -73,6 +73,9 @@ These rules summarize repeated findings from the optimization timeline. They are
 - Hand-written K=2/K=4 unrolls in the prefetched m64 SME streaming-B C
   intrinsic kernel did not improve the remaining large-`K` gaps. Do not revisit
   that schedule without counter evidence or a dedicated assembly kernel.
+- Splitting the m64 prefetched SME streaming-B loops into an unconditional
+  prefetch main loop plus a no-prefetch tail did not improve the remaining
+  large-`K` gaps. Keep the compact in-loop prefetch guard.
 - For `64x2112x7168` and `64x4096x7168`, repeat counter profiles showed high
   map/dispatch stalls, near-zero `LDST_UNIT_WAITING_SME_ENGINE_MEM_DATA`, and
   no SME cross-page events. Treat the remaining gap as dispatch/scheduling

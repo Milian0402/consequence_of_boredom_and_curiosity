@@ -22,6 +22,23 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06 local-uncommitted: m64 prefetch-boundary branch hoist rejected
+
+A temp source in `/private/tmp/cob_prefetch_guard_exp` split the prefetched
+SME streaming-B K loops into a main loop with unconditional B prefetches and a
+short no-prefetch tail. This removed the `p + distance < k` check from the hot
+loop in both `cob_sgemm_16x64_sme_strided_b32_prefetch2` and the tuple
+B-pack-prefetch helper, targeting the map/dispatch pressure seen in the m64
+large-K counter pass without changing any route gates.
+
+Correctness passed across 127 shapes, but paired validation was neutral/noisy:
+`64x1088x7168` median `0.9958x`, `64x2112x7168` `1.0014x` with holdout
+`0.9949x`, `64x3328x12288` `1.0000x`, `64x3712x12288` `0.9985x`,
+`64x4032x8192` `0.9984x`, `64x4096x7168` `0.9965x`, `64x4096x8192`
+`0.9945x`, and guard `384x1280x1536` `1.0026x`. Several high-variance shapes
+auto-extended to 61 repeats but still lacked useful sign-test or holdout
+support. Leave the compact in-loop prefetch guard in source.
+
 ### 2026-05-06 local-uncommitted: medium SME B-panel-first traversal rejected
 
 The broad B-panel-first loop-order probe for the SME direct-B kernel was not
