@@ -62,6 +62,9 @@ These rules summarize repeated findings from the optimization timeline. They are
   the 384-row large-block schedule. The wider 512-row packed-B block makes this
   shape miss large-block B-panel reuse entirely. Do not extend this rule to
   `k = 512` or broader `m >= 512` shapes without fresh paired evidence.
+- For public packed-B AMX full-width shapes, use the large-block schedule below
+  `n = 1152` only when `n >= 768` and `k >= 3072`. The lower-`k` `n = 768,
+  k = 2048` rows were behavior-identical/noisy and should not drive the rule.
 - In one-shot AMX medium routes, high-`K` strided-B loses to packing B even
   after pack cost. Keep `m >= 512, k >= 4096` on the packed path, plus
   `n = 1152, k >= 3072`, and only `m >= 1024` for `n = 1152, k = 2048`.

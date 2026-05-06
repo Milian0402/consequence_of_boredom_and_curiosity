@@ -454,7 +454,8 @@ static const char* cob_packed_b_route(bench_shape shape)
         return "packed_sme";
     }
     if ((m % COB_BENCH_AMX_MR) == 0 && (n % COB_BENCH_AMX_NR) == 0) {
-        if (m >= cob_amx_packed_b_mc(m, n, k) && n >= 1152 && k >= 512) {
+        if (m >= cob_amx_packed_b_mc(m, n, k) &&
+            (n >= 1152 || (n >= 768 && k >= 3072)) && k >= 512) {
             return "packed_amx_large_block";
         }
         return "packed_amx_full";

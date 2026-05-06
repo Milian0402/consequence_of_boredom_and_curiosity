@@ -1676,7 +1676,7 @@ static int cob_sgemm_rowmajor_amx_from_packed_b32(
     const size_t b_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_NR;
 
     const int packed_mc = cob_sgemm_amx_packed_b_mc(m, n, k);
-    if (m >= packed_mc && n >= 1152 && k >= 512 &&
+    if (m >= packed_mc && (n >= 1152 || (n >= 768 && k >= 3072)) && k >= 512 &&
         m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0) {
         const int max_a_panels = packed_mc / COB_SGEMM_AMX_MR;
         const size_t a_block_floats = (size_t)max_a_panels * a_panel_floats;

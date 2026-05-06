@@ -1798,6 +1798,36 @@ The `k = 2048` guards were also neutral, so the rule is limited to exact
 `k = 3072` and `m >= 1024`. Correctness coverage adds `1024x512x3072` and
 `1280x512x3072`.
 
+### 2026-05-06 a911501+local: lower packed-B AMX large-block threshold for high-K n>=768
+
+After the SME-vs-AMX dispatch gaps narrowed, the remaining public packed-B
+medium losses were mostly already on AMX. A structural probe lowered the AMX
+packed-B large-block schedule from `n >= 1152` to `n >= 768`. The broad version
+was strongly positive at `k >= 3072`, but it touched `n = 768, k = 2048` and
+produced a behavior-identical/noisy guard mix, including one repeat with a
+`1024x768x2048` regression. The accepted rule keeps the old `n >= 1152` path
+and only uses the lower `n >= 768` threshold when `k >= 3072`.
+
+The narrowed paired packed-B A/B remained strongly positive on the target
+routes: `512x768x3072` median `1.1135x`, bootstrap95 `[1.1038,1.1191]`,
+B-faster `100/101`, sign-p `8.05e-29`, holdout median `1.1161x`;
+`768x768x3072` median `1.0428x`, bootstrap95 `[1.0167,1.0395]`, B-faster
+`81/101`, sign-p `6.93e-10`, holdout median `1.0517x`; `1024x768x3072`
+median `1.0539x`, bootstrap95 `[1.0544,1.0687]`, B-faster `98/101`, sign-p
+`1.36e-25`, holdout median `1.0615x`; `512x768x4096` median `1.1061x`,
+bootstrap95 `[1.0758,1.1017]`, B-faster `92/101`, sign-p `1.82e-18`, holdout
+median `1.1231x`; `768x768x4096` median `1.1153x`, bootstrap95
+`[1.0493,1.0934]`, B-faster `72/101`, sign-p `2.24e-05`, holdout median
+`1.1226x`; `1024x768x4096` median `1.1089x`, bootstrap95 `[1.0761,1.1026]`,
+B-faster `91/101`, sign-p `1.7e-17`, holdout median `1.1081x`;
+`1024x1024x3072` median `1.1714x`, bootstrap95 `[1.1386,1.1745]`, B-faster
+`98/101`, sign-p `1.36e-25`, holdout median `1.1709x`; and
+`1024x1024x4096` median `1.1006x`, bootstrap95 `[1.0967,1.1068]`, B-faster
+`61/61`, sign-p `8.67e-19`, holdout median `1.1000x`.
+
+Correctness coverage adds `512x768x4096`, `768x768x4096`, and
+`1024x1024x4096`.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The qualified claim now is:
@@ -1822,8 +1852,9 @@ one-shot `n = 512, k >= 2048` packed-AMX conflict fallback, plus the packed-B
 high-`K` packed-path gate, plus the one-shot `n = 1216, k >= 3072` packed-path
 gate and the public packed-B `n = 1024, k >= 3072` and exact
 `n = 768, k = 2048/3072`, `n = 1152, k = 1536`, and high-`m`
-`n = 512, k = 3072` AMX fallbacks. Current correctness coverage is 95 GEMM
-shapes.
+`n = 512, k = 3072` AMX fallbacks, plus the lowered public packed-B AMX
+large-block threshold for `n >= 768, k >= 3072`. Current correctness coverage
+is 98 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
