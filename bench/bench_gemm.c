@@ -424,8 +424,12 @@ static const char* cob_one_shot_route(bench_shape shape)
             ((n >= 1024 && n <= 4096 && k >= 2048) ||
                 (n == 1024 && k == 1536) ||
                 (n >= 1408 && n <= 4096 && k == 1536));
+        const int use_mid_n_k512 =
+            n >= 2048 && n < COB_SGEMM_M64_SME_LONG_N_K512_MIN_N &&
+            (n % 512) == 0;
         const int use_long_n_k512 =
-            m == 64 && n >= COB_SGEMM_M64_SME_LONG_N_K512_MIN_N && k == 512;
+            m == 64 && (use_mid_n_k512 || n >= COB_SGEMM_M64_SME_LONG_N_K512_MIN_N) &&
+            k == 512;
         if ((use_large_k_skinny || use_long_n_k512) && (n % 64) == 0) {
             return "sme_skinny_strided";
         }

@@ -248,6 +248,10 @@ int main(void)
     failures += test_packed_matches_direct_aligned_shape(64, 1408, 1536);
     failures += test_packed_matches_direct_aligned_shape(64, 1472, 1536);
     failures += test_packed_matches_direct_aligned_shape(64, 1600, 2048);
+    failures += test_packed_matches_direct_aligned_shape(64, 2048, 512);
+    failures += test_packed_matches_direct_aligned_shape(64, 2560, 512);
+    failures += test_packed_matches_direct_aligned_shape(64, 3072, 512);
+    failures += test_packed_matches_direct_aligned_shape(64, 3584, 512);
     failures += test_packed_matches_direct_aligned_shape(512, 1152, 2048);
     failures += test_packed_matches_direct_aligned_shape(768, 1152, 2048);
     failures += test_packed_matches_direct_aligned_shape(512, 1024, 4096);
@@ -307,7 +311,7 @@ int main(void)
     failures += test_packed_matches_direct_aligned_shape(128, 2048, 2048);
     failures += test_packed_matches_direct_aligned_shape(1280, 1280, 1280);
     failures += test_packed_matches_direct_aligned_shape(2048, 2048, 2048);
-    total_shapes += 86;
+    total_shapes += 90;
 #endif
 
     if (failures != 0) {

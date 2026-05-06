@@ -22,6 +22,41 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: m64 k512 mid-width SME reuse accepted
+
+The one-shot `m = 64, k = 512` SME B-reuse route now starts at mid-width
+multiples of 512 from `n = 2048` through `3584`, while retaining the existing
+`n >= 4096` long-`N` route. A broad threshold lowering to every `n >= 2048`
+was rejected because off-boundary widths regressed.
+
+Focused paired one-shot evidence on M5 Max with the shaped source predicate:
+
+- `64x2048x512` median `1.0485x`, bootstrap95 `[1.0438,1.0552]`,
+  B-faster `100/101`, holdout median `1.0489x`.
+- `64x2560x512` median `1.0557x`, bootstrap95 `[1.0513,1.0608]`,
+  B-faster `99/101`, holdout median `1.0601x`.
+- `64x3072x512` median `1.0874x`, bootstrap95 `[1.0791,1.0926]`,
+  B-faster `99/101`, holdout median `1.0873x`.
+- `64x3584x512` median `1.0804x`, bootstrap95 `[1.0795,1.0953]`,
+  B-faster `99/101`, holdout median `1.0839x`.
+- Existing long-`N` guards stayed neutral: `64x4096x512` median `1.0015x`
+  and `64x8192x512` median `1.0000x`.
+
+Rejected broad-threshold evidence: with `COB_SGEMM_M64_SME_LONG_N_K512_MIN_N`
+lowered to `2048`, `64x2112x512` regressed to `0.8994x` and
+`64x2304x512` regressed to `0.9402x`.
+
+Follow-up rejected: adding exact `64x1024x512` to the SME B-reuse route was
+too weak to ship. The first repeat-201 run showed median `1.0476x`, but the
+`COB_AB_ITERS=4` confirmation weakened to median `1.0184x`, bootstrap95
+`[1.0059,1.0257]`, B-faster `61/101`, sign-p `0.046`, and holdout median
+`1.0062x` with CI crossing `1.0`. Behavior-identical guards at `1536`, `2048`,
+`2112`, and `4096` were neutral to slightly negative/noisy, so exact `n = 1024`
+stays on AMX.
+
+Correctness coverage adds `64x2048x512`, `64x2560x512`, `64x3072x512`, and
+`64x3584x512`.
+
 ### 2026-05-06: exact 64x1024x1536 SME skinny route accepted
 
 The one-shot `m = 64, k = 1536` SME skinny direct route now includes exact
@@ -42,6 +77,12 @@ Focused paired one-shot evidence on M5 Max:
   `64x1024x2048` median `1.0083x` in the focused confirmation.
 
 Correctness coverage adds `64x1024x1536`.
+
+Follow-up rejected: forcing exact `64x1024x1536` away from the SME skinny
+direct route and through the one-shot packed-AMX path was a hard regression.
+The paired run measured median `0.5833x`, bootstrap95 `[0.5383,0.5597]`,
+B-faster `0/201`, with holdout median `0.5278x`. Keep this shape on the SME
+skinny route despite the remaining noisy Accelerate audit gap.
 
 ### 2026-05-06: public packed-B 512x1280x2048 MC512 accepted
 
@@ -2085,8 +2126,9 @@ The recent methodology loop is now the main asset: route-aware grid sweeps find
 gaps, paired A/B runs validate candidate thresholds, holdout/sign-test output
 filters noise, and the timeline records rejected paths. The strongest structural
 wins since the older conclusion are the skinny SME B-reuse generalization, the
-`m = 64, k = 512` threshold drop, B-pack prefetching, packed-B large-square
-blocking, wide `m = 64` K-chunk tuning, and the local `n = 1280..1472` SME
+`m = 64, k = 512` threshold drop and mid-width extension, B-pack prefetching,
+packed-B large-square blocking, wide `m = 64` K-chunk tuning, and the local
+`n = 1280..1472` SME
 direct route, plus the local `m = 64, k >= 2048` SME skinny threshold and
 streaming-B prefetch gates, the narrow `m = 64, k = 2048` large-KC gate, and
 the `m = 64, k = 1536` SME route at exact `n = 1024` plus `n >= 1408`, the
@@ -2105,7 +2147,8 @@ and one-shot large-block threshold for `n >= 768, k >= 3072` and high-row
 large-block AMX, plus the exact public packed-B `512x1024x1536` AMX fallback.
 The exact `512x1280x1536` SME direct route addresses one-shot pack overhead in
 the medium band, and exact public packed-B `512x1280x2048` now uses the
-512-row AMX block. Current correctness coverage is 110 GEMM shapes.
+512-row AMX block, and the `m = 64, k = 512` mid-width SME reuse extension.
+Current correctness coverage is 114 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

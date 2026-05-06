@@ -39,6 +39,13 @@ These rules summarize repeated findings from the optimization timeline. They are
 - For `m = 64`, the SME skinny direct route is useful from `k >= 2048` through
   `n <= 4096`; at `k = 1536`, keep exact `n = 1024` plus the narrower
   `n >= 1408` gate because `n = 1088..1280` regressed or stayed noisy.
+  Do not route exact `64x1024x1536` through one-shot packed AMX; it is a hard
+  regression against the SME route.
+- For `m = 64, k = 512`, the SME B-reuse route is useful from `n >= 4096` and
+  at the mid-width `n = 2048/2560/3072/3584` multiples of 512. Do not lower the
+  threshold for all `n >= 2048`; `n = 2112/2304` regressed hard in the broad
+  threshold probe. Keep exact `n = 1024` on AMX; the SME exact probe had weak
+  holdout and noisy behavior-identical guards.
 - For `m = 64, k = 2048`, `KC=1024` is useful only in the low-width SME skinny
   band currently gated as `n = 1088..1280` plus `n = 1600`. Global
   `COB_SGEMM_SKINNY_SME_KC=384/768/1024` probes regressed important high-`K`
