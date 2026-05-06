@@ -22,6 +22,36 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: exact 384x1280x1024 SME direct route accepted
+
+The one-shot dispatcher now routes exact `384x1280x1024` through the SME
+direct-`B` medium kernel. This is a narrow low-height exception: adjacent
+widths and the same width at `k = 1536` did not provide route-worthy evidence.
+
+Exploratory paired one-shot evidence on M5 Max with repeat-61,
+`COB_AB_ITERS=2`:
+
+- Exact accepted gate: `384x1280x1024` B/A median `1.2179x`, bootstrap95
+  `[1.2106x,1.2231x]`, B-faster `61/61`, sign-p `8.67e-19`, holdout median
+  `1.2184x`.
+- Guards stayed neutral/noisy or too small: `384x1216x1024` median `0.9979x`,
+  `384x1344x1024` median `1.0000x`, `512x1280x1024` median `1.0006x`, and
+  `384x1280x1536` median `1.0011x`.
+
+Confirmation with repeat-101, `COB_AB_ITERS=4`:
+
+- Exact accepted gate: `384x1280x1024` median `1.2218x`, bootstrap95
+  `[1.1705x,1.2057x]`, B-faster `95/101`, sign-p `1.07e-21`, holdout median
+  `1.2276x`.
+- Guards stayed neutral: `384x1216x1024` median `0.9995x`,
+  `384x1344x1024` median `1.0012x`, and `384x1280x1536` median `1.0000x`.
+
+Direct benchmark after the patch: COB one-shot `384x1280x1024` reached median
+`2005.24 GF/s` on route `sme_medium_direct`, versus packed-B `1962.25 GF/s`
+and Accelerate `1958.43 GF/s`.
+
+Correctness coverage increases to 116 shapes.
+
 ### 2026-05-06: exact 512x1024x1536 SME direct route accepted
 
 The one-shot dispatcher now routes exact `512x1024x1536` through the SME

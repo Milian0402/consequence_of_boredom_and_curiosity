@@ -29,6 +29,9 @@ These rules summarize repeated findings from the optimization timeline. They are
 - One-shot `n = 1024` via public packed-B or direct SME routes has generally
   not beaten the current path, except exact `512x1024x1536`, which should use
   SME direct-B.
+- Exact `384x1280x1024` is a low-height SME-direct exception for one-shot
+  GEMM. Do not broaden it to adjacent widths or `k = 1536`; current guards were
+  neutral/noisy or too small to justify a wider route.
 - Increasing expression-level unrolling in the C SME packed-B kernel did not beat the compiler's current schedule.
 - m=64 B-reuse changes are shape-sensitive; do not assume a NC/KC knob alone will close the MpGEMM gap.
 - SME streaming-B prefetch is route-specific. It helped `m = 64`, large-`K`
