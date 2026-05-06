@@ -80,6 +80,11 @@ These rules summarize repeated findings from the optimization timeline. They are
   hard-regressed `64x4096x7168` and `64x4096x8192`.
 - Keep `64x2112x7168` on the direct streaming-B route; forcing B reuse there
   hard-regressed the exact gap shape.
+- For m64 direct streaming-B, chunk the N loop at 1024 columns only in the
+  high-width, high-K band `3584 <= n < 4096, k >= 7168`. This keeps the current
+  B slab hot across the four 16-row A panels without paying B-pack cost. Do not
+  broaden it below `n = 3584`, at `n = 4096`, or below `k = 7168`; those guards
+  were neutral/noisy or already use the stronger B-reuse route.
 - Full-K chunks are not a substitute for a real single-store epilogue. They
   helped only tiny isolated low-width `k = 2048` cases and badly regressed
   high-`K` m64 SME skinny shapes.

@@ -132,6 +132,10 @@ enum {
 #define COB_SGEMM_M64_SME_B_PREFETCH_DISTANCE 32
 #endif
 
+#ifndef COB_SGEMM_M64_SME_DIRECT_NC
+#define COB_SGEMM_M64_SME_DIRECT_NC 1024
+#endif
+
 static int cob_min_i32(int a, int b)
 {
     return a < b ? a : b;
@@ -210,6 +214,11 @@ static int cob_sgemm_m64_sme_direct_prefetch_shape(int n, int k)
         return 1;
     }
     return k == 1536 && n >= 1408;
+}
+
+static int cob_sgemm_m64_sme_direct_nc_shape(int n, int k)
+{
+    return n >= 3584 && n < 4096 && k >= 7168;
 }
 
 static int cob_sgemm_m64_sme_large_kc_shape(int n, int k)
@@ -1448,11 +1457,14 @@ static int cob_sgemm_rowmajor_sme_skinny_contiguous_strided_b32(
         return 0;
     }
 
-    const int b_panels64 = n / 64;
     const int a32_panels = m / COB_SGEMM_AMX_MR;
     const int kc_max =
         use_large_k_skinny && cob_sgemm_m64_sme_large_kc_shape(n, k) ?
             COB_SGEMM_SKINNY_SME_LARGE_KC : COB_SGEMM_SKINNY_SME_KC;
+    const int use_direct_nc = use_large_k_skinny && cob_sgemm_m64_sme_direct_nc_shape(n, k);
+    const int nc_max =
+        (COB_SGEMM_M64_SME_DIRECT_NC >= 64 && use_direct_nc) ?
+            COB_SGEMM_M64_SME_DIRECT_NC : n;
     const size_t a_panel_floats =
         (size_t)kc_max * (size_t)COB_SGEMM_AMX_MR;
     float* packed_a =
@@ -1475,28 +1487,32 @@ static int cob_sgemm_rowmajor_sme_skinny_contiguous_strided_b32(
         }
         cob_amx_clr();
 
-        if (use_prefetch) {
-            cob_sgemm_16x64_sme_strided_b32_prefetch2(
-                a32_panels * 2,
-                b_panels64,
-                kc,
-                packed_a,
-                b + (size_t)pc * (size_t)ldb,
-                ldb,
-                c,
-                ldc,
-                pc != 0);
-        } else {
-            cob_sgemm_16x64_sme_strided_b32(
-                a32_panels * 2,
-                b_panels64,
-                kc,
-                packed_a,
-                b + (size_t)pc * (size_t)ldb,
-                ldb,
-                c,
-                ldc,
-                pc != 0);
+        for (int jc = 0; jc < n; jc += nc_max) {
+            const int nc = cob_min_i32(nc_max, n - jc);
+            const int b_panels64 = nc / 64;
+            if (use_prefetch) {
+                cob_sgemm_16x64_sme_strided_b32_prefetch2(
+                    a32_panels * 2,
+                    b_panels64,
+                    kc,
+                    packed_a,
+                    b + (size_t)pc * (size_t)ldb + jc,
+                    ldb,
+                    c + jc,
+                    ldc,
+                    pc != 0);
+            } else {
+                cob_sgemm_16x64_sme_strided_b32(
+                    a32_panels * 2,
+                    b_panels64,
+                    kc,
+                    packed_a,
+                    b + (size_t)pc * (size_t)ldb + jc,
+                    ldb,
+                    c + jc,
+                    ldc,
+                    pc != 0);
+            }
         }
     }
 

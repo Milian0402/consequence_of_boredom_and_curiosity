@@ -35,8 +35,8 @@ if [ "$UNAME_M" = "arm64" ] || [ "$UNAME_M" = "aarch64" ]; then
     COMMON_CFLAGS="$COMMON_CFLAGS -DCOB_USE_NEON=1"
 fi
 
-RENAME_A="-Dcob_sgemm_ref_rowmajor=cob_a_sgemm_ref_rowmajor -Dcob_sgemm_pack_b=cob_a_sgemm_pack_b -Dcob_sgemm_free_packed_b=cob_a_sgemm_free_packed_b -Dcob_sgemm_rowmajor_packed_b=cob_a_sgemm_rowmajor_packed_b -Dcob_sgemm_rowmajor=cob_a_sgemm_rowmajor"
-RENAME_B="-Dcob_sgemm_ref_rowmajor=cob_b_sgemm_ref_rowmajor -Dcob_sgemm_pack_b=cob_b_sgemm_pack_b -Dcob_sgemm_free_packed_b=cob_b_sgemm_free_packed_b -Dcob_sgemm_rowmajor_packed_b=cob_b_sgemm_rowmajor_packed_b -Dcob_sgemm_rowmajor=cob_b_sgemm_rowmajor"
+RENAME_A="-Dcob_sgemm_ref_rowmajor=cob_a_sgemm_ref_rowmajor -Dcob_sgemm_pack_b=cob_a_sgemm_pack_b -Dcob_sgemm_free_packed_b=cob_a_sgemm_free_packed_b -Dcob_sgemm_rowmajor_packed_b=cob_a_sgemm_rowmajor_packed_b -Dcob_sgemm_pack_a=cob_a_sgemm_pack_a -Dcob_sgemm_free_packed_a=cob_a_sgemm_free_packed_a -Dcob_sgemm_rowmajor_packed_ab=cob_a_sgemm_rowmajor_packed_ab -Dcob_sgemm_rowmajor=cob_a_sgemm_rowmajor"
+RENAME_B="-Dcob_sgemm_ref_rowmajor=cob_b_sgemm_ref_rowmajor -Dcob_sgemm_pack_b=cob_b_sgemm_pack_b -Dcob_sgemm_free_packed_b=cob_b_sgemm_free_packed_b -Dcob_sgemm_rowmajor_packed_b=cob_b_sgemm_rowmajor_packed_b -Dcob_sgemm_pack_a=cob_b_sgemm_pack_a -Dcob_sgemm_free_packed_a=cob_b_sgemm_free_packed_a -Dcob_sgemm_rowmajor_packed_ab=cob_b_sgemm_rowmajor_packed_ab -Dcob_sgemm_rowmajor=cob_b_sgemm_rowmajor"
 
 echo "paired A/B build dir: $BUILD_DIR" >&2
 "$CC_BIN" $COMMON_CFLAGS $A_FLAGS $RENAME_A -c "$BASELINE_SRC" -o "$BUILD_DIR/gemm_a.o"

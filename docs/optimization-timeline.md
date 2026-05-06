@@ -22,6 +22,45 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: m64 high-K direct SME N-chunking accepted
+
+The remaining m64 large-K counter evidence pointed at dispatch/scheduling
+pressure rather than simple B-memory waits. A bounded structural probe split
+the direct SME streaming-B route into 1024-column chunks only for
+`3584 <= n < 4096, k >= 7168`, so each B slab is reused across the four
+16-row A panels before moving to the next slab. This avoids the B-pack reuse
+path that previously regressed `64x2112x7168` and leaves `n = 4096` on its
+existing B-reuse route.
+
+The paired harness had first regressed after the packed-AB API addition because
+`tools/paired_ab_bench.sh` did not rename the new packed-A public symbols. The
+script now renames `cob_sgemm_pack_a`, `cob_sgemm_free_packed_a`, and
+`cob_sgemm_rowmajor_packed_ab` on both A and B sides, restoring same-process
+A/B builds.
+
+Final paired validation against clean `e9466e1` source with the fixed harness:
+
+- Guard `64x3520x7168`: median `1.0069x`, bootstrap95 `[0.9817,1.0268]`,
+  sign-p `1`, holdout median `1.0149x`; unchanged.
+- Guard `64x4096x7168`: median `0.9978x`, bootstrap95 `[0.9756,1.0104]`,
+  sign-p `1`, holdout median `0.9954x`; unchanged on the existing reuse route.
+- Accepted band: `64x3584x7168` median `1.0865x`, bootstrap95
+  `[1.0671,1.1000]`, sign-p `1.46e-20`, holdout `1.0842x`;
+  `64x4032x7168` median `1.0500x`, `[1.0443,1.0704]`, sign-p `7.85e-12`,
+  holdout `1.0500x`; `64x3584x8192` median `1.0599x`,
+  `[1.0496,1.0733]`, sign-p `1.08e-15`, holdout `1.0569x`;
+  `64x3712x12288` median `1.0330x`, `[1.0261,1.0494]`,
+  sign-p `1.54e-12`, holdout `1.0330x`.
+- A focused repeat-161 rerun with `COB_AB_ITERS=2` cleared the noisy middle
+  width: `64x3712x7168` median `1.0492x`, bootstrap95 `[1.0489,1.0738]`,
+  B-faster `146/161`, sign-p `3.76e-28`, holdout `1.0567x`.
+
+Route smoke after rebuilding labels `64x3520x7168` as
+`sme_skinny_strided`, `64x3584x7168`, `64x3712x7168`, and
+`64x4032x8192` as `sme_skinny_strided_nc`, and `64x4096x7168` as
+`sme_skinny_reuse`. Correctness coverage adds representative
+`64x3584x7168` and `64x4032x8192` shapes.
+
 ### 2026-05-06: packed-B dispatch cleanup and gate floor
 
 Current cleanup is intended to be behavior-preserving: `src/gemm.c` and

@@ -124,6 +124,10 @@ enum {
 #define COB_SGEMM_M96_128_SME_REUSE_K1024_MIN_N 4096
 #endif
 
+#ifndef COB_SGEMM_M64_SME_DIRECT_NC
+#define COB_SGEMM_M64_SME_DIRECT_NC 1024
+#endif
+
 static int cob_amx_strided_b_prefers_packed_shape(int m, int n, int k)
 {
     if (m == COB_SGEMM_AMX_MC) {
@@ -412,6 +416,12 @@ static int cob_sme_direct_extra_n_shape(int m, int n, int k)
     return 0;
 }
 
+static int cob_m64_sme_direct_nc_shape(int n, int k)
+{
+    return n >= 3584 && n < 4096 && k >= 7168 &&
+        COB_SGEMM_M64_SME_DIRECT_NC >= 64;
+}
+
 static const char* cob_one_shot_route(bench_shape shape)
 {
     const int m = shape.m;
@@ -461,6 +471,9 @@ static const char* cob_one_shot_route(bench_shape shape)
             m == 64 && (use_mid_n_k512 || n >= COB_SGEMM_M64_SME_LONG_N_K512_MIN_N) &&
             k == 512;
         if ((use_large_k_skinny || use_long_n_k512) && (n % 64) == 0) {
+            if (use_large_k_skinny && cob_m64_sme_direct_nc_shape(n, k)) {
+                return "sme_skinny_strided_nc";
+            }
             return "sme_skinny_strided";
         }
 
