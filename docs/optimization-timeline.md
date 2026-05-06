@@ -1555,6 +1555,22 @@ several pack-heavy one-shot cases such as `512x768x4096` `0.9921x`,
 `768x512x4096` `0.9876x`, `512x1152x4096` `0.9756x`, and
 `512x1024x2048` `0.9906x`. Keep the current distance `64`.
 
+Follow-up accepted: the one-shot packed-path gate was extended to the
+low-height `m = 384` high-`K` medium band. Direct repeat-9 benchmarking showed
+`384x1152x3072` and `384x1152x4096` still used AMX strided-B and trailed the
+packed path badly even after pack setup. A paired source gate in
+`/private/tmp/cob_m384_highk_pack_exp` passed correctness and validated the
+narrow rule: `m = 384, n >= 1152, k >= 4096`, plus exact
+`m = 384, n = 1152, k >= 3072`. Wins were large on the target band:
+`384x1152x3072` `1.2427x`, CI `[1.2339,1.2572]`, B-faster `101/101`;
+`384x1152x4096` `1.5692x`, CI `[1.5609,1.5875]`, B-faster `101/101`; and
+`384x1216x4096` `1.5077x`, CI `[1.4862,1.5163]`, B-faster `101/101`.
+Existing `m >= 512, n = 1152, k = 3072` guards stayed neutral. Lower `m = 384`
+width guards were neutral/noisy, so the source rule does not broaden those:
+`384x512x4096` `0.9960x`, `384x768x4096` `1.0119x` with neutral holdout, and
+`384x1024x4096` `0.9966x`. Correctness coverage added `384x1152x3072` and
+`384x1216x4096`.
+
 Follow-up rejected: routing `64x1408x2048` and `64x1472x2048` back to the old
 AMX path did not close their remaining small gaps. The AMX fallback candidate
 in `/private/tmp/cob_k2048_1408_amx_exp` passed correctness but paired A/B
@@ -1691,8 +1707,8 @@ streaming-B prefetch gates, the narrow `m = 64, k = 2048` large-KC gate, and
 the `m = 64, k = 1536, n >= 1408` SME route, the public packed-B AMX fallback
 for high-`K` shapes, the one-shot high-`K` medium AMX packed-path gate, and the
 one-shot `n = 512, k >= 2048` packed-AMX conflict fallback, plus the packed-B
-`m = 384, n >= 2048` AMX block fix. Current correctness coverage is 79 GEMM
-shapes.
+`m = 384, n >= 2048` AMX block fix and the one-shot `m = 384, n >= 1152`
+high-`K` packed-path gate. Current correctness coverage is 81 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

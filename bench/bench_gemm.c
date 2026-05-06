@@ -126,6 +126,10 @@ enum {
 
 static int cob_amx_strided_b_prefers_packed_shape(int m, int n, int k)
 {
+    if (m == COB_SGEMM_AMX_MC) {
+        return (n >= COB_SGEMM_AMX_STRIDED_B_EXTRA_N3 && k >= 4096) ||
+            (n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N3 && k >= 3072);
+    }
     return m >= 512 &&
         (k >= 4096 ||
             (n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N3 &&
