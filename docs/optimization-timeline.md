@@ -154,6 +154,12 @@ instead of measuring the whole comparison benchmark. Added
 database and default events for cycles, instructions, cache/TLB misses, map and
 dispatch stalls, and SME wait/ALU counters.
 
+Follow-up tooling: `COB_BENCH_HOT_SECONDS=N` keeps a single benchmark row
+running in a hot loop for profiler attachment. This is intended for `sample`,
+Instruments, or counter tools and is disabled by default. A Codex-sandboxed
+`sample -wait` attempt failed on process-list `sysctl` permissions, so `sample`
+should be run from a normal terminal.
+
 Local setup status: `/private/tmp/mperf/mperf-stat` can list M5 `as5` events
 when launched with `MPERF_KPEP_DB=as5`, but actual sampling still reports
 `Root privileges required` without sudo. The next counter pass should run, for

@@ -276,6 +276,11 @@ static int bench_route_enabled(void)
     return env_int_clamped("COB_BENCH_ROUTE", 0, 0, 1) != 0;
 }
 
+static int bench_hot_seconds(void)
+{
+    return env_int_clamped("COB_BENCH_HOT_SECONDS", 0, 0, 3600);
+}
+
 static int bench_only_matches(const char* only, const char* name)
 {
     if (only == NULL || only[0] == '\0') {
@@ -617,6 +622,65 @@ static double run_case(
         fn(shape, a, b, c);
     }
 
+    const int hot_seconds = bench_hot_seconds();
+    if (hot_seconds > 0) {
+        const double ops = 2.0 * (double)shape.m * (double)shape.n * (double)shape.k;
+        const double t0 = now_seconds();
+        const double deadline = t0 + (double)hot_seconds;
+        uint64_t calls = 0;
+        do {
+            fn(shape, a, b, c);
+            ++calls;
+        } while (now_seconds() < deadline);
+        const double elapsed = now_seconds() - t0;
+        const double gflops = ops * (double)calls / elapsed / 1.0e9;
+        const double sum = (double)checksum(c, (size_t)shape.m * (size_t)shape.n);
+        if (csv) {
+            if (route_enabled) {
+                printf(
+                    "gemm,%s,%d,%d,%d,%.6f,%.6f,GF/s,%.9f,%.9f,%.9e,%s\n",
+                    name,
+                    shape.m,
+                    shape.n,
+                    shape.k,
+                    gflops,
+                    gflops,
+                    elapsed / (double)calls,
+                    elapsed / (double)calls,
+                    sum,
+                    route);
+            } else {
+                printf(
+                    "gemm,%s,%d,%d,%d,%.6f,%.6f,GF/s,%.9f,%.9f,%.9e\n",
+                    name,
+                    shape.m,
+                    shape.n,
+                    shape.k,
+                    gflops,
+                    gflops,
+                    elapsed / (double)calls,
+                    elapsed / (double)calls,
+                    sum);
+            }
+        } else {
+            char shape_text[32];
+            format_shape(shape_text, sizeof(shape_text), shape);
+            printf(
+                "%-18s %-14s  hot %8.2f GF/s  %9.3f s  calls=%llu  checksum=% .5e",
+                name,
+                shape_text,
+                gflops,
+                elapsed,
+                (unsigned long long)calls,
+                sum);
+            if (route_enabled && route[0] != '\0') {
+                printf("  route=%s", route);
+            }
+            printf("\n");
+        }
+        return gflops;
+    }
+
     for (int i = 0; i < repeats; ++i) {
         const double t0 = now_seconds();
         for (int iter = 0; iter < iters; ++iter) {
@@ -700,6 +764,66 @@ static double run_case_cob_packed_reuse(
     for (int i = 0; i < warmups; ++i) {
         cob_sgemm_rowmajor_packed_b(
             shape.m, shape.n, shape.k, a, shape.k, &packed_b, c, shape.n);
+    }
+
+    const int hot_seconds = bench_hot_seconds();
+    if (hot_seconds > 0) {
+        const double ops = 2.0 * (double)shape.m * (double)shape.n * (double)shape.k;
+        const double t0 = now_seconds();
+        const double deadline = t0 + (double)hot_seconds;
+        uint64_t calls = 0;
+        do {
+            cob_sgemm_rowmajor_packed_b(
+                shape.m, shape.n, shape.k, a, shape.k, &packed_b, c, shape.n);
+            ++calls;
+        } while (now_seconds() < deadline);
+        const double elapsed = now_seconds() - t0;
+        const double gflops = ops * (double)calls / elapsed / 1.0e9;
+        const double sum = (double)checksum(c, (size_t)shape.m * (size_t)shape.n);
+        if (csv) {
+            if (route_enabled) {
+                printf(
+                    "gemm,cob packed-B,%d,%d,%d,%.6f,%.6f,GF/s,%.9f,%.9f,%.9e,%s\n",
+                    shape.m,
+                    shape.n,
+                    shape.k,
+                    gflops,
+                    gflops,
+                    elapsed / (double)calls,
+                    elapsed / (double)calls,
+                    sum,
+                    cob_packed_b_route(shape));
+            } else {
+                printf(
+                    "gemm,cob packed-B,%d,%d,%d,%.6f,%.6f,GF/s,%.9f,%.9f,%.9e\n",
+                    shape.m,
+                    shape.n,
+                    shape.k,
+                    gflops,
+                    gflops,
+                    elapsed / (double)calls,
+                    elapsed / (double)calls,
+                    sum);
+            }
+        } else {
+            char shape_text[32];
+            format_shape(shape_text, sizeof(shape_text), shape);
+            printf(
+                "%-18s %-14s  hot %8.2f GF/s  %9.3f s  calls=%llu  checksum=% .5e",
+                "cob packed-B",
+                shape_text,
+                gflops,
+                elapsed,
+                (unsigned long long)calls,
+                sum);
+            if (route_enabled) {
+                printf("  route=%s", cob_packed_b_route(shape));
+            }
+            printf("\n");
+        }
+
+        cob_sgemm_free_packed_b(&packed_b);
+        return gflops;
     }
 
     for (int i = 0; i < repeats; ++i) {

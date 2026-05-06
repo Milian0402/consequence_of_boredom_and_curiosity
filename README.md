@@ -79,6 +79,9 @@ and plotting. Set `COB_BENCH_ROUTE=1` to add the benchmark's current COB route
 label to CSV or text output. Set `COB_BENCH_ONLY=one-shot`, `packed`,
 `pack-setup`, or `accelerate` to isolate one benchmark row, which is useful for
 hardware-counter runs; `pack-setup` still requires `COB_BENCH_PACK_SETUP=1`.
+Set `COB_BENCH_HOT_SECONDS=N` with `COB_BENCH_ONLY` and one shape to run a
+single row in a hot loop for profiler attachment; normal benchmark behavior is
+unchanged when it is unset.
 
 For repeated boundary sweeps, use the CSV wrapper:
 
@@ -103,6 +106,14 @@ sudo env MPERF_KPEP_DB=as5 COB_COUNTER_ONLY=packed sh tools/counter_probe.sh 512
 The counter helper defaults to the remaining structural probe shapes and uses
 `COB_BENCH_ONLY` so counters are not polluted by Accelerate or the other COB
 benchmark rows.
+
+If root-backed counters are unavailable, the hot-loop mode can keep one process
+alive long enough for macOS `sample` from a normal terminal:
+
+```sh
+COB_BENCH_ONLY=one-shot COB_BENCH_ROUTE=1 COB_BENCH_HOT_SECONDS=20 \
+  build/cob_gemm_bench 512x1024x1536
+```
 
 ## Comparison Status
 
