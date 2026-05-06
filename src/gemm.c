@@ -248,6 +248,14 @@ static int cob_sgemm_amx_large_block_shape(int m, int n, int k)
         (n == 512 && ((m == 768 && k == 4096) || (m >= 1024 && k >= 4096)));
 }
 
+static int cob_sgemm_amx_one_shot_large_mc(int m, int n, int k)
+{
+    if (m >= 768 && ((n == 768 && k >= 3072) || (n == 1024 && k >= 4096))) {
+        return 256;
+    }
+    return COB_SGEMM_AMX_MC;
+}
+
 #if defined(COB_USE_APPLE_AMX)
 static void cob_amx_set(void)
 {
@@ -2082,7 +2090,8 @@ static int cob_sgemm_rowmajor_amx(
         !cob_sgemm_amx_strided_b_prefers_packed_shape(m, n, k) &&
         ldb != COB_SGEMM_AMX_STRIDED_B_CONFLICT_LDB &&
         m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0;
-    const int max_a_panels = COB_SGEMM_AMX_MC / COB_SGEMM_AMX_MR;
+    const int large_mc = cob_sgemm_amx_one_shot_large_mc(m, n, k);
+    const int max_a_panels = large_mc / COB_SGEMM_AMX_MR;
     const size_t a_block_floats = (size_t)max_a_panels * a_panel_floats;
     const size_t a_scratch_floats = use_large_block ? a_block_floats : a_panel_floats;
     const size_t scratch_bytes = b_bytes + a_scratch_floats * sizeof(float);
@@ -2186,8 +2195,8 @@ static int cob_sgemm_rowmajor_amx(
     if (use_large_block) {
         float* packed_a_block = packed_a_scratch;
         cob_amx_set();
-        for (int ib = 0; ib < m; ib += COB_SGEMM_AMX_MC) {
-            const int mc = cob_min_i32(COB_SGEMM_AMX_MC, m - ib);
+        for (int ib = 0; ib < m; ib += large_mc) {
+            const int mc = cob_min_i32(large_mc, m - ib);
             const int a_panels = mc / COB_SGEMM_AMX_MR;
             for (int ap = 0; ap < a_panels; ++ap) {
                 const int ic = ib + ap * COB_SGEMM_AMX_MR;

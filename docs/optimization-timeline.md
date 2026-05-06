@@ -22,6 +22,33 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: one-shot AMX high-K medium MC256 accepted
+
+The medium audit showed remaining one-shot gaps on high-`K` AMX packed
+large-block shapes, especially `768x1024x4096` and `1024x768x4096`. A global
+compile-flag probe with `COB_SGEMM_AMX_MC=512` regressed the gap set, but
+`COB_SGEMM_AMX_MC=256` improved several high-`K` medium rows, suggesting the
+M5 8 MB P-cluster L2 favored a smaller one-shot A block for this band.
+
+The accepted source change keeps public packed-B blocking unchanged and adds a
+narrow one-shot helper that uses a 256-row A block only for `m >= 768` with
+`n = 768, k >= 3072` or `n = 1024, k >= 4096`.
+
+Higher-work paired A/B evidence (`repeat=101`, `iters=4`) against the previous
+source:
+
+- `1024x768x4096`: median `1.0297x`, bootstrap95 `[0.9913,1.0338]`,
+  B-faster `82/101`, sign-p `1.66e-10`, holdout median `1.0250x`.
+- `1024x1024x4096`: median `1.0410x`, bootstrap95 `[1.0287,1.0707]`,
+  B-faster `87/101`, sign-p `4.8e-14`, holdout median `1.0359x`.
+- `768x1024x4096`: median `1.0466x`, bootstrap95 `[1.0102,1.0584]`,
+  B-faster `83/101`, sign-p `3.73e-11`, holdout median `1.0463x`.
+- `768x768x4096`: median `1.0537x`, bootstrap95 `[1.0358,1.0626]`,
+  B-faster `87/101`, sign-p `4.8e-14`, holdout median `1.0579x`.
+
+Correctness coverage adds `768x768x3072`, `1024x768x4096`, and
+`768x1024x4096`.
+
 ### 2026-05-06: m64 large-K counter pass and rejected scheduling probes
 
 The local `mperf` sudo prompt succeeded through the macOS authentication

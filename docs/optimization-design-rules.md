@@ -105,6 +105,10 @@ These rules summarize repeated findings from the optimization timeline. They are
   exact `768x512x4096`. The lower-`k` `n = 768, k = 2048` rows,
   `n = 512, k = 3072`, `512x512x4096`, and `768x512x8192` large-block guards
   were behavior-identical/noisy or regressions and should not drive the rule.
+- For one-shot AMX packed large-block high-`K` medium cases at `m >= 768`, use
+  a 256-row A block for `n = 768, k >= 3072` and `n = 1024, k >= 4096`. A
+  global 512-row block regressed, while the narrow 256-row block improved the
+  validated audit gaps without changing public packed-B blocking.
 - In one-shot AMX medium routes, high-`K` strided-B loses to packing B even
   after pack cost. Keep `m >= 512, k >= 4096` on the packed path, plus
   `n = 1152, k >= 3072`, and exact `n = 1152, k = 2048` from `m >= 512`.
