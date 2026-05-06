@@ -1213,7 +1213,7 @@ static int cob_sgemm_rowmajor_sme_from_packed_b32(
         n > COB_SGEMM_SME_PACKED_MAX_N || n == 832 || n == 960 || n == 1088 ||
         (n == 768 && (k == 2048 || k == 3072)) ||
         (n == 1024 && k >= 3072) ||
-        k >= 4096 || (n == 1152 && k >= 2048) ||
+        k >= 4096 || (n == 1152 && k >= 2048) || (n == 1152 && k == 1536) ||
         (m % COB_SGEMM_AMX_MR) != 0 || (n % 64) != 0 ||
         !cob_apple_sme2p1_available()) {
         return 0;

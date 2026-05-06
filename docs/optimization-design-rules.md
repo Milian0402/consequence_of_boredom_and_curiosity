@@ -47,8 +47,9 @@ These rules summarize repeated findings from the optimization timeline. They are
   helped only tiny isolated low-width `k = 2048` cases and badly regressed
   high-`K` m64 SME skinny shapes.
 - For the public packed-B API, AMX beats the current SME packed-B kernel at
-  `k >= 4096` and at `n = 1152, k >= 2048`. Keep those shapes on AMX unless a
-  future packed-B layout or kernel change is validated directly.
+  `k >= 4096`, at `n = 1152, k >= 2048`, and at exact `n = 1152, k = 1536`.
+  Keep those shapes on AMX unless a future packed-B layout or kernel change is
+  validated directly.
 - For public packed-B `n = 1024`, use AMX from `k >= 3072`. The `k = 2048`
   neighbor was mixed, while `k = 3072` was a clear win across `m = 512..1024`.
 - For public packed-B `n = 768`, use AMX at exact `k = 2048` and `k = 3072`.

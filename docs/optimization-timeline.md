@@ -1757,6 +1757,29 @@ uses AMX for public packed-B `n = 768` at exact `k = 2048` and `k = 3072`, with
 the existing high-`K` AMX path. Correctness coverage adds `512x768x2048`,
 `768x768x2048`, and `1024x768x2048`.
 
+### 2026-05-06 5c852b2+local: public packed-B n=1152 k=1536 AMX fallback
+
+The route-aware medium grid still showed `n = 1152, k = 1536` on the SME
+packed-B path, while `n = 1152, k >= 2048` was already routed to AMX. A broad
+threshold probe down to `k >= 1536` improved the target band but produced a
+tiny same-route guard dip at `1024x1152x2048`. The candidate was narrowed to an
+exact `k = 1536` sibling and ordered after the existing `k >= 2048` condition,
+so the already-routed high-`K` branch short-circuits before the new check.
+
+The final focused repeat-201 packed-B A/B validated the exact sibling:
+`512x1152x1536` median `1.0372x`, bootstrap95 `[1.0537,1.0790]`, B-faster
+`161/201`, sign-p `2.11e-18`, holdout median `1.0112x`; `768x1152x1536`
+median `1.0341x`, bootstrap95 `[1.0397,1.0599]`, B-faster `147/201`, sign-p
+`3.86e-11`, holdout median `1.0142x`; and `1024x1152x1536` median `1.0352x`,
+bootstrap95 `[1.0452,1.0719]`, B-faster `151/201`, sign-p `5.57e-13`,
+holdout median `1.0348x`. The reordered `1024x1152x2048` guard rerun was
+neutral at median `1.0012x`, bootstrap95 `[0.9954,1.0086]`, B-faster `74/141`,
+sign-p `0.614`, holdout median `1.0016x`.
+
+The accepted rule keeps public packed-B `n = 1152` on AMX at exact `k = 1536`
+and at the existing `k >= 2048` band. Correctness coverage adds
+`512x1152x1536`, `768x1152x1536`, and `1024x1152x1536`.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The qualified claim now is:
@@ -1780,8 +1803,8 @@ one-shot `n = 512, k >= 2048` packed-AMX conflict fallback, plus the packed-B
 `m = 384, n >= 2048` AMX block fix and the one-shot `m = 384, n >= 1152`
 high-`K` packed-path gate, plus the one-shot `n = 1216, k >= 3072` packed-path
 gate and the public packed-B `n = 1024, k >= 3072` and exact
-`n = 768, k = 2048/3072` AMX fallbacks. Current correctness coverage is 90 GEMM
-shapes.
+`n = 768, k = 2048/3072` and `n = 1152, k = 1536` AMX fallbacks. Current
+correctness coverage is 93 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
