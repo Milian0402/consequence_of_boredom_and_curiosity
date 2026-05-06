@@ -22,6 +22,45 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: exact 512x1024x1536 SME direct route accepted
+
+The one-shot dispatcher now routes exact `512x1024x1536` through the SME
+direct-`B` medium kernel. This supersedes the older broad `n = 1024` SME
+rejection with a narrow exact gate and keeps the general `n = 1024` exclusion
+in place for other shapes.
+
+Focused paired one-shot evidence on M5 Max:
+
+- Exact accepted gate: `512x1024x1536` median `1.0699x`, bootstrap95
+  `[1.0408,1.0650]`, B-faster `84/101`, holdout median `1.0805x`.
+- Earlier repeat-201 probe was also positive: median `1.0372x`, bootstrap95
+  `[1.0351,1.0474]`, B-faster `182/201`, holdout median `1.0358x`.
+- Guards stayed neutral/noisy: `512x1024x1024`, `512x1024x2048`,
+  `768x1024x1536`, `512x960x1536`, and `512x1088x1536`.
+
+Correctness coverage already included `512x1024x1536`; no test count change.
+
+### 2026-05-06: exact 512x512x3072 SME direct route accepted
+
+The one-shot dispatcher now routes exact `512x512x3072` through the SME
+direct-`B` medium kernel instead of the packed-AMX conflict path. This is a
+narrow exception to the general `n = 512, k >= 2048` packed-AMX rule.
+
+Focused paired one-shot evidence on M5 Max:
+
+- Exact accepted gate: `512x512x3072` median `1.0713x`, bootstrap95
+  `[1.0358,1.0660]`, B-faster `87/101`, holdout median `1.0730x`.
+- Earlier repeat-201 probe was also positive: median `1.0171x`, bootstrap95
+  `[1.0041,1.0208]`, B-faster `137/201`, holdout median `1.0163x`.
+- Guards stayed neutral/noisy: `512x512x2048`, `512x512x4096`,
+  `512x768x3072`, `768x512x3072`, and `1024x512x3072`.
+
+Rejected broader SME-direct probe: exact `512x768x3072`, `512x1152x2048`,
+`512x1216x2048`, `512x1216x3072`, and `512x1280x2048` did not hold up.
+`512x1216x3072` and `512x1280x2048` were hard regressions.
+
+Correctness coverage adds `512x512x3072`.
+
 ### 2026-05-06: m64 k512 mid-width SME reuse accepted
 
 The one-shot `m = 64, k = 512` SME B-reuse route now starts at mid-width
@@ -2145,10 +2184,11 @@ and one-shot large-block threshold for `n >= 768, k >= 3072` and high-row
 `n = 512, k >= 4096`, and the lowered one-shot packed-path gate for
 `n = 1152, k = 2048` from `m >= 512`, plus exact `768x512x4096`
 large-block AMX, plus the exact public packed-B `512x1024x1536` AMX fallback.
-The exact `512x1280x1536` SME direct route addresses one-shot pack overhead in
-the medium band, and exact public packed-B `512x1280x2048` now uses the
-512-row AMX block, and the `m = 64, k = 512` mid-width SME reuse extension.
-Current correctness coverage is 114 GEMM shapes.
+The exact `512x1280x1536`, `512x1024x1536`, and `512x512x3072` SME direct
+routes address one-shot pack overhead in the medium band, exact public
+packed-B `512x1280x2048` now uses the 512-row AMX block, and the `m = 64,
+k = 512` mid-width SME reuse extension covers the newer skinny gaps. Current
+correctness coverage is 115 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

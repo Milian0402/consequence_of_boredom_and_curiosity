@@ -369,6 +369,12 @@ static int is_apple_sme_build(void)
 
 static int cob_sme_direct_extra_n_shape(int m, int n, int k)
 {
+    if (m == 512 && n == 1024 && k == 1536) {
+        return 1;
+    }
+    if (m == 512 && n == 512 && k == 3072) {
+        return 1;
+    }
     if (m == 512 && n == 1280 && k == 1536) {
         return 1;
     }
@@ -466,7 +472,7 @@ static const char* cob_one_shot_route(bench_shape shape)
                 (m >= 832 && m <= COB_SGEMM_SME_DIRECT_MAX_N &&
                     n >= 832 && n <= COB_SGEMM_SME_DIRECT_MAX_N &&
                     k >= 832 && k <= COB_SGEMM_SME_DIRECT_MAX_N)) &&
-            n != 1024 && (n % 64) == 0 && (m % COB_BENCH_AMX_MR) == 0) {
+            (n != 1024 || use_extra_n) && (n % 64) == 0 && (m % COB_BENCH_AMX_MR) == 0) {
             return "sme_medium_direct";
         }
     }

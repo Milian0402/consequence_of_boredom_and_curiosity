@@ -26,7 +26,9 @@ These rules summarize repeated findings from the optimization timeline. They are
 - Row-wise B traversal during packing has repeatedly reduced pack bandwidth and collapsed one-shot performance.
 - Scalar or simpler A-pack fallbacks for small K have been hard regressions.
 - Broad low-threshold direct SME routing has not held up. Exact 384 and 768 were accepted only after focused repeat runs.
-- One-shot 1024 via public packed-B or direct SME routes has not beaten the current path.
+- One-shot `n = 1024` via public packed-B or direct SME routes has generally
+  not beaten the current path, except exact `512x1024x1536`, which should use
+  SME direct-B.
 - Increasing expression-level unrolling in the C SME packed-B kernel did not beat the compiler's current schedule.
 - m=64 B-reuse changes are shape-sensitive; do not assume a NC/KC knob alone will close the MpGEMM gap.
 - SME streaming-B prefetch is route-specific. It helped `m = 64`, large-`K`
@@ -99,6 +101,12 @@ These rules summarize repeated findings from the optimization timeline. They are
 - For the one-shot `n = 512` conflict path, keep SME packed-B at `k <= 1024`,
   but use packed AMX at `k >= 2048`. The `k = 1024` AMX fallback probe was a
   regression/noise, while `k = 2048/3072` was consistently positive.
+- Exception: exact one-shot `512x512x3072` should use the SME direct-B route,
+  not packed AMX. Broader SME-direct probes at nearby medium shapes regressed
+  or stayed noisy.
+- Exception: exact one-shot `512x1024x1536` should also use SME direct-B.
+  Its `k = 1024/2048`, `m = 768`, `n = 960`, and `n = 1088` guards stayed
+  neutral/noisy.
 - Do not port cache-blocking constants from other Apple Silicon generations. On this M5 Max, per-P-cluster L2 is 8 MB, page size is 16 KB, and route-specific cache-fit probes still need paired A/B proof.
 - Do not prioritize fused inline B-packing rewrites unless a profiler shows packing is the bottleneck on an in-scope licensed-baseline gap.
 
