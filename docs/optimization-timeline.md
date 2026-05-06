@@ -1571,6 +1571,16 @@ width guards were neutral/noisy, so the source rule does not broaden those:
 `384x1024x4096` `0.9966x`. Correctness coverage added `384x1152x3072` and
 `384x1216x4096`.
 
+Follow-up accepted: exact `n = 1216` one-shot medium shapes now use the packed
+path from `k >= 3072`. The `k = 2048` neighbor was neutral/noisy, but the
+`k = 3072` band was a large and consistent win against the previous AMX
+strided-B route: `384x1216x3072` `1.2450x`, CI `[1.2492,1.2679]`, B-faster
+`101/101`; `512x1216x3072` `1.3160x`, B-faster `99/101`;
+`768x1216x3072` `1.4334x`, B-faster `99/101`; and `1024x1216x3072`
+`1.5064x`, B-faster `101/101`. `k = 4096` was already selected by the existing
+high-`K` gate and stayed neutral. Correctness coverage added `384x1216x3072`
+and `1024x1216x3072`.
+
 Follow-up rejected: routing `64x1408x2048` and `64x1472x2048` back to the old
 AMX path did not close their remaining small gaps. The AMX fallback candidate
 in `/private/tmp/cob_k2048_1408_amx_exp` passed correctness but paired A/B
@@ -1708,7 +1718,8 @@ the `m = 64, k = 1536, n >= 1408` SME route, the public packed-B AMX fallback
 for high-`K` shapes, the one-shot high-`K` medium AMX packed-path gate, and the
 one-shot `n = 512, k >= 2048` packed-AMX conflict fallback, plus the packed-B
 `m = 384, n >= 2048` AMX block fix and the one-shot `m = 384, n >= 1152`
-high-`K` packed-path gate. Current correctness coverage is 81 GEMM shapes.
+high-`K` packed-path gate, plus the one-shot `n = 1216, k >= 3072` packed-path
+gate. Current correctness coverage is 83 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
