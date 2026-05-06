@@ -1428,6 +1428,18 @@ accepted low-width `k = 2048` band, but regressed `64x4032x8192` (`0.8297x`),
 `k = 1536` and high-`K` low-width positives were too noisy or discontinuous to
 ship.
 
+Follow-up rejected: forcing the m64 SME skinny direct route to use full-K
+chunks, as a low-effort proxy for a single-store epilogue, was not viable.
+The candidate in `/private/tmp/cob_m64_fullkc_exp` passed correctness, but
+paired A/B was catastrophic beyond a tiny low-width pocket: `64x2048x2048`
+`0.5336x`, `64x2112x7168` `0.6881x`, `64x4032x8192` `0.6074x`, and
+`64x3712x12288` `0.5541x`. A narrower sweep showed only isolated low-width
+`k = 2048` positives, mainly `64x1088x2048` `1.0138x` and `64x1152x2048`
+`1.0129x`, while `64x1024x2048`, `64x1216x2048`, `64x1280x2048`, and all
+tested `k = 4096` low-width shapes regressed. Do not replace the current
+K-blocking policy with full-K chunks; a real single-store epilogue would need a
+more careful structure than simply growing `KC` to `k`.
+
 Follow-up accepted: the `m = 64, k = 1536` SME skinny route was lowered from
 `n >= 1536` to `n >= 1408`, with the streaming-B prefetch subroute lowered to
 the same boundary. This targets the previous `64x1408x1536` and
@@ -1442,6 +1454,20 @@ sizes: `64x1408x1536` repeat-101 median `1.2831x`, bootstrap95
 `100/101`, holdout median `1.2312x`. Guard shapes stayed neutral within noise:
 `64x1152x1536`, `64x1280x1536`, `64x1536x1536`, `64x1600x1536`,
 `64x1728x1536`, and `64x2048x1536`.
+
+Follow-up accepted: the public packed-B dispatcher now keeps high-`K` packed-B
+shapes on AMX instead of the current SME packed-B kernel when `k >= 4096`, and
+also keeps `n = 1152, k >= 2048` on AMX. The clean gate in
+`/private/tmp/cob_packed_amx_gate_exp` passed all correctness tests and a
+focused packed-B paired A/B rerun showed the suspicious non-selected neighbor
+`512x1024x2048` was neutral (`1.0148x`, CI `[0.9836,1.0254]`, sign-p `0.32`,
+holdout `1.0086x`). Selected shapes were strong: `512x1152x2048` `1.1760x`
+with B-faster `97/101`, `1024x1152x2048` `1.1044x` with B-faster `101/101`,
+`512x1024x4096` `1.6663x`, `1024x1024x4096` `1.6446x`,
+`512x1152x4096` `1.7688x`, and `1024x1152x4096` `1.7397x`, all four
+`k = 4096` selected shapes with B-faster `101/101`. The change adds packed-B
+correctness coverage for `512x1152x2048`, `512x1024x4096`, and
+`1024x1152x4096`.
 
 Follow-up rejected: routing `64x1408x2048` and `64x1472x2048` back to the old
 AMX path did not close their remaining small gaps. The AMX fallback candidate
@@ -1576,8 +1602,8 @@ wins since the older conclusion are the skinny SME B-reuse generalization, the
 blocking, wide `m = 64` K-chunk tuning, and the local `n = 1280..1472` SME
 direct route, plus the local `m = 64, k >= 2048` SME skinny threshold and
 streaming-B prefetch gates, the narrow `m = 64, k = 2048` large-KC gate, and
-the `m = 64, k = 1536, n >= 1408` SME route. Current correctness coverage is
-69 GEMM shapes.
+the `m = 64, k = 1536, n >= 1408` SME route, and the public packed-B AMX
+fallback for high-`K` shapes. Current correctness coverage is 72 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

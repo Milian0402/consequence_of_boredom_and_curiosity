@@ -419,6 +419,7 @@ static const char* cob_packed_b_route(bench_shape shape)
     }
     if (is_apple_sme_build() && m >= 512 && n >= 512 && k >= 512 &&
         n <= COB_SGEMM_SME_PACKED_MAX_N && n != 832 && n != 960 && n != 1088 &&
+        k < 4096 && !(n == 1152 && k >= 2048) &&
         (m % COB_BENCH_AMX_MR) == 0 && (n % 64) == 0) {
         return "packed_sme";
     }
