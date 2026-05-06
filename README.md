@@ -76,7 +76,9 @@ Arguments can be square sizes (`512`) or rectangular `MxNxK` shapes
 Set `COB_BENCH_PACK_SETUP=1` to also print the one-time packed-`B` setup cost.
 Set `COB_BENCH_CSV=1` to print machine-readable benchmark rows for grid sweeps
 and plotting. Set `COB_BENCH_ROUTE=1` to add the benchmark's current COB route
-label to CSV or text output.
+label to CSV or text output. Set `COB_BENCH_ONLY=one-shot`, `packed`,
+`pack-setup`, or `accelerate` to isolate one benchmark row, which is useful for
+hardware-counter runs; `pack-setup` still requires `COB_BENCH_PACK_SETUP=1`.
 
 For repeated boundary sweeps, use the CSV wrapper:
 
@@ -87,6 +89,20 @@ COB_BENCH_ROUTE=1 sh tools/bench_grid.sh 832 896 960 | python3 tools/bench_gap_r
 COB_BENCH_ROUTE=1 sh tools/bench_grid.sh 832 896 960 > /tmp/cob-grid.csv
 python3 tools/bench_heatmap.py /tmp/cob-grid.csv --output /tmp/cob-grid.png
 ```
+
+For Apple Silicon hardware-counter probes, build `mperf-stat` from
+<https://github.com/tmcgilchrist/mperf>. On M5 machines, force the local `as5`
+PMC database; if an upstream `mperf-stat` build cannot load that database, use
+a build that honors `MPERF_KPEP_DB`:
+
+```sh
+sudo env MPERF_KPEP_DB=as5 COB_COUNTER_ONLY=one-shot sh tools/counter_probe.sh 64x4096x7168
+sudo env MPERF_KPEP_DB=as5 COB_COUNTER_ONLY=packed sh tools/counter_probe.sh 512x1280x1536
+```
+
+The counter helper defaults to the remaining structural probe shapes and uses
+`COB_BENCH_ONLY` so counters are not polluted by Accelerate or the other COB
+benchmark rows.
 
 ## Comparison Status
 
@@ -146,7 +162,8 @@ void cob_sgemm_rowmajor_packed_b(
 
 - Add `4x8`, `12x8`, and `16x4` NEON kernels and shape dispatch.
 - Keep expanding route-aware grid sweeps before adding new dispatch gates.
-- Add hardware-counter profiling when local tooling is available.
+- Run hardware-counter profiling with `tools/counter_probe.sh` when sudo is
+  available.
 - Replace scalar edges with vector edge kernels.
 - Use the CBLAS and Fortran-BLAS comparison targets to track external results.
 

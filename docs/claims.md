@@ -103,7 +103,18 @@ COB_AB_REPEATS=61 COB_AB_MAX_REPEATS=101 COB_AB_CV_TARGET=2 \
 sign test, and split-half holdout agree. If implementation CV is high but the
 paired ratio is tight, prefer the paired ratio but rerun cold for small deltas.
 
-5. Re-run correctness and build checks:
+5. For remaining structural gaps, collect counters before adding more exact
+   gates. On this M5 Max, the local counter path is `mperf-stat` with the `as5`
+   KPEP database:
+
+```sh
+sudo env MPERF_KPEP_DB=as5 COB_COUNTER_ONLY=one-shot sh tools/counter_probe.sh 64x4096x7168
+sudo env MPERF_KPEP_DB=as5 COB_COUNTER_ONLY=packed sh tools/counter_probe.sh 512x1280x1536
+```
+
+The helper uses `COB_BENCH_ONLY` to isolate the measured implementation.
+
+6. Re-run correctness and build checks:
 
 ```sh
 make test

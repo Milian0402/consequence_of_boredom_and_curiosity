@@ -273,6 +273,32 @@ static int bench_route_enabled(void)
     return env_int_clamped("COB_BENCH_ROUTE", 0, 0, 1) != 0;
 }
 
+static int bench_only_matches(const char* only, const char* name)
+{
+    if (only == NULL || only[0] == '\0') {
+        return 1;
+    }
+    if (strcmp(only, name) == 0) {
+        return 1;
+    }
+    if (strcmp(only, "one-shot") == 0 && strcmp(name, "cob one-shot") == 0) {
+        return 1;
+    }
+    if (strcmp(only, "packed") == 0 && strcmp(name, "cob packed-B") == 0) {
+        return 1;
+    }
+    if (strcmp(only, "packed-B") == 0 && strcmp(name, "cob packed-B") == 0) {
+        return 1;
+    }
+    if (strcmp(only, "pack-setup") == 0 && strcmp(name, "cob pack-B setup") == 0) {
+        return 1;
+    }
+    if (strcmp(only, "accelerate") == 0 && strcmp(name, "Accelerate") == 0) {
+        return 1;
+    }
+    return 0;
+}
+
 static int pack_setup_iterations(bench_shape shape)
 {
     const int n = shape_max_dim(shape);
@@ -879,6 +905,7 @@ int main(int argc, char** argv)
     const int show_pack_setup = bench_pack_setup_enabled();
     const int csv = bench_csv_enabled();
     const int route_enabled = bench_route_enabled();
+    const char* bench_only = getenv("COB_BENCH_ONLY");
     if (csv) {
         if (route_enabled) {
             printf(
@@ -913,46 +940,56 @@ int main(int argc, char** argv)
         fill_random(a, a_count, &state);
         fill_random(b, b_count, &state);
 
-        run_case(
-            "cob one-shot",
-            cob_one_shot_route(shape),
-            bench_cob_direct,
-            shape,
-            a,
-            b,
-            c,
-            csv,
-            route_enabled);
-        run_case_cob_packed_reuse(shape, a, b, c, csv, route_enabled);
-        if (show_pack_setup) {
+        if (bench_only_matches(bench_only, "cob one-shot")) {
+            run_case(
+                "cob one-shot",
+                cob_one_shot_route(shape),
+                bench_cob_direct,
+                shape,
+                a,
+                b,
+                c,
+                csv,
+                route_enabled);
+        }
+        if (bench_only_matches(bench_only, "cob packed-B")) {
+            run_case_cob_packed_reuse(shape, a, b, c, csv, route_enabled);
+        }
+        if (show_pack_setup && bench_only_matches(bench_only, "cob pack-B setup")) {
             run_case_cob_pack_setup(shape, b, csv, route_enabled);
         }
 #if defined(COB_HAVE_ACCELERATE)
-        run_case("Accelerate", "", bench_accelerate, shape, a, b, c, csv, route_enabled);
+        if (bench_only_matches(bench_only, "Accelerate")) {
+            run_case("Accelerate", "", bench_accelerate, shape, a, b, c, csv, route_enabled);
+        }
 #endif
 #if defined(COB_HAVE_EXTERNAL_CBLAS)
-        run_case(
-            COB_EXTERNAL_CBLAS_NAME,
-            "",
-            bench_external_cblas,
-            shape,
-            a,
-            b,
-            c,
-            csv,
-            route_enabled);
+        if (bench_only_matches(bench_only, COB_EXTERNAL_CBLAS_NAME)) {
+            run_case(
+                COB_EXTERNAL_CBLAS_NAME,
+                "",
+                bench_external_cblas,
+                shape,
+                a,
+                b,
+                c,
+                csv,
+                route_enabled);
+        }
 #endif
 #if defined(COB_HAVE_EXTERNAL_FORTRAN_SGEMM)
-        run_case(
-            COB_EXTERNAL_FORTRAN_SGEMM_NAME,
-            "",
-            bench_external_fortran_sgemm,
-            shape,
-            a,
-            b,
-            c,
-            csv,
-            route_enabled);
+        if (bench_only_matches(bench_only, COB_EXTERNAL_FORTRAN_SGEMM_NAME)) {
+            run_case(
+                COB_EXTERNAL_FORTRAN_SGEMM_NAME,
+                "",
+                bench_external_fortran_sgemm,
+                shape,
+                a,
+                b,
+                c,
+                csv,
+                route_enabled);
+        }
 #endif
         if (!csv) {
             printf("\n");

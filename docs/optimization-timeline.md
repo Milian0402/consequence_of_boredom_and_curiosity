@@ -22,6 +22,24 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: counter probe workflow added
+
+Added an opt-in benchmark row filter, `COB_BENCH_ONLY`, so hardware-counter
+runs can isolate `cob one-shot`, `cob packed-B`, `pack-setup`, or `Accelerate`
+instead of measuring the whole comparison benchmark. Added
+`tools/counter_probe.sh`, which wraps `mperf-stat` with the M5 `as5` KPEP
+database and default events for cycles, instructions, cache/TLB misses, map and
+dispatch stalls, and SME wait/ALU counters.
+
+Local setup status: `/private/tmp/mperf/mperf-stat` can list M5 `as5` events
+when launched with `MPERF_KPEP_DB=as5`, but actual sampling still reports
+`Root privileges required` without sudo. The next counter pass should run, for
+example:
+
+```sh
+sudo env MPERF_KPEP_DB=as5 COB_COUNTER_ONLY=one-shot sh tools/counter_probe.sh 64x4096x7168
+```
+
 ### 2026-05-06: exact 512x1280x1536 SME direct route accepted
 
 The one-shot dispatcher now routes exact `512x1280x1536` through the SME
