@@ -2028,7 +2028,7 @@ static int cob_sgemm_rowmajor_amx(
     const size_t b_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_NR;
     const size_t b_bytes = (size_t)b_panels * b_panel_floats * sizeof(float);
     const int use_large_block =
-        m >= COB_SGEMM_AMX_MC && n >= 1152 && k >= 512 &&
+        m >= COB_SGEMM_AMX_MC && (n >= 1152 || (n >= 768 && k >= 3072)) && k >= 512 &&
         m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0;
     const int use_strided_b_large_extra =
         n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N3 || n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N4;

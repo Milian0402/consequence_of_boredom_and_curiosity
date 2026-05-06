@@ -1828,6 +1828,36 @@ B-faster `91/101`, sign-p `1.7e-17`, holdout median `1.1081x`;
 Correctness coverage adds `512x768x4096`, `768x768x4096`, and
 `1024x1024x4096`.
 
+### 2026-05-06 226827d+local: lower one-shot AMX large-block threshold for high-K n>=768
+
+The public packed-B large-block win changed the one-shot tradeoff too. The
+one-shot AMX path still used the old `n >= 1152` large-block threshold, which
+left `n = 768/1024, k >= 3072` either on strided-B or on the old one-panel
+packed-A schedule. A paired one-shot A/B applied the same `n >= 768,
+k >= 3072` large-block rule to the one-shot path.
+
+The target rows were consistently positive: `512x768x3072` median `1.0441x`,
+bootstrap95 `[1.0314,1.0568]`, B-faster `73/101`, sign-p `8.64e-06`, holdout
+median `1.0407x`; `768x768x3072` median `1.0488x`, bootstrap95
+`[1.0403,1.0629]`, B-faster `87/101`, sign-p `4.8e-14`, holdout median
+`1.0526x`; `1024x768x3072` median `1.1261x`, bootstrap95 `[1.1392,1.1791]`,
+B-faster `101/101`, sign-p `7.89e-31`, holdout median `1.1318x`;
+`512x768x4096` median `1.0282x`, bootstrap95 `[1.0175,1.0432]`, B-faster
+`66/101`, sign-p `0.00265`, holdout median `1.0337x`; `768x768x4096` median
+`1.0327x`, bootstrap95 `[1.0231,1.0538]`, B-faster `80/101`, sign-p
+`2.73e-09`, holdout median `1.0294x`; `1024x768x4096` median `1.0353x`,
+bootstrap95 `[1.0249,1.0377]`, B-faster `82/101`, sign-p `1.66e-10`, holdout
+median `1.0395x`; `1024x1024x3072` median `1.0985x`, bootstrap95
+`[1.0918,1.1317]`, B-faster `101/101`, sign-p `7.89e-31`, holdout median
+`1.0780x`; and `1024x1024x4096` median `1.0976x`, bootstrap95
+`[1.0812,1.1000]`, B-faster `98/101`, sign-p `1.36e-25`, holdout median
+`1.1061x`.
+
+The `n = 768, k = 2048` rows were behavior-identical/noisy and did not justify
+lowering the threshold below `k = 3072`. No new correctness shapes were needed;
+the affected one-shot and packed-B shapes are already covered by the 98-shape
+suite.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The qualified claim now is:
@@ -1853,8 +1883,8 @@ high-`K` packed-path gate, plus the one-shot `n = 1216, k >= 3072` packed-path
 gate and the public packed-B `n = 1024, k >= 3072` and exact
 `n = 768, k = 2048/3072`, `n = 1152, k = 1536`, and high-`m`
 `n = 512, k = 3072` AMX fallbacks, plus the lowered public packed-B AMX
-large-block threshold for `n >= 768, k >= 3072`. Current correctness coverage
-is 98 GEMM shapes.
+and one-shot large-block threshold for `n >= 768, k >= 3072`. Current
+correctness coverage is 98 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
