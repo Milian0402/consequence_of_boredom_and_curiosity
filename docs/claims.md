@@ -86,10 +86,11 @@ COB_AUDIT_REPEATS=11 COB_AUDIT_COOLDOWN_SEC=60 sh tools/claim_audit.sh
 
 The script writes `context.txt`, per-suite benchmark CSVs, per-suite gap
 reports against external baselines, one-shot-vs-best reports that also include
-COB packed-B as an internal baseline, and `summary.md` into a
+COB packed-B as an internal baseline, sanity reports that flag rows where the
+median is far below the best sample, and `summary.md` into a
 `/tmp/cob-claim-audit-*` directory by default. Use `COB_AUDIT_SUITES`,
-`COB_AUDIT_OUT_DIR`, and the suite-specific shape environment variables when a
-narrower cold rerun is needed.
+`COB_AUDIT_OUT_DIR`, `COB_AUDIT_SANITY_DROP`, and the suite-specific shape
+environment variables when a narrower cold rerun is needed.
 
 3. For any candidate source change, use paired A/B:
 

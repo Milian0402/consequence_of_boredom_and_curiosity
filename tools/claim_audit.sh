@@ -7,6 +7,7 @@ REPEATS=${COB_AUDIT_REPEATS:-11}
 BATCH=${COB_AUDIT_BATCH:-8}
 COOLDOWN_SEC=${COB_AUDIT_COOLDOWN_SEC:-0}
 SUITES=${COB_AUDIT_SUITES:-"square medium skinny"}
+SANITY_DROP=${COB_AUDIT_SANITY_DROP:-15}
 
 mkdir -p "$OUT_DIR"
 
@@ -48,6 +49,7 @@ write_context() {
         echo "repeats=$REPEATS"
         echo "batch=$BATCH"
         echo "cooldown_sec=$COOLDOWN_SEC"
+        echo "sanity_drop_percent=$SANITY_DROP"
         echo "suites=$SUITES"
     } > "$OUT_DIR/context.txt"
 }
@@ -78,6 +80,8 @@ run_grid_env() {
     python3 tools/bench_gap_report.py --target "cob one-shot" --include-cob-baselines "$csv" \
         > "$OUT_DIR/$name.one-shot-vs-best.gaps.csv"
     python3 tools/bench_gap_report.py --target "cob packed-B" "$csv" > "$OUT_DIR/$name.packed-b.gaps.csv"
+    python3 tools/bench_sanity_report.py --max-drop-percent "$SANITY_DROP" "$csv" \
+        > "$OUT_DIR/$name.sanity.csv"
 }
 
 run_grid_shapes() {
@@ -95,6 +99,8 @@ run_grid_shapes() {
     python3 tools/bench_gap_report.py --target "cob one-shot" --include-cob-baselines "$csv" \
         > "$OUT_DIR/$name.one-shot-vs-best.gaps.csv"
     python3 tools/bench_gap_report.py --target "cob packed-B" "$csv" > "$OUT_DIR/$name.packed-b.gaps.csv"
+    python3 tools/bench_sanity_report.py --max-drop-percent "$SANITY_DROP" "$csv" \
+        > "$OUT_DIR/$name.sanity.csv"
 }
 
 write_summary() {
@@ -105,8 +111,36 @@ write_summary() {
         echo "- Commit: \`$(git rev-parse --short HEAD)\`"
         echo "- Repeats: \`$REPEATS\`"
         echo "- Cooldown seconds between suites: \`$COOLDOWN_SEC\`"
+        echo "- Sanity drop threshold: \`$SANITY_DROP%\`"
         echo "- Output directory: \`$OUT_DIR\`"
         echo
+        for sanity in "$OUT_DIR"/*.sanity.csv; do
+            [ -f "$sanity" ] || continue
+            title=$(basename "$sanity" .sanity.csv)
+            echo "## $title"
+            echo
+            python3 - "$sanity" <<'PY'
+import csv
+import sys
+
+path = sys.argv[1]
+with open(path, newline="") as handle:
+    rows = list(csv.DictReader(handle))
+
+if not rows:
+    print("No rows exceeded the best-vs-median drop threshold.")
+else:
+    print("| shape | implementation | route | best | median | drop |")
+    print("| --- | --- | --- | ---: | ---: | ---: |")
+    for row in rows[:10]:
+        print(
+            f"| {row['shape']} | {row['implementation']} | {row['route']} | "
+            f"{row['best_throughput']} | {row['median_throughput']} | "
+            f"{row['best_median_drop_percent']}% |"
+        )
+PY
+            echo
+        done
         for gaps in "$OUT_DIR"/*.gaps.csv; do
             [ -f "$gaps" ] || continue
             title=$(basename "$gaps" .gaps.csv)

@@ -1923,6 +1923,12 @@ Follow-up tooling tweak: the audit bundle also emits one-shot-vs-best gap
 reports that include COB packed-B as an internal baseline. This makes pack/setup
 overhead visible separately from external-baseline misses.
 
+Follow-up sanity tweak: `tools/bench_sanity_report.py` flags benchmark rows
+where median throughput falls far below the best sample, and
+`tools/claim_audit.sh` now writes per-suite `.sanity.csv` files plus summary
+sections. This gives noisy/collapsed audit runs an explicit warning before
+their gap reports are used for route tuning.
+
 ### 2026-05-06 8ccd77b+local: one-shot n=1216 k=2048 packed path for m>=768
 
 The medium audit's internal one-shot-vs-best report highlighted
