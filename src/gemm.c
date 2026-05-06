@@ -1676,7 +1676,9 @@ static int cob_sgemm_rowmajor_amx_from_packed_b32(
     const size_t b_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_NR;
 
     const int packed_mc = cob_sgemm_amx_packed_b_mc(m, n, k);
-    if (m >= packed_mc && (n >= 1152 || (n >= 768 && k >= 3072)) && k >= 512 &&
+    if (m >= packed_mc &&
+        (n >= 1152 || (n >= 768 && k >= 3072) || (n == 512 && m >= 1024 && k >= 4096)) &&
+        k >= 512 &&
         m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0) {
         const int max_a_panels = packed_mc / COB_SGEMM_AMX_MR;
         const size_t a_block_floats = (size_t)max_a_panels * a_panel_floats;
@@ -2028,7 +2030,9 @@ static int cob_sgemm_rowmajor_amx(
     const size_t b_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_NR;
     const size_t b_bytes = (size_t)b_panels * b_panel_floats * sizeof(float);
     const int use_large_block =
-        m >= COB_SGEMM_AMX_MC && (n >= 1152 || (n >= 768 && k >= 3072)) && k >= 512 &&
+        m >= COB_SGEMM_AMX_MC &&
+        (n >= 1152 || (n >= 768 && k >= 3072) || (n == 512 && m >= 1024 && k >= 4096)) &&
+        k >= 512 &&
         m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0;
     const int use_strided_b_large_extra =
         n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N3 || n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N4;

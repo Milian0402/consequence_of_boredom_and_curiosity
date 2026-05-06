@@ -1858,6 +1858,29 @@ lowering the threshold below `k = 3072`. No new correctness shapes were needed;
 the affected one-shot and packed-B shapes are already covered by the 98-shape
 suite.
 
+### 2026-05-06 0a86b71+local: n=512 high-m AMX large-block for k>=4096
+
+A focused repeated benchmark showed `1024x512x4096` remained a coherent medium
+gap after the `n >= 768` large-block changes. A narrow large-block probe added
+only `n = 512, m >= 1024, k >= 4096` to both the public packed-B AMX path and
+the one-shot packed path.
+
+Public packed-B A/B validated the high-row target: `1024x512x4096` median
+`1.0228x`, bootstrap95 `[1.0176,1.0405]`, B-faster `86/101`, sign-p
+`2.83e-13`, holdout median `1.0224x`; and `1280x512x4096` median `1.0178x`,
+bootstrap95 `[1.0147,1.0204]`, B-faster `56/61`, sign-p `5.65e-12`, holdout
+median `1.0191x`. Lower rows were not admitted: `768x512x4096` regressed in
+the behavior-identical guard, and `512x512x4096` was only a noisy small
+positive.
+
+One-shot A/B was stronger on the same high-row target: `1024x512x4096` median
+`1.0500x`, bootstrap95 `[1.0276,1.0508]`, B-faster `95/101`, sign-p
+`1.07e-21`, holdout median `1.0500x`; and `1280x512x4096` median `1.0469x`,
+bootstrap95 `[1.0245,1.0573]`, B-faster `88/101`, sign-p `7.52e-15`, holdout
+median `1.0498x`. The `1024/1280 x 512 x 3072` guards were neutral/noisy, so
+the rule starts only at `k >= 4096`. Correctness coverage adds
+`1024x512x4096` and `1280x512x4096`.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The qualified claim now is:
@@ -1883,8 +1906,8 @@ high-`K` packed-path gate, plus the one-shot `n = 1216, k >= 3072` packed-path
 gate and the public packed-B `n = 1024, k >= 3072` and exact
 `n = 768, k = 2048/3072`, `n = 1152, k = 1536`, and high-`m`
 `n = 512, k = 3072` AMX fallbacks, plus the lowered public packed-B AMX
-and one-shot large-block threshold for `n >= 768, k >= 3072`. Current
-correctness coverage is 98 GEMM shapes.
+and one-shot large-block threshold for `n >= 768, k >= 3072` and high-row
+`n = 512, k >= 4096`. Current correctness coverage is 100 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

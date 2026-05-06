@@ -394,7 +394,8 @@ static const char* cob_one_shot_route(bench_shape shape)
     }
 
     const int use_large_block =
-        m >= COB_SGEMM_AMX_MC && (n >= 1152 || (n >= 768 && k >= 3072)) &&
+        m >= COB_SGEMM_AMX_MC &&
+        (n >= 1152 || (n >= 768 && k >= 3072) || (n == 512 && m >= 1024 && k >= 4096)) &&
         k >= 512 && aligned32;
     const int use_strided_b_large_extra =
         n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N3 || n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N4;
@@ -456,7 +457,8 @@ static const char* cob_packed_b_route(bench_shape shape)
     }
     if ((m % COB_BENCH_AMX_MR) == 0 && (n % COB_BENCH_AMX_NR) == 0) {
         if (m >= cob_amx_packed_b_mc(m, n, k) &&
-            (n >= 1152 || (n >= 768 && k >= 3072)) && k >= 512) {
+            (n >= 1152 || (n >= 768 && k >= 3072) || (n == 512 && m >= 1024 && k >= 4096)) &&
+            k >= 512) {
             return "packed_amx_large_block";
         }
         return "packed_amx_full";
