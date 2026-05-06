@@ -40,6 +40,13 @@ Focused paired one-shot evidence on M5 Max:
 
 Correctness coverage already included `512x1024x1536`; no test count change.
 
+Follow-up rejected: routing high-`K` medium audit gaps through SME direct-B was
+a hard regression. The exact probe covered `768x512x4096`, `768x768x4096`,
+`1024x768x4096`, and `768x1024x4096`; paired medians were `0.9484x`,
+`0.7460x`, `0.7282x`, and `0.3834x`, with all holdouts negative. Guard rows
+at `768x512x3072`, `768x768x3072`, and `1024x768x3072` stayed neutral/noisy.
+Keep these high-`K` medium rows on packed AMX.
+
 ### 2026-05-06: exact 512x512x3072 SME direct route accepted
 
 The one-shot dispatcher now routes exact `512x512x3072` through the SME

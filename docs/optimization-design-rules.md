@@ -107,6 +107,9 @@ These rules summarize repeated findings from the optimization timeline. They are
 - Exception: exact one-shot `512x1024x1536` should also use SME direct-B.
   Its `k = 1024/2048`, `m = 768`, `n = 960`, and `n = 1088` guards stayed
   neutral/noisy.
+- Do not use SME direct-B for high-`K` medium `n = 512/768/1024` audit gaps.
+  Exact probes at `768x512x4096`, `768x768x4096`, `1024x768x4096`, and
+  `768x1024x4096` regressed hard.
 - Do not port cache-blocking constants from other Apple Silicon generations. On this M5 Max, per-P-cluster L2 is 8 MB, page size is 16 KB, and route-specific cache-fit probes still need paired A/B proof.
 - Do not prioritize fused inline B-packing rewrites unless a profiler shows packing is the bottleneck on an in-scope licensed-baseline gap.
 
