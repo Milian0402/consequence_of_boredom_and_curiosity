@@ -1904,6 +1904,21 @@ uses AMX for public packed-B `n = 1024` at exact `k = 2048` and at the existing
 `k >= 3072` band. Correctness coverage adds `512x1024x2048`,
 `768x1024x2048`, and `1024x1024x2048`.
 
+### 2026-05-06 743ecac+local: claim audit bundle tool
+
+After the low-`k` exact packed-B probes stopped producing clean wins, broad
+threshold work was paused in favor of audit hygiene. `tools/claim_audit.sh`
+now writes a timestamped bundle containing `context.txt`, route-aware benchmark
+CSVs, one-shot and packed-B gap reports, and `summary.md`. The default suites
+cover square, medium, and sparse skinny route families, with environment
+variables for cold reruns of narrower families.
+
+The smoke run used `COB_AUDIT_SUITES=square COB_AUDIT_SQUARE_SIZES="64"
+COB_AUDIT_REPEATS=1 COB_AUDIT_OUT_DIR=/tmp/cob-claim-audit-smoke
+sh tools/claim_audit.sh`, and produced the expected context, CSV, gap, and
+summary files. `docs/claims.md` now points the audit recipe at this wrapper so
+future full-claim checks do not rely on ad hoc terminal output.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The qualified claim now is:

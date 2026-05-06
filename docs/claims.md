@@ -77,6 +77,18 @@ COB_BENCH_ROUTE=1 COB_BENCH_CSV=1 sh tools/bench_grid.sh > /tmp/cob-grid.csv
 python3 tools/bench_gap_report.py /tmp/cob-grid.csv
 ```
 
+For a timestamped audit bundle with hardware context, route-aware CSVs, and
+gap reports for both public COB paths:
+
+```sh
+COB_AUDIT_REPEATS=11 COB_AUDIT_COOLDOWN_SEC=60 sh tools/claim_audit.sh
+```
+
+The script writes `context.txt`, per-suite benchmark CSVs, per-suite gap
+reports, and `summary.md` into a `/tmp/cob-claim-audit-*` directory by default.
+Use `COB_AUDIT_SUITES`, `COB_AUDIT_OUT_DIR`, and the suite-specific shape
+environment variables when a narrower cold rerun is needed.
+
 3. For any candidate source change, use paired A/B:
 
 ```sh
