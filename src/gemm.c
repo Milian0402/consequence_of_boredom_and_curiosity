@@ -220,6 +220,13 @@ static int cob_sgemm_amx_packed_b_mc(int m, int n, int k)
     return n >= 2048 ? COB_SGEMM_AMX_PACKED_LARGE_MC : COB_SGEMM_AMX_MC;
 }
 
+static int cob_sgemm_amx_large_block_shape(int m, int n, int k)
+{
+    return n >= 1152 ||
+        (n >= 768 && k >= 3072) ||
+        (n == 512 && ((m == 768 && k == 4096) || (m >= 1024 && k >= 4096)));
+}
+
 #if defined(COB_USE_APPLE_AMX)
 static void cob_amx_set(void)
 {
@@ -1679,7 +1686,7 @@ static int cob_sgemm_rowmajor_amx_from_packed_b32(
 
     const int packed_mc = cob_sgemm_amx_packed_b_mc(m, n, k);
     if (m >= packed_mc &&
-        (n >= 1152 || (n >= 768 && k >= 3072) || (n == 512 && m >= 1024 && k >= 4096)) &&
+        cob_sgemm_amx_large_block_shape(m, n, k) &&
         k >= 512 &&
         m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0) {
         const int max_a_panels = packed_mc / COB_SGEMM_AMX_MR;
@@ -2033,7 +2040,7 @@ static int cob_sgemm_rowmajor_amx(
     const size_t b_bytes = (size_t)b_panels * b_panel_floats * sizeof(float);
     const int use_large_block =
         m >= COB_SGEMM_AMX_MC &&
-        (n >= 1152 || (n >= 768 && k >= 3072) || (n == 512 && m >= 1024 && k >= 4096)) &&
+        cob_sgemm_amx_large_block_shape(m, n, k) &&
         k >= 512 &&
         m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0;
     const int use_strided_b_large_extra =

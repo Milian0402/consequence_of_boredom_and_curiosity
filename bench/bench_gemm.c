@@ -148,6 +148,13 @@ static int cob_amx_packed_b_mc(int m, int n, int k)
     return n >= 2048 ? COB_SGEMM_AMX_PACKED_LARGE_MC : COB_SGEMM_AMX_MC;
 }
 
+static int cob_amx_large_block_shape(int m, int n, int k)
+{
+    return n >= 1152 ||
+        (n >= 768 && k >= 3072) ||
+        (n == 512 && ((m == 768 && k == 4096) || (m >= 1024 && k >= 4096)));
+}
+
 static uint32_t rng_next(uint32_t* state)
 {
     *state = *state * 1664525u + 1013904223u;
@@ -397,7 +404,7 @@ static const char* cob_one_shot_route(bench_shape shape)
 
     const int use_large_block =
         m >= COB_SGEMM_AMX_MC &&
-        (n >= 1152 || (n >= 768 && k >= 3072) || (n == 512 && m >= 1024 && k >= 4096)) &&
+        cob_amx_large_block_shape(m, n, k) &&
         k >= 512 && aligned32;
     const int use_strided_b_large_extra =
         n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N3 || n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N4;
@@ -459,7 +466,7 @@ static const char* cob_packed_b_route(bench_shape shape)
     }
     if ((m % COB_BENCH_AMX_MR) == 0 && (n % COB_BENCH_AMX_NR) == 0) {
         if (m >= cob_amx_packed_b_mc(m, n, k) &&
-            (n >= 1152 || (n >= 768 && k >= 3072) || (n == 512 && m >= 1024 && k >= 4096)) &&
+            cob_amx_large_block_shape(m, n, k) &&
             k >= 512) {
             return "packed_amx_large_block";
         }

@@ -22,6 +22,24 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: exact 768x512x4096 large-block AMX accepted
+
+The AMX packed full-width large-block rule now includes exact
+`768x512x4096` for both one-shot and public packed-`B`. The broader probe that
+started `n = 512` large-blocking at `m >= 768, k >= 4096` was rejected because
+`768x512x8192` regressed, so the accepted gate is exact.
+
+Focused paired evidence on M5 Max:
+
+- One-shot `768x512x4096` median `1.0383x`, bootstrap95 `[1.0280,1.0387]`,
+  B-faster `178/201`, holdout median `1.0419x`.
+- Packed-`B` `768x512x4096` median `1.0431x`, bootstrap95
+  `[1.0439,1.0584]`, B-faster `185/201`, holdout median `1.0431x`.
+- Rejected guard: `768x512x8192` regressed in both one-shot and packed-`B`
+  (`0.9747x` and `0.9788x` medians).
+
+The existing correctness suite already covers `768x512x4096`.
+
 ### 2026-05-06: one-shot n1152 k2048 packed path lowered to m512
 
 The one-shot AMX medium dispatch now uses the packed-`B` path for exact
@@ -1995,8 +2013,8 @@ gate with its `m >= 768, k = 2048` sibling, and the public packed-B
 `n = 512, k = 3072` AMX fallbacks, plus the lowered public packed-B AMX
 and one-shot large-block threshold for `n >= 768, k >= 3072` and high-row
 `n = 512, k >= 4096`, and the lowered one-shot packed-path gate for
-`n = 1152, k = 2048` from `m >= 512`. Current correctness coverage is
-105 GEMM shapes.
+`n = 1152, k = 2048` from `m >= 512`, plus exact `768x512x4096`
+large-block AMX. Current correctness coverage is 105 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
