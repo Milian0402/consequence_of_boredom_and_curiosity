@@ -87,6 +87,21 @@ Repeat-31 paired validation was neutral/noisy across the tested set:
 
 Do not make `-mcpu=native` a default build flag based on current evidence.
 
+### 2026-05-06 local-uncommitted: direct SME K16 unroll pragma rejected
+
+A temp source added `#pragma clang loop unroll_count(16)` to the plain and
+prefetched `cob_sgemm_16x64_sme_strided_b32` K loops. This was a cheap check
+inspired by MpGEMM's hand-scheduled K16 assembly blocks, without changing route
+gates or kernel layout. Correctness passed, but repeat-31 paired validation did
+not support the change: `64x1088x7168` median `1.0020x`,
+`64x2112x7168` `0.9993x`, `64x3328x12288` `1.0093x`,
+`64x3712x12288` `1.0270x` with weak sign-test support,
+`64x4032x8192` `0.9675x`, `64x4096x7168` `0.9900x`, and
+`384x1280x1536` hard-regressed to `0.9034x`.
+
+The compiler pragma is not an adequate substitute for a real hand-scheduled
+SME kernel.
+
 ### 2026-05-06: packed-AB paired A/B mode added
 
 The paired A/B harness now supports `COB_AB_MODE=packed-AB`, so future
@@ -2660,35 +2675,23 @@ calibration target with unclear licensing and still wins some one-shot `m = 64`
 shapes. Accelerate also remains ahead on a few small/medium cases, especially
 where one-shot pack overhead dominates.
 
-The recent methodology loop is now the main asset: route-aware grid sweeps find
-gaps, paired A/B runs validate candidate thresholds, holdout/sign-test output
-filters noise, and the timeline records rejected paths. The strongest structural
-wins since the older conclusion are the public packed-AB repeated-use path, the
-skinny SME B-reuse generalization, the
-`m = 64, k = 512` threshold drop and mid-width extension, B-pack prefetching,
-packed-B large-square blocking, wide `m = 64` K-chunk tuning, and the local
-`n = 1280..1472` SME
-direct route, plus the local `m = 64, k >= 2048` SME skinny threshold and
-streaming-B prefetch gates, the narrow `m = 64, k = 2048` large-KC gate, and
-the `m = 64, k = 1536` SME route at exact `n = 1024` plus `n >= 1408`, the
-public packed-B AMX fallback for high-`K` shapes, the one-shot high-`K` medium
-AMX packed-path gate, and the
-one-shot `n = 512, k >= 2048` packed-AMX conflict fallback, plus the packed-B
-`m = 384, n >= 2048` AMX block fix and the one-shot `m = 384, n >= 1152`
-high-`K` packed-path gate, plus the one-shot `n = 1216, k >= 3072` packed-path
-gate with its `m >= 768, k = 2048` sibling, and the public packed-B
-`n = 1024, k = 2048 or k >= 3072` and exact
-`n = 768, k = 2048/3072`, `n = 1152, k = 1536`, and high-`m`
-`n = 512, k = 3072` AMX fallbacks, plus the lowered public packed-B AMX
-and one-shot large-block threshold for `n >= 768, k >= 3072` and high-row
-`n = 512, k >= 4096`, and the lowered one-shot packed-path gate for
-`n = 1152, k = 2048` from `m >= 512`, plus exact `768x512x4096`
-large-block AMX, plus the exact public packed-B `512x1024x1536` AMX fallback.
-The exact `512x1280x1536`, `512x1024x1536`, and `512x512x3072` SME direct
-routes address one-shot pack overhead in the medium band, exact public
-packed-B `512x1280x2048` now uses the 512-row AMX block, and the `m = 64,
-k = 512` mid-width SME reuse extension covers the newer skinny gaps. Current
-correctness coverage is 125 GEMM shapes.
+The current working loop is: route-aware grid sweep, gap ranking, paired A/B
+candidate probe, cold/holdout validation, then either a narrow source change or
+a rejection note. That loop has produced the public packed-AB repeated-use path,
+skinny SME B-reuse generalization for `m = 64/96/128`, the `m = 64, k = 512`
+threshold and mid-width extensions, m64 high-K SME N-chunking for
+`3584 <= n < 4096`, B-pack prefetching, packed-B large-square and `m = 384`
+blocking, small-A packed-B B-panel traversal, medium SME direct routes in the
+`n = 1280..1472` band, high-K AMX packed-path fallbacks, and several public
+packed-B AMX fallbacks for shapes where SME lost.
+
+The latest C-level attempts to close the remaining m64 large-K calibration gap
+did not hold up: B-panel-first SME direct traversal, prefetch locality changes,
+epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
+neutral, noisy, or regressive. The remaining gap is therefore still best treated
+as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
+kernel or assembly rather than more dispatch gates. Current correctness
+coverage is 127 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
