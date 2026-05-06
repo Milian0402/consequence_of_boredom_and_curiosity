@@ -22,6 +22,37 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: exact 384x1280x1536 SME direct route accepted
+
+The one-shot dispatcher now routes exact `384x1280x1536` through the SME
+direct-`B` medium kernel. This extends the same low-height, `n = 1280`
+exception family as `384x1280x1024`, but keeps higher-K and adjacent-width
+shapes out of the route.
+
+Initial multi-K exact SME-direct probe on M5 Max with repeat-61,
+`COB_AB_ITERS=4`:
+
+- Exact accepted candidate: `384x1280x1536` median `1.0920x`, bootstrap95
+  `[1.0151,1.0997]`, B-faster `43/61`, sign-p `0.00187`, holdout median
+  `1.1229x`.
+- Rejected higher-K candidates: `384x1280x2048` median `0.9234x` and
+  `384x1280x3072` median `0.6179x`.
+- Width guards at `384x1216x2048` and `384x1344x2048` stayed neutral/noisy.
+
+Isolated repeat-101 confirmation with `COB_AB_ITERS=6` strengthened the exact
+`k = 1536` case: median `1.1875x`, bootstrap95 `[1.1574,1.1888]`, B-faster
+`99/101`, sign-p `4.06e-27`, holdout median `1.1724x`. Guards stayed neutral:
+existing `k = 1024` behavior median `0.9987x`, `k = 2048` median `1.0000x`
+with holdout `0.9996x`, `384x1216x1536` median `0.9993x`,
+`384x1344x1536` median `0.9972x`, and `512x1280x1536` median `0.9981x`.
+
+Direct benchmark after the patch candidate: COB one-shot `384x1280x1536`
+reached median `1793.29 GF/s` on route `sme_medium_direct`, versus packed-B
+`1984.16 GF/s` and Accelerate `1887.44 GF/s`. Treat this as a COB one-shot
+improvement, not an external median win claim for that noisy run.
+
+Correctness coverage increases to 118 shapes after tests pass.
+
 ### 2026-05-06: exact 384x512x3072 SME direct route accepted
 
 The one-shot dispatcher now routes exact `384x512x3072` through the SME
@@ -56,7 +87,9 @@ Correctness coverage increases to 117 shapes after tests pass.
 
 The one-shot dispatcher now routes exact `384x1280x1024` through the SME
 direct-`B` medium kernel. This is a narrow low-height exception: adjacent
-widths and the same width at `k = 1536` did not provide route-worthy evidence.
+widths and the same width at `k = 1536` did not provide route-worthy evidence
+in this first probe, though later isolated evidence accepted exact
+`384x1280x1536`.
 
 Exploratory paired one-shot evidence on M5 Max with repeat-61,
 `COB_AB_ITERS=2`:

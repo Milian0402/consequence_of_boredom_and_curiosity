@@ -29,9 +29,10 @@ These rules summarize repeated findings from the optimization timeline. They are
 - One-shot `n = 1024` via public packed-B or direct SME routes has generally
   not beaten the current path, except exact `512x1024x1536`, which should use
   SME direct-B.
-- Exact `384x1280x1024` is a low-height SME-direct exception for one-shot
-  GEMM. Do not broaden it to adjacent widths or `k = 1536`; current guards were
-  neutral/noisy or too small to justify a wider route.
+- Exact `384x1280x1024` and `384x1280x1536` are low-height SME-direct
+  exceptions for one-shot GEMM. Do not broaden them to `k = 2048/3072` or
+  adjacent widths; current higher-K and width guards were neutral/noisy or hard
+  regressions.
 - Exact `384x512x3072` may use SME direct for one-shot GEMM. Do not extend the
   rule to `n = 768` or `n = 1024` without new cold holdout proof; the current
   `n = 768` rerun lost its holdout and `n = 1024` was a hard regression.
