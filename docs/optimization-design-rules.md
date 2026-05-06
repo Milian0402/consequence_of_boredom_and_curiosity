@@ -74,9 +74,10 @@ These rules summarize repeated findings from the optimization timeline. They are
 - The same packed-path rule has a lower-height exception at `m = 384`: use the
   packed path for `n >= 1152, k >= 4096` and for exact `n = 1152, k >= 3072`.
   Guard `m = 384` widths below `1152` were neutral/noisy, so do not broaden it.
-- For one-shot `n = 1216`, use the packed path from `k >= 3072`. The
-  `k = 2048` neighbor was neutral/noisy, while `k = 3072` was a clear win
-  across `m = 384..1024`; `k >= 4096` is already covered by the high-`K` rule.
+- For one-shot `n = 1216`, use the packed path from `k >= 3072`, and also at
+  exact `k = 2048` when `m >= 768`. The `m = 512, k = 2048` neighbor and
+  `k = 1536` guards are neutral/noisy; `k >= 4096` is covered by the high-`K`
+  rule.
 - For the one-shot `n = 512` conflict path, keep SME packed-B at `k <= 1024`,
   but use packed AMX at `k >= 2048`. The `k = 1024` AMX fallback probe was a
   regression/noise, while `k = 2048/3072` was consistently positive.

@@ -1923,6 +1923,26 @@ Follow-up tooling tweak: the audit bundle also emits one-shot-vs-best gap
 reports that include COB packed-B as an internal baseline. This makes pack/setup
 overhead visible separately from external-baseline misses.
 
+### 2026-05-06 8ccd77b+local: one-shot n=1216 k=2048 packed path for m>=768
+
+The medium audit's internal one-shot-vs-best report highlighted
+`1024x1216x2048`: one-shot stayed on AMX strided-B while COB packed-B was much
+faster after `B` was already packed. A broad exact `n = 1216, k = 2048` packed
+path rerun showed strong wins at `m = 768/1024`, but only weak/noisy behavior at
+`m = 512`. The accepted candidate therefore keeps `m = 512` on the existing
+strided-B path and uses the packed path only when `m >= 768`.
+
+The focused repeat-201 rerun validated the narrowed gate:
+`768x1216x2048` median `1.0252x`, bootstrap95 `[1.0535,1.0992]`, B-faster
+`139/201`, sign-p `5.77e-08`, holdout median `1.0313x`; and
+`1024x1216x2048` median `1.0936x`, bootstrap95 `[1.1083,1.1563]`, B-faster
+`189/201`, sign-p `4.31e-42`, holdout median `1.0971x`. The excluded
+`512x1216x2048` row stayed neutral/noisy at median `0.9986x`, bootstrap95
+`[0.9750,1.0181]`, sign-p `0.778`. The `k = 1536` and `k = 3072` guards were
+behavior-identical/noisy or neutral, so the rule is exact to `k = 2048` for
+`m >= 768`; the existing `k >= 3072` path remains unchanged. Correctness
+coverage adds `768x1216x2048` and `1024x1216x2048`.
+
 ## Current Conclusion
 
 COB is very competitive in its exact current scope. The qualified claim now is:
@@ -1945,11 +1965,12 @@ for high-`K` shapes, the one-shot high-`K` medium AMX packed-path gate, and the
 one-shot `n = 512, k >= 2048` packed-AMX conflict fallback, plus the packed-B
 `m = 384, n >= 2048` AMX block fix and the one-shot `m = 384, n >= 1152`
 high-`K` packed-path gate, plus the one-shot `n = 1216, k >= 3072` packed-path
-gate and the public packed-B `n = 1024, k = 2048 or k >= 3072` and exact
+gate with its `m >= 768, k = 2048` sibling, and the public packed-B
+`n = 1024, k = 2048 or k >= 3072` and exact
 `n = 768, k = 2048/3072`, `n = 1152, k = 1536`, and high-`m`
 `n = 512, k = 3072` AMX fallbacks, plus the lowered public packed-B AMX
 and one-shot large-block threshold for `n >= 768, k >= 3072` and high-row
-`n = 512, k >= 4096`. Current correctness coverage is 103 GEMM shapes.
+`n = 512, k >= 4096`. Current correctness coverage is 105 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
