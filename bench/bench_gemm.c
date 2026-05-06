@@ -460,6 +460,7 @@ static const char* cob_packed_b_route(bench_shape shape)
         !(m >= 1024 && n == 512 && k == 3072) &&
         !(n == 768 && (k == 2048 || k == 3072)) &&
         !(n == 1024 && k >= 3072) && !(n == 1024 && k == 2048) &&
+        !(m == 512 && n == 1024 && k == 1536) &&
         k < 4096 && !(n == 1152 && k >= 2048) && !(n == 1152 && k == 1536) &&
         (m % COB_BENCH_AMX_MR) == 0 && (n % 64) == 0) {
         return "packed_sme";

@@ -22,6 +22,23 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: public packed-B 512x1024x1536 AMX fallback accepted
+
+The public packed-`B` SME route now rejects exact `512x1024x1536`, letting the
+existing AMX packed-`B` path handle that shape. This addresses a fresh audit
+row where the SME packed-`B` median was unstable, while leaving the one-shot
+route unchanged because one-shot already used AMX there.
+
+Focused paired packed-`B` evidence on M5 Max:
+
+- `512x1024x1536` median `1.0270x`, bootstrap95 `[1.0236,1.0602]`,
+  B-faster `123/201`, holdout median `1.0297x`.
+- `768x1024x1536` stayed neutral/noisy at median `0.9944x`.
+- `512x1152x1536` was a small behavior-identical/layout regression in the
+  probe, so the accepted route is exact to `512x1024x1536`.
+
+Correctness coverage adds `512x1024x1536`.
+
 ### 2026-05-06: exact 768x512x4096 large-block AMX accepted
 
 The AMX packed full-width large-block rule now includes exact
@@ -2014,7 +2031,8 @@ gate with its `m >= 768, k = 2048` sibling, and the public packed-B
 and one-shot large-block threshold for `n >= 768, k >= 3072` and high-row
 `n = 512, k >= 4096`, and the lowered one-shot packed-path gate for
 `n = 1152, k = 2048` from `m >= 512`, plus exact `768x512x4096`
-large-block AMX. Current correctness coverage is 105 GEMM shapes.
+large-block AMX, plus the exact public packed-B `512x1024x1536` AMX fallback.
+Current correctness coverage is 107 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
