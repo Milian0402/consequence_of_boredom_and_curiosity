@@ -22,6 +22,21 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: public packed-B 512x1280x2048 MC512 accepted
+
+The public packed-`B` AMX path now uses a 512-row block for exact
+`512x1280x2048`. The old 384-row block split the shape into 384+128 rows even
+though the right-hand panel was reusable across the full 512 rows.
+
+The first repeat-201 packed-B run had a positive median but noisy confidence,
+so the decision was repeated with `COB_AB_ITERS=4`. The focused rerun was clean:
+`512x1280x2048` median `1.0137x`, bootstrap95 `[1.0117,1.0151]`,
+B-faster `95/101`, holdout median `1.0133x`. Rejected guards:
+`512x1280x1536` regressed to `0.9947x`, `512x1344x2048` regressed to
+`0.9984x`, and `512x1280x3072` / `512x1216x2048` stayed neutral/noisy.
+
+Correctness coverage adds `512x1280x2048`.
+
 ### 2026-05-06: counter probe workflow added
 
 Added an opt-in benchmark row filter, `COB_BENCH_ONLY`, so hardware-counter
@@ -2067,7 +2082,8 @@ and one-shot large-block threshold for `n >= 768, k >= 3072` and high-row
 `n = 1152, k = 2048` from `m >= 512`, plus exact `768x512x4096`
 large-block AMX, plus the exact public packed-B `512x1024x1536` AMX fallback.
 The exact `512x1280x1536` SME direct route addresses one-shot pack overhead in
-the medium band. Current correctness coverage is 108 GEMM shapes.
+the medium band, and exact public packed-B `512x1280x2048` now uses the
+512-row AMX block. Current correctness coverage is 109 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

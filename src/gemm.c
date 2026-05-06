@@ -220,6 +220,9 @@ static int cob_sgemm_amx_packed_b_mc(int m, int n, int k)
     if (n >= 2048 && m == COB_SGEMM_AMX_MC && k >= 1024) {
         return COB_SGEMM_AMX_MC;
     }
+    if (m == COB_SGEMM_AMX_PACKED_LARGE_MC && n == 1280 && k == 2048) {
+        return COB_SGEMM_AMX_PACKED_LARGE_MC;
+    }
     return n >= 2048 ? COB_SGEMM_AMX_PACKED_LARGE_MC : COB_SGEMM_AMX_MC;
 }
 

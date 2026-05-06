@@ -67,6 +67,9 @@ These rules summarize repeated findings from the optimization timeline. They are
   the 384-row large-block schedule. The wider 512-row packed-B block makes this
   shape miss large-block B-panel reuse entirely. Do not extend this rule to
   `k = 512` or broader `m >= 512` shapes without fresh paired evidence.
+- For public packed-B AMX, use the 512-row block at exact `512x1280x2048`.
+  Neighboring `512x1280x1536` and `512x1344x2048` regressed under the same row
+  block, so keep the exception exact.
 - For AMX packed full-width shapes, including one-shot and public packed-B, use
   the large-block schedule below `n = 1152` only when `n >= 768` and
   `k >= 3072`, plus the high-row `n = 512, m >= 1024, k >= 4096` band and
