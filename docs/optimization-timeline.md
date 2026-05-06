@@ -61,6 +61,52 @@ Route smoke after rebuilding labels `64x3520x7168` as
 `sme_skinny_reuse`. Correctness coverage adds representative
 `64x3584x7168` and `64x4032x8192` shapes.
 
+Follow-up rejected probes:
+
+- Adding exact `64x1024x512` to the AMX skinny chunk packer was a hard
+  regression against the current AMX strided-B path: repeat-161 with
+  `COB_AB_ITERS=8` measured median `0.5557x`, bootstrap95 `[0.5510,0.5619]`,
+  B-faster `0/161`, sign-p `6.84e-49`.
+- Forcing exact `64x4096x2048` away from SME direct into one-shot packed AMX
+  also regressed: repeat-101 median `0.6662x`, bootstrap95
+  `[0.6556,0.7026]`, B-faster `3/101`, sign-p `1.36e-25`.
+- Prefetching exact `64x1024x1536` in the SME streaming-B route regressed:
+  repeat-161 with `COB_AB_ITERS=6` measured median `0.8744x`, bootstrap95
+  `[0.8711,0.9096]`, B-faster `29/161`, sign-p `6.7e-17`.
+
+The skinny audit default was updated to include representative
+`sme_skinny_strided_nc` shapes, so future claim audits cover this route without
+requiring `COB_AUDIT_SKINNY_EXTRA`.
+
+### 2026-05-06: small-A packed-B B-panel traversal accepted
+
+The public packed-B AMX path now has a small-A B-panel-outer traversal for the
+wide skinny packed-B regions. Instead of packing one A panel and walking all B
+panels before moving to the next A panel, the new path packs the small A block
+once, then reuses each packed-B panel across the resident A panels. The source
+gate is limited to `m = 64, n >= 2048, k >= 1536` and
+`m = 96/128, n >= 4096, k >= 1024`.
+
+Final paired packed-B validation against clean `82fc74f` source:
+
+- `64x2048x1536`: median `1.0815x`, bootstrap95 `[1.0740,1.0956]`,
+  B-faster `98/101`, sign-p `1.36e-25`, holdout `1.0810x`.
+- `64x2048x2048`: median `1.2078x`, bootstrap95 `[1.1826,1.2086]`,
+  B-faster `98/101`, sign-p `1.36e-25`, holdout `1.2120x`.
+- `64x3072x2048`: median `1.0998x`, bootstrap95 `[1.0665,1.1529]`,
+  B-faster `89/101`, sign-p `1.08e-15`, holdout `1.0998x`.
+- `64x3712x7168`: median `1.1298x`, bootstrap95 `[1.1201,1.1458]`,
+  B-faster `98/101`, sign-p `1.36e-25`, holdout `1.1360x`.
+- `96x4096x1024`: median `1.0725x`, bootstrap95 `[1.0709,1.0908]`,
+  B-faster `100/101`, sign-p `8.05e-29`, holdout `1.0708x`.
+- `128x4096x1024`: median `1.1806x`, bootstrap95 `[1.1808,1.1967]`,
+  B-faster `101/101`, sign-p `7.89e-31`, holdout `1.1770x`.
+
+Rejected low-edge evidence: exact `64x1024x1536` regressed/noised negative,
+`64x1408x1536` was positive but below the acceptance floor on holdout,
+and `m = 96/128, k = 512` was neutral/noisy. Keep those on the existing
+packed-AMX full traversal.
+
 ### 2026-05-06: packed-B dispatch cleanup and gate floor
 
 Current cleanup is intended to be behavior-preserving: `src/gemm.c` and

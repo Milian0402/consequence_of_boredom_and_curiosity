@@ -553,6 +553,12 @@ static int cob_packed_b_sme_excluded_shape(int m, int n, int k)
     return 0;
 }
 
+static int cob_packed_b_small_bouter_shape(int m, int n, int k)
+{
+    return (m == 64 && n >= 2048 && k >= 1536) ||
+        (m >= 96 && m <= 128 && n >= 4096 && k >= 1024);
+}
+
 static const char* cob_packed_b_route(bench_shape shape)
 {
     const int m = shape.m;
@@ -572,6 +578,9 @@ static const char* cob_packed_b_route(bench_shape shape)
             cob_amx_large_block_shape(m, n, k) &&
             k >= 512) {
             return "packed_amx_large_block";
+        }
+        if (cob_packed_b_small_bouter_shape(m, n, k)) {
+            return "packed_amx_small_bouter";
         }
         return "packed_amx_full";
     }

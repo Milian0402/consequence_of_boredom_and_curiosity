@@ -2057,9 +2057,46 @@ static int cob_sgemm_rowmajor_amx_from_packed_b32(
         return 1;
     }
 
-    float* packed_a = (float*)cob_aligned_alloc(128, a_panel_floats * sizeof(float));
+    const int use_small_bouter =
+        m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0 &&
+        ((m == 64 && n >= 2048 && k >= 1536) ||
+            (m >= 96 && m <= 128 && n >= 4096 && k >= 1024));
+    const int scratch_a_panels = use_small_bouter ? m / COB_SGEMM_AMX_MR : 1;
+    float* packed_a = (float*)cob_aligned_alloc(
+        128,
+        (size_t)scratch_a_panels * a_panel_floats * sizeof(float));
     if (packed_a == NULL) {
         return 0;
+    }
+
+    if (use_small_bouter) {
+        cob_amx_set();
+        for (int ap = 0; ap < scratch_a_panels; ++ap) {
+            const int ic = ap * COB_SGEMM_AMX_MR;
+            cob_sgemm_pack_a32_full(
+                packed_a + (size_t)ap * a_panel_floats,
+                k,
+                a + (size_t)ic * (size_t)lda,
+                lda);
+        }
+
+        for (int panel = 0; panel < b_panels; ++panel) {
+            const int jc = panel * COB_SGEMM_AMX_NR;
+            const float* bp = packed_b->data + (size_t)panel * b_panel_floats;
+            for (int ap = 0; ap < scratch_a_panels; ++ap) {
+                const int ic = ap * COB_SGEMM_AMX_MR;
+                cob_sgemm_32x32_amx_packed_full(
+                    k,
+                    packed_a + (size_t)ap * a_panel_floats,
+                    bp,
+                    c + (size_t)ic * (size_t)ldc + jc,
+                    ldc);
+            }
+        }
+        cob_amx_clr();
+
+        free(packed_a);
+        return 1;
     }
 
     if (m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0) {

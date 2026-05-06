@@ -85,6 +85,10 @@ These rules summarize repeated findings from the optimization timeline. They are
   B slab hot across the four 16-row A panels without paying B-pack cost. Do not
   broaden it below `n = 3584`, at `n = 4096`, or below `k = 7168`; those guards
   were neutral/noisy or already use the stronger B-reuse route.
+- Do not route exact `64x1024x512` through the AMX skinny chunk packer; the
+  existing AMX strided-B route is much faster. Do not force exact
+  `64x4096x2048` onto one-shot packed AMX; B-pack cost overwhelms the compute
+  win. Do not prefetch exact `64x1024x1536`; it regressed hard.
 - Full-K chunks are not a substitute for a real single-store epilogue. They
   helped only tiny isolated low-width `k = 2048` cases and badly regressed
   high-`K` m64 SME skinny shapes.
@@ -109,6 +113,11 @@ These rules summarize repeated findings from the optimization timeline. They are
 - For public packed-B AMX, use the 512-row block at exact `512x1280x2048`.
   Neighboring `512x1280x1536` and `512x1344x2048` regressed under the same row
   block, so keep the exception exact.
+- For public packed-B AMX with small A, use B-panel-outer traversal only in the
+  proven wide regions: `m = 64, n >= 2048, k >= 1536`, and
+  `m = 96/128, n >= 4096, k >= 1024`. Do not include `64x1024x1536` or the
+  `m = 96/128, k = 512` low edge; those stayed neutral or regressed under the
+  same traversal.
 - For AMX packed full-width shapes, including one-shot and public packed-B, use
   the large-block schedule below `n = 1152` only when `n >= 768` and
   `k >= 3072`, plus the high-row `n = 512, m >= 1024, k >= 4096` band and
