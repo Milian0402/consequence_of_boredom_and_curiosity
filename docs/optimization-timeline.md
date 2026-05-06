@@ -1486,6 +1486,17 @@ checks showing B-faster counts of at least `80/81`. The refined boundary kept
 guard stayed neutral, so that boundary remains on strided-B. Correctness
 coverage added `1024x1152x2048`, `512x1152x3072`, and `512x960x4096`.
 
+Follow-up accepted: the one-shot `n = 512` conflict path now uses packed AMX
+instead of the SME packed-B kernel at `k >= 2048`, while keeping SME at
+`k <= 1024`. The first probe that switched from `k >= 1024` was rejected because
+`512x512x1024`, `768x512x1024`, and `1024x512x1024` regressed or stayed noisy.
+The refined `k >= 2048` gate was positive: `512x512x2048` median `1.0211x`,
+CI `[1.0145,1.0292]`, B-faster `71/101`; `768x512x2048` `1.0228x`,
+B-faster `82/101`; `1024x512x2048` `1.0206x`, B-faster `73/101`; and
+`512/768/1024 x 512 x 3072` at `1.0272x`, `1.0456x`, and `1.0327x` with
+holdout agreement. Correctness coverage added `512x512x2048` and
+`768x512x3072`.
+
 Follow-up rejected: routing `64x1408x2048` and `64x1472x2048` back to the old
 AMX path did not close their remaining small gaps. The AMX fallback candidate
 in `/private/tmp/cob_k2048_1408_amx_exp` passed correctness but paired A/B
@@ -1620,8 +1631,9 @@ blocking, wide `m = 64` K-chunk tuning, and the local `n = 1280..1472` SME
 direct route, plus the local `m = 64, k >= 2048` SME skinny threshold and
 streaming-B prefetch gates, the narrow `m = 64, k = 2048` large-KC gate, and
 the `m = 64, k = 1536, n >= 1408` SME route, the public packed-B AMX fallback
-for high-`K` shapes, and the one-shot high-`K` medium AMX packed-path gate.
-Current correctness coverage is 75 GEMM shapes.
+for high-`K` shapes, the one-shot high-`K` medium AMX packed-path gate, and the
+one-shot `n = 512, k >= 2048` packed-AMX conflict fallback. Current correctness
+coverage is 77 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

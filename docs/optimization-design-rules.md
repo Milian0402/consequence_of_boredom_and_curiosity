@@ -52,6 +52,9 @@ These rules summarize repeated findings from the optimization timeline. They are
 - In one-shot AMX medium routes, high-`K` strided-B loses to packing B even
   after pack cost. Keep `m >= 512, k >= 4096` on the packed path, plus
   `n = 1152, k >= 3072`, and only `m >= 1024` for `n = 1152, k = 2048`.
+- For the one-shot `n = 512` conflict path, keep SME packed-B at `k <= 1024`,
+  but use packed AMX at `k >= 2048`. The `k = 1024` AMX fallback probe was a
+  regression/noise, while `k = 2048/3072` was consistently positive.
 - Do not port cache-blocking constants from other Apple Silicon generations. On this M5 Max, per-P-cluster L2 is 8 MB, page size is 16 KB, and route-specific cache-fit probes still need paired A/B proof.
 - Do not prioritize fused inline B-packing rewrites unless a profiler shows packing is the bottleneck on an in-scope licensed-baseline gap.
 
