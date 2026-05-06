@@ -54,10 +54,20 @@ large square calibration while keeping the one-shot and packed-B contracts
 separate.
 
 Follow-up `1024/1536/2048` focused runs confirmed the large-block traversal fix
-keeps the fully packed path around `2.0 TF/s` best on larger aligned squares,
-with low-repeat OpenBLAS route audit output in
-`/private/tmp/cob-openblas-packed-ab-audit-20260506` showing no packed-AB gaps
-in square, medium, or skinny suites.
+keeps the fully packed path around `2.0 TF/s` best on larger aligned squares.
+A second full-aligned traversal change switched non-large packed-AB shapes to
+B-panel outer order, improving the `192x192x192` packed-AB best to
+`2013.27 GF/s` in repeat-31 focused reruns. A same-session tract rerun measured
+`tract packed-both` at `2006.11 GF/s` for `192` and `2026.33 GF/s` for `1024`,
+while COB packed-AB measured `2035.53 GF/s` best at `1024`.
+
+Low-repeat OpenBLAS route audit output in
+`/private/tmp/cob-openblas-packed-ab-audit-20260506` showed no packed-AB gaps in
+square, medium, or skinny suites. BLASFEO's packed-AB refresh in
+`/private/tmp/cob-blasfeo-packed-ab-audit-20260506` also showed no gaps. BLIS's
+low-repeat refresh in `/private/tmp/cob-blis-packed-ab-audit-20260506` had a
+single noisy packed-AB row at `768x1152x1536`, but focused repeat-31 rerun
+cleared it: COB packed-AB median `1920.78 GF/s` versus BLIS `1585.71 GF/s`.
 
 ### 2026-05-06: licensed baseline audit refreshed at f2826ec
 

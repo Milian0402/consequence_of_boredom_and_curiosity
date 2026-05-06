@@ -146,14 +146,23 @@ git diff --check
   `1536x1536x1536`, and `1024x1216x1536`. BLASFEO audit output was
   `/private/tmp/cob-blasfeo-audit-20260506` with repeats=3; BLASFEO was far
   behind in the default square smoke and showed no one-shot or packed-B gaps.
+- After the packed-AB API landed, repeat-3 audit refreshes at `c6108dd` found
+  no packed-AB gaps against OpenBLAS (`/private/tmp/cob-openblas-packed-ab-audit-20260506`)
+  or BLASFEO (`/private/tmp/cob-blasfeo-packed-ab-audit-20260506`). The BLIS
+  refresh (`/private/tmp/cob-blis-packed-ab-audit-20260506`) had one noisy
+  packed-AB row and several one-shot rows; focused repeat-31 reruns cleared the
+  suspects, including `768x1152x1536` packed-AB at `1920.78 GF/s` median versus
+  BLIS `1585.71 GF/s`.
 - Remaining baseline smokes also support the current claim boundary:
   Rust `matrixmultiply` and `coral-aarch64` square smokes were far behind COB;
   KleidiAI comparable one-shot samples stayed below COB, while its elastic
   compute-only mode remains out of contract because it excludes packing; and
   `tract-linalg` pack-each and packed-B samples stayed below COB. Tract
   `packed-both` reached about `2030 GF/s`, which motivated COB's public
-  packed-AB path; repeat-31 square smoke now shows COB packed-AB at up to
-  `2018.31 GF/s` median and `2076.87 GF/s` best on `1024x1024x1024`.
+  packed-AB path; after switching full-aligned packed-AB traversal to B-panel
+  outer order, COB's repeat-31 packed-AB square smoke reached `2013.27 GF/s`
+  best at `192` and `2035.53 GF/s` best at `1024`, while a same-session tract
+  rerun measured `2006.11 GF/s` and `2026.33 GF/s` for those packed-both rows.
 - Recent structural wins include skinny SME B-reuse generalization,
   `m = 64, k = 512` threshold lowering, B-pack prefetching, packed-B
   large-square blocking, wide `m = 64` K-chunk tuning, and medium SME direct

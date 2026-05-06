@@ -1917,6 +1917,25 @@ static int cob_sgemm_rowmajor_amx_from_packed_ab32(
         return 1;
     }
 
+    if (m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0) {
+        for (int bpanel = 0; bpanel < b_panels; ++bpanel) {
+            const int jc = bpanel * COB_SGEMM_AMX_NR;
+            const float* bp = packed_b->data + (size_t)bpanel * b_panel_floats;
+            for (int apanel = 0; apanel < a_panels; ++apanel) {
+                const int ic = apanel * COB_SGEMM_AMX_MR;
+                const float* ap = packed_a->data + (size_t)apanel * a_panel_floats;
+                cob_sgemm_32x32_amx_packed_full(
+                    k,
+                    ap,
+                    bp,
+                    c + (size_t)ic * (size_t)ldc + jc,
+                    ldc);
+            }
+        }
+        cob_amx_clr();
+        return 1;
+    }
+
     for (int apanel = 0; apanel < a_panels; ++apanel) {
         const int ic = apanel * COB_SGEMM_AMX_MR;
         const int mr = cob_min_i32(COB_SGEMM_AMX_MR, m - ic);
