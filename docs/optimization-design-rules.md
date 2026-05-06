@@ -32,6 +32,9 @@ These rules summarize repeated findings from the optimization timeline. They are
 - Exact `384x1280x1024` is a low-height SME-direct exception for one-shot
   GEMM. Do not broaden it to adjacent widths or `k = 1536`; current guards were
   neutral/noisy or too small to justify a wider route.
+- Exact `384x512x3072` may use SME direct for one-shot GEMM. Do not extend the
+  rule to `n = 768` or `n = 1024` without new cold holdout proof; the current
+  `n = 768` rerun lost its holdout and `n = 1024` was a hard regression.
 - Increasing expression-level unrolling in the C SME packed-B kernel did not beat the compiler's current schedule.
 - m=64 B-reuse changes are shape-sensitive; do not assume a NC/KC knob alone will close the MpGEMM gap.
 - SME streaming-B prefetch is route-specific. It helped `m = 64`, large-`K`

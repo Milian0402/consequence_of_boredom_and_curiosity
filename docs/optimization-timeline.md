@@ -22,6 +22,36 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: exact 384x512x3072 SME direct route accepted
+
+The one-shot dispatcher now routes exact `384x512x3072` through the SME
+direct-`B` medium kernel. This is another narrow low-height exception; nearby
+widths did not hold up well enough to broaden the route.
+
+Focused paired one-shot evidence on M5 Max with repeat-61,
+`COB_AB_ITERS=4`:
+
+- Exact accepted gate: `384x512x3072` B/A median `1.1332x`, bootstrap95
+  `[1.1114,1.1366]`, B-faster `58/61`, sign-p `3.29e-14`, holdout median
+  `1.1332x`.
+- Guards stayed neutral/noisy: `384x512x2048` median `0.9971x`,
+  `384x512x4096` median `1.0006x`, `384x768x3072` was neutral under the exact
+  candidate, and `512x512x3072` was neutral/noisy.
+
+Confirmation with repeat-101, `COB_AB_ITERS=6`, was weaker/noisier but still
+positive: `384x512x3072` median `1.1064x`, bootstrap95 `[1.0363,1.0817]`,
+B-faster `86/101`, sign-p `2.83e-13`, holdout median `1.0980x`. A second
+repeat-101 after removing the rejected temporary `n = 1024` gate strengthened
+the result: median `1.1412x`, bootstrap95 `[1.0788,1.1223]`, B-faster
+`89/101`, sign-p `1.08e-15`, holdout median `1.1384x`.
+
+Rejected same-family probes: `384x768x3072` first looked positive with median
+`1.0896x` and holdout `1.0928x`, but the rerun weakened to full median
+`1.0656x` with holdout `0.9986x`, so reject it. `384x1024x3072` was a hard
+regression at median `0.5743x`.
+
+Correctness coverage increases to 117 shapes after tests pass.
+
 ### 2026-05-06: exact 384x1280x1024 SME direct route accepted
 
 The one-shot dispatcher now routes exact `384x1280x1024` through the SME
