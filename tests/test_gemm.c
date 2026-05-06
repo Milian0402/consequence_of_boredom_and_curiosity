@@ -246,6 +246,7 @@ int main(void)
     failures += test_packed_matches_direct_aligned_shape(64, 1472, 1536);
     failures += test_packed_matches_direct_aligned_shape(64, 1600, 2048);
     failures += test_packed_matches_direct_aligned_shape(512, 1152, 2048);
+    failures += test_packed_matches_direct_aligned_shape(768, 1152, 2048);
     failures += test_packed_matches_direct_aligned_shape(512, 1024, 4096);
     failures += test_packed_matches_direct_aligned_shape(512, 1024, 2048);
     failures += test_packed_matches_direct_aligned_shape(768, 1024, 2048);

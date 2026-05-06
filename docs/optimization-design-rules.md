@@ -70,7 +70,7 @@ These rules summarize repeated findings from the optimization timeline. They are
   were behavior-identical/noisy and should not drive the rule.
 - In one-shot AMX medium routes, high-`K` strided-B loses to packing B even
   after pack cost. Keep `m >= 512, k >= 4096` on the packed path, plus
-  `n = 1152, k >= 3072`, and only `m >= 1024` for `n = 1152, k = 2048`.
+  `n = 1152, k >= 3072`, and exact `n = 1152, k = 2048` from `m >= 512`.
 - The same packed-path rule has a lower-height exception at `m = 384`: use the
   packed path for `n >= 1152, k >= 4096` and for exact `n = 1152, k >= 3072`.
   Guard `m = 384` widths below `1152` were neutral/noisy, so do not broaden it.

@@ -209,7 +209,7 @@ static int cob_sgemm_amx_strided_b_prefers_packed_shape(int m, int n, int k)
             (n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N4 &&
                 (k >= 3072 || (m >= 768 && k >= 2048))) ||
             (n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N3 &&
-                (k >= 3072 || (m >= 1024 && k >= 2048))));
+                (k >= 3072 || (m >= 512 && k == 2048))));
 }
 
 static int cob_sgemm_amx_packed_b_mc(int m, int n, int k)

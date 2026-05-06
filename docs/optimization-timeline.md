@@ -22,6 +22,24 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-06: one-shot n1152 k2048 packed path lowered to m512
+
+The one-shot AMX medium dispatch now uses the packed-`B` path for exact
+`n = 1152, k = 2048` starting at `m >= 512`. The previous gate required
+`m >= 1024`, leaving `512x1152x2048` and `768x1152x2048` on strided-`B` AMX
+despite the packed path being much more stable in the route-aware audit.
+
+Focused paired old-vs-new evidence on M5 Max:
+
+- `512x1152x2048` median `1.1715x`, bootstrap95 `[1.1387,1.2021]`,
+  B-faster `167/201`, holdout median `1.1598x`.
+- `768x1152x2048` median `1.1318x`, bootstrap95 `[1.1339,1.1973]`,
+  B-faster `162/201`, holdout median `1.0818x`.
+- `1024x1152x2048` was behavior-identical/noisy at median `0.9986x`.
+
+The rule stays exact to `k = 2048`; existing `k >= 3072` behavior is unchanged.
+Correctness coverage adds `768x1152x2048`.
+
 ### 2026-05-06: packed-B m384 high-N AMX block accepted
 
 The public packed-B AMX path now uses the 384-row large-block schedule for
@@ -1976,7 +1994,9 @@ gate with its `m >= 768, k = 2048` sibling, and the public packed-B
 `n = 768, k = 2048/3072`, `n = 1152, k = 1536`, and high-`m`
 `n = 512, k = 3072` AMX fallbacks, plus the lowered public packed-B AMX
 and one-shot large-block threshold for `n >= 768, k >= 3072` and high-row
-`n = 512, k >= 4096`. Current correctness coverage is 105 GEMM shapes.
+`n = 512, k >= 4096`, and the lowered one-shot packed-path gate for
+`n = 1152, k = 2048` from `m >= 512`. Current correctness coverage is
+105 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
