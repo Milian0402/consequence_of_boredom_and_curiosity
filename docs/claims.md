@@ -132,6 +132,10 @@ git diff --check
 
 ## Current Evidence Summary
 
+- Final scoped audit note: `docs/audits/2026-05-10-claim-audit.md` records a
+  clean rebuild, 127-shape correctness pass, and fresh `square`, `medium`, and
+  `skinny` route-aware audit bundle at
+  `/private/tmp/cob-final-claim-audit-20260510`.
 - Recent external baseline audits are listed below with their output
   directories; rerun them before broadening the claim beyond the recorded shape
   suites.

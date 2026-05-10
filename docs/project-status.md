@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-05-06
+Last updated: 2026-05-10
 
 ## Goal
 
@@ -25,11 +25,12 @@ COB is fastest among the tested licensed/open-source baselines for
 single-thread FP32 row-major SGEMM on Apple Silicon, in the routed shape
 ranges.
 
-That is the claim supported by the current audit docs. It is not a universal
-"fastest matmul software" claim. Accelerate is proprietary and still wins some
-small or pack-overhead-heavy cases. MpGEMM is source-available with unclear
-licensing in the local scan and remains a calibration target; it still wins a
-small number of one-shot `m = 64` large-`K` shapes.
+That is the claim supported by the current audit docs, including the final
+scoped audit note at `docs/audits/2026-05-10-claim-audit.md`. It is not a
+universal "fastest matmul software" claim. Accelerate is proprietary and still
+wins some small or pack-overhead-heavy cases. MpGEMM is source-available with
+unclear licensing in the local scan and remains a calibration target; it still
+wins a small number of one-shot `m = 64` large-`K` shapes.
 
 ## What Shipped
 
@@ -41,6 +42,7 @@ small number of one-shot `m = 64` large-`K` shapes.
 - Apple Silicon SME2.1 direct-`B`, packed-`B`, and skinny/reuse routes.
 - ARM64 NEON and scalar fallback paths.
 - Correctness coverage for 127 GEMM shapes.
+- A May 10 clean rebuild and claim-audit snapshot for the scoped routed suites.
 - Route-aware benchmarks, grid sweeps, gap reports, and heatmap generation.
 - A paired A/B benchmark harness with median ratio, bootstrap confidence
   interval, sign-test p-value, split-half holdout, checksum guards, and
