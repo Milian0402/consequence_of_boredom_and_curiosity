@@ -8,7 +8,7 @@ that gives us a clean route to beat general BLAS calls when the right-hand
 matrix is reused.
 
 Goal: become the fastest open-source single-threaded matrix multiplication
-software in this repo's chosen scope.
+software in the world
 
 Current audited evidence: fastest among the tested licensed/open-source
 baselines for single-thread FP32 row-major SGEMM on Apple Silicon, in the routed
