@@ -1,7 +1,5 @@
 # Agent Instructions
 
-The user is going to bed and has given standing permission to work unattended in
-this repository.
 
 - Do not ask for permission to edit files in this repo. This also means do not
   write status updates that sound like repo edits need approval.
