@@ -22,6 +22,33 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m800 medium SME direct edge accepted
+
+The lower medium edge now extends through `m = 800` with the same bounded shape
+set as `m = 768`: `n = 1280` at `k = 832/960`, `n = 1344/1408` at
+`k = 832/960/1152`, and `n = 1472, k = 832`.
+
+A repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-m800-extra-n-sme.c` showed the
+candidate rows winning strongly while `800x1280x1152`,
+`800x1472x960/1152`, and accepted-neighbor rows stayed neutral/noisy.
+Repeat-301, `iters=8` confirmed the route: `800x1280x832` median `1.1193x`,
+bootstrap95 `[1.1133,1.1235]`; `800x1280x960` `1.1144x`, bootstrap95
+`[1.0616,1.0886]`; `800x1344x832` `1.0920x`, bootstrap95
+`[1.0566,1.0780]`; `800x1344x960` `1.1145x`, bootstrap95
+`[1.1009,1.1158]`; `800x1344x1152` `1.1351x`, bootstrap95
+`[1.1115,1.1299]`; `800x1408x832` `1.1236x`, bootstrap95
+`[1.1204,1.1303]`; `800x1408x960` `1.1312x`, bootstrap95
+`[1.1121,1.1268]`; `800x1408x1152` `1.1470x`, bootstrap95
+`[1.1306,1.1444]`; and `800x1472x832` `1.1078x`, bootstrap95
+`[1.1026,1.1121]`.
+
+The omitted rows stayed bounded: `800x1280x1152`, `800x1472x960`, and
+`800x1472x1152` were neutral/noisy. Existing neighbors `768x1280x832` and
+`832x1280x832` were behavior-identical/noisy.
+
+Correctness coverage adds the nine accepted `m = 800` rows.
+
 ### 2026-05-27 local-uncommitted: m736 medium SME direct edge accepted
 
 The lower medium edge now fills the 32-row gap between the accepted `m = 704`
@@ -3471,7 +3498,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 203 GEMM shapes.
+coverage is 212 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
