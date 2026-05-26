@@ -22,6 +22,28 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m672 medium SME direct edge accepted
+
+The lower medium edge extends one more step below `m = 704`, but only for a
+narrower subset: `672x1280x832/960`, `672x1344x832`, and
+`672x1408x832/960` now route through SME direct-`B`.
+
+A repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-m672-extra-n-sme.c` found strong
+signal for `n = 1280` and `n = 1408`, but `672x1344x960` was too weak and
+`672x1472x832` stayed neutral. Repeat-301, `iters=8` confirmed the narrowed
+route: `672x1280x832` median `1.1390x`, bootstrap95 `[1.0980,1.2036]`;
+`672x1280x960` `1.1529x`, bootstrap95 `[1.1323,1.1805]`;
+`672x1344x832` `1.1159x`, bootstrap95 `[1.1093,1.1189]`;
+`672x1408x832` `1.1499x`, bootstrap95 `[1.1411,1.1520]`; and
+`672x1408x960` `1.1988x`, bootstrap95 `[1.1681,1.2653]`.
+
+The omitted rows kept the rule bounded: `672x1344x960`, all tested
+`k = 1152` rows, and `672x1472x832` stayed neutral/noisy. Existing neighbors
+`640x1280x832` and `704x1280x832` were behavior-identical/noisy.
+
+Correctness coverage adds the five accepted `m = 672` rows.
+
 ### 2026-05-27 local-uncommitted: m800 medium SME direct edge accepted
 
 The lower medium edge now extends through `m = 800` with the same bounded shape
@@ -3498,7 +3520,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 212 GEMM shapes.
+coverage is 217 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
