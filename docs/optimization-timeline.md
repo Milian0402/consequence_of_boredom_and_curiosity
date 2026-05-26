@@ -22,6 +22,41 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m736 medium SME direct edge accepted
+
+The lower medium edge now fills the 32-row gap between the accepted `m = 704`
+and `m = 768` routes. Exact `m = 736`, `n = 1280/1344/1408`, `k = 832/960`
+now uses the SME direct-`B` medium kernel.
+
+A repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-m736-extra-n-sme.c` showed all six
+target rows positive while `k = 1152`, `n = 1472`, and accepted-neighbor
+guards stayed neutral/noisy. Repeat-301, `iters=8` confirmed the route:
+`736x1280x832` median `1.1411x`, bootstrap95 `[1.1129,1.1311]`;
+`736x1280x960` `1.0913x`, bootstrap95 `[1.0630,1.0848]`;
+`736x1344x832` `1.1133x`, bootstrap95 `[1.0939,1.1087]`;
+`736x1344x960` `1.1296x`, bootstrap95 `[1.1063,1.1221]`;
+`736x1408x832` `1.0576x`, bootstrap95 `[1.0336,1.0921]`; and
+`736x1408x960` `1.0531x`, bootstrap95 `[1.0753,1.1388]`.
+
+The guards kept the route bounded: `736x1280x1152`, `736x1344x1152`,
+`736x1408x1152`, and `736x1472x832` stayed neutral/noisy. Existing routed
+neighbors `704x1280x832` and `768x1280x832` were behavior-identical/noisy.
+
+Correctness coverage adds the six accepted `m = 736` rows.
+
+### 2026-05-27 local-uncommitted: n1216 SME-before-strided probe rejected
+
+The `n = 1216` AMX strided-`B` route had several low one-shot medians in the
+fresh grid, so a temp source tried routing exact candidates through SME direct
+before strided-`B`.
+
+The broad repeat-101 screen was mixed, but repeat-301, `iters=8` rejected the
+narrowed candidate: `960x1216x832` median `0.9908x`, bootstrap95
+`[0.9660,0.9926]`; `960x1216x960` `0.9945x`, bootstrap95
+`[0.9790,0.9993]`; and `1120x1216x832` `0.9961x`, bootstrap95
+`[0.9664,1.0134]`. Keep these rows on the existing strided-`B` route.
+
 ### 2026-05-27 local-uncommitted: exact m1184 n1280 SME direct accepted
 
 The upper-edge `n = 1280` pair extends one more 32-row step: exact
@@ -3436,7 +3471,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 197 GEMM shapes.
+coverage is 203 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
