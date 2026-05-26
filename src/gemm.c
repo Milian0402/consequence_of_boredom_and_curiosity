@@ -2566,6 +2566,7 @@ static int cob_sgemm_rowmajor_amx(
 
 #if defined(COB_USE_APPLE_SME)
     if (n == COB_SGEMM_AMX_STRIDED_B_CONFLICT_LDB &&
+        !(m == 768 && k == 1536) &&
         m % COB_SGEMM_AMX_MR == 0 && k >= 512 && k < 2048) {
         cob_packed_b_f32 packed_b_view;
         packed_b_view.k = k;

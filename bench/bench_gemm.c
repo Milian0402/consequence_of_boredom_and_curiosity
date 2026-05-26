@@ -538,7 +538,8 @@ static const char* cob_one_shot_route(bench_shape shape)
         }
     }
 
-    if (n == COB_SGEMM_AMX_STRIDED_B_CONFLICT_LDB && m >= 512 && k < 2048 &&
+    if (n == COB_SGEMM_AMX_STRIDED_B_CONFLICT_LDB && m >= 512 &&
+        !(m == 768 && k == 1536) && k < 2048 &&
         (m % COB_BENCH_AMX_MR) == 0 && k >= 512 && is_apple_sme_build()) {
         return "pack_b_then_sme";
     }

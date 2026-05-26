@@ -22,6 +22,22 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: exact 768x512x1536 AMX fallback accepted
+
+A medium audit pointed at noisy one-shot `n = 512, k < 2048` rows where the
+current path packs B and then uses the SME packed-B kernel to avoid the AMX
+strided-B conflict stride. A broad `COB_DISABLE_APPLE_SME=1` probe was too
+coarse, but it showed one repeatable candidate: exact `768x512x1536`.
+
+The source now skips the SME packed-B detour only for `768x512x1536`, letting
+the existing AMX packed fallback consume the already-packed B panel. Focused
+repeat-301, `iters=8` A/B against
+`/private/tmp/cob-next-audit/gemm-baseline-n512-amx-exact.c` measured the
+target at median `1.0602x`, bootstrap95 `[1.0153,1.1012]`, B-faster
+`179/301`, sign-p `0.00121`, and holdout median `1.0662x`. Neighboring guards
+`512x512x1536`, `1024x512x1536`, `1280x512x1536`, `768x512x1024`, and
+`768x512x2048` were behavior-identical or noisy under the exact gate.
+
 ### 2026-05-27 local-uncommitted: m96/m128 k1024 fallback recheck rejected
 
 A noisy skinny claim audit made the m96/m128 `k >= 1024` SME B-reuse rows look

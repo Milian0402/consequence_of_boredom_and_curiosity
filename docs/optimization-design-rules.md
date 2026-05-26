@@ -47,6 +47,9 @@ These rules summarize repeated findings from the optimization timeline. They are
 - Exact `384x512x3072` may use SME direct for one-shot GEMM. Do not extend the
   rule to `n = 768` or `n = 1024` without new cold holdout proof; the current
   `n = 768` rerun lost its holdout and `n = 1024` was a hard regression.
+- For exact one-shot `768x512x1536`, skip the SME packed-B conflict detour and
+  let the AMX packed fallback consume the already-packed B panel. Nearby
+  `n = 512` guards stayed neutral/noisy, so keep this gate exact.
 - Increasing expression-level unrolling in the C SME packed-B kernel did not beat the compiler's current schedule.
 - m=64 B-reuse changes are shape-sensitive; do not assume a NC/KC knob alone will close the MpGEMM gap.
 - For wide `m = 64, k = 2048` B-reuse, use the tuple-prefetch pack helper.
