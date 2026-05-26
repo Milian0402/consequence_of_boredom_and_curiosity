@@ -418,8 +418,32 @@ static int cob_sme_direct_extra_n_shape(int m, int n, int k)
 
 static int cob_m64_sme_direct_nc_shape(int n, int k)
 {
-    return n >= 3584 && n < 4096 && k >= 7168 &&
+    return ((n == 2560 && k >= 12288) || (n == 3072 && k >= 4096) ||
+               (n >= 3584 && n < 4096 && k >= 7168)) &&
         COB_SGEMM_M64_SME_DIRECT_NC >= 64;
+}
+
+static int cob_m64_sme_wide_reuse_shape(int n, int k)
+{
+    if (k < 1024) {
+        return 0;
+    }
+    if (n >= 4160) {
+        return 1;
+    }
+    if (n == 4096) {
+        return k < 7168;
+    }
+    if (n == 2560 && k == 3072) {
+        return 1;
+    }
+    if (n >= 3072 && n < 4096 && k == 1024) {
+        return 1;
+    }
+    if (n == 3584) {
+        return k < 7168;
+    }
+    return 0;
 }
 
 static const char* cob_one_shot_route(bench_shape shape)
@@ -442,7 +466,7 @@ static const char* cob_one_shot_route(bench_shape shape)
             (use_m64 && n >= COB_SGEMM_M64_SME_LONG_N_K512_MIN_N && k == 512) ||
             use_m96_128_k512;
         const int use_n4096_large_k = use_m64 && n == 4096 && k >= 7168;
-        const int use_wide = use_m64 && n >= 7168 && k >= 1024;
+        const int use_wide = use_m64 && cob_m64_sme_wide_reuse_shape(n, k);
         if ((use_m64 || use_m96_128_k512 || use_m96_128_k1024) &&
             (use_long_n_k512 || use_n4096_large_k || use_wide || use_m96_128_k1024) &&
             (n % 64) == 0) {

@@ -87,11 +87,24 @@ These rules summarize repeated findings from the optimization timeline. They are
   hard-regressed `64x4096x7168` and `64x4096x8192`.
 - Keep `64x2112x7168` on the direct streaming-B route; forcing B reuse there
   hard-regressed the exact gap shape.
-- For m64 direct streaming-B, chunk the N loop at 1024 columns only in the
-  high-width, high-K band `3584 <= n < 4096, k >= 7168`. This keeps the current
-  B slab hot across the four 16-row A panels without paying B-pack cost. Do not
-  broaden it below `n = 3584`, at `n = 4096`, or below `k = 7168`; those guards
-  were neutral/noisy or already use the stronger B-reuse route.
+- For m64 direct streaming-B, chunk the N loop at 1024 columns for
+  exact `n = 2560, k >= 12288`, exact `n = 3072, k >= 4096`, and for the
+  high-width, high-K band `3584 <= n < 4096, k >= 7168`. This keeps the
+  current B slab hot across the four 16-row A panels without paying B-pack
+  cost. Do not broaden the `n = 2560` rule to lower K: `k = 5120` had weak
+  full-run support, `k = 6144` was inconsistent, and `k = 7168` missed the
+  holdout-median bar. Below `k = 4096` at `n = 3072`, keep only the
+  separately validated reuse route at `k = 1024`; the `k = 3072` reuse probe
+  was positive but did not clear the usual holdout bar. At `n = 4096,
+  k >= 7168`, keep the existing B-reuse path with the old high-K chunking.
+- For m64 one-shot B-reuse, use the reuse path for `k >= 1024, n >= 4160`;
+  for `n = 4096` only below high-K (`1024 <= k < 7168`); for exact
+  `64x2560x3072`; for `3072 <= n < 4096` only at `k = 1024`; and for exact
+  `n = 3584` below high-K (`1024 <= k < 7168`). Do not broaden the exact
+  `2560x3072` reuse gate: neighboring `2304/2432/2496/2624/2816` widths
+  regressed hard. Do not route the tempting `3712x4096/5120` exact cases or
+  `3712x6144`; mixed validation was unstable or regressive even after earlier
+  positive samples.
 - Do not route exact `64x1024x512` through the AMX skinny chunk packer; the
   existing AMX strided-B route is much faster. Do not force exact
   `64x4096x2048` onto one-shot packed AMX; B-pack cost overwhelms the compute

@@ -1,6 +1,6 @@
 # Optimization Attempt Timeline
 
-Last updated: 2026-05-06
+Last updated: 2026-05-26
 
 This tracks the matrix-multiplication speed work so far. The narrow comparison
 scope is single-threaded FP32 row-major GEMM for `C = A * B` with `alpha = 1`
@@ -21,6 +21,121 @@ use the git history for this file; the current recent sequence is anchored by:
 - `7fae628` Increase B-pack prefetch distance.
 
 ## Timeline
+
+### 2026-05-26: exact 2560 m64 route add-ons accepted
+
+Follow-up calibration after the wide-reuse/direct-NC pass found two exact
+`n = 2560` wins. The final source routes exact `64x2560x3072` through the
+existing SME B-reuse path, and routes `m = 64, n = 2560, k >= 12288` through
+the direct-NC streaming-B path. Benchmark route labels mirror both gates, and
+correctness coverage now covers 135 GEMM shapes.
+
+The accepted reuse point was exact, not a smooth band. With only
+`64x2560x3072` routed, repeat-201, `iters=3` measured median `1.0799x`,
+bootstrap95 `[1.0647,1.1109]`, B-faster `154/201`, sign-p `1.76e-14`, and
+holdout median `1.0885x`. A wider `2304..2816, k = 3072` probe rejected the
+neighbors hard: `64x2304x3072` median `0.9154x`, `64x2432x3072` `0.9126x`,
+`64x2496x3072` `0.8126x`, `64x2624x3072` `0.8370x`, and
+`64x2816x3072` `0.9056x`; `64x2880x3072` was neutral and unchanged.
+
+The accepted direct-NC point is also exact in `n`, and is limited to the
+validated higher-K threshold. Focused repeat-401, `iters=3` checks measured
+`64x2560x12288` median `1.0516x`, bootstrap95 `[1.0608,1.1141]`, B-faster
+`280/401`, sign-p `1.28e-15`, and holdout median `1.0444x`; and
+`64x2560x16384` median `1.0398x`, bootstrap95 `[1.0428,1.0619]`, B-faster
+`363/401`, sign-p `1.12e-67`, and holdout median `1.0410x`. Lower high-K
+points were left out: `64x2560x5120` had weak full-run support despite a
+positive holdout, `64x2560x6144` was inconsistent across cold runs,
+`64x2560x7168` did not clear the usual holdout-median bar, and
+`64x2560x8192` stayed positive on some runs but did not survive the final
+no-change guard cleanly enough to route.
+
+Rejected follow-up probes from this continuation: `COB_SGEMM_M64_SME_REUSE_NC`
+at `256` was neutral/noisy and hurt `64x4096x2048`; `NC=1024` was a clear loss.
+`COB_SGEMM_M64_SME_WIDE_K1536_KC=1024` regressed low-edge `k = 1536` shapes,
+while `512` had tempting but weak/noisy exact medians. `WIDE_KC=512` and
+`1536` for `k >= 2048` failed cold reruns or regressed guard widths. A broader
+direct-NC high-K width band around `n = 2560` was not stable enough to ship;
+keep the source exact unless fresh paired evidence changes that.
+
+### 2026-05-26: m64 SME wide-reuse and 3072 direct-NC routes accepted
+
+This session changed only m64 SME routing. A new
+`cob_sgemm_m64_sme_wide_reuse_shape` helper routes the existing SME B-reuse
+path for `m = 64` when `k >= 1024, n >= 4160`; when `n == 4096` and
+`1024 <= k < 7168`, leaving the existing `n == 4096, k >= 7168` path
+unchanged; exact `n == 2560, k == 3072`; when `3072 <= n < 4096` at
+`k == 1024`; and when `n == 3584` with `1024 <= k < 7168`. The existing
+direct-NC helper now also covers exact `n == 2560, k >= 12288` and exact
+`n == 3072, k >= 4096`, in addition to the previous
+`3584 <= n < 4096, k >= 7168` band. Benchmark route labels mirror source
+dispatch, and correctness coverage now covers 135 GEMM shapes.
+
+Final direct-NC validation accepted the exact `n = 3072` high-K pocket. The
+repeat-161, `iters=2` final check for `64x3072x4096` measured median
+`1.0368x`, bootstrap95 `[1.0514,1.0871]` by mean-log interval, B-faster
+`130/161`, sign-p `1.27e-15`, and holdout median `1.0399x`. Earlier
+repeat-161 checks were stronger at higher K: `64x3072x7168` median `1.1535x`
+with holdout `1.1577x`, `64x3072x8192` `1.4175x` with holdout `1.3976x`, and
+`64x3072x12288` `1.3450x` with holdout `1.2799x`.
+
+Final reuse validation showed the low/wide rule was route-worthy:
+`64x3072x1024` median `1.5952x`, holdout `1.6403x`, sign-p `4.76e-43`;
+`64x3328x1024` `1.7308x`, holdout `1.5774x`, sign-p `1.16e-34`;
+`64x3584x2048` `1.1019x`, holdout `1.0953x`, sign-p `2.98e-26`;
+`64x3840x1024` `1.6749x`, holdout `1.6025x`, sign-p `6.84e-49`;
+`64x4096x2048` `1.1129x`, holdout `1.1390x`, sign-p `1.77e-33`;
+`64x4160x1024` `1.8372x`, holdout `1.8675x`, sign-p `6.84e-49`; and
+`64x5120x7168` `2.0563x`, holdout `2.0965x`, sign-p `6.84e-49`.
+
+Guard validation kept the accepted shape rules narrow. `64x3072x3072` stayed
+neutral/negative at median `0.9857x` with holdout `0.9996x`, so it was dropped. `64x3328x2048`
+was not granted an exact gate despite median `1.0142x` and holdout `1.0473x`.
+After the unstable exact 3712 route was removed, `64x3712x4096` stayed neutral
+at median `1.0080x`, holdout `1.0067x`, and `64x3712x5120` stayed neutral at
+`1.0002x`, holdout `1.0119x`. `64x3840x3072` stayed unchanged at median
+`0.9988x`, holdout `1.0079x`; `64x4096x7168` stayed on the existing high-K
+reuse path at median `1.0039x`, holdout `1.0039x`.
+
+Verification passed `make test` across 135 shapes, `make all`,
+`git diff --check`, `cmake --build build-cmake` with only existing
+SDK/Accelerate warnings, and `ctest --test-dir build-cmake --output-on-failure`.
+Route smoke showed the expected labels: `64x2560x3072` `sme_skinny_reuse`,
+`64x2560x8192` `sme_skinny_strided`, `64x2560x12288`
+`sme_skinny_strided_nc`, `64x2496x3072` `sme_skinny_strided`,
+`64x2624x8192` `sme_skinny_strided`, `64x3072x1024`
+`sme_skinny_reuse`, `64x3072x3072` `sme_skinny_strided`,
+`64x3072x4096` `sme_skinny_strided_nc`, `64x3584x2048`
+`sme_skinny_reuse`, `64x3712x4096` `sme_skinny_strided`,
+`64x3840x1024` `sme_skinny_reuse`, `64x4096x2048`
+`sme_skinny_reuse`, `64x4096x7168` `sme_skinny_reuse`,
+`64x4160x1024` `sme_skinny_reuse`, and `64x5120x7168`
+`sme_skinny_reuse`.
+
+### 2026-05-26 local-uncommitted: m64 SME route probes rejected
+
+Several m64 probes from the same session were rejected before the final narrow
+reuse and direct-NC rules landed. Disabling SME with
+`-DCOB_DISABLE_APPLE_SME=1` was a hard regression on m64 high-K shapes:
+`64x1024x7168` median `0.5442x`, `64x1088x7168` `0.6219x`,
+`64x2112x7168` `0.5759x`, and `64x4096x7168` `0.4176x`.
+
+Raising `COB_SGEMM_SKINNY_SME_LARGE_KC` to `2048` was neutral or regressive:
+`64x1024x7168` median `0.9024x`, `64x1088x7168` `1.0057x`,
+`64x2112x7168` `1.0077x` with weak support, and `64x4096x7168` `0.9976x`.
+Direct-stream prefetch for exact `n = 1024, k >= 4096` regressed
+`64x1024x7168` to `0.9576x`, with guards unchanged. Forcing high-K
+`n = 1024` through B-reuse also regressed: `64x1024x4096` median `0.9074x`
+and `64x1024x7168` `0.8868x`.
+
+A broad direct-NC threshold of `n >= 2048, k >= 7168` had one useful exact
+`n = 3072` pocket, but was neutral/noisy elsewhere; the final source kept only
+exact `n = 3072` plus the previous `3584..4032` high-K direct-NC band. Broad
+reuse for `n = 3712, k >= 3072` was unstable: early `4096/5120` runs looked
+positive, but mixed final validation turned exact `3712x4096` and
+`3712x5120` neutral until the route was removed, and `3712x6144` was a clear
+focused-rerun regression at median `0.9424x`. Do not route these 3712 shapes
+without fresh cold proof.
 
 ### 2026-05-06 local-uncommitted: m64 prefetch-boundary branch hoist rejected
 

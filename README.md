@@ -199,8 +199,8 @@ void cob_sgemm_rowmajor_packed_ab(
 
 ## Next Work
 
-- Write an original fixed-shape SME kernel for the remaining `m = 64` large-`K`
-  one-shot gaps.
+- Re-run m64 large-`K` calibration after the latest exact `n = 2560` route
+  changes, then write fixed-shape SME only for the gaps that remain.
 - Use hardware counters before accepting more exact dispatch gates.
 - Re-audit external baselines before publishing any broader fastest claim.
 - Keep MpGEMM separate unless its license becomes clear, then rerun

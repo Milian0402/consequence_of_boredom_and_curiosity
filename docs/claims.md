@@ -139,7 +139,7 @@ git diff --check
 - Recent external baseline audits are listed below with their output
   directories; rerun them before broadening the claim beyond the recorded shape
   suites.
-- Correctness suite currently covers 127 GEMM shapes on Apple Silicon.
+- Correctness suite currently covers 135 GEMM shapes on Apple Silicon.
 - The paired A/B harness reports median ratio, mean-log speedup, bootstrap
   confidence interval, sign-test p-value, and split-half holdout.
 - Route-aware benchmarking and `tools/bench_heatmap.py` make dispatcher
@@ -174,9 +174,11 @@ git diff --check
 - Recent structural wins include skinny SME B-reuse generalization,
   `m = 64, k = 512` threshold lowering, B-pack prefetching, packed-B
   large-square blocking, wide `m = 64` K-chunk tuning, and medium SME direct
-  routing for selected `n = 1280..1472` shapes, the public packed-AB path, and
-  m64 direct SME N-chunking for `3584 <= n < 4096, k >= 7168`, plus small-A
-  packed-B B-panel traversal for wide skinny packed-B shapes.
+  routing for selected `n = 1280..1472` shapes, the public packed-AB path,
+  m64 direct SME N-chunking for exact `n = 2560, k >= 12288`,
+  `n = 3072, k >= 4096`, and `3584 <= n < 4096, k >= 7168`, plus m64 SME
+  reuse routing in the `n = 2560..5120` gap band and small-A packed-B B-panel
+  traversal for wide skinny packed-B shapes.
 
 ## Claim Boundaries
 

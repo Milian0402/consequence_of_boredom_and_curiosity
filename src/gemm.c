@@ -218,7 +218,36 @@ static int cob_sgemm_m64_sme_direct_prefetch_shape(int n, int k)
 
 static int cob_sgemm_m64_sme_direct_nc_shape(int n, int k)
 {
+    if (n == 2560) {
+        return k >= 12288;
+    }
+    if (n == 3072) {
+        return k >= 4096;
+    }
     return n >= 3584 && n < 4096 && k >= 7168;
+}
+
+static int cob_sgemm_m64_sme_wide_reuse_shape(int n, int k)
+{
+    if (k < 1024) {
+        return 0;
+    }
+    if (n >= 4160) {
+        return 1;
+    }
+    if (n == 4096) {
+        return k < 7168;
+    }
+    if (n == 2560 && k == 3072) {
+        return 1;
+    }
+    if (n >= 3072 && n < 4096 && k == 1024) {
+        return 1;
+    }
+    if (n == 3584) {
+        return k < 7168;
+    }
+    return 0;
 }
 
 static int cob_sgemm_m64_sme_large_kc_shape(int n, int k)
@@ -1216,7 +1245,7 @@ static int cob_sgemm_rowmajor_sme_skinny_pack_b_reuse(
         (use_m64 && n >= COB_SGEMM_M64_SME_LONG_N_K512_MIN_N && k == 512) ||
         use_m96_128_k512;
     const int use_n4096_large_k = use_m64 && n == 4096 && k >= 7168;
-    const int use_wide = use_m64 && n >= 7168 && k >= 1024;
+    const int use_wide = use_m64 && cob_sgemm_m64_sme_wide_reuse_shape(n, k);
     if ((!use_m64 && !use_m96_128_k512 && !use_m96_128_k1024) ||
         (!use_long_n_k512 && !use_n4096_large_k && !use_wide && !use_m96_128_k1024) ||
         lda != k || ldb != n || (n % 64) != 0 || !cob_apple_sme2p1_available()) {

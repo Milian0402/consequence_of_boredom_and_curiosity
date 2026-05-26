@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-05-10
+Last updated: 2026-05-26
 
 ## Goal
 
@@ -41,7 +41,7 @@ wins a small number of one-shot `m = 64` large-`K` shapes.
 - Apple Silicon AMX kernels and route-specific packing paths.
 - Apple Silicon SME2.1 direct-`B`, packed-`B`, and skinny/reuse routes.
 - ARM64 NEON and scalar fallback paths.
-- Correctness coverage for 127 GEMM shapes.
+- Correctness coverage for 135 GEMM shapes.
 - A May 10 clean rebuild and claim-audit snapshot for the scoped routed suites.
 - Route-aware benchmarks, grid sweeps, gap reports, and heatmap generation.
 - A paired A/B benchmark harness with median ratio, bootstrap confidence
@@ -56,7 +56,10 @@ The most important performance wins came from:
 - SME packed-`B` and direct-`B` tuple-load paths.
 - Skinny SME `B`-reuse generalization for `m = 64/96/128`.
 - `m = 64, k = 512` threshold lowering and mid-width extensions.
-- `m = 64` high-`K` SME N-chunking for `3584 <= n < 4096`.
+- `m = 64` high-`K` SME N-chunking for exact `n = 2560, k >= 12288` and
+  `3584 <= n < 4096`.
+- `m = 64` SME reuse and direct-NC routing for the `n = 2560..5120`
+  gap band.
 - B-pack prefetch tuning.
 - Packed-B large-square and `m = 384` blocking.
 - Small-A packed-B B-panel traversal.
@@ -66,9 +69,10 @@ The most important performance wins came from:
 ## Current Limits
 
 - The full "fastest fastest" goal is not proven.
-- The remaining serious speed gap is narrow but real: a handful of `m = 64`
-  large-`K` shapes compared with MpGEMM-style calibration runs.
-- Recent C-level probes did not close that gap: B-panel-first traversal,
+- The remaining serious speed gap is narrower after the May 26 m64 route pass,
+  but still not globally closed: some `m = 64` large-`K` shapes still need
+  fresh calibration against MpGEMM-style runs and licensed/open-source baselines.
+- Earlier C-level probes did not close that gap: B-panel-first traversal,
   prefetch locality changes, epilogue branch hoisting, broad compiler unrolling,
   `-mcpu=native`, K16 unroll pragmas, and prefetch-boundary branch splitting
   were neutral, noisy, or regressive.
@@ -78,8 +82,9 @@ The most important performance wins came from:
 
 ## Future Work
 
-1. Write an original fixed-shape SME kernel for the remaining `m = 64`
-   large-`K` one-shot path. Start with `64x4096x7168` and `64x2112x7168`.
+1. Re-run the m64 large-`K` calibration grid after the May 26 route changes,
+   then write an original fixed-shape SME kernel only for the gaps that remain.
+   Keep `64x2112x7168` and the high-K `n = 1024` family on the short list.
 2. Use hardware counters before accepting more exact gates. The prior counter
    evidence pointed at dispatch/scheduling pressure, not a simple memory-wait
    problem.
