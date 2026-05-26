@@ -22,6 +22,22 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: packed-B reuse prefetch rejected
+
+A follow-up tested software prefetching inside
+`cob_sgemm_16x64_sme_from_packed_b64_tuple`, the helper that consumes already
+packed B for the second through fourth 16-row panels in the m64 reuse path.
+This was intended to complement the accepted source-B pack prefetching, but it
+did not hold up. Repeat-201, `iters=4` paired A/B against
+`/private/tmp/cob-next-audit/gemm-baseline-packed-reuse-prefetch.c` was
+neutral/noisy or worse across the main reuse rows: `64x4096x7168` median
+`0.9969x`, `64x7168x2048` `1.0062x` with neutral holdout, `64x7168x16384`
+`1.0104x` with neutral holdout, `64x24576x1536` `1.0061x` with neutral
+holdout, `64x8192x2048` `0.9971x`, `64x8192x1024` `1.0160x` with neutral
+holdout, `96x4096x1024` `1.0195x` with neutral holdout, and
+`128x8192x1024` `1.0124x` with neutral holdout. Revert the temp source change;
+keep prefetching limited to selected source-B pack helpers.
+
 ### 2026-05-27 local-uncommitted: exact n7168 high-K prefetch accepted
 
 Follow-up after the wide `k = 2048` prefetch change tested whether the same

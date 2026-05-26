@@ -60,6 +60,9 @@ These rules summarize repeated findings from the optimization timeline. They are
 - For wide `m = 64, n = 7168, k >= 8192` B-reuse, also use the tuple-prefetch
   pack helper. Do not broaden this to all high-K wide rows without fresh proof:
   `n = 6144` and `n = 8192` high-K guards stayed neutral/noisy.
+- Do not add software prefetching to the packed-B reuse helper itself. A broad
+  probe over m64 and 96/128-row reuse paths was neutral/noisy or worse; keep
+  prefetching on selected source-B pack helpers only.
 - SME streaming-B prefetch is route-specific. It helped `m = 64`, large-`K`
   skinny direct widths whose row stride is not a 512-float multiple, plus the
   exact `n = 4096` reuse path, but broad medium, m=96/128, and wide-`N`
