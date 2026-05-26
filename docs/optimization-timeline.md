@@ -22,6 +22,31 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m704 medium SME direct lower edge accepted
+
+The new medium extra-`N` edge route extends one more bounded row band downward:
+`m = 704`, `1280 <= n <= 1408`, and `k = 832` or `960` now uses the SME
+direct-`B` medium kernel.
+
+The first repeat-101, `iters=4` screen against
+`/private/tmp/cob-next-audit/gemm-baseline-m704-extra-n-sme.c` was strongly
+positive on all six target cells, with medians from `1.1118x` to `1.1451x`.
+Repeat-201 confirmation stayed positive for `704x1344x832` `1.0656x`,
+`704x1344x960` `1.0893x`, `704x1408x832` `1.0543x`, and `704x1408x960`
+`1.1385x`; the `1280` rows were noisier in that run, so they were rechecked
+separately.
+
+Focused repeat-301, `iters=8` confirmed the `n = 1280` pair cleanly:
+`704x1280x832` median `1.1364x`, bootstrap95 `[1.1330,1.1431]`, B-faster
+`295/301`, holdout median `1.1353x`; and `704x1280x960` median `1.1448x`,
+bootstrap95 `[1.1406,1.1522]`, B-faster `297/301`, holdout median `1.1471x`.
+
+The guard rows kept the rule bounded: `640x1280x832` stayed neutral/noisy,
+`704x1280x1152` stayed neutral, `704x1472x832` stayed neutral, and accepted
+`768x1280x832` was behavior-identical/noisy.
+
+Correctness coverage adds the six accepted `m = 704` rows.
+
 ### 2026-05-27 local-uncommitted: exact 384x896x1536 SME direct accepted
 
 The lower-row sibling of the `512x896` SME-direct band has one useful exact
@@ -3287,7 +3312,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 167 GEMM shapes.
+coverage is 173 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
