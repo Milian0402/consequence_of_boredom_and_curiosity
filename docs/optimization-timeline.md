@@ -22,6 +22,27 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m608 medium SME direct edge accepted
+
+The lower medium edge extends below `m = 640`, but only for exact
+`608x1280x832/960` and `608x1408x832/960`. The `n = 1344` rows were too weak
+to include.
+
+A repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-m608-extra-n-sme.c` showed strong
+signal at `n = 1280` and `n = 1408`, while `n = 1344`, `k = 1152`, and
+`n = 1472` stayed neutral or weak. Repeat-301, `iters=8` confirmed the narrowed
+route: `608x1280x832` median `1.1463x`, bootstrap95 `[1.0931,1.1278]`;
+`608x1280x960` `1.1689x`, bootstrap95 `[1.1574,1.1739]`;
+`608x1408x832` `1.1528x`, bootstrap95 `[1.1087,1.1317]`; and
+`608x1408x960` `1.0849x`, bootstrap95 `[1.0382,1.0771]`.
+
+The guards kept the rule bounded: `608x1344x832/960`, all tested
+`k = 1152` rows, and `608x1472x832` stayed neutral/noisy. Existing neighbors
+`576x1280x832` and `640x1280x832` were behavior-identical/noisy.
+
+Correctness coverage adds the four accepted `m = 608` rows.
+
 ### 2026-05-27 local-uncommitted: m640 medium SME direct edge accepted
 
 The lower medium edge extends to `m = 640` for `n = 1280/1344/1408` at
@@ -3567,7 +3588,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 230 GEMM shapes.
+coverage is 234 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
