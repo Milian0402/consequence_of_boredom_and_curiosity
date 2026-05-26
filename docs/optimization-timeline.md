@@ -22,6 +22,32 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m992 medium SME direct edge accepted
+
+The upper side of the broad medium route now fills the 32-row gap between
+`m = 960` and `m = 1024`. The accepted `m = 992` subset mirrors the nearby
+`m = 1024` shape set: `n = 1280` at `k = 832/960`, `n = 1344` at
+`k = 832/960/1152`, and `n = 1472` at `k = 832/960`.
+
+A repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-m992-extra-n-sme.c` showed the
+candidate rows winning while `n = 1408`, `992x1280x1152`, and
+`992x1472x1152` stayed neutral/noisy. Repeat-301, `iters=8` confirmed the
+route: `992x1280x832` median `1.1080x`, bootstrap95 `[1.1044,1.1128]`;
+`992x1280x960` `1.1213x`, bootstrap95 `[1.1081,1.1233]`;
+`992x1344x832` `1.0793x`, bootstrap95 `[1.0702,1.0802]`;
+`992x1344x960` `1.0815x`, bootstrap95 `[1.0386,1.0618]`;
+`992x1344x1152` `1.0865x`, bootstrap95 `[1.0143,1.0411]`;
+`992x1472x832` `1.0870x`, bootstrap95 `[1.0714,1.0862]`; and
+`992x1472x960` `1.0972x`, bootstrap95 `[1.0860,1.1043]`.
+
+The guards kept the rule bounded: `992x1280x1152`, `992x1408x832/960/1152`,
+and `992x1472x1152` stayed neutral/noisy. Existing neighbors
+`960x1280x832`, `1024x1280x832`, and `1024x1408x832` were
+behavior-identical/noisy.
+
+Correctness coverage adds the seven accepted `m = 992` rows.
+
 ### 2026-05-27 local-uncommitted: m672 medium SME direct edge accepted
 
 The lower medium edge extends one more step below `m = 704`, but only for a
@@ -3520,7 +3546,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 217 GEMM shapes.
+coverage is 224 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
