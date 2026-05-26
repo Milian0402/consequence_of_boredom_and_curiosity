@@ -22,6 +22,25 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: exact 384x896x1536 SME direct accepted
+
+The lower-row sibling of the `512x896` SME-direct band has one useful exact
+case. The dispatcher now routes only `384x896x1536` through the SME direct-`B`
+medium kernel.
+
+Repeat-201, `iters=8` paired A/B against
+`/private/tmp/cob-next-audit/gemm-baseline-384x896-sme.c` measured
+`384x896x1536` at median `1.2278x`, mean-log `1.2270x`, bootstrap95
+`[1.1892,1.2625]`, B-faster `187/201`, sign-p `8.52e-40`, and holdout median
+`1.2337x`.
+
+The exact gate stayed bounded: `384x896x1024` was neutral at median `1.0000x`,
+`384x896x2048` was neutral/noisy at `1.0034x`, `384x960x1536` stayed neutral
+at `0.9987x`, and the already-routed `512x896x1536` stayed behavior-identical
+at `1.0082x`.
+
+Correctness coverage adds `384x896x1536`.
+
 ### 2026-05-27 local-uncommitted: exact n1152 k832 SME-before-strided accepted
 
 The older broad `n = 1152` SME-before-AMX-strided probe was correctly rejected,
@@ -3268,7 +3287,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 166 GEMM shapes.
+coverage is 167 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

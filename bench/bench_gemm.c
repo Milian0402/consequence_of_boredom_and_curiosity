@@ -396,6 +396,9 @@ static int cob_sme_direct_extra_n_shape(int m, int n, int k)
     if (m == 384 && n == 512 && k == 3072) {
         return 1;
     }
+    if (m == 384 && n == 896 && k == 1536) {
+        return 1;
+    }
     if (m == 512 && n == 1280 && k == 1536) {
         return 1;
     }
