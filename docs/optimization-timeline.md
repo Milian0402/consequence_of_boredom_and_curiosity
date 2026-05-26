@@ -22,6 +22,27 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: exact 512x896x1536 SME direct route accepted
+
+The medium audit found a strong one-shot exception at `512x896x1536`: routing
+only that exact shape through the SME direct-`B` medium kernel beat the current
+packed path without creating a usable threshold around it.
+
+Focused repeat-301, `iters=8` paired A/B against
+`/private/tmp/cob-next-audit/gemm-baseline-512x896-sme.c` measured median
+`1.2025x`, mean-log `1.2208x`, bootstrap95 `[1.1808,1.2652]`, B-faster
+`247/301`, sign-p `1.19e-30`, holdout median `1.2028x`, holdout bootstrap95
+`[1.1640,1.2811]`, holdout B-faster `126/151`, and holdout sign-p
+`2.04e-17`.
+
+The guard set did not justify broadening the gate: `512x896x1024` was neutral
+at median `0.9991x`, `512x896x2048` was noisy at `1.0052x`,
+`512x960x1536` was noisy at `1.0065x`, `512x1088x1536` was neutral at
+`1.0019x`, and `768x896x1536` was noisy at `1.0083x`. Treat this as an exact
+one-shot rule beside the existing `512x1024x1536` SME-direct exception.
+
+Correctness coverage adds `512x896x1536`.
+
 ### 2026-05-27 local-uncommitted: exact 1024 square large-block rejected
 
 A fresh square audit again made `1024x1024x1024` look weak on separate-process
@@ -51,6 +72,18 @@ hard rejection: `512x1152x1536` median `0.8324x`, `768x1152x1536` `0.8708x`,
 `768x1216x1536` `0.8887x`, and `1024x1216x1536` `0.9051x`. Existing
 `k = 2048` packed-route guards stayed neutral/noisy. Keep `k = 1536` on
 strided-B for these widths.
+
+### 2026-05-27 local-uncommitted: n768 packed fallback screen rejected
+
+A compile-flag screen lowered `COB_SGEMM_AMX_STRIDED_B_MAX_N` from `832` to
+`512`, forcing `n = 768` one-shot rows below the existing high-K large-block
+gates away from AMX strided-B and through the packed fallback. Repeat-201,
+`iters=8` A/B was a clear loss at the low-K rows: `512x768x1536` median
+`0.8680x`, `768x768x1536` `0.8989x`, `1024x768x1536` `0.9123x`,
+`512x768x2048` `0.8499x`, `768x768x2048` `0.8818x`, and `1024x768x2048`
+`0.9082x`. The `k = 3072` rows were neutral because they already sit on the
+large-block packed path. Keep the current strided-B coverage for `n = 768`
+below the high-K gates.
 
 ### 2026-05-27 local-uncommitted: exact 768x512x1536 AMX fallback accepted
 
@@ -3161,7 +3194,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 127 GEMM shapes.
+coverage is 143 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

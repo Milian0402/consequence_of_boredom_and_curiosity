@@ -384,6 +384,9 @@ static int is_apple_sme_build(void)
 
 static int cob_sme_direct_extra_n_shape(int m, int n, int k)
 {
+    if (m == 512 && n == 896 && k == 1536) {
+        return 1;
+    }
     if (m == 512 && n == 1024 && k == 1536) {
         return 1;
     }
