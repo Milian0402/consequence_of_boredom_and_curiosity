@@ -22,6 +22,26 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: long-k512 NC and unroll probes rejected
+
+The remaining `64x32768x512` calibration gap was tested with route-local
+changes instead of broad reuse knobs. A temp source first added a default-off
+`m = 64, k = 512` NC override for the long-`n` B-reuse path. With
+`NC = 1024`, repeat-201, `iters=8` paired A/B regressed `64x4096x512` to
+`0.9334x`, left `64x16384x512` neutral at `1.0001x`, and measured
+`64x32768x512` at `0.9901x`. With `NC = 256`, the low widths were only
+weak/noisy positive, `64x16384x512` regressed to `0.9872x`, and
+`64x32768x512` stayed neutral at `0.9999x`.
+
+A second temp source added compile-flagged 2x `p`-loop unrolling to the two
+non-tuple B64 helpers used by the long-k512 route:
+`cob_sgemm_16x64_sme_strided_b_pack_b32` and
+`cob_sgemm_16x64_sme_from_packed_b64`. Repeat-201, `iters=8` A/B with the
+unroll enabled measured `64x4096x512` `0.9948x`, `64x8192x512` `0.9994x`,
+`64x16384x512` `0.9767x`, and `64x32768x512` `0.9936x`. Shared-helper guards
+were also not useful: `96x4096x512` regressed to `0.9942x`, while the
+remaining m96/m128 rows stayed neutral/noisy. Revert the temp source changes.
+
 ### 2026-05-27 local-uncommitted: tuple-prefetch distance retune rejected
 
 Fresh compile-flag A/B checks tried moving
