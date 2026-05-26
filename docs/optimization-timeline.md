@@ -22,6 +22,27 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m1088 medium SME direct upper edge accepted
+
+The `m = 1088` upper edge now mirrors the accepted `m = 1056` subset:
+`n = 1280` at `k = 832/960`, `n = 1344` at `k = 832/960/1152`, and
+`n = 1472` at `k = 832/960`.
+
+Repeat-201, `iters=4` paired A/B against
+`/private/tmp/cob-next-audit/gemm-baseline-m1088-extra-n-sme.c` validated the
+seven target rows: `1088x1280x832` median `1.0890x`, `1088x1280x960`
+`1.0785x`, `1088x1344x832` `1.0536x`, `1088x1344x960` `1.0913x`,
+`1088x1344x1152` `1.1076x`, `1088x1472x832` `1.0804x`, and
+`1088x1472x960` `1.0905x`. All target rows had positive bootstrap intervals
+in the repeat-201 run.
+
+The guard rows kept the rule bounded: `1088x1408x832` and `1088x1408x960`
+stayed neutral/noisy, `1088x1280x1152` and `1088x1472x1152` stayed neutral,
+and accepted-neighbor `1056x1280x832` plus next-row `1120x1280x832` were
+behavior-identical/noisy.
+
+Correctness coverage adds the seven accepted `m = 1088` rows.
+
 ### 2026-05-27 local-uncommitted: 512x1152x2048 packed-B MC512 rejected
 
 The packed-B audit tried one exact row-block change in
@@ -3355,7 +3376,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 180 GEMM shapes.
+coverage is 187 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
