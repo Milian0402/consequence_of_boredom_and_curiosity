@@ -22,6 +22,23 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: exact n24576 k1536 prefetch accepted
+
+The long-wide `64x24576x1536` MpGEMM stock row was still close enough to be
+worth probing after the `n = 7168` prefetch work. A broad `n >= 24576,
+k = 1536` source-B pack prefetch rule was rejected because it regressed
+`64x32768x1536` hard in the first repeat-201 run (`0.8749x`). Narrowing the
+rule to exact `n = 24576, k = 1536` kept the useful target and avoided that
+tail risk.
+
+Focused repeat-301, `iters=4` validation against
+`/private/tmp/cob-next-audit/gemm-baseline-longwide-k1536-prefetch.c` measured
+`64x24576x1536` median `1.0617x`, bootstrap95 `[1.0178,1.0818]`, B-faster
+`201/301`, sign-p `5.97e-09`, and holdout median `1.0489x`. Neighboring widths
+`64x24064x1536`, `64x24320x1536`, `64x24832x1536`, `64x25088x1536`, the
+`64x32768x1536` tail, and `64x24576x2048` were neutral/noisy under the exact
+gate.
+
 ### 2026-05-27 local-uncommitted: packed-B reuse prefetch rejected
 
 A follow-up tested software prefetching inside
