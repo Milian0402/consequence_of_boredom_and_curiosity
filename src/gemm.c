@@ -2495,8 +2495,11 @@ static int cob_sgemm_rowmajor_amx(
         n <= COB_SGEMM_AMX_STRIDED_B_MAX_N || n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N ||
         n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N2 || use_strided_b_large_extra ||
         use_strided_b_skinny_extra;
+    const int use_sme_before_strided_n1152 =
+        n == COB_SGEMM_AMX_STRIDED_B_EXTRA_N3 && k == 832 && (m == 1024 || m == 1088);
     const int use_strided_b =
         (!use_large_block || use_strided_b_large_extra) && use_strided_b_extra &&
+        !use_sme_before_strided_n1152 &&
         !cob_sgemm_amx_strided_b_prefers_packed_shape(m, n, k) &&
         ldb != COB_SGEMM_AMX_STRIDED_B_CONFLICT_LDB &&
         m % COB_SGEMM_AMX_MR == 0 && n % COB_SGEMM_AMX_NR == 0;

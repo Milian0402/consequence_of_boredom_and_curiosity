@@ -22,6 +22,28 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: exact n1152 k832 SME-before-strided accepted
+
+The older broad `n = 1152` SME-before-AMX-strided probe was correctly rejected,
+but its notes called out two isolated positive rows. A fresh exact probe now
+routes only `1024x1152x832` and `1088x1152x832` around AMX strided-`B` and
+into the existing SME direct-`B` medium kernel.
+
+Repeat-201, `iters=8` paired A/B against
+`/private/tmp/cob-next-audit/gemm-baseline-n1152-exact-sme-before-strided.c`
+validated both exact targets: `1024x1152x832` median `1.0219x`, bootstrap95
+`[1.0191,1.0365]`, B-faster `155/201`, holdout median `1.0243x`; and
+`1088x1152x832` median `1.0185x`, bootstrap95 `[1.0092,1.0263]`, B-faster
+`145/201`, holdout median `1.0213x`.
+
+The guard rows kept the rule exact: `832x1152x832` was neutral at median
+`1.0008x`, `960x1152x832` regressed at `0.9890x`, `1152x1152x832` was
+neutral/noisy at `0.9929x`, `1024x1152x960` regressed at `0.9772x`,
+`1024x1152x1152` stayed noisy at `1.0364x` with weak CI/sign, and
+`1024x1216x832` stayed neutral/noisy at `1.0054x`.
+
+Correctness coverage adds `1024x1152x832` and `1088x1152x832`.
+
 ### 2026-05-27 local-uncommitted: 512x896 SME direct K-band accepted
 
 The exact `512x896x1536` SME-direct route exposed a nearby gap at lower `K`.
@@ -3246,7 +3268,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 164 GEMM shapes.
+coverage is 166 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
