@@ -22,6 +22,23 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: long-k512 source-B pack prefetch rejected
+
+A temp source added source-B software prefetching to the existing non-tuple
+`cob_sgemm_16x64_sme_strided_b_pack_b32` helper used by the long-`n`,
+`k = 512` B-reuse path. This tested prefetching the original B stream while
+keeping the long-k512 route on the non-tuple helper, avoiding the already
+rejected tuple-helper swap.
+
+Paired repeat-201, `iters=8` A/B against
+`/private/tmp/cob-next-audit/gemm-baseline-k512-pack-prefetch.c` measured
+`64x4096x512` median `0.9887x`, `64x8192x512` `1.0011x`,
+`64x16384x512` `0.9199x`, `64x32768x512` `0.8072x`,
+`96x4096x512` `0.9241x`, `96x8192x512` `0.9969x`,
+`128x4096x512` `0.9983x`, and `128x8192x512` `0.9996x`. The source change was
+reverted because the larger m64 k512 widths and the first m96 guard regressed
+hard while the remaining shapes were neutral/noisy.
+
 ### 2026-05-27 local-uncommitted: exact n24576 k1536 prefetch accepted
 
 The long-wide `64x24576x1536` MpGEMM stock row was still close enough to be
