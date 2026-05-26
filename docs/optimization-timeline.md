@@ -22,6 +22,30 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m1120 medium SME direct upper edge accepted
+
+The `m = 1120` upper edge was noisier than the previous two row bands, so the
+accepted rule is slightly narrower: `n = 1280` at `k = 832/960`,
+`n = 1344` at `k = 832/960/1152`, and only `1472x960`.
+
+Repeat-201, `iters=4` against
+`/private/tmp/cob-next-audit/gemm-baseline-m1120-extra-n-sme.c` narrowed the
+gate: `1120x1472x832` had positive median but negative mean-log CI, and the
+`1408` plus `k = 1152` side guards stayed neutral/noisy. A repeat-301,
+`iters=8` confirmation validated the accepted rows: `1120x1280x832` median
+`1.0978x`, bootstrap95 `[1.0731,1.0933]`; `1120x1280x960` `1.0847x`,
+bootstrap95 `[1.0432,1.0657]`; `1120x1344x832` `1.0730x`, bootstrap95
+`[1.0638,1.0748]`; `1120x1344x960` `1.0243x`, bootstrap95
+`[1.0277,1.1031]`; `1120x1344x1152` `1.0680x`, bootstrap95
+`[1.0208,1.0763]`; and `1120x1472x960` `1.0938x`, bootstrap95
+`[1.0823,1.0926]`.
+
+The unchanged-neighbor guards `1088x1280x832` and `1152x1280x832` were noisy
+or neutral in the broad screen, so the rule stops at this exact `m = 1120`
+subset for now.
+
+Correctness coverage adds the six accepted `m = 1120` rows.
+
 ### 2026-05-27 local-uncommitted: m1088 medium SME direct upper edge accepted
 
 The `m = 1088` upper edge now mirrors the accepted `m = 1056` subset:
@@ -3376,7 +3400,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 187 GEMM shapes.
+coverage is 193 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
