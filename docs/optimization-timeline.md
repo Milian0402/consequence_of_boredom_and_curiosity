@@ -22,6 +22,21 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: exact 1024 square large-block rejected
+
+A fresh square audit again made `1024x1024x1024` look weak on separate-process
+medians, so a temp source added exact `1024^3` to
+`cob_sgemm_amx_large_block_shape` without broadening the old `n >= 1024`
+large-block threshold that had previously been rejected.
+
+Repeat-301, `iters=8` paired A/B against
+`/private/tmp/cob-next-audit/gemm-baseline-square1024-largeblock.c` did not
+clear the dispatch-gate bar: `1024x1024x1024` measured median `1.0023x`,
+bootstrap95 `[0.9994,1.0180]`, B-faster `159/301`, sign-p `0.356`, and
+holdout median `1.0109x`. Behavior-identical guards stayed neutral/noisy:
+`768^3` `1.0003x`, `1280^3` `0.9980x`, and `1536^3` `0.9994x`. Revert the
+temp exact gate; standalone square audit medians are not enough evidence here.
+
 ### 2026-05-27 local-uncommitted: exact 768x512x1536 AMX fallback accepted
 
 A medium audit pointed at noisy one-shot `n = 512, k < 2048` rows where the
