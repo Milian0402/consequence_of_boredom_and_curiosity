@@ -22,6 +22,24 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: 512x1152x2048 packed-B MC512 rejected
+
+The packed-B audit tried one exact row-block change in
+`cob_sgemm_amx_packed_b_mc`: route `512x1152x2048` through the 512-row AMX
+large packed-B block, matching the existing exact `512x1280x2048` rule.
+
+Packed-B repeat-201, `iters=8` against
+`/private/tmp/cob-next-audit/gemm-baseline-512x1152x2048-packed-mc512.c` was
+too weak to route: target `512x1152x2048` measured median `1.0155x`, but
+bootstrap95 was `[0.9957,1.0166]` and holdout median was only `1.0120x` with
+weak sign. Guards were not supportive: `512x1216x2048` `0.9965x`,
+`512x1280x2048` neutral/noisy at `1.0019x`, `512x1152x1536` `0.9935x`,
+`512x1152x3072` `0.9963x`, and `768x1152x2048` noisy at `1.0387x`.
+
+Packed-AB repeat-201, `iters=8` rejected the idea harder: target
+`512x1152x2048` measured median `0.9606x`, bootstrap95 `[0.9188,1.0402]`,
+with holdout median `0.9885x`. Leave the exact MC512 packed-B helper unchanged.
+
 ### 2026-05-27 local-uncommitted: m1056 medium SME direct upper edge accepted
 
 The medium extra-`N` upper edge now extends one 32-row step past the exact
