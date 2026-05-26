@@ -22,6 +22,32 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m96/m128 k1024 fallback recheck rejected
+
+A noisy skinny claim audit made the m96/m128 `k >= 1024` SME B-reuse rows look
+weak against packed-path ceilings, so the old route decision was rechecked
+directly. The candidate disabled
+`COB_SGEMM_M96_128_SME_REUSE_K1024_MIN_N` by compiling it to a very high
+threshold, forcing those rows back through the later one-shot fallback path.
+
+Repeat-201, `iters=8` paired A/B was a clear rejection: `96x4096x1024` median
+`0.6320x`, `96x8192x1024` `0.6212x`, `96x4096x2048` `0.6219x`,
+`128x4096x1024` `0.6601x`, `128x8192x1024` `0.6562x`, and
+`128x8192x4096` `0.7076x`, all with B-faster `0/201`. Keep the existing SME
+B-reuse route for m96/m128 `k >= 1024`.
+
+### 2026-05-27 local-uncommitted: direct-NC 768-column retune rejected
+
+The accepted high-width m64 direct-NC route uses 1024-column chunks. A
+compile-flag probe tested `COB_SGEMM_M64_SME_DIRECT_NC=768`, since older notes
+only ruled out `512` on the existing direct-NC routes. Repeat-201, `iters=4`
+A/B was neutral/noisy across most of the band: `64x2560x12288` median
+`0.9981x`, `64x3072x4096` `1.0022x`, `64x3072x7168` `0.9987x`,
+`64x3584x7168` `0.9996x`, `64x3712x7168` `1.0003x`, `64x4032x7168`
+`0.9996x`, and `64x4032x8192` `1.0036x`. The tempting audit row
+`64x3840x7168` leaned negative at `0.9953x` with a negative holdout. Keep the
+current 1024-column direct-NC chunk.
+
 ### 2026-05-27 local-uncommitted: long-k512 NC and unroll probes rejected
 
 The remaining `64x32768x512` calibration gap was tested with route-local
