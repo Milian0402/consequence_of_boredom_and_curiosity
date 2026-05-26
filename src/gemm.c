@@ -132,6 +132,10 @@ enum {
 #define COB_SGEMM_M64_SME_B_PREFETCH_DISTANCE 32
 #endif
 
+#ifndef COB_SGEMM_M64_SME_PACK_B_PREFETCH_DISTANCE
+#define COB_SGEMM_M64_SME_PACK_B_PREFETCH_DISTANCE 16
+#endif
+
 #ifndef COB_SGEMM_M64_SME_DIRECT_NC
 #define COB_SGEMM_M64_SME_DIRECT_NC 1024
 #endif
@@ -1131,9 +1135,9 @@ static void cob_sgemm_16x64_sme_strided_b_pack_b32_tuple_prefetch2(
                 svld1(pg, a_panel + (size_t)p * (size_t)COB_SGEMM_AMX_MR);
             const float* brow = b + (size_t)p * (size_t)ldb + (size_t)col0;
             float* pbrow = packed_panel + (size_t)p * 64u;
-            if (p + COB_SGEMM_M64_SME_B_PREFETCH_DISTANCE < k) {
+            if (p + COB_SGEMM_M64_SME_PACK_B_PREFETCH_DISTANCE < k) {
                 const float* pf =
-                    b + (size_t)(p + COB_SGEMM_M64_SME_B_PREFETCH_DISTANCE) *
+                    b + (size_t)(p + COB_SGEMM_M64_SME_PACK_B_PREFETCH_DISTANCE) *
                         (size_t)ldb + (size_t)col0;
                 __builtin_prefetch(pf, 0, 1);
                 __builtin_prefetch(pf + 32, 0, 1);

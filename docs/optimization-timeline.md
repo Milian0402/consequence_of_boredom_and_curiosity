@@ -22,6 +22,33 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-26 local-uncommitted: n4096 pack-B prefetch split accepted
+
+Focused high-K `m = 64, n = 4096` probes found one small route-local tweak
+worth keeping. The existing B-reuse tuple-prefetch path now uses a separate
+`COB_SGEMM_M64_SME_PACK_B_PREFETCH_DISTANCE=16`, while direct streaming-B
+keeps `COB_SGEMM_M64_SME_B_PREFETCH_DISTANCE=32`.
+
+The accepted split was first identified with a compile-flag sweep, then
+validated as a source-narrowed change against the saved baseline
+`/private/tmp/cob-next-audit/gemm-baseline-n4096-kc.c`. Broad repeat-201,
+`iters=4` A/B measured target speedups of `64x4096x7168` median `1.0148x`,
+`64x4096x8192` `1.0063x`, and `64x4096x12288` `1.0113x`; guards
+`64x4160x7168`, `64x5120x7168`, and `64x2112x7168` were neutral because the
+new constant only fires on the exact `n = 4096, k >= 7168` reuse path. Heavier
+target-only repeat-301, `iters=8` confirmation stayed positive:
+`64x4096x7168` median `1.0035x`, `64x4096x8192` `1.0033x`, and
+`64x4096x12288` `1.0045x`, with positive mean-log/bootstrap and holdout on all
+three rows.
+
+Rejected alternatives from the same pass: forcing `n = 4096, k >= 7168` from
+B-reuse to direct-NC regressed `64x4096x7168/8192/12288` to about
+`0.79..0.84x`; disabling the special `n = 4096` tuple-prefetch path regressed
+the same region at about `0.93..0.97x`; `COB_SGEMM_M64_SME_REUSE_NC=256` was
+neutral, `COB_SGEMM_M64_SME_REUSE_NC=1024` was not a target win and hurt the
+`64x4160x7168` guard, `COB_SGEMM_M64_SME_B_PREFETCH_DISTANCE=64` regressed the
+target/guard set, and using `KC=1024` for this reuse path was neutral to worse.
+
 ### 2026-05-26 local-uncommitted: MpGEMM calibration refreshed
 
 The MpGEMM checkout was refreshed at `/private/tmp/mpgemm_latest`, commit

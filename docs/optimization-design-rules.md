@@ -53,9 +53,11 @@ These rules summarize repeated findings from the optimization timeline. They are
   skinny direct widths whose row stride is not a 512-float multiple, plus the
   exact `n = 4096` reuse path, but broad medium, m=96/128, and wide-`N`
   prefetch probes regressed or stayed noisy.
-- Keep `COB_SGEMM_M64_SME_B_PREFETCH_DISTANCE=32` as the default. Distance
-  `64` helps a few high-`K` widths but the boundary is discontinuous; do not
-  add exact-width distance gates without counter evidence or a smoother rule.
+- Keep `COB_SGEMM_M64_SME_B_PREFETCH_DISTANCE=32` as the direct streaming-B
+  default, but use `COB_SGEMM_M64_SME_PACK_B_PREFETCH_DISTANCE=16` for the
+  exact `n = 4096, k >= 7168` B-reuse tuple-prefetch path. Distance `64`
+  regressed the target/guard set, and disabling the tuple-prefetch path also
+  regressed.
 - For `m = 64`, the SME skinny direct route is useful from `k >= 2048` through
   `n <= 4096`; at `k = 1536`, keep exact `n = 1024` plus the narrower
   `n >= 1408` gate because `n = 1088..1280` regressed or stayed noisy.
@@ -101,7 +103,8 @@ These rules summarize repeated findings from the optimization timeline. They are
   holdout-median bar. Below `k = 4096` at `n = 3072`, keep only the
   separately validated reuse route at `k = 1024`; the `k = 3072` reuse probe
   was positive but did not clear the usual holdout bar. At `n = 4096,
-  k >= 7168`, keep the existing B-reuse path with the old high-K chunking.
+  k >= 7168`, keep the existing B-reuse path with `KC=512`, `NC=512`, and the
+  narrower B-pack prefetch distance; direct-NC forcing regressed hard.
 - For m64 one-shot B-reuse, use the reuse path for `k >= 1024, n >= 4160`;
   for `n = 4096` only below high-K (`1024 <= k < 7168`); for exact
   `64x2560x3072`; for `3072 <= n < 4096` only at `k = 1024`; and for exact
