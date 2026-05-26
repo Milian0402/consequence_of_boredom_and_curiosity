@@ -49,6 +49,11 @@ These rules summarize repeated findings from the optimization timeline. They are
   `n = 768` rerun lost its holdout and `n = 1024` was a hard regression.
 - Increasing expression-level unrolling in the C SME packed-B kernel did not beat the compiler's current schedule.
 - m=64 B-reuse changes are shape-sensitive; do not assume a NC/KC knob alone will close the MpGEMM gap.
+- For wide `m = 64` B-reuse around the remaining `64x7168x2048` MpGEMM
+  calibration gap, keep the current `NC=512` and `WIDE_KC=1024`. Probes at
+  `WIDE_KC=768/1536/2048` and `NC=256/768` were neutral or regressive on the
+  target/guard set; the small exact `64x4160x1536` tight-NC win was too weak
+  for another dispatch exception.
 - SME streaming-B prefetch is route-specific. It helped `m = 64`, large-`K`
   skinny direct widths whose row stride is not a 512-float multiple, plus the
   exact `n = 4096` reuse path, but broad medium, m=96/128, and wide-`N`

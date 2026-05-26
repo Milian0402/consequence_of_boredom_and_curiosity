@@ -22,6 +22,31 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-26 local-uncommitted: wide m64 NC/KC follow-up rejected
+
+After `137b02c`, a fresh MpGEMM calibration refresh at
+`/private/tmp/cob-mpgemm-after-n4096-prefetch-20260526` showed COB beating the
+stock MpGEMM skinny rows on five of six medians in the current local run:
+`64x2112x7168` `1431.14 GF/s`, `64x24576x1536` `1076.61 GF/s`,
+`64x32768x512` `885.20 GF/s`, `64x7168x16384` `1035.00 GF/s`,
+`64x4096x7168` `1083.34 GF/s`, and `64x7168x2048` `1003.77 GF/s`.
+The remaining obvious MpGEMM calibration gap is still `64x7168x2048`
+against MpGEMM's earlier `1095.65 GF/s` stock result.
+
+Wide B-reuse chunk probes did not close that gap. `COB_SGEMM_M64_SME_WIDE_KC`
+at `2048`, `1536`, and `768` was neutral or worse on `64x7168x2048` and
+nearby guards. `COB_SGEMM_M64_SME_REUSE_NC=256` helped some low-edge
+`k = 1536` rows and `64x8192x2048`, but regressed the target
+`64x7168x2048`; `NC=768` was neutral on the target and regressed
+`64x8192x2048` plus `64x7168x1536`.
+
+A source-narrowed `k = 1536` tight-NC candidate also stayed uncommitted. The
+broad `4160 <= n <= 7168` rule was only consistently useful at the low edge,
+and an exact `64x4160x1536` repeat-301, `iters=8` validation was only a small
+win: median `1.0138x`, bootstrap95 `[1.0075,1.0250]`, B-faster `171/301`,
+sign-p `0.021`, and holdout median `1.0151x`. That is too weak for another
+exact dispatch exception.
+
 ### 2026-05-26 local-uncommitted: n4096 pack-B prefetch split accepted
 
 Focused high-K `m = 64, n = 4096` probes found one small route-local tweak
