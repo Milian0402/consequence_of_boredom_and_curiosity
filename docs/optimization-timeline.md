@@ -22,6 +22,36 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m768/m1024 medium SME direct edge route accepted
+
+The medium SME-direct extra-`N` band previously covered `832 <= m <= 960`
+for `n = 1280..1472, k = 832..1152`. A subagent sweep found edge candidates at
+`m = 768` and `m = 1024`; the accepted source change adds only the rows that
+survived paired A/B and leaves the mixed edge rows on AMX.
+
+Repeat-201, `iters=4` paired A/B against
+`/private/tmp/cob-next-audit/gemm-baseline-m768-m1024-direct-edge.c` validated
+the accepted `m = 768` rows: `768x1280x832` median `1.1253x`,
+`768x1280x960` `1.1343x`, `768x1344x832` `1.1082x`,
+`768x1344x960` `1.0630x`, `768x1344x1152` `1.1059x`,
+`768x1408x832` `1.1267x`, `768x1408x960` `1.0453x`,
+`768x1408x1152` `1.1266x`, and `768x1472x832` `1.1186x`. The rejected
+same-edge guards stayed neutral/noisy: `768x1280x1152` `0.9988x`,
+`768x1472x960` `0.9989x`, and `768x1472x1152` `1.0026x`.
+
+The accepted `m = 1024` rows measured `1024x1280x960` median `1.1084x`,
+`1024x1344x832` `1.0832x`, `1024x1472x832` `1.0950x`, and
+`1024x1472x960` `1.0826x` in the same repeat-201 run. Higher-iteration
+confirmation (`repeat=301`, `iters=8`) kept the borderline rows positive:
+`1024x1280x832` median `1.0772x`, bootstrap95 `[1.0509,1.0878]`;
+`1024x1344x960` `1.0694x`, bootstrap95 `[1.0401,1.0825]`; and
+`1024x1344x1152` `1.0881x`, bootstrap95 `[1.0546,1.0721]`. Rejected
+`m = 1024` guards were neutral or negative: `1024x1280x1152` `0.9971x`,
+`1024x1408x832` `1.0036x`, `1024x1408x960` `1.0018x`, and
+`1024x1472x1152` `0.9981x`.
+
+Correctness coverage adds the 16 accepted edge rows.
+
 ### 2026-05-27 local-uncommitted: exact 512x896x1536 SME direct route accepted
 
 The medium audit found a strong one-shot exception at `512x896x1536`: routing
@@ -3194,7 +3224,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 143 GEMM shapes.
+coverage is 159 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
