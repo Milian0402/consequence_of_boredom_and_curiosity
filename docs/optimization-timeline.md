@@ -22,6 +22,31 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m1056 medium SME direct upper edge accepted
+
+The medium extra-`N` upper edge now extends one 32-row step past the exact
+`m = 1024` subset. The accepted `m = 1056` rule mirrors that subset:
+`n = 1280` at `k = 832/960`, `n = 1344` at `k = 832/960/1152`, and
+`n = 1472` at `k = 832/960`.
+
+Repeat-201, `iters=4` paired A/B against
+`/private/tmp/cob-next-audit/gemm-baseline-m1056-extra-n-sme.c` was positive
+on all target rows: `1056x1280x832` median `1.1064x`, `1056x1280x960`
+`1.1012x`, `1056x1344x832` `1.0632x`, `1056x1344x960` `1.0769x`,
+`1056x1344x1152` `1.0534x`, `1056x1472x832` `1.0843x`, and
+`1056x1472x960` `1.0878x`. The `1344` rows were rechecked at repeat-301,
+`iters=8`: `1056x1344x832` median `1.0798x`, bootstrap95
+`[1.0683,1.0811]`; `1056x1344x960` `1.0889x`, bootstrap95
+`[1.0546,1.0782]`; and `1056x1344x1152` `1.0945x`, bootstrap95
+`[1.0590,1.0829]`.
+
+The guard rows kept the rule bounded: `1056x1408x832` and `1056x1408x960`
+stayed neutral/noisy, `1056x1280x1152` and `1056x1472x1152` stayed neutral,
+and accepted-neighbor guards `1024x1280x832` and `1088x1280x832` were
+behavior-identical/noisy.
+
+Correctness coverage adds the seven accepted `m = 1056` rows.
+
 ### 2026-05-27 local-uncommitted: m704 medium SME direct lower edge accepted
 
 The new medium extra-`N` edge route extends one more bounded row band downward:
@@ -3312,7 +3337,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 173 GEMM shapes.
+coverage is 180 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
