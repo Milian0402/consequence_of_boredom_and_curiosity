@@ -87,6 +87,11 @@ These rules summarize repeated findings from the optimization timeline. They are
   hard-regressed `64x4096x7168` and `64x4096x8192`.
 - Keep `64x2112x7168` on the direct streaming-B route; forcing B reuse there
   hard-regressed the exact gap shape.
+- Keep `n = 1024` high-K m64 shapes on the existing direct streaming-B route
+  with `KC=1024`. Exact direct-NC chunking, high-K B-reuse, and a narrowed
+  `KC=512` probe either failed cold validation or regressed adjacent guards.
+- Do not force exact `64x2112x7168` to the larger `KC=1024` direct route; it
+  regressed the target and nearby high-K points.
 - For m64 direct streaming-B, chunk the N loop at 1024 columns for
   exact `n = 2560, k >= 12288`, exact `n = 3072, k >= 4096`, and for the
   high-width, high-K band `3584 <= n < 4096, k >= 7168`. This keeps the

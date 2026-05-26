@@ -22,6 +22,47 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-26 local-uncommitted: m64 post-route follow-up probes rejected
+
+After `da3a87e`, a fresh route-aware one-shot grid over `m = 64` and
+`n = 1024..4096`, `k = 1536..16384` showed the remaining weak area was still
+large-K skinny direct routing, especially high-K `n = 1024`, `64x2112x7168`,
+and a few noisy direct-NC rows. The grid output was
+`/private/tmp/cob-m64-next/oneshot-route.csv`; a small full benchmark subset in
+`/private/tmp/cob-m64-next/target-full.csv` showed `64x1024x7168` could still
+trail Accelerate in a noisy repeat-7 run, so the next probes focused there.
+
+Exact `n = 1024` direct-NC chunking with `COB_SGEMM_M64_SME_DIRECT_NC=512` was
+not shippable. It gave weak medians at the low edge but no clean holdout/sign
+support: `64x1024x4096` median `1.0197x`, holdout `1.0170x`, sign-p `0.0109`;
+`64x1024x7168` median `1.0170x`, holdout `1.0164x`, sign-p `0.00184`; and
+`64x1024x8192` was neutral. Applying `NC=512` to existing direct-NC routes was
+also neutral or negative except a noisy `64x3584x7168` median `1.0262x` with
+weak holdout sign support. Keep the current direct-NC chunk size and gates.
+
+Narrow high-K `n = 1024` B-reuse was also rejected. Routing `n = 1024` through
+reuse from `k >= 8192` regressed `64x1024x8192` to median `0.9823x` and
+`64x1024x12288` to `0.9594x`; only `64x1024x16384` looked positive at median
+`1.0860x`, but sign-p `7.05e-05` and holdout sign-p `0.00265` were far below
+the acceptance bar for another exact gate.
+
+The `n = 1024` K-chunk probe was not stable. A compile-flag run with
+`COB_SGEMM_SKINNY_SME_LARGE_KC=512` looked promising at `64x1024x6144`
+(`1.0963x`, holdout `1.0900x`, sign-p `5.15e-19`) and `64x1024x8192`
+(`1.0756x`, holdout `1.0857x`, sign-p `5.57e-13`), but it regressed the
+low-width `k = 2048` guards because the flag was global. A source-narrowed
+`6144..8192` gate did not reproduce, and a focused exact `64x1024x6144`
+repeat-401 rerun collapsed to median `1.0015x`, holdout `0.9994x`, sign-p
+`0.92`. Leave `n = 1024` on the existing `KC=1024` direct route.
+
+Two other route probes were rejected. For exact `64x1280x1536`, forcing the
+AMX chunked packed-B path was a hard regression at median `0.5255x`, even
+though a noisy full benchmark subset showed a small Accelerate gap. For
+`64x2112x7168` and neighboring high-K points, forcing the larger `KC=1024`
+direct route regressed the target: `64x2112x7168` median `0.9635x` and
+`64x2112x8192` `0.9684x`. These results reinforce that the remaining gap is
+unlikely to fall to another simple dispatch or cache-blocking gate.
+
 ### 2026-05-26: exact 2560 m64 route add-ons accepted
 
 Follow-up calibration after the wide-reuse/direct-NC pass found two exact
