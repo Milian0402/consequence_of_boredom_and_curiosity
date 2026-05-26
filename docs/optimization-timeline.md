@@ -1,6 +1,6 @@
 # Optimization Attempt Timeline
 
-Last updated: 2026-05-26
+Last updated: 2026-05-27
 
 This tracks the matrix-multiplication speed work so far. The narrow comparison
 scope is single-threaded FP32 row-major GEMM for `C = A * B` with `alpha = 1`
@@ -21,6 +21,25 @@ use the git history for this file; the current recent sequence is anchored by:
 - `7fae628` Increase B-pack prefetch distance.
 
 ## Timeline
+
+### 2026-05-27 local-uncommitted: exact n7168 high-K prefetch accepted
+
+Follow-up after the wide `k = 2048` prefetch change tested whether the same
+tuple-prefetch pack helper should cover wider high-K B-reuse rows. A broad
+`k >= 8192` rule was not good enough because `n = 8192` was neutral/noisy, but
+an exact `n = 7168, k >= 8192` rule held against neighboring guards. The source
+now uses the prefetched helper for wide `m = 64` B-reuse when `k == 2048`, and
+also when `n == 7168 && k >= 8192`.
+
+The first broad repeat-201, `iters=2` A/B measured strong wins at
+`64x7168x8192` median `1.0671x` and `64x7168x16384` `1.0774x`, but
+`64x8192x8192` was `0.9800x` and `64x8192x16384` was only weak/noisy. The
+narrowed repeat-201, `iters=2` validation kept the target wins:
+`64x7168x8192` median `1.0850x`, bootstrap95 `[1.0436,1.1026]`, holdout
+median `1.0786x`; and `64x7168x16384` median `1.1043x`, bootstrap95
+`[1.0726,1.1276]`, holdout median `1.1321x`. Guards `64x6144x8192`,
+`64x8192x8192`, `64x6144x16384`, `64x8192x16384`, `64x7168x4096`, and
+`64x7168x2048` stayed neutral/noisy under the exact rule.
 
 ### 2026-05-26 local-uncommitted: wide m64 k2048 prefetch accepted
 
