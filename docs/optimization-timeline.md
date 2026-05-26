@@ -22,6 +22,23 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: exact m1152 n1280 SME direct accepted
+
+The next upper edge did not support a broad `m = 1152` rule, but exact
+`1152x1280x832` and `1152x1280x960` were strong enough to route through SME
+direct-`B`.
+
+The broad repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-m1152-extra-n-sme.c` only made the
+`n = 1280, k = 832/960` pair look credible; `n = 1344`, `n = 1472`, `k =
+1152`, and the `1408` side guards were weak, noisy, or neutral. Focused
+repeat-301, `iters=8` confirmed the accepted pair: `1152x1280x832` median
+`1.0980x`, bootstrap95 `[1.0829,1.0983]`, B-faster `286/301`, holdout median
+`1.0966x`; and `1152x1280x960` median `1.1060x`, bootstrap95
+`[1.0859,1.1007]`, B-faster `281/301`, holdout median `1.1065x`.
+
+Correctness coverage adds `1152x1280x832` and `1152x1280x960`.
+
 ### 2026-05-27 local-uncommitted: m1120 medium SME direct upper edge accepted
 
 The `m = 1120` upper edge was noisier than the previous two row bands, so the
@@ -3400,7 +3417,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 193 GEMM shapes.
+coverage is 195 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
