@@ -22,6 +22,28 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: 512x896 SME direct K-band accepted
+
+The exact `512x896x1536` SME-direct route exposed a nearby gap at lower `K`.
+The dispatcher now treats `512x896` as an SME direct-`B` band for
+`832 <= k <= 1536`, rather than a single exact `k = 1536` exception.
+
+Repeat-201, `iters=8` paired A/B against
+`/private/tmp/cob-next-audit/gemm-baseline-512x896-kband-sme.c` measured the
+newly routed rows as strong wins: `512x896x832` median `1.1726x`,
+bootstrap95 `[1.1677,1.2946]`; `512x896x960` `1.1686x`, bootstrap95
+`[1.1465,1.2743]`; `512x896x1024` `1.1755x`, bootstrap95
+`[1.1973,1.3391]`; `512x896x1152` `1.1817x`, bootstrap95
+`[1.2074,1.3325]`; and `512x896x1280` `1.1924x`, bootstrap95
+`[1.2213,1.3652]`. The already-routed `512x896x1536` was behavior-identical
+in this comparison.
+
+The same run kept the band bounded: `512x896x2048` stayed neutral/noisy at
+median `0.9909x`, `512x960x1152` regressed at `0.9986x` with negative
+mean-log CI, and `768x896x1152` stayed neutral/noisy at `1.0036x`.
+
+Correctness coverage adds the five new `512x896` lower-`K` rows.
+
 ### 2026-05-27 local-uncommitted: m768/m1024 medium SME direct edge route accepted
 
 The medium SME-direct extra-`N` band previously covered `832 <= m <= 960`
@@ -3224,7 +3246,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 159 GEMM shapes.
+coverage is 164 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

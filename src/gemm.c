@@ -177,7 +177,7 @@ static int cob_sgemm_pack_mr(void)
 
 static int cob_sgemm_sme_direct_extra_n_shape(int m, int n, int k)
 {
-    if (m == 512 && n == 896 && k == 1536) {
+    if (m == 512 && n == 896 && k >= 832 && k <= 1536) {
         return 1;
     }
     if (m == 512 && n == 1024 && k == 1536) {
