@@ -130,6 +130,17 @@ COB_BENCH_ONLY=one-shot COB_BENCH_ROUTE=1 COB_BENCH_HOT_SECONDS=20 \
   build/cob_gemm_bench 512x1024x1536
 ```
 
+For MpGEMM calibration, keep the checkout outside this repo and point the helper
+at it:
+
+```sh
+git clone https://github.com/MpGEMM/mpgemm /private/tmp/mpgemm_latest
+sh tools/mpgemm_calibration.sh
+```
+
+Set `COB_MPGEMM_RUN_MPGEMM=0` to skip rebuilding/running MpGEMM and only
+refresh COB's matching route-aware CSV.
+
 ## Comparison Status
 
 Current evidence is scoped to the benchmarked shape set and this repo's narrow

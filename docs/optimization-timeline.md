@@ -22,6 +22,42 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-26 local-uncommitted: MpGEMM calibration refreshed
+
+The MpGEMM checkout was refreshed at `/private/tmp/mpgemm_latest`, commit
+`8d83011`. No `LICENSE*` or `COPYING*` file was found within depth 2, so MpGEMM
+still stays outside the licensed/open-source claim set, but it remains the main
+source-available calibration target. Its README states that MpGEMM is an
+SME-focused GEMM library and reports an average `1.23x` speedup over Apple
+Accelerate on the paper's Apple M4 Pro workloads.
+
+Build and correctness passed with MpGEMM's stock Makefiles:
+`make -C /private/tmp/mpgemm_latest/src`,
+`make -C /private/tmp/mpgemm_latest/benchmark correct.x singlePerformance.x`,
+and `/private/tmp/mpgemm_latest/benchmark/correct.x`. The stock
+`singlePerformance.x` FP32 row-major results were:
+`64x2112x7168` `1283.29 GF/s`, `64x24576x1536` `1031.78 GF/s`,
+`64x32768x512` `880.48 GF/s`, `64x7168x16384` `1018.18 GF/s`,
+`64x4096x7168` `1076.82 GF/s`, and `64x7168x2048` `1095.65 GF/s`.
+
+COB one-shot repeat-31 on the same stock shapes measured:
+`64x2112x7168` median `1308.42 GF/s`, `64x24576x1536` median
+`720.10 GF/s` with best `998.52 GF/s`, `64x32768x512` median
+`843.80 GF/s`, `64x7168x16384` median `980.27 GF/s`,
+`64x4096x7168` median `942.11 GF/s`, and `64x7168x2048` median
+`1025.12 GF/s`. An isolated repeat-101 rerun improved `64x24576x1536` to
+median `960.22 GF/s`, best `1025.87 GF/s`, and measured `64x4096x7168` at
+median `948.77 GF/s`, best `1062.21 GF/s`.
+
+Follow-up probes from the same pass found no code change to keep. For exact
+`64x4096x7168/8192/12288`, forcing direct-NC instead of the existing high-K
+B-reuse path was a hard regression: medians `0.8434x`, `0.8421x`, and
+`0.7918x`. For exact `n = 1024`, forcing the packed-AMX fallback was a hard
+regression around `0.56..0.62x`, and forcing B-reuse with `NC=256` or
+`NC=1024` regressed all tested high-K rows. The reusable output helper
+`tools/mpgemm_calibration.sh` was added so this source-available baseline can
+be refreshed without hand-editing benchmark files.
+
 ### 2026-05-26 local-uncommitted: m64 post-route follow-up probes rejected
 
 After `da3a87e`, a fresh route-aware one-shot grid over `m = 64` and

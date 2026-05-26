@@ -93,6 +93,16 @@ where the median is far below the best sample, and `summary.md` into a
 `COB_AUDIT_OUT_DIR`, `COB_AUDIT_SANITY_DROP`, and the suite-specific shape
 environment variables when a narrower cold rerun is needed.
 
+For MpGEMM calibration, use a separate checkout and run:
+
+```sh
+COB_MPGEMM_DIR=/private/tmp/mpgemm_latest sh tools/mpgemm_calibration.sh
+```
+
+This helper records the MpGEMM commit and license-file scan, runs MpGEMM's
+stock FP32 skinny benchmark when enabled, and emits COB route-aware CSVs for the
+same stock shapes.
+
 3. For any candidate source change, use paired A/B:
 
 ```sh
