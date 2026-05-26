@@ -22,6 +22,25 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: tuple-prefetch distance retune rejected
+
+Fresh compile-flag A/B checks tried moving
+`COB_SGEMM_M64_SME_PACK_B_PREFETCH_DISTANCE` away from the accepted value `16`.
+The macro is shared by the exact `n = 4096, k >= 7168` B-reuse path and the
+newer selected wide prefetched tuple-pack paths, so the guard set covered all
+of those routes.
+
+Distance `24` regressed the `n = 4096` target region: repeat-201, `iters=4`
+measured `64x4096x7168` median `0.9493x`, `64x4096x8192` `0.9610x`, and
+`64x4096x12288` `0.9857x`. Wide guards were neutral/noisy except a weak
+`64x4160x2048` positive line.
+
+Distance `8` was also not shippable: repeat-201, `iters=4` measured the
+`n = 4096` rows at `0.9955x`, `0.9935x`, and `0.9959x`, while
+`64x4160x2048` regressed to `0.9655x`. `64x7168x8192` showed a noisy positive
+median at `1.0728x`, but its holdout reversed to `0.9725x`. Keep the current
+distance `16`.
+
 ### 2026-05-27 local-uncommitted: long-k512 source-B pack prefetch rejected
 
 A temp source added source-B software prefetching to the existing non-tuple
