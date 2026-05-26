@@ -22,6 +22,35 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-26 local-uncommitted: wide m64 k2048 prefetch accepted
+
+The `64x7168x2048` MpGEMM calibration gap did not respond to wide B-reuse
+`NC/KC` retuning, but did respond to reusing the existing tuple-prefetch pack
+helper. The source now uses `cob_sgemm_16x64_sme_strided_b_pack_b32_tuple_prefetch2`
+for the wide `m = 64, k = 2048` B-reuse route, while keeping neighboring
+`k = 1536` and `k = 4096` paths on the old tuple pack helper.
+
+Broad repeat-201, `iters=4` A/B against
+`/private/tmp/cob-next-audit/gemm-baseline-wide-prefetch.c` showed the target
+moving in the right direction: `64x6144x2048` median `1.0833x`,
+`64x7168x2048` `1.0617x`, and `64x5120x2048` `1.0315x`, while `64x8192x2048`
+was neutral and `64x7168x1536` / `64x7168x4096` stayed off the new path.
+Focused repeat-301, `iters=8` validation was stronger across the wide
+`k = 2048` band: `64x5120x2048` median `1.0894x`, `64x6144x2048` `1.0845x`,
+`64x7168x2048` `1.0978x`, and `64x8192x2048` `1.0418x`, all with positive
+holdouts. Edge repeat-201, `iters=8` also showed `64x4160x2048` at median
+`1.1876x` and `64x4096x2048` positive/noisy at `1.0271x`; `k = 1536` and
+`k = 3072` guards were neutral. An isolated repeat-31 one-shot bench after the
+source change measured `64x7168x2048` at median `1076.82 GF/s`, best
+`1120.48 GF/s`; this is much closer to MpGEMM's earlier `1095.65 GF/s` stock
+result and beats it on best sample, but still leaves a small median gap in that
+separate-process comparison.
+
+The existing `COB_SGEMM_M64_SME_PACK_B_PREFETCH_DISTANCE=16` stayed the best
+overall distance for this shared helper. Distance `8` regressed the target and
+low/mid `k = 2048` rows despite helping `8192`; distance `32` helped
+`4160/5120` but regressed `8192` and the existing `64x4096x7168` prefetch path.
+
 ### 2026-05-26 local-uncommitted: wide m64 NC/KC follow-up rejected
 
 After `137b02c`, a fresh MpGEMM calibration refresh at

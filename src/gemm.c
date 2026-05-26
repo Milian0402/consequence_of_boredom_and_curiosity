@@ -1250,6 +1250,7 @@ static int cob_sgemm_rowmajor_sme_skinny_pack_b_reuse(
         use_m96_128_k512;
     const int use_n4096_large_k = use_m64 && n == 4096 && k >= 7168;
     const int use_wide = use_m64 && cob_sgemm_m64_sme_wide_reuse_shape(n, k);
+    const int use_wide_k2048 = use_wide && k == 2048;
     if ((!use_m64 && !use_m96_128_k512 && !use_m96_128_k1024) ||
         (!use_long_n_k512 && !use_n4096_large_k && !use_wide && !use_m96_128_k1024) ||
         lda != k || ldb != n || (n % 64) != 0 || !cob_apple_sme2p1_available()) {
@@ -1315,7 +1316,7 @@ static int cob_sgemm_rowmajor_sme_skinny_pack_b_reuse(
                         c + (size_t)row * (size_t)ldc + jc, ldc, pc != 0);
                 }
             } else {
-                if (use_n4096_large_k) {
+                if (use_n4096_large_k || use_wide_k2048) {
                     cob_sgemm_16x64_sme_strided_b_pack_b32_tuple_prefetch2(
                         b_panels64, kc, packed_a, b + (size_t)pc * (size_t)ldb + jc,
                         ldb, packed_b64, c + jc, ldc, pc != 0);

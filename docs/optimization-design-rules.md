@@ -49,11 +49,14 @@ These rules summarize repeated findings from the optimization timeline. They are
   `n = 768` rerun lost its holdout and `n = 1024` was a hard regression.
 - Increasing expression-level unrolling in the C SME packed-B kernel did not beat the compiler's current schedule.
 - m=64 B-reuse changes are shape-sensitive; do not assume a NC/KC knob alone will close the MpGEMM gap.
-- For wide `m = 64` B-reuse around the remaining `64x7168x2048` MpGEMM
-  calibration gap, keep the current `NC=512` and `WIDE_KC=1024`. Probes at
-  `WIDE_KC=768/1536/2048` and `NC=256/768` were neutral or regressive on the
-  target/guard set; the small exact `64x4160x1536` tight-NC win was too weak
-  for another dispatch exception.
+- For wide `m = 64, k = 2048` B-reuse, use the tuple-prefetch pack helper.
+  This improved the remaining `64x7168x2048` MpGEMM calibration gap and nearby
+  `n = 4160..8192` rows. Keep the current `NC=512` and `WIDE_KC=1024`: probes
+  at `WIDE_KC=768/1536/2048` and `NC=256/768` were neutral or regressive on
+  the target/guard set, and the small exact `64x4160x1536` tight-NC win was too
+  weak for another dispatch exception. Keep the shared pack-prefetch distance
+  at `16`; distance `8` hurt the target and distance `32` hurt `8192` plus the
+  existing `64x4096x7168` prefetch path.
 - SME streaming-B prefetch is route-specific. It helped `m = 64`, large-`K`
   skinny direct widths whose row stride is not a 512-float multiple, plus the
   exact `n = 4096` reuse path, but broad medium, m=96/128, and wide-`N`
