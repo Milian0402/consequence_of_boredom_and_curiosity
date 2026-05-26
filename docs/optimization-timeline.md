@@ -37,6 +37,21 @@ holdout median `1.0109x`. Behavior-identical guards stayed neutral/noisy:
 `768^3` `1.0003x`, `1280^3` `0.9980x`, and `1536^3` `0.9994x`. Revert the
 temp exact gate; standalone square audit medians are not enough evidence here.
 
+### 2026-05-27 local-uncommitted: n1152/n1216 k1536 packed fallback rejected
+
+A medium audit showed noisy one-shot dips at `n = 1152/1216, k = 1536`, so a
+temp source forced those widths away from the AMX strided-B route and through
+the packed fallback. This mirrors some accepted packed-path decisions at higher
+K, but it did not hold at `k = 1536`.
+
+Repeat-201, `iters=8` paired A/B against
+`/private/tmp/cob-next-audit/gemm-baseline-n1152-n1216-k1536-packed.c` was a
+hard rejection: `512x1152x1536` median `0.8324x`, `768x1152x1536` `0.8708x`,
+`1024x1152x1536` `0.8994x`, `512x1216x1536` `0.8346x`,
+`768x1216x1536` `0.8887x`, and `1024x1216x1536` `0.9051x`. Existing
+`k = 2048` packed-route guards stayed neutral/noisy. Keep `k = 1536` on
+strided-B for these widths.
+
 ### 2026-05-27 local-uncommitted: exact 768x512x1536 AMX fallback accepted
 
 A medium audit pointed at noisy one-shot `n = 512, k < 2048` rows where the
