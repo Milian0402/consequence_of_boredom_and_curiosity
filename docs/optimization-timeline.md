@@ -22,6 +22,33 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m480 medium SME direct edge accepted
+
+The lower medium edge now reaches `m = 480` for `n = 1280/1344/1408/1472` at
+`k = 832/960/1152`, routing the full tested rectangle through SME direct-`B`.
+
+A broad repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-m480-extra-n-sme.c` showed all
+twelve candidate rows positive. Repeat-301, `iters=8` confirmed the route:
+`480x1280x832` median `1.2182x`, bootstrap95 `[1.2012,1.3029]`;
+`480x1280x960` `1.2031x`, bootstrap95 `[1.1804,1.2672]`;
+`480x1280x1152` `1.2196x`, bootstrap95 `[1.1762,1.2772]`;
+`480x1344x832` `1.1540x`, bootstrap95 `[1.1536,1.2233]`;
+`480x1344x960` `1.1757x`, bootstrap95 `[1.1517,1.2192]`;
+`480x1344x1152` `1.1812x`, bootstrap95 `[1.1727,1.2499]`;
+`480x1408x832` `1.1809x`, bootstrap95 `[1.1702,1.2456]`;
+`480x1408x960` `1.1911x`, bootstrap95 `[1.1363,1.2089]`;
+`480x1408x1152` `1.2060x`, bootstrap95 `[1.1680,1.2441]`;
+`480x1472x832` `1.1656x`, bootstrap95 `[1.1576,1.2235]`;
+`480x1472x960` `1.1792x`, bootstrap95 `[1.1621,1.2263]`; and
+`480x1472x1152` `1.1932x`, bootstrap95 `[1.1177,1.1837]`.
+
+The guards kept the route bounded: `480x1216x832`, `480x1280x1536`,
+`448x1280x832`, and `512x1280x832` stayed neutral/noisy or
+behavior-identical.
+
+Correctness coverage adds the twelve accepted `m = 480` rows.
+
 ### 2026-05-27 local-uncommitted: m512 medium SME direct edge accepted
 
 The lower medium edge now reaches `m = 512` for `n = 1280/1344/1408` at
@@ -3655,7 +3682,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 252 GEMM shapes.
+coverage is 264 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
