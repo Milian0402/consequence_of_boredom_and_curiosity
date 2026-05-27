@@ -22,6 +22,28 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m352 medium SME direct edge accepted
+
+The lower medium edge now reaches `m = 352` for `n = 1280/1344/1408/1472` at
+all tested 64-step K points from `832` through `1152`. The dispatcher folds
+`m = 352/384` into one compact SME direct-`B` gate while keeping the lower
+neighbor and higher-K rows off the new route.
+
+A repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-m352-extra-n-sme.c` showed the
+rectangle positive, with `352x1472x832` noisy enough to require confirmation.
+Repeat-301, `iters=8` confirmed all twenty rows. The lower-width rows were
+strong: `352x1280x832` median `1.2437x`, `352x1280x960` `1.2427x`,
+`352x1280x1024` `1.2451x`, `352x1280x1088` `1.2603x`, and
+`352x1280x1152` `1.2694x`. The noisy `352x1472x832` row confirmed at median
+`1.2040x`, bootstrap95 `[1.2164,1.2919]`, with positive holdout.
+
+The guards kept the route bounded: `352x1216x832`, `352x1280x1536`,
+`352x1280x2048`, lower neighbor `320x1280x832`, and routed upper neighbor
+`384x1280x832` stayed neutral/noisy or behavior-identical.
+
+Correctness coverage adds the twenty accepted `m = 352` rows.
+
 ### 2026-05-27 local-uncommitted: m384 medium SME direct edge accepted
 
 The lower medium edge now reaches `m = 384` for `n = 1280/1344/1408/1472` at
@@ -3768,7 +3790,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 331 GEMM shapes.
+coverage is 351 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
