@@ -41,10 +41,10 @@ These rules summarize repeated findings from the optimization timeline. They are
   not beaten the current path, except exact `512x1024x1536`, which should use
   SME direct-B.
 - The low-height `m = 160/192/224/256/288/320/352/384` medium rectangles now
-  use SME direct-`B` for `n = 1280/1344/1408/1472`, `832 <= k <= 1152`,
+  use SME direct-`B` for `n = 1280/1344/1408/1472`, `768 <= k <= 1152`,
   alongside the older exact `384x1280x1536` exception. Do not broaden this
-  below `m = 160` or to `k = 2048/3072`; current guards were neutral/noisy or
-  regressions.
+  below `m = 160`, below `k = 768`, or to `k = 2048/3072`; current guards were
+  neutral/noisy or regressions.
 - For `n = 1536`, use the same SME direct-`B` path only for
   `m = 160/192/224/256/288/320`, `832 <= k <= 1152`. Keep `m = 352/384`,
   and `k = 1536` off this narrow edge; confirmation found mixed holdouts and

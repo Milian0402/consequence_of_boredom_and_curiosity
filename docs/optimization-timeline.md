@@ -22,6 +22,27 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: k768 low-height SME direct edge accepted
+
+The low-height medium rectangle now reaches down to `k = 768` for
+`m = 160/192/224/256/288/320/352/384` and `n = 1280/1344/1408/1472`. The
+dispatcher keeps the wider `n = 1536/1600` edges at `k >= 832` for now.
+
+A repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-k768-low-medium-sme.c` showed all
+thirty-two candidate rows positive. Repeat-301, `iters=8` confirmed the full
+rectangle: `160x1280x768` median `1.5046x`, `160x1344x768` `1.4358x`,
+`160x1408x768` `1.4903x`, and `160x1472x768` `1.4704x`. The weakest confirmed
+median in the rectangle was `384x1472x768` at `1.2061x`, still with a positive
+holdout.
+
+The guards kept the route bounded: `160x1216x768`, `384x1216x768`,
+`160x1280x704`, `384x1280x704`, lower neighbor `128x1280x768`, upper neighbor
+`416x1280x768`, and already-routed `k = 832` rows stayed neutral/noisy or
+behavior-identical.
+
+Correctness coverage adds the thirty-two accepted `k = 768` rows.
+
 ### 2026-05-27 local-uncommitted: n1600 lower-height SME direct edge accepted
 
 The lower-height medium edge now reaches `n = 1600` for
