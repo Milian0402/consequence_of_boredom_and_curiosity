@@ -53,6 +53,11 @@ These rules summarize repeated findings from the optimization timeline. They are
   `n = 1280/1344/1408` and `k = 768/832/960`, plus the older exact
   `512x1280x1536` exception. Keep `n = 1472`, `m = 608`, and other K points
   off this edge without fresh paired evidence.
+- For the next medium cluster, use SME direct-`B` at `k = 768/832/960` for
+  `608x1280`, `608x1408`, `640x1280/1344/1408`, `672x1280/1408`,
+  `704x1280/1344/1408`, and `736x1280/1344/1408`. At `672x1344`, use only
+  `k = 768/832`. Keep `608x1344`, `m = 768`, `n = 1472`, and `k < 768` off
+  this edge.
 - For `n = 1536`, use the same SME direct-`B` path only for
   `m = 160/192/224/256/288/320`, `832 <= k <= 1152`. Keep `m = 352/384`,
   `k = 768`, and `k = 1536` off this narrow edge; confirmation found mixed

@@ -22,6 +22,26 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m608-736 k768 SME direct edge accepted
+
+The next routed medium cluster now reaches down to `k = 768` at the same
+`n` points that already used SME direct-`B` for `k = 832/960`: `m = 608` at
+`n = 1280/1408`, `m = 640/704/736` at `n = 1280/1344/1408`, and `m = 672`
+at `n = 1280/1344/1408` with its existing `n = 1344` K shape kept narrower.
+
+A repeat-101 screen was positive on all fourteen candidates. Repeat-301 with
+`iters=8` confirmed the cluster: `608x1280x768` median `1.1698x`,
+`608x1408x768` `1.1752x`, `640x1344x768` `1.1380x`,
+`672x1344x768` `1.1344x`, `704x1280x768` `1.1078x`,
+`704x1344x768` `1.1230x`, `736x1280x768` `1.1549x`,
+`736x1344x768` `1.1205x`, and `736x1408x768` `1.1536x`.
+
+The guards kept the route bounded: `608x1344x768`, `768x1280x768`, `n = 1472`
+rows, `k = 704` rows, and already-routed `k = 832` rows stayed neutral/noisy
+or behavior-identical.
+
+Correctness coverage adds the fourteen accepted `m = 608..736, k = 768` rows.
+
 ### 2026-05-27 local-uncommitted: m512-576 k768 SME direct edge accepted
 
 The existing `m = 512/544/576`, `n = 1280/1344/1408` SME direct rows at
