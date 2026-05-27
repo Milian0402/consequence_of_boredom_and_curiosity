@@ -22,6 +22,33 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m448 medium SME direct edge accepted
+
+The lower medium edge now reaches `m = 448` for `n = 1280/1344/1408/1472` at
+`k = 832/960/1152`, matching the accepted `m = 480` rectangle.
+
+A broad repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-m448-extra-n-sme.c` showed all
+twelve candidate rows positive. Repeat-301, `iters=8` confirmed the route:
+`448x1280x832` median `1.2062x`, bootstrap95 `[1.1889,1.2643]`;
+`448x1280x960` `1.2137x`, bootstrap95 `[1.1936,1.2777]`;
+`448x1280x1152` `1.2341x`, bootstrap95 `[1.1859,1.2658]`;
+`448x1344x832` `1.1664x`, bootstrap95 `[1.1696,1.2409]`;
+`448x1344x960` `1.1831x`, bootstrap95 `[1.1529,1.2169]`;
+`448x1344x1152` `1.1018x`, bootstrap95 `[1.0508,1.1305]`;
+`448x1408x832` `1.1903x`, bootstrap95 `[1.1905,1.2017]`;
+`448x1408x960` `1.2106x`, bootstrap95 `[1.1988,1.2122]`;
+`448x1408x1152` `1.2245x`, bootstrap95 `[1.2022,1.2191]`;
+`448x1472x832` `1.1701x`, bootstrap95 `[1.1672,1.1773]`;
+`448x1472x960` `1.1898x`, bootstrap95 `[1.1755,1.1890]`; and
+`448x1472x1152` `1.2062x`, bootstrap95 `[1.1867,1.2036]`.
+
+The guards kept the route bounded: `448x1216x832`, `448x1280x1536`,
+`416x1280x832`, and `480x1280x832` stayed neutral/noisy or
+behavior-identical.
+
+Correctness coverage adds the twelve accepted `m = 448` rows.
+
 ### 2026-05-27 local-uncommitted: m480 medium SME direct edge accepted
 
 The lower medium edge now reaches `m = 480` for `n = 1280/1344/1408/1472` at
@@ -3682,7 +3709,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 264 GEMM shapes.
+coverage is 276 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
