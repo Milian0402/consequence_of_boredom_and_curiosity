@@ -22,6 +22,26 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m512-576 k768 SME direct edge accepted
+
+The existing `m = 512/544/576`, `n = 1280/1344/1408` SME direct rows at
+`k = 832/960` now extend to `k = 768`. The separate exact
+`512x1280x1536` exception stays unchanged.
+
+A repeat-101 screen was positive for all nine candidates, though
+`576x1344x768` was noisy enough to require confirmation. Repeat-301 with
+`iters=8` confirmed the band: `512x1280x768` median `1.1754x`,
+`512x1344x768` `1.1412x`, `512x1408x768` `1.1713x`,
+`544x1280x768` `1.1675x`, `544x1344x768` `1.1304x`,
+`544x1408x768` `1.1615x`, `576x1280x768` `1.1583x`,
+`576x1344x768` `1.1250x`, and `576x1408x768` `1.1470x`.
+
+The guards kept the route bounded: `n = 1472` rows, upper neighbor
+`608x1280x768`, `k = 704` rows, and already-routed `k = 832` rows stayed
+neutral/noisy or behavior-identical.
+
+Correctness coverage adds the nine accepted `m = 512/544/576, k = 768` rows.
+
 ### 2026-05-27 local-uncommitted: upper-medium k768 SME direct edge accepted
 
 The upper side of the medium rectangle already used SME direct-`B` for

@@ -46,9 +46,13 @@ These rules summarize repeated findings from the optimization timeline. They are
   below `m = 160`, below `k = 768`, or to `k = 2048/3072`; current guards were
   neutral/noisy or regressions.
 - The upper-medium `m = 416/448/480` rectangle uses SME direct-`B` for
-  `n = 1280/1344/1408/1472`, `768 <= k <= 1152`. Keep `m = 512`, `n = 1216`,
+  `n = 1280/1344/1408/1472`, `768 <= k <= 1152`. Keep `n = 1216`,
   `n = 1536`, and `k < 768` off this edge; repeat-301 confirmed the target
   band while those guards stayed neutral/noisy or behavior-identical.
+- For `m = 512/544/576`, use SME direct-`B` only at
+  `n = 1280/1344/1408` and `k = 768/832/960`, plus the older exact
+  `512x1280x1536` exception. Keep `n = 1472`, `m = 608`, and other K points
+  off this edge without fresh paired evidence.
 - For `n = 1536`, use the same SME direct-`B` path only for
   `m = 160/192/224/256/288/320`, `832 <= k <= 1152`. Keep `m = 352/384`,
   `k = 768`, and `k = 1536` off this narrow edge; confirmation found mixed
