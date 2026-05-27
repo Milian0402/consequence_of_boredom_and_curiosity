@@ -22,6 +22,28 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: n1600 lower-height SME direct edge accepted
+
+The lower-height medium edge now reaches `n = 1600` for
+`m = 160/192/224/256` at all tested 64-step K points from `832` through
+`1152`. The dispatcher keeps this wider edge narrower than the `n = 1536`
+route because the first-pass `m = 288/320` rows were mixed.
+
+A repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-n1600-low-sme.c` showed the lower
+subset positive and the higher rows mixed. After narrowing the candidate to
+`m <= 256`, repeat-301, `iters=8` confirmed the shipped subset:
+`160x1600x832` median `1.5000x`, `160x1600x960` `1.5182x`,
+`160x1600x1024` `1.4776x`, `160x1600x1088` `1.5065x`, and
+`160x1600x1152` `1.5293x`. The weakest confirmed median in the shipped subset
+was `256x1600x1152` at `1.2205x`, still with a positive holdout.
+
+The guards kept the route bounded: `160x1664x832`, `256x1664x832`,
+`160x1600x1536`, `256x1600x1536`, lower neighbor `128x1600x832`, and upper
+neighbor `288x1600x832` stayed neutral/noisy or behavior-identical.
+
+Correctness coverage adds the twenty accepted `n = 1600` rows.
+
 ### 2026-05-27 local-uncommitted: n1536 low-height SME direct edge accepted
 
 The low-height medium edge now reaches `n = 1536` for
