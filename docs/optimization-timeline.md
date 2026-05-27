@@ -22,6 +22,33 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m384 medium SME direct edge accepted
+
+The lower medium edge now reaches `m = 384` for `n = 1280/1344/1408/1472` at
+all tested 64-step K points from `832` through `1152`. The exact
+`384x1280x1024` row was already on SME direct-`B`; this pass fills the rest of
+the medium rectangle while keeping higher-K and adjacent-height guards off the
+new route.
+
+A repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-m384-extra-n-sme.c` showed the new
+rows positive, with the existing exact `384x1280x1024` behavior-identical.
+Repeat-301, `iters=8` confirmed the route. Representative rows:
+`384x1280x832` median `1.2209x`, bootstrap95 `[1.2059,1.2236]`;
+`384x1280x960` `1.2434x`, bootstrap95 `[1.1876,1.2128]`;
+`384x1280x1088` `1.0835x`, bootstrap95 `[1.0976,1.1454]`;
+`384x1344x960` `1.1970x`, bootstrap95 `[1.1045,1.1663]`;
+`384x1408x1152` `1.0870x`, bootstrap95 `[1.0635,1.0999]`;
+and `384x1472x1152` `1.0443x`, bootstrap95 `[1.0615,1.1149]`.
+The strongest rows were around `1.23x`.
+
+The guards kept the rule bounded: `384x1216x832`, existing exact
+`384x1280x1536`, `384x1280x2048`, lower neighbor `352x1280x832`, and routed
+upper neighbor `416x1280x832` stayed neutral/noisy or behavior-identical.
+
+Correctness coverage adds the nineteen new `m = 384` rows; the existing
+`384x1280x1024` coverage already covered the remaining row in the rectangle.
+
 ### 2026-05-27 local-uncommitted: m416 medium SME direct edge accepted
 
 The lower medium edge now reaches `m = 416` for `n = 1280/1344/1408/1472` at
@@ -3741,7 +3768,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 312 GEMM shapes.
+coverage is 331 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
