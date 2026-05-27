@@ -22,6 +22,27 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m320 medium SME direct edge accepted
+
+The lower medium edge now reaches `m = 320` for `n = 1280/1344/1408/1472` at
+all tested 64-step K points from `832` through `1152`. The dispatcher folds
+`m = 320/352/384` into one compact SME direct-`B` gate and keeps the lower
+neighbor, `n = 1216`, and higher-K rows off this route.
+
+A repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-m320-extra-n-sme.c` showed all
+twenty candidate rows positive. Repeat-301, `iters=8` confirmed the rectangle:
+`320x1280x832` median `1.2629x`, `320x1280x960` `1.2639x`,
+`320x1280x1024` `1.2654x`, `320x1280x1088` `1.2689x`, and
+`320x1280x1152` `1.3009x`. The weakest confirmed median in the rectangle was
+`320x1408x1088` at `1.1006x`, still with a positive holdout.
+
+The guards kept the route bounded: `320x1216x832`, `320x1280x1536`,
+`320x1280x2048`, lower neighbor `288x1280x832`, and routed upper neighbor
+`352x1280x832` stayed neutral/noisy or behavior-identical.
+
+Correctness coverage adds the twenty accepted `m = 320` rows.
+
 ### 2026-05-27 local-uncommitted: m352 medium SME direct edge accepted
 
 The lower medium edge now reaches `m = 352` for `n = 1280/1344/1408/1472` at
@@ -3790,7 +3811,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 351 GEMM shapes.
+coverage is 371 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

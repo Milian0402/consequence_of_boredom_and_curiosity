@@ -40,7 +40,7 @@ These rules summarize repeated findings from the optimization timeline. They are
 - One-shot `n = 1024` via public packed-B or direct SME routes has generally
   not beaten the current path, except exact `512x1024x1536`, which should use
   SME direct-B.
-- The low-height `m = 352/384` medium rectangles now use SME direct-`B` for
+- The low-height `m = 320/352/384` medium rectangles now use SME direct-`B` for
   `n = 1280/1344/1408/1472`, `832 <= k <= 1152`, alongside the older exact
   `384x1280x1536` exception. Do not broaden this to lower `m` or
   `k = 2048/3072`; current guards were neutral/noisy or regressions.
