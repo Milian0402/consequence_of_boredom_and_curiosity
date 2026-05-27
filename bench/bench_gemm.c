@@ -466,21 +466,21 @@ static int cob_sme_direct_extra_n_shape(int m, int n, int k)
     }
     if (m == 768) {
         if (n == 1280) {
-            return k == 832 || k == 960;
+            return k == 768 || k == 832 || k == 960;
         }
         if (n == 1344 || n == 1408) {
-            return k >= 832 && k <= 1152;
+            return k >= 768 && k <= 1152;
         }
-        return n == 1472 && k == 832;
+        return n == 1472 && (k == 768 || k == 832);
     }
     if (m == 800) {
         if (n == 1280) {
-            return k == 832 || k == 960;
+            return k == 768 || k == 832 || k == 960;
         }
         if (n == 1344 || n == 1408) {
-            return k >= 832 && k <= 1152;
+            return k >= 768 && k <= 1152;
         }
-        return n == 1472 && k == 832;
+        return n == 1472 && (k == 768 || k == 832);
     }
     if (m == 992) {
         if (n == 1280) {

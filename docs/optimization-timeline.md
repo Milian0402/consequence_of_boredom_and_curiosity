@@ -22,6 +22,27 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m768-800 k768 SME direct edge accepted
+
+The `m = 768/800` exact medium rules now include `k = 768` at
+`n = 1280/1344/1408/1472`, matching the accepted `k = 832` N coverage while
+leaving wider `n = 1536`, lower `k = 704`, and upper neighbor `m = 832`
+untouched.
+
+A repeat-101 screen was positive on all eight candidates. Repeat-301 with
+`iters=8` confirmed the band: `768x1280x768` median `1.1259x`,
+`768x1344x768` `1.0416x`, `768x1408x768` `1.1013x`,
+`768x1472x768` `1.1148x`, `800x1280x768` `1.1186x`,
+`800x1344x768` `1.0834x`, `800x1408x768` `1.0970x`, and
+`800x1472x768` `1.1162x`. The weakest row still had a positive holdout:
+`768x1344x768` holdout median `1.0409x`.
+
+The guards kept the route bounded: `832x1280x768`, `768x1536x768`,
+`800x1536x768`, `k = 704` rows, and already-routed `k = 832` rows stayed
+neutral/noisy or behavior-identical.
+
+Correctness coverage adds the eight accepted `m = 768/800, k = 768` rows.
+
 ### 2026-05-27 local-uncommitted: m608-736 k768 SME direct edge accepted
 
 The next routed medium cluster now reaches down to `k = 768` at the same

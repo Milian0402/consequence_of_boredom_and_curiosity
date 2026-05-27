@@ -58,6 +58,9 @@ These rules summarize repeated findings from the optimization timeline. They are
   `704x1280/1344/1408`, and `736x1280/1344/1408`. At `672x1344`, use only
   `k = 768/832`. Keep `608x1344`, `m = 768`, `n = 1472`, and `k < 768` off
   this edge.
+- For `m = 768/800`, include `k = 768` at `n = 1280/1344/1408/1472`.
+  Keep `m = 832`, `n = 1536`, and `k < 768` off this low-K extension unless a
+  separate paired run proves them.
 - For `n = 1536`, use the same SME direct-`B` path only for
   `m = 160/192/224/256/288/320`, `832 <= k <= 1152`. Keep `m = 352/384`,
   `k = 768`, and `k = 1536` off this narrow edge; confirmation found mixed
