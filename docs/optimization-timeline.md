@@ -22,10 +22,39 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m416 medium SME direct edge accepted
+
+The lower medium edge now reaches `m = 416` for `n = 1280/1344/1408/1472` at
+all tested 64-step K points from `832` through `1152`. The dispatcher now folds
+the accepted `m = 416/448/480` rectangles into one compact SME direct-`B`
+gate.
+
+A repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-m416-extra-n-sme.c` showed all
+twenty candidate rows positive. Repeat-301, `iters=8` confirmed the full range:
+the weakest full-run row, `416x1344x1152`, still had median `1.0897x` with
+bootstrap95 `[1.0514,1.0888]`, while the strongest rows were around
+`1.24x`. A focused repeat-301 rerun confirmed the noisy `n = 1472` tail:
+`416x1472x960` median `1.2032x`, `416x1472x1024` `1.2169x`,
+`416x1472x1088` `1.2208x`, and `416x1472x1152` `1.2139x`, all with positive
+holdouts.
+
+The guards kept the route bounded: `416x1216x832`, `416x1280x1536`,
+`384x1280x832`, and routed neighbor `448x1280x832` stayed neutral/noisy or
+behavior-identical after the compact gate rewrite.
+
+The same pass filled the missing `k = 1024/1088` correctness coverage for the
+already accepted `m = 448/480` broad gates. A repeat-301 audit against
+`/private/tmp/cob-next-audit/gemm-baseline-m480-extra-n-sme.c` confirmed all
+sixteen intermediate rows, with medians from `1.1594x` to `1.2248x`.
+
+Correctness coverage adds the twenty accepted `m = 416` rows plus sixteen
+intermediate-K rows for `m = 448/480`.
+
 ### 2026-05-27 local-uncommitted: m448 medium SME direct edge accepted
 
 The lower medium edge now reaches `m = 448` for `n = 1280/1344/1408/1472` at
-`k = 832/960/1152`, matching the accepted `m = 480` rectangle.
+`k = 832/960/1024/1088/1152`, matching the accepted `m = 480` rectangle.
 
 A broad repeat-101 screen against
 `/private/tmp/cob-next-audit/gemm-baseline-m448-extra-n-sme.c` showed all
@@ -47,12 +76,14 @@ The guards kept the route bounded: `448x1216x832`, `448x1280x1536`,
 `416x1280x832`, and `480x1280x832` stayed neutral/noisy or
 behavior-identical.
 
-Correctness coverage adds the twelve accepted `m = 448` rows.
+Correctness coverage initially added the twelve edge `m = 448` rows; the
+`k = 1024/1088` rows were filled in by the later m416 pass.
 
 ### 2026-05-27 local-uncommitted: m480 medium SME direct edge accepted
 
 The lower medium edge now reaches `m = 480` for `n = 1280/1344/1408/1472` at
-`k = 832/960/1152`, routing the full tested rectangle through SME direct-`B`.
+`k = 832/960/1024/1088/1152`, routing the full tested rectangle through SME
+direct-`B`.
 
 A broad repeat-101 screen against
 `/private/tmp/cob-next-audit/gemm-baseline-m480-extra-n-sme.c` showed all
@@ -74,7 +105,8 @@ The guards kept the route bounded: `480x1216x832`, `480x1280x1536`,
 `448x1280x832`, and `512x1280x832` stayed neutral/noisy or
 behavior-identical.
 
-Correctness coverage adds the twelve accepted `m = 480` rows.
+Correctness coverage initially added the twelve edge `m = 480` rows; the
+`k = 1024/1088` rows were filled in by the later m416 pass.
 
 ### 2026-05-27 local-uncommitted: m512 medium SME direct edge accepted
 
@@ -3709,7 +3741,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 276 GEMM shapes.
+coverage is 312 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 
