@@ -48,7 +48,9 @@ These rules summarize repeated findings from the optimization timeline. They are
 - For `n = 1536`, use the same SME direct-`B` path only for
   `m = 160/192/224/256/288/320`, `832 <= k <= 1152`. Keep `m = 352/384`,
   `n = 1600`, and `k = 1536` off this narrow edge; confirmation found mixed
-  holdouts and a clear `352x1536x1024` regression.
+  holdouts and a clear `352x1536x1024` regression. Do not extend this to the
+  upper medium `m = 416/448/480` band; the `n = 1536` probe regressed from
+  `k = 1024` upward and was noisy even at the low-K edge.
 - Exact `384x512x3072` may use SME direct for one-shot GEMM. Do not extend the
   rule to `n = 768` or `n = 1024` without new cold holdout proof; the current
   `n = 768` rerun lost its holdout and `n = 1024` was a hard regression.
