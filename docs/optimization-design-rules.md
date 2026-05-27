@@ -47,8 +47,9 @@ These rules summarize repeated findings from the optimization timeline. They are
   neutral/noisy or regressions.
 - For `n = 1536`, use the same SME direct-`B` path only for
   `m = 160/192/224/256/288/320`, `832 <= k <= 1152`. Keep `m = 352/384`,
-  and `k = 1536` off this narrow edge; confirmation found mixed holdouts and
-  a clear `352x1536x1024` regression. Do not extend this to the upper medium
+  `k = 768`, and `k = 1536` off this narrow edge; confirmation found mixed
+  holdouts and a clear `352x1536x1024` regression, while the colder `k = 768`
+  probe regressed `192..320`. Do not extend this to the upper medium
   `m = 416/448/480` band; the `n = 1536` probe regressed from `k = 1024`
   upward and was noisy even at the low-K edge.
 - For `n = 1600`, use SME direct-`B` only for `m = 160/192/224/256`,

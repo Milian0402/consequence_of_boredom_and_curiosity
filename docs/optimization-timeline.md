@@ -22,6 +22,22 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: n1536 k768 SME direct edge rejected
+
+The next natural edge after the accepted `n = 1280..1472, k = 768` rectangle
+was lowering the narrow `n = 1536` route from `k >= 832` to `k >= 768` for
+`m = 160/192/224/256/288/320`.
+
+A repeat-101 screen looked encouraging, with all six candidate rows above
+`1.06x` median and neutral guards. A colder repeat-301 with `iters=8` rejected
+the route: `192x1536x768` fell to median `0.9706x`, `224x1536x768` to
+`0.9261x`, `256x1536x768` to `0.8920x`, `288x1536x768` to `0.8737x`, and
+`320x1536x768` to `0.8393x`, all with negative holdouts. The `160` row was
+too noisy to rescue as an exact exception: full median `1.0301x`, holdout
+`0.9433x`, sign-test `p = 0.134`.
+
+Keep the `n = 1536` low-height SME direct edge at `832 <= k <= 1152`.
+
 ### 2026-05-27 local-uncommitted: k768 low-height SME direct edge accepted
 
 The low-height medium rectangle now reaches down to `k = 768` for
