@@ -9,6 +9,10 @@ These rules summarize repeated findings from the optimization timeline. They are
 - Check the split-half holdout line before shipping a small change. If the full-run result looks positive but the reporting half is neutral or reversed, rerun cold instead of tuning a gate from that sample.
 - Prefer candidates whose bootstrap interval and sign-test p-value agree. If they disagree, rerun instead of shipping the change.
 - Recheck any candidate win in a fresh process before committing a performance route.
+- Use `COB_BENCH_ITERS` for short standalone benchmark rows whose single-call
+  timings show large best-vs-median drops; otherwise prefer paired A/B with
+  `COB_AB_ITERS`. Avoid applying high forced-iteration counts to broad hot
+  grids without cooldown; use them for focused reruns of suspect rows.
 - Use `COB_AB_A_FLAGS` / `COB_AB_B_FLAGS` for compile-time threshold or constant sweeps before forking source; it keeps A/B probes cheap and reproducible.
 - Use `COB_AB_MODE=packed` for public packed-B probes and
   `COB_AB_MODE=packed-AB` for fully prepacked A+B probes; do not validate
@@ -61,6 +65,18 @@ These rules summarize repeated findings from the optimization timeline. They are
 - For `m = 768/800`, include `k = 768` at `n = 1280/1344/1408/1472`.
   Keep `m = 832`, `n = 1536`, and `k < 768` off this low-K extension unless a
   separate paired run proves them.
+- For `m = 832..960`, include `k = 768` at `n = 1280/1344/1408/1472` except
+  `928x1280x768`. Keep `m = 992`, `n = 1536`, and `k < 768` off this edge;
+  the excluded `928x1280x768` row had conflicting full-audit evidence.
+- Keep the existing `m = 832..960, k >= 832` SME direct fallback. A low-repeat
+  frontier scan made some rows look weak, but paired removal regressed
+  `960x1280x832` hard and did not produce a stable win elsewhere.
+- Do not extend the medium `k = 768` SME direct edge to `m >= 992` as a
+  cluster. The `m = 992..1184` screen had multiple hard regressions, especially
+  around `n = 1344/1472` and `m = 1056/1120/1152`.
+- Do not remove exact `1088x1280x832` or `1120x1344x832` from SME direct based
+  on low-repeat gap scans. Paired route-removal testing regressed both rows
+  hard.
 - For `n = 1536`, use the same SME direct-`B` path only for
   `m = 160/192/224/256/288/320`, `832 <= k <= 1152`. Keep `m = 352/384`,
   `k = 768`, and `k = 1536` off this narrow edge; confirmation found mixed
@@ -80,9 +96,13 @@ These rules summarize repeated findings from the optimization timeline. They are
   `n = 512` guards stayed neutral/noisy, so keep this gate exact.
 - Increasing expression-level unrolling in the C SME packed-B kernel did not beat the compiler's current schedule.
 - m=64 B-reuse changes are shape-sensitive; do not assume a NC/KC knob alone will close the MpGEMM gap.
-- For wide `m = 64, k = 2048` B-reuse, use the tuple-prefetch pack helper.
-  This improved the remaining `64x7168x2048` MpGEMM calibration gap and nearby
-  `n = 4160..8192` rows. Keep the current `NC=512` and `WIDE_KC=1024`: probes
+- For wide `m = 64`, use the tuple-prefetch pack helper for
+  `k = 1536, n = 5120..7680` at 64-column multiples, plus the broad `k = 2048`
+  band. This improved the remaining `64x7168x2048` MpGEMM calibration gap and
+  nearby `n = 4160..8192` rows, while the `k = 1536` mid-wide band held up
+  across both 512-column and in-between widths with `n = 5056/7744/8704` guards
+  neutral or negative and `n = 8192` rejected as conflicted. Keep the current
+  `NC=512` and `WIDE_KC=1024`: probes
   at `WIDE_KC=768/1536/2048` and `NC=256/768` were neutral or regressive on
   the target/guard set, and the small exact `64x4160x1536` tight-NC win was too
   weak for another dispatch exception. Keep the shared pack-prefetch distance
@@ -110,12 +130,15 @@ These rules summarize repeated findings from the optimization timeline. They are
   `n <= 4096`; at `k = 1536`, keep exact `n = 1024` plus the narrower
   `n >= 1408` gate because `n = 1088..1280` regressed or stayed noisy.
   Do not route exact `64x1024x1536` through one-shot packed AMX; it is a hard
-  regression against the SME route.
+  regression against the SME route. Do not route exact `64x2048x512` through
+  one-shot packed AMX based on noisy standalone medians; paired route removal
+  was neutral/noisy.
 - For `m = 64, k = 512`, the SME B-reuse route is useful from `n >= 4096` and
   at the mid-width `n = 2048/2560/3072/3584` multiples of 512. Do not lower the
   threshold for all `n >= 2048`; `n = 2112/2304` regressed hard in the broad
   threshold probe. Keep exact `n = 1024` on AMX; the SME exact probe had weak
-  holdout and noisy behavior-identical guards.
+  holdout and noisy behavior-identical guards. Keep `64x32768x512` on SME
+  B-reuse; forcing it to the fallback path was a hard regression.
 - For `m = 64, k = 2048`, `KC=1024` is useful only in the low-width SME skinny
   band currently gated as `n = 1088..1280` plus `n = 1600`. Global
   `COB_SGEMM_SKINNY_SME_KC=384/768/1024` probes regressed important high-`K`

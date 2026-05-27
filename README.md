@@ -74,6 +74,8 @@ On macOS the benchmark also builds an Apple Accelerate comparison when the
 framework is available. The benchmark allocates aligned matrices so it measures
 the fastest AMX output path. Set `COB_BENCH_REPEATS` to use more benchmark
 repeats for noisier large shapes, for example `COB_BENCH_REPEATS=11`.
+Set `COB_BENCH_ITERS` to force multiple GEMM calls per timed sample when short
+shapes are too noisy for single-call timing.
 Arguments can be square sizes (`512`) or rectangular `MxNxK` shapes
 (`832x960x896`).
 Set `COB_BENCH_PACK_SETUP=1` to also print the one-time packed-`B` setup cost.

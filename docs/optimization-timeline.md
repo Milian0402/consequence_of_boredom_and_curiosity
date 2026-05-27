@@ -22,6 +22,171 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: mid-wide k1536 tuple-prefetch accepted
+
+The m64 wide B-reuse tuple-prefetch helper already covered the broad `k = 2048`
+band, exact `24576x1536`, and exact `7168` at high K. Fresh narrow probes
+tested whether mid-wide `k = 1536` rows should join that list without reopening
+the previously rejected broad `k = 1536` rules.
+
+The first repeat-201, `iters=8` paired A/B in
+`/private/tmp/cob-next-audit/n7168-k1536-prefetch-r201-i8.log` was promising
+but still noisy: target median `1.0328x`, holdout `1.0428x`, with neutral
+guards at `6144`, `8192`, `7168x2048`, `24576x1536`, and `32768x1536`.
+The narrower repeat-301, `iters=16` confirmation in
+`/private/tmp/cob-next-audit/n7168-k1536-prefetch-target-r301-i16.log`
+promoted the exact route: `64x7168x1536` median `1.0719x`, bootstrap95
+`[1.0391x, 1.1101x]`, holdout median `1.0704x`, B-faster `217/301`, sign-p
+`1.01e-14`. Neighbor guards stayed neutral/noisy: `64x6144x1536` median
+`1.0003x`, `64x8192x1536` `0.9951x`.
+
+The follow-up broader repeat-151, `iters=8` sweep in
+`/private/tmp/cob-next-audit/k1536-near7168-prefetch-r151-i8.log` found the
+useful band was wider than the original exact row, then repeat-301,
+`iters=16` confirmation in
+`/private/tmp/cob-next-audit/k1536-near7168-prefetch-r301-i16.log` promoted
+`n = 5120/5632/6144/6656/7168/7680` at `k = 1536`: medians ranged from
+`1.0360x` to `1.0647x`, all with positive bootstrap intervals and holdouts.
+The adjacent guards stayed out: `64x4608x1536` was neutral, `64x8704x1536` was
+neutral, and `64x8192x1536` was rejected because its median looked positive
+but mean-log, bootstrap, and holdout were negative.
+
+The next all-64-column screen in
+`/private/tmp/cob-next-audit/k1536-midwide-all64-prefetch-r151-i8.log` showed
+the in-between widths were the larger opportunity: `64x5184x1536` through
+`64x7616x1536` landed around `1.19..1.22x`, while the outside guards
+`64x5056x1536` and `64x7744x1536` stayed negative or neutral. The repeat-301,
+`iters=16` confirmation in
+`/private/tmp/cob-next-audit/k1536-midwide-all64-prefetch-r301-i16.log`
+accepted the whole `n = 5120..7680` 64-column band: representative medians
+were `64x5184x1536` `1.2049x`, `64x6208x1536` `1.2141x`,
+`64x6976x1536` `1.2144x`, and `64x7616x1536` `1.2003x`; guards
+`64x5056x1536` and `64x7744x1536` remained negative or neutral.
+
+Correctness coverage adds the original 512-column multiples plus representative
+in-between rows at `n = 5184/6208/6976/7616`.
+
+### 2026-05-27 local-uncommitted: standalone benchmark iteration override added
+
+The m64 audits repeatedly showed short-shape standalone medians collapsing even
+when paired A/B told a stable route story. `bench_gemm` now accepts
+`COB_BENCH_ITERS` to force multiple GEMM calls per timed sample, matching the
+paired harness's `COB_AB_ITERS` escape hatch. Claim-audit context records the
+override when it is set, so future noisy skinny scans can distinguish
+single-call jitter from real route gaps.
+
+A full skinny audit with `COB_BENCH_ITERS=8` at
+`/private/tmp/cob-skinny-audit-20260527-iters8` over-heated or otherwise
+destabilized the longest rows and created false gaps. Focused repeat-31 reruns
+in `/private/tmp/cob-next-audit/skinny-iters8-audit-suspects-focused-r31.txt`
+cleared the obvious examples: `64x3840x7168` COB one-shot median `927.41 GF/s`
+versus Accelerate `757.68 GF/s`, and `64x4032x7168` `1295.92 GF/s` versus
+Accelerate `1100.19 GF/s`. Use forced iterations for focused suspects, not as
+a blanket setting for broad hot grids without cooldown.
+
+### 2026-05-27 local-uncommitted: m64 calibration refreshed, fallback removals rejected
+
+After the medium-route checkpoint, the MpGEMM calibration was refreshed at
+`/private/tmp/cob-mpgemm-calibration-20260527-post-medium` against MpGEMM
+commit `8d83011`. No `LICENSE*` or `COPYING*` file was found within depth 2,
+so MpGEMM remains a source-available calibration target rather than part of the
+licensed/open-source claim.
+
+The repeat-31 COB one-shot run beat MpGEMM `row_sgemm` on most default
+calibration rows, but two rows needed follow-up. `64x24576x1536` had a bad
+repeat-31 median (`845.76 GF/s`), then repeat-101 recovered to `1062.64 GF/s`,
+slightly above MpGEMM `row_sgemm` at `1055.91 GF/s`. `64x32768x512` remained
+noisy: repeat-101 showed best `892.92 GF/s` versus MpGEMM `898.15 GF/s`, but
+median collapsed to `601.87 GF/s`.
+
+Dispatching away from the current m64 SME routes did not fix those noisy gaps.
+For the skinny audit suspects, forcing `64x2048x512` and `64x1024x1536` off
+SME direct in
+`/private/tmp/cob-next-audit/m64-skinny-direct-removal-r301-i32.log` left
+`64x2048x512` neutral/noisy at `0.9847x` and regressed `64x1024x1536` hard at
+`0.9242x`. For the long-N K512 suspect, forcing `64x32768x512` off SME reuse
+in `/private/tmp/cob-next-audit/m64-32768-k512-reuse-removal-r301-i16.log`
+regressed the target to `0.3412x`. Keep the existing SME direct/reuse routes;
+the remaining m64 issue is measurement stability or a deeper kernel/scheduling
+problem, not an AMX fallback dispatch win.
+
+### 2026-05-27 local-uncommitted: low-medium k832 SME removal rejected
+
+A repeat-11 frontier scan made several existing `k = 832` SME direct rows look
+weak, but the scan also had large best-vs-median collapses, so it was treated
+only as a lead. The follow-up removed `832x1280x832`, `896x1280x832`,
+`896x1344x832`, and `960x1280x832` from SME direct as one narrow candidate.
+
+The paired repeat-101 audit in
+`/private/tmp/cob-next-audit/k832-low-medium-removal2-r101.log` did not support
+the removal. `960x1280x832` regressed hard at median `0.9096x` with holdout
+`0.9085x`; `896x1344x832` leaned negative at `0.9780x`; and the only
+apparently positive row, `832x1280x832`, was noisy and not significant. Keep
+the existing `m = 832..960, k >= 832` SME direct fallback.
+
+### 2026-05-27 local-uncommitted: k832 SME direct removal rejected
+
+The medium-frontier repeat-3 gap scan made `1088x1280x832` and
+`1120x1344x832` look suspicious, so the exact SME direct routes were tested by
+removing only those two rows from the predicate.
+
+The paired repeat-101 audit in
+`/private/tmp/cob-next-audit/k832-sme-removal-screen-r101.log` rejected the
+removal clearly: `1088x1280x832` dropped to median `0.9213x` with holdout
+`0.9214x`, and `1120x1344x832` dropped to `0.9417x` with holdout `0.9382x`.
+Keep both existing SME direct routes. The low-repeat gap scan was misleading.
+
+### 2026-05-27 local-uncommitted: m992-1184 k768 SME direct edge rejected
+
+The next higher exact medium cluster was screened after the accepted
+`m = 832..960` local candidate, testing `k = 768` only at N points that already
+had nearby `k = 832/960` SME direct coverage.
+
+The repeat-101 screen in
+`/private/tmp/cob-next-audit/m992-1184-k768-screen-r101.log` rejected the
+candidate clearly. Several rows regressed hard: `992x1344x768` median
+`0.9124x`, `992x1472x768` `0.9135x`, `1056x1280x768` `0.7489x`,
+`1056x1472x768` `0.8886x`, `1088x1344x768` `0.8332x`,
+`1120x1280x768` `0.8006x`, and `1152x1280x768` `0.6496x`, with matching
+negative holdouts. No part of this cluster is promoted.
+
+Keep `m >= 992` on its current `k >= 832` medium rules unless a future probe is
+much narrower and has cold paired evidence.
+
+### 2026-05-27 local-uncommitted: m832-960 k768 SME direct edge accepted with one hole
+
+The broad `m = 832..960` SME direct fallback was tested at the lower
+`k = 768` edge for `n = 1280/1344/1408/1472`. The shipped candidate keeps the
+extension explicit and leaves `928x1280x768` on AMX because independent full
+audits disagreed on that row.
+
+The repeat-101 screen was positive on all twenty candidates. The first
+repeat-301 full pass was truncated in the terminal and showed contradictory
+noise, including a bad-looking `960x1408x768` sample. A focused repeat-301
+suspect rerun in
+`/private/tmp/cob-next-audit/m832-960-k768-suspects-r301.log` recovered those
+rows strongly. A fresh full repeat-301 audit saved at
+`/private/tmp/cob-next-audit/m832-960-k768-full-r301b.log` confirmed nineteen
+of the twenty rows: representative medians were `832x1280x768` `1.0696x`,
+`832x1472x768` `1.0901x`, `864x1280x768` `1.1123x`, `896x1472x768`
+`1.0682x`, `928x1472x768` `1.0833x`, `960x1280x768` `1.1104x`, and
+`960x1408x768` `1.1070x`.
+
+A final paired repeat-301 rerun after the noisy frontier scan, saved at
+`/private/tmp/cob-next-audit/m832-960-k768-final-r301.log`, reconfirmed the
+decision on a target/guard subset: `832x1280x768` `1.1157x`,
+`896x1280x768` `1.1024x`, `960x1280x768` `1.1004x`, and `960x1344x768`
+`1.0717x`; `928x1280x768`, `992x1280x768`, `832x1536x768`, and
+`832x1280x704` stayed neutral.
+
+`928x1280x768` is deliberately not routed: the focused rerun measured it at
+`1.1208x`, but the fresh full audit measured median `0.9981x` with bootstrap95
+`[0.9721x, 0.9986x]`. The guards kept the route bounded: `992x1280x768`,
+`n = 1536`, `k = 704`, and already-routed `k = 832` rows stayed neutral/noisy
+or behavior-identical.
+
+Correctness coverage adds the nineteen accepted `m = 832..960, k = 768` rows.
+
 ### 2026-05-27 local-uncommitted: m768-800 k768 SME direct edge accepted
 
 The `m = 768/800` exact medium rules now include `k = 768` at

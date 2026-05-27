@@ -47,6 +47,7 @@ write_context() {
         done
         echo "bench=$BENCH"
         echo "repeats=$REPEATS"
+        echo "bench_iters=${COB_BENCH_ITERS:-auto}"
         echo "batch=$BATCH"
         echo "cooldown_sec=$COOLDOWN_SEC"
         echo "sanity_drop_percent=$SANITY_DROP"

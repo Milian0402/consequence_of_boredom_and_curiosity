@@ -219,8 +219,15 @@ static int shape_max_dim(bench_shape shape)
     return max_dim;
 }
 
+static int env_int_clamped(const char* name, int fallback, int min_value, int max_value);
+
 static int timed_iterations(bench_shape shape)
 {
+    const int forced = env_int_clamped("COB_BENCH_ITERS", 0, 0, 100000000);
+    if (forced > 0) {
+        return forced;
+    }
+
     const int n = shape_max_dim(shape);
     if (n <= 64) {
         return 8192;
@@ -532,6 +539,9 @@ static int cob_sme_direct_extra_n_shape(int m, int n, int k)
     }
     if (m == 1184) {
         return n == 1280 && (k == 832 || k == 960);
+    }
+    if (k == 768 && m >= 832 && m <= 960 && !(m == 928 && n == 1280)) {
+        return 1;
     }
     if (m >= 832 && m <= 960 && k >= 832 && k <= 1152) {
         return 1;
