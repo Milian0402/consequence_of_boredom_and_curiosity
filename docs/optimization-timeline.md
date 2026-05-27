@@ -22,6 +22,27 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m288 medium SME direct edge accepted
+
+The lower medium edge now reaches `m = 288` for `n = 1280/1344/1408/1472` at
+all tested 64-step K points from `832` through `1152`. The dispatcher folds
+`m = 288/320/352/384` into one compact SME direct-`B` gate and keeps the lower
+neighbor, `n = 1216`, and higher-K rows off this route.
+
+A repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-m288-extra-n-sme.c` showed all
+twenty candidate rows positive. Repeat-301, `iters=8` confirmed the rectangle:
+`288x1280x832` median `1.3090x`, `288x1280x960` `1.2894x`,
+`288x1280x1024` `1.2899x`, `288x1280x1088` `1.3074x`, and
+`288x1280x1152` `1.2966x`. The weakest confirmed median in the rectangle was
+`288x1344x832` at `1.2367x`, still with a positive holdout.
+
+The guards kept the route bounded: `288x1216x832`, `288x1280x1536`,
+`288x1280x2048`, lower neighbor `256x1280x832`, and routed upper neighbor
+`320x1280x832` stayed neutral/noisy or behavior-identical.
+
+Correctness coverage adds the twenty accepted `m = 288` rows.
+
 ### 2026-05-27 local-uncommitted: m320 medium SME direct edge accepted
 
 The lower medium edge now reaches `m = 320` for `n = 1280/1344/1408/1472` at
