@@ -22,6 +22,30 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: n1536 low-height SME direct edge accepted
+
+The low-height medium edge now reaches `n = 1536` for
+`m = 160/192/224/256/288/320` at all tested 64-step K points from `832`
+through `1152`. The dispatcher keeps the broader `m = 160..384` route capped
+at `n = 1472`, then adds a narrower `n = 1536` gate only for `m <= 320`.
+
+A repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-n1536-extra-n-sme.c` showed the
+candidate broadly positive but weak at the high-m edge. Repeat-301, `iters=8`
+confirmed the shipped subset: `160x1536x832` median `1.3267x`,
+`160x1536x960` `1.2940x`, `160x1536x1024` `1.2989x`,
+`160x1536x1088` `1.3342x`, and `160x1536x1152` `1.3432x`. The weakest
+confirmed median in the shipped subset was `256x1536x832` at `1.0993x`, still
+with a positive holdout.
+
+The guards kept the route bounded: `160x1600x832`, `384x1600x832`,
+`160x1536x1536`, `384x1536x1536`, lower neighbor `128x1536x832`, and upper
+neighbor `416x1536x832` stayed neutral/noisy or behavior-identical. The
+`m = 352/384` `n = 1536` rows stay off this gate after mixed confirmation,
+including a clear `352x1536x1024` regression.
+
+Correctness coverage adds the thirty accepted `n = 1536` rows.
+
 ### 2026-05-27 local-uncommitted: m160 medium SME direct edge accepted
 
 The lower medium edge now reaches `m = 160` for `n = 1280/1344/1408/1472` at
