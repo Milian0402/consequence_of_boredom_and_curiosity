@@ -22,6 +22,25 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: n1600 k768 SME direct edge accepted
+
+After the `n = 1536, k = 768` rejection, the already-narrow `n = 1600` edge
+was tested separately for `m = 160/192/224/256`. Lowering only that existing
+band from `k >= 832` to `k >= 768` held up.
+
+A repeat-101 screen showed all four candidate rows strongly positive. The
+repeat-301 confirmation with `iters=8` kept the full target set well clear:
+`160x1600x768` median `1.4841x`, `192x1600x768` `1.3066x`,
+`224x1600x768` `1.2935x`, and `256x1600x768` `1.2579x`. Holdouts remained
+positive on all four rows, with the weakest at `256x1600x768` median `1.2700x`.
+
+The guards kept the route bounded: `288x1600x768`, `160x1600x704`,
+`256x1600x704`, lower neighbor `128x1600x768`, wider `n = 1664` rows,
+nearby `n = 1536` rows, and already-routed `k = 832` rows stayed
+neutral/noisy or behavior-identical.
+
+Correctness coverage adds the four accepted `n = 1600, k = 768` rows.
+
 ### 2026-05-27 local-uncommitted: n1536 k768 SME direct edge rejected
 
 The next natural edge after the accepted `n = 1280..1472, k = 768` rectangle
