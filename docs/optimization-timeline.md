@@ -22,6 +22,29 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: m576 medium SME direct edge accepted
+
+The lower medium edge extends to `m = 576` for `n = 1280/1344/1408` at
+`k = 832/960`, while keeping `k = 1152` and `n = 1472` on the packed route.
+
+A repeat-101 screen against
+`/private/tmp/cob-next-audit/gemm-baseline-m576-extra-n-sme.c` showed all six
+candidate rows positive. Repeat-301, `iters=8` confirmed the route:
+`576x1280x832` median `1.1806x`, bootstrap95 `[1.1880,1.2871]`;
+`576x1280x960` `1.1687x`, bootstrap95 `[1.1013,1.1947]`;
+`576x1344x832` `1.1431x`, bootstrap95 `[1.1232,1.1938]`;
+`576x1344x960` `1.1439x`, bootstrap95 `[1.1122,1.1931]`;
+`576x1408x832` `1.1573x`, bootstrap95 `[1.1013,1.1814]`; and
+`576x1408x960` `1.1799x`, bootstrap95 `[1.1498,1.2247]`.
+
+The guards kept the route bounded: `576x1280x1152`, `576x1344x1152`,
+`576x1408x1152`, and `576x1472x832` stayed neutral/noisy. Existing upper
+neighbor `608x1280x832` stayed behavior-identical/noisy; lower neighbor
+`544x1280x832` showed positive no-route noise, so it is left for a separate
+direct probe rather than included here.
+
+Correctness coverage adds the six accepted `m = 576` rows.
+
 ### 2026-05-27 local-uncommitted: m608 medium SME direct edge accepted
 
 The lower medium edge extends below `m = 640`, but only for exact
@@ -3588,7 +3611,7 @@ epilogue branch hoisting, broad compiler unrolling, and `-mcpu=native` were all
 neutral, noisy, or regressive. The remaining gap is therefore still best treated
 as an SME kernel scheduling problem, likely requiring a dedicated fixed-shape
 kernel or assembly rather than more dispatch gates. Current correctness
-coverage is 234 GEMM shapes.
+coverage is 240 GEMM shapes.
 
 Historical post-`5e6da0a` rejected/probed follow-ups:
 

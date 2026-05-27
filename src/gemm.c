@@ -180,6 +180,9 @@ static int cob_sgemm_sme_direct_extra_n_shape(int m, int n, int k)
     if (m == 512 && n == 896 && k >= 832 && k <= 1536) {
         return 1;
     }
+    if (m == 576 && n >= 1280 && n <= 1408 && (k == 832 || k == 960)) {
+        return 1;
+    }
     if (m == 608) {
         return (n == 1280 || n == 1408) && (k == 832 || k == 960);
     }
