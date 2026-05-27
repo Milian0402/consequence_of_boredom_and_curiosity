@@ -45,6 +45,10 @@ These rules summarize repeated findings from the optimization timeline. They are
   alongside the older exact `384x1280x1536` exception. Do not broaden this
   below `m = 160`, below `k = 768`, or to `k = 2048/3072`; current guards were
   neutral/noisy or regressions.
+- The upper-medium `m = 416/448/480` rectangle uses SME direct-`B` for
+  `n = 1280/1344/1408/1472`, `768 <= k <= 1152`. Keep `m = 512`, `n = 1216`,
+  `n = 1536`, and `k < 768` off this edge; repeat-301 confirmed the target
+  band while those guards stayed neutral/noisy or behavior-identical.
 - For `n = 1536`, use the same SME direct-`B` path only for
   `m = 160/192/224/256/288/320`, `832 <= k <= 1152`. Keep `m = 352/384`,
   `k = 768`, and `k = 1536` off this narrow edge; confirmation found mixed

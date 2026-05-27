@@ -22,6 +22,26 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-27 local-uncommitted: upper-medium k768 SME direct edge accepted
+
+The upper side of the medium rectangle already used SME direct-`B` for
+`m = 416/448/480`, `n = 1280/1344/1408/1472`, and `832 <= k <= 1152`. Lowering
+that bounded band to `k = 768` held up cleanly.
+
+A repeat-101 screen was positive on all twelve candidate rows. Repeat-301 with
+`iters=8` confirmed the full band: representative medians were
+`416x1280x768` `1.2335x`, `416x1472x768` `1.1981x`, `448x1280x768`
+`1.2127x`, `448x1472x768` `1.1892x`, `480x1280x768` `1.2007x`, and
+`480x1472x768` `1.1809x`. The weakest confirmed target was
+`480x1344x768` at `1.1067x`, with holdout median `1.1032x`.
+
+The guards kept the route bounded: `512x1280x768`, `416x1216x768`,
+`480x1216x768`, `416x1280x704`, `480x1280x704`, `416x1536x768`,
+`480x1536x768`, and already-routed `k = 832` rows stayed neutral/noisy or
+behavior-identical.
+
+Correctness coverage adds the twelve accepted upper-medium `k = 768` rows.
+
 ### 2026-05-27 local-uncommitted: n1600 k768 SME direct edge accepted
 
 After the `n = 1536, k = 768` rejection, the already-narrow `n = 1600` edge
