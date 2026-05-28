@@ -122,6 +122,30 @@ Rejected C-level probes from this pass:
   current `MC=256` path. Exact `2048x768x3072` with `MC=384/512/768/1024`
   measured `0.9970x`, `0.9979x`, `0.9560x`, and `0.8896x`. Keep the existing
   `MC=256` rule for these rows.
+- Fresh m512 chunk-size probes still did not improve the accepted `k = 2048`
+  chunked-B route. `NC=320` was weak/noisy at `512x1152x2048` (`1.0053x`) and
+  `512x1280x2048` (`1.0046x`) with bootstrap intervals crossing `1`; accepted
+  lower widths were neutral. `NC=352` was also noisy/neutral, and `NC=640`
+  destabilized the larger rows. Keep `NC=256`.
+- Rechecking exact chunked-B routing for `512x768x3072` also confirmed the old
+  rejection. Repeat-151 measured `0.9698x`, bootstrap95 `[0.9541,0.9752]`,
+  with a negative holdout. The current packed large-block route is still better.
+- Rechecking exact SME direct for `512x768x3072` confirmed the older rejection:
+  repeat-151 measured `0.9319x`, bootstrap95 `[0.9032,0.9386]`, with a
+  negative holdout. The current AMX packed large-block route remains best.
+- Disabling SME for the current high-K `n = 512` reuse rows also reconfirmed
+  the existing boundary. `768x512x4096`, `1024x512x4096`, and
+  `1280x512x4096` all leaned negative or regressed; keep the SME reuse route.
+- For the same high-K SME reuse route, `NC=128` was neutral/noisy on
+  `768x512x4096`, `1024x512x4096`, `1280x512x4096`, and `1024x768x4096`.
+  Keep `NC=256`.
+- B-pack prefetch-distance retunes did not uncover a new m512 source win.
+  Distance `0` was a hard regression on `512x768x3072`, `512x1152x2048`, and
+  `512x1280x2048`; distance `32` leaned negative; and a repeat-251 rerun of
+  distance `96` stayed neutral/noisy on all three rows. Keep distance `64`.
+- AMX packed large-block A-panel-outer compute order was a hard regression for
+  exact `512x768x3072`: repeat-151 measured `0.9219x`, bootstrap95
+  `[0.9111,0.9284]`, with a negative holdout. Keep B-panel outer order.
 
 ### 2026-05-28 local-uncommitted: high-K n512 target recheck and rejected follow-ups
 

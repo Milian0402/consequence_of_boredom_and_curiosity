@@ -235,7 +235,7 @@ These rules summarize repeated findings from the optimization timeline. They are
   route there, and the public packed-B path is already at roughly Accelerate
   speed on `2048x512x4096`. Keep `NC=512`, `KC=512`, and `KC=2048` rejected;
   they were neutral/noisy or regressive in cooled paired probes. Follow-up
-  May 28 probes also rejected `KC=1536`, `NC=384`, and prefetching inside the
+  May 28 probes also rejected `KC=1536`, `NC=128/384`, and prefetching inside the
   reused `cob_sgemm_16x64_sme_from_packed_b64_tuple` helper. They also rejected
   scalar A packing, B-panel-major traversal of the reused packed-B tail, and
   weak/noisy `MC=1024/1536` m-blocking. Later probes also rejected a two-A-panel
@@ -309,8 +309,11 @@ These rules summarize repeated findings from the optimization timeline. They are
   retest, panel-immediate packed-B reuse, and fused AMX pack-plus-first-tile
   helpers. B-pack prefetch distances `32/96/128` also stayed neutral or
   regressive versus the current `64`; exact row-wise chunk packing and a
-  four-row unrolled panel packer regressed too. The profiler and cost split
-  point back at a deeper setup/layout issue rather than a small chunking tweak.
+  four-row unrolled panel packer regressed too. Fresh `NC=320/352/640`, exact
+  `512x768x3072` chunked-B, `512x768x3072` A-panel-outer large-block compute,
+  and B-pack prefetch distance `0/32/96` probes also failed to clear
+  validation. The profiler and cost split point back at a deeper setup/layout
+  issue rather than a small chunking tweak.
 - For one-shot `n = 1216`, use the packed path from `k >= 3072`, and also at
   exact `k = 2048` when `m >= 768`. The `m = 512, k = 2048` neighbor and
   `k = 1536` guards are neutral/noisy; `k >= 4096` is covered by the high-`K`
