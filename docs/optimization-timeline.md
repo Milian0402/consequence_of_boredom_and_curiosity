@@ -66,6 +66,77 @@ Rejected follow-up probes from this continuation:
 - Adding a packed-B prefetch inside `cob_sgemm_16x64_sme_from_packed_b64_tuple`
   was rejected. It regressed `1024x512x4096` hard (`0.8318x` median) and did not
   move `2048x512x4096`.
+- Forcing scalar A packing only inside the high-K SME reuse route was a hard
+  regression, despite A packing taking visible Time Profiler samples:
+  `1024/1536/2048x512x4096` fell to roughly `0.59x..0.61x`, and
+  `1024x768x4096` fell to `0.6777x`.
+- Reordering the reused packed-B tail to visit one 64-column B panel across all
+  remaining 16-row A panels was rejected. `2048x512x4096` measured `0.9777x`
+  with bootstrap95 `[0.9736,0.9818]`; `2048x768x4096` was similarly negative
+  at `0.9767x`.
+- M-blocking the high-K reuse route with `MC=1024` produced only weak,
+  noise-grade positives: a focused repeat-101 rerun measured `2048x512x4096`
+  at `1.0047x` with bootstrap95 `[0.9904,1.0247]`, and
+  `2048x768x4096` at `1.0064x` with bootstrap95 `[0.9997,1.0162]`. `MC=1536`
+  was negative on the main target (`0.9937x`, bootstrap95 `[0.9922,1.0066]`).
+  Do not ship this without a stronger kernel-level reason.
+- A temporary two-A-panel `16x32` reused packed-B SME helper also lost. It
+  used the four exposed ZA32 tiles for two 16-row A panels over 32 columns at a
+  time, halving packed-B vector loads but doubling A loads for the full
+  64-column tile. The tradeoff was negative: `1024x512x4096` measured
+  `0.9646x`, `2048x512x4096` `0.9595x`, and `1024x768x4096` `0.9666x`.
+- Full-B packing for the high-K small-`n` route, followed by full-`K`
+  single-store packed-B compute, was rejected. It avoided the four `KC=1024`
+  C accumulation passes but lost too much locality/setup: `1024x512x4096`
+  measured `0.8521x`, `2048x512x4096` `0.9016x`, and `1024x768x4096`
+  `0.6180x`, all with high variance.
+- Specializing the reused packed-B helper for fixed `KC=1024` was neutral/noisy:
+  `2048x512x4096` was `1.0005x` with bootstrap95 `[0.9971,1.0073]`, while
+  `1024x512x4096` and `2048x768x4096` leaned slightly negative.
+- Adding `restrict` to the hot reused helper arguments was also neutral/noisy:
+  the main `2048x512x4096` row measured `0.9994x` with bootstrap95
+  `[0.9902,1.0055]`.
+
+Assembly/codegen inspection with Apple clang 21 showed the hot reused helper is
+already close to the expected intrinsic lowering. The inner loop in
+`cob_sgemm_16x64_sme_from_packed_b64_tuple` is one packed-A vector load, one
+four-vector packed-B `ld1w`, four `fmopa` instructions, pointer bumps, and the
+loop branch. That makes more C-level spelling changes unlikely to move the
+core compute schedule.
+
+CPU Counter traces for `2048x512x4096` also did not show a CPU-front-end
+explanation for the remaining Accelerate gap. With `COB_BENCH_ITERS=128`,
+COB one-shot produced 648 steady main-thread samples over 637.23 ms with
+weighted `Instruction Processing Bottleneck` `0.7958`, `Useful` `0.2000`,
+`Instruction Delivery Bottleneck` `0.0014`, and `Discarded Bottleneck`
+`0.0030`. Accelerate produced 546 samples over 532.22 ms with processing
+`0.7899`, useful `0.1985`, delivery `0.0096`, and discarded `0.0021`.
+Interpretation: the gap is not a branch/front-end issue that another small C
+helper tweak should fix.
+
+The useful turn came from rechecking the high-K SME reuse route against the AMX
+fallback. A steady mode sweep for `2048x512x4096` showed COB packed-B already
+at Accelerate speed (`1649.39` vs `1647.69 GF/s` median) and packed-AB above
+both (`1916.70 GF/s`), while one-shot SME reuse lagged (`1493.98 GF/s`). Fresh
+cooled A/B then showed AMX fallback beating the high-K SME route on the largest
+rows:
+
+- `2048x512x4096`: AMX/SME `1.0280x`, bootstrap95 `[1.0225,1.0307]`,
+  holdout `1.0256x`.
+- `2048x768x4096`: AMX/SME `1.0458x`, bootstrap95 `[1.0282,1.0475]`,
+  holdout `1.0458x`.
+- `1536x768x4096`: AMX/SME `1.0262x`, bootstrap95 `[1.0081,1.0351]`,
+  holdout `1.0277x`.
+
+The same check did not justify cutting over the smaller rows. `768x512` and
+`768x768` favored SME, `1024x512/768` were SME or neutral, `1280x512` was
+neutral, `1280x768` was too weak/noisy to ship, and focused `1536x512` reruns
+did not clear the bar. The source route was narrowed accordingly: keep
+`sme_large_reuse` for `m = 768/1024/1280`, `n = 512/768`, plus exact
+`1536x512x4096`; let exact `1536x768x4096`, `2048x512x4096`, and
+`2048x768x4096` fall back to AMX. A post-change paired Accelerate check on
+`2048x512x4096` measured Accelerate/COB `1.0695x`, improving from the earlier
+`1.1101x` target gap but not closing it.
 
 A Time Profiler trace for `2048x512x4096` with `COB_BENCH_ITERS=64` was
 exported from `/private/tmp/cob-2048x512x4096-current-time.trace`. The

@@ -630,7 +630,7 @@ static const char* cob_one_shot_route(bench_shape shape)
         if (m == 512 && n == 1216 && k == 3072 && (n % 64) == 0) {
             return "sme_medium_reuse";
         }
-        if ((m == 768 || m == 1024 || m == 1280 || m == 1536 || m == 2048) &&
+        if ((m == 768 || m == 1024 || m == 1280 || (m == 1536 && n == 512)) &&
             (n == 512 || n == 768) && k == 4096 && (n % 64) == 0) {
             return "sme_large_reuse";
         }

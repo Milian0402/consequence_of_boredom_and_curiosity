@@ -72,7 +72,8 @@ The most important performance wins came from:
 - Small-A packed-B B-panel traversal.
 - Medium SME direct routes in the `n = 1280..1472` band.
 - One-shot SME source-`B` reuse routes for exact `512x1216x3072` and for
-  `k = 4096`, `m = 768/1024/1280/1536/2048`, `n = 512/768`.
+  selected `k = 4096`, `n = 512/768` rows up to `m = 1280`, plus exact
+  `1536x512x4096`.
 - Public packed-AB support and packed-AB traversal tuning.
 
 ## Current Limits
@@ -90,14 +91,23 @@ The most important performance wins came from:
   Accelerate and source-available competitors. The exact `512x1216x3072` row is
   neutral in the latest paired Accelerate confirmation, not a current confirmed
   loss. The clearest remaining proprietary baseline target is
-  `2048x512x4096`; a May 28 paired Accelerate rerun measured
-  Accelerate/COB median `1.1101x` with bootstrap95 `[1.0940,1.1352]`.
-  Neighboring `n = 768, k = 4096` rows stayed neutral/noisy.
+  `2048x512x4096`; after narrowing the high-K SME reuse route so this exact
+  row falls back to AMX, a May 28 paired Accelerate rerun measured
+  Accelerate/COB median `1.0695x` with bootstrap95 `[1.0688,1.0822]`. That is
+  materially better than the earlier `1.1101x` gap, but still not closed.
+  Exact `1536x768x4096` and `2048x768x4096` now also fall back to AMX because
+  paired A/B favored that route over SME reuse.
 - The next speed step is likely not another broad dispatch gate. It is probably
   a real kernel/layout change backed by Time Profiler or hardware-counter
   evidence. The latest `2048x512x4096` Time Profiler trace put most samples in
   `cob_sgemm_16x64_sme_from_packed_b64_tuple`, not the first source-B packing
-  pass.
+  pass. Follow-up probes rejected scalar A packing, B-panel-major reuse
+  traversal, weak/noisy high-K m-blocking, two-A-panel `16x32` reuse, full-B
+  single-store packing, fixed-`KC=1024` specialization, and `restrict`-only
+  codegen changes. The next useful candidate likely needs a deeper SME compute
+  schedule or packed-layout change than these C-level probes. CPU Counter
+  traces on `2048x512x4096` showed COB and Accelerate with similar CPU pipeline
+  ratios, so this does not look like a simple front-end/codegen cleanup.
 
 ## Future Work
 

@@ -227,14 +227,20 @@ These rules summarize repeated findings from the optimization timeline. They are
   row-block, block-size, and prefetch-distance probes were neutral or
   regressive. A serial paired Accelerate rerun was neutral, not proof of a
   broad Accelerate win.
-- For one-shot `k = 4096`, `m = 768/1024/1280/1536/2048`, and
-  `n = 512/768`, use the SME source-`B` reuse path with `NC=256`, `KC=1024`,
-  and the same tuple source-B prefetch helper. This route closes or neutralizes
-  several high-K medium/large Accelerate gaps without changing the public
-  packed-B API. Keep `NC=512`, `KC=512`, and `KC=2048` rejected; they were
-  neutral/noisy or regressive in cooled paired probes. Follow-up May 28 probes
-  also rejected `KC=1536`, `NC=384`, and prefetching inside the reused
-  `cob_sgemm_16x64_sme_from_packed_b64_tuple` helper. Do not resurrect the
+- For one-shot `k = 4096`, use the SME source-`B` reuse path with `NC=256`,
+  `KC=1024`, and the same tuple source-B prefetch helper for
+  `m = 768/1024/1280`, `n = 512/768`, plus exact `1536x512x4096`. Let exact
+  `1536x768x4096`, `2048x512x4096`, and `2048x768x4096` fall back to the AMX
+  packed large-block path; fresh cooled A/B showed AMX beating the SME reuse
+  route there, and the public packed-B path is already at roughly Accelerate
+  speed on `2048x512x4096`. Keep `NC=512`, `KC=512`, and `KC=2048` rejected;
+  they were neutral/noisy or regressive in cooled paired probes. Follow-up
+  May 28 probes also rejected `KC=1536`, `NC=384`, and prefetching inside the
+  reused `cob_sgemm_16x64_sme_from_packed_b64_tuple` helper. They also rejected
+  scalar A packing, B-panel-major traversal of the reused packed-B tail, and
+  weak/noisy `MC=1024/1536` m-blocking. Later probes also rejected a two-A-panel
+  `16x32` SME reuse helper, full-B single-store packing, a fixed-`KC=1024`
+  reused helper, and `restrict`-only codegen changes. Do not resurrect the
   row-streaming AMX B-pack rewrite or the packed-B SME inner-loop unroll from
   this pass; both failed validation.
 - For the public packed-B API, AMX beats the current SME packed-B kernel at
