@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>COB SGEMM Benchmark Dashboard</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0d0d10;
+      --panel: #17171c;
+      --panel-2: #1d1d24;
+      --panel-3: #22232b;
+      --text: #f2f3f7;
+      --muted: #aeb4c2;
+      --soft: #d4d8e3;
+      --line: #30313b;
+      --line-strong: #454856;
+      --green: #67e3b2;
+      --blue: #8fc7ff;
+      --amber: #f2c96d;
+      --rose: #ff8f9c;
+      --purple: #c0a4ff;
+      --shadow: rgba(0, 0, 0, 0.24);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    main {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 34px 28px 42px;
+    }
+    h1, h2, h3, p { margin: 0; }
+    h1 {
+      max-width: 900px;
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+    h2 { font-size: 18px; line-height: 1.2; }
+    h3 { font-size: 14px; line-height: 1.2; color: var(--soft); }
+    p { color: var(--muted); }
+    a { color: var(--blue); }
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 410px);
+      gap: 20px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
+    .hero-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
+    .eyebrow {
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .lede {
+      max-width: 980px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+    .method-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 2px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 10px;
+      color: var(--soft);
+      background: #141419;
+      white-space: nowrap;
+    }
+    .chip.good { border-color: rgba(103, 227, 178, 0.55); color: var(--green); }
+    .chip.warn { border-color: rgba(242, 201, 109, 0.55); color: var(--amber); }
+    .chip.bad { border-color: rgba(255, 143, 156, 0.55); color: var(--rose); }
+    .record-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: 0 14px 30px var(--shadow);
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .record-card .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+    .record-card strong {
+      display: block;
+      color: var(--green);
+      font-size: clamp(36px, 6vw, 58px);
+      line-height: 0.96;
+      letter-spacing: 0;
+      margin: 6px 0;
+    }
+    .record-card .shape {
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 760;
+    }
+    .record-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .record-mini {
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      min-width: 0;
+    }
+    .record-mini span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .record-mini b {
+      display: block;
+      color: var(--soft);
+      overflow-wrap: anywhere;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin: 18px 0;
+    }
+    .metric {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px 14px;
+      min-height: 86px;
+    }
+    .metric strong {
+      display: block;
+      color: var(--green);
+      font-size: 25px;
+      line-height: 1;
+      margin-bottom: 8px;
+      letter-spacing: 0;
+    }
+    .metric span { color: var(--muted); }
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px 0 14px;
+      margin-bottom: 4px;
+      background: var(--bg);
+      border-bottom: 1px solid rgba(48, 49, 59, 0.45);
+    }
+    button, select, input {
+      min-height: 40px;
+      color: var(--text);
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 9px 11px;
+      font: inherit;
+    }
+    input {
+      min-width: min(420px, 100%);
+      flex: 1 1 260px;
+    }
+    button { cursor: pointer; }
+    button:hover, select:hover, input:hover { border-color: var(--line-strong); }
+    button.active {
+      border-color: var(--green);
+      color: var(--green);
+      background: rgba(103, 227, 178, 0.08);
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+    .panel-head p { max-width: 880px; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .stat {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      min-width: 0;
+    }
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+    .stat strong {
+      display: block;
+      color: var(--text);
+      font-size: 19px;
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+    .stat.good strong { color: var(--green); }
+    .stat.warn strong { color: var(--amber); }
+    .stat.bad strong { color: var(--rose); }
+    .method-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .method {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 112px;
+    }
+    .method h3 { margin-bottom: 8px; }
+    .method p { font-size: 13px; }
+    .chart {
+      display: grid;
+      gap: 9px;
+    }
+    .bar-row {
+      display: grid;
+      grid-template-columns: minmax(150px, 270px) minmax(140px, 1fr) 92px;
+      gap: 10px;
+      align-items: center;
+      min-height: 36px;
+    }
+    .bar-label {
+      min-width: 0;
+      color: var(--soft);
+      overflow-wrap: anywhere;
+    }
+    .bar-label strong {
+      display: block;
+      color: var(--text);
+      line-height: 1.15;
+    }
+    .bar-label span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .bar-track {
+      height: 12px;
+      background: #111116;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      width: 0;
+      background: var(--green);
+      border-radius: 999px;
+    }
+    .bar-fill.blue { background: var(--blue); }
+    .bar-fill.warn { background: var(--amber); }
+    .bar-fill.bad { background: var(--rose); }
+    .bar-value {
+      color: var(--soft);
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .row-count {
+      color: var(--muted);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 880px;
+      background: #121218;
+    }
+    th, td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #1a1a21;
+      color: var(--soft);
+      font-size: 12px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    td {
+      color: #d8dbe5;
+      overflow-wrap: anywhere;
+    }
+    tr:hover td { background: rgba(255, 255, 255, 0.025); }
+    .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .muted { color: var(--muted); }
+    .good { color: var(--green); }
+    .bad { color: var(--rose); }
+    .warn { color: var(--amber); }
+    .hidden { display: none; }
+    footer {
+      color: var(--muted);
+      margin: 22px 0 4px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+    @media (max-width: 960px) {
+      main { padding: 24px 16px 34px; }
+      .hero, .grid-2 { grid-template-columns: 1fr; }
+      .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .method-grid, .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .bar-row { grid-template-columns: 1fr; gap: 5px; }
+      .bar-value { text-align: left; }
+      nav { position: static; }
+    }
+    @media (max-width: 560px) {
+      .summary, .method-grid, .stat-grid, .record-grid { grid-template-columns: 1fr; }
+      input { min-width: 100%; }
+      .row-count { margin-left: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Apple Silicon single-thread SGEMM evidence</p>
+        <h1>COB SGEMM Benchmark Dashboard</h1>
+        <p class="lede">Static browser dashboard for the local FP32 row-major SGEMM evidence. It keeps the strongest packed-AB results, fresh A/B runs, validation, open Accelerate gaps, and rejected probes in one place.</p>
+        <div class="method-strip">
+          <span class="chip good">CPU-only</span>
+          <span class="chip good">single-thread</span>
+          <span class="chip">row-major A/B/C</span>
+          <span class="chip">FP32</span>
+          <span class="chip warn">Accelerate tracked separately</span>
+        </div>
+      </div>
+      <aside class="record-card" id="recordCard"></aside>
+    </header>
+
+    <section class="summary" id="summary"></section>
+
+    <nav>
+      <button class="active" data-tab="overview">Overview</button>
+      <button data-tab="benchmarks">Benchmarks</button>
+      <button data-tab="fresh">Fresh paired runs</button>
+      <button data-tab="timeline">Timeline</button>
+      <button data-tab="research">Research attempts</button>
+    </nav>
+
+    <section id="overview" class="tab"></section>
+    <section id="benchmarks" class="tab hidden"></section>
+    <section id="fresh" class="tab hidden"></section>
+    <section id="timeline" class="tab hidden"></section>
+    <section id="research" class="tab hidden"></section>
+
+    <footer>
+      Scope: CPU-only, single-thread FP32 row-major SGEMM on Apple Silicon. Apple Accelerate is proprietary and kept as a separate calibration target, not folded into the open-source claim.
+    </footer>
+  </main>
+
+  <script id="data" type="application/json">__DATA_JSON__</script>
+  <script>
+    const DATA = JSON.parse(document.getElementById("data").textContent);
+    const fmt = (value, digits = 3) => {
+      const number = Number(value);
+      return Number.isFinite(number) ? number.toFixed(digits) : (value || "");
+    };
+    const num = (value) => {
+      const number = Number(value);
+      return Number.isFinite(number) ? number : 0;
+    };
+    const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (ch) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#39;"
+    }[ch]));
+    const includes = (row, query) => !query || Object.values(row).join(" ").toLowerCase().includes(query.toLowerCase());
+    const el = (id) => document.getElementById(id);
+    const unique = (rows, key) => Array.from(new Set(rows.map(row => row[key]).filter(Boolean))).sort();
+
+    function table(rows, columns, limit = 100) {
+      const shown = rows.slice(0, limit);
+      const head = columns.map(([key, label]) => `<th>${esc(label)}</th>`).join("");
+      const body = shown.map(row => {
+        const cells = columns.map(([key, label, cls]) => `<td class="${esc(cls || "")}">${esc(row[key] ?? "")}</td>`).join("");
+        return `<tr>${cells}</tr>`;
+      }).join("");
+      const empty = shown.length ? "" : `<tr><td colspan="${columns.length}" class="muted">No rows match this filter.</td></tr>`;
+      return `<div class="table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body || empty}</tbody></table></div>`;
+    }
+
+    function chip(text, tone = "") {
+      return `<span class="chip ${tone}">${esc(text)}</span>`;
+    }
+
+    function barChart(rows, options) {
+      const max = Math.max(...rows.map(row => Math.max(0, num(options.value(row)))), 1);
+      return `<div class="chart">${rows.map(row => {
+        const value = num(options.value(row));
+        const pct = Math.max(2, Math.min(100, (value / max) * 100));
+        return `
+          <div class="bar-row">
+            <div class="bar-label"><strong>${esc(options.label(row))}</strong><span>${esc(options.subLabel ? options.subLabel(row) : "")}</span></div>
+            <div class="bar-track"><div class="bar-fill ${esc(options.tone || "")}" style="width:${pct}%"></div></div>
+            <div class="bar-value">${esc(options.format ? options.format(value, row) : fmt(value))}</div>
+          </div>
+        `;
+      }).join("")}</div>`;
+    }
+
+    function ratioBarChart(rows, tone) {
+      const maxDelta = Math.max(...rows.map(row => Math.abs(num(row.median_ratio) - 1)), 0.01);
+      return `<div class="chart">${rows.map(row => {
+        const value = num(row.median_ratio);
+        const pct = Math.max(3, Math.min(100, Math.abs(value - 1) / maxDelta * 100));
+        return `
+          <div class="bar-row">
+            <div class="bar-label"><strong>${esc(row.shape)}</strong><span>${esc(row.route || row.comparison)}</span></div>
+            <div class="bar-track"><div class="bar-fill ${tone}" style="width:${pct}%"></div></div>
+            <div class="bar-value">${fmt(value, 4)}x</div>
+          </div>
+        `;
+      }).join("")}</div>`;
+    }
+
+    function topPackedRows(limit = 8) {
+      return DATA.benchmarks
+        .filter(row => row.implementation === "cob packed-AB" && num(row.median) > 0)
+        .sort((a, b) => num(b.median) - num(a.median))
+        .slice(0, limit);
+    }
+
+    function sourceWins() {
+      return DATA.freshPaired
+        .filter(row => row.ratio_label === "current/repo_head" && num(row.median_ratio) > 1)
+        .sort((a, b) => num(b.median_ratio) - num(a.median_ratio));
+    }
+
+    function accelerateGaps() {
+      return DATA.freshPaired
+        .filter(row => row.ratio_label === "Accelerate/COB" && num(row.median_ratio) > 1)
+        .sort((a, b) => num(b.median_ratio) - num(a.median_ratio));
+    }
+
+    function renderRecordCard() {
+      const bestPacked = topPackedRows(1)[0] || {};
+      const bestSample = DATA.benchmarks
+        .filter(row => row.implementation === "cob packed-AB" && num(row.best) > 0)
+        .sort((a, b) => num(b.best) - num(a.best))[0] || {};
+      const bestSourceWin = sourceWins()[0] || {};
+      el("recordCard").innerHTML = `
+        <div>
+          <div class="label">Top packed-AB median</div>
+          <strong>${fmt(bestPacked.median, 0)} GF/s</strong>
+          <div class="shape">${esc(bestPacked.shape || "no row loaded")}</div>
+          <p>${esc(bestPacked.run_id || "")}</p>
+        </div>
+        <div class="record-grid">
+          <div class="record-mini"><span>Best sample</span><b>${fmt(bestSample.best, 0)} GF/s</b></div>
+          <div class="record-mini"><span>Current/head</span><b>${bestSourceWin.shape ? `${fmt(bestSourceWin.median_ratio, 4)}x` : ""}</b></div>
+          <div class="record-mini"><span>Validation</span><b>${esc(DATA.validation[0]?.reported_shapes || "")} shapes</b></div>
+          <div class="record-mini"><span>Timeline</span><b>${esc(DATA.counts.timelineRows)} entries</b></div>
+        </div>
+      `;
+    }
+
+    function renderSummary() {
+      const items = [
+        ["Benchmark rows", DATA.counts.benchmarkRows],
+        ["Fresh paired rows", DATA.counts.freshPairedRows],
+        ["Timeline entries", DATA.counts.timelineRows],
+        ["Research rows", DATA.counts.researchRows],
+        ["Validation", DATA.validation[0]?.reported_shapes ? `${DATA.validation[0].reported_shapes} shapes` : "loaded"],
+      ];
+      el("summary").innerHTML = items.map(([label, value]) => `<div class="metric"><strong>${esc(value)}</strong><span>${esc(label)}</span></div>`).join("");
+    }
+
+    function renderOverview() {
+      const packed = topPackedRows(8).map(row => ({...row, median: fmt(row.median), best: fmt(row.best)}));
+      const wins = sourceWins().map(row => ({...row, median_ratio: fmt(row.median_ratio, 4), bootstrap: `[${fmt(row.bootstrap_low, 4)}, ${fmt(row.bootstrap_high, 4)}]`}));
+      const gaps = accelerateGaps().map(row => ({...row, median_ratio: fmt(row.median_ratio, 4), bootstrap: `[${fmt(row.bootstrap_low, 4)}, ${fmt(row.bootstrap_high, 4)}]`}));
+      const bestPacked = topPackedRows(1)[0] || {};
+      const bestWin = sourceWins()[0] || {};
+      const worstGap = accelerateGaps()[0] || {};
+
+      el("overview").innerHTML = `
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Evidence snapshot</h2>
+              <p>Strongest public-facing rows first, with the less flattering Accelerate gaps kept visible.</p>
+            </div>
+          </div>
+          <div class="stat-grid">
+            <div class="stat good"><span>Best packed-AB median</span><strong>${fmt(bestPacked.median, 0)} GF/s</strong></div>
+            <div class="stat good"><span>Best shape</span><strong>${esc(bestPacked.shape || "")}</strong></div>
+            <div class="stat good"><span>Largest current-vs-head win</span><strong>${bestWin.shape ? `${fmt(bestWin.median_ratio, 4)}x` : ""}</strong></div>
+            <div class="stat warn"><span>Largest direct Accelerate gap</span><strong>${worstGap.shape ? `${fmt(worstGap.median_ratio, 4)}x` : ""}</strong></div>
+          </div>
+        </section>
+
+        <div class="grid-2">
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Top packed-AB throughput</h2>
+                <p>Median GF/s from the recorded route-aware sweeps.</p>
+              </div>
+            </div>
+            ${barChart(topPackedRows(10), {
+              value: row => row.median,
+              label: row => row.shape,
+              subLabel: row => row.run_id,
+              tone: "blue",
+              format: value => `${fmt(value, 0)} GF/s`
+            })}
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Fresh current-vs-head wins</h2>
+                <p>Source route improvements from the fresh paired direct runs.</p>
+              </div>
+            </div>
+            ${ratioBarChart(sourceWins().slice(0, 7), "good")}
+          </section>
+        </div>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Methodology boundary</h2>
+              <p>Compact version of what the data can and cannot claim.</p>
+            </div>
+          </div>
+          <div class="method-grid">
+            <div class="method"><h3>Scope</h3><p>CPU-only, single-thread FP32 SGEMM with row-major A, B, and C.</p></div>
+            <div class="method"><h3>APIs</h3><p>One-shot, packed-B, and packed-AB paths are reported separately.</p></div>
+            <div class="method"><h3>Correctness</h3><p>${esc(DATA.validation[0]?.command || "make test")} passed ${esc(DATA.validation[0]?.reported_shapes || "")} shapes.</p></div>
+            <div class="method"><h3>Comparisons</h3><p>Accelerate is proprietary, so it is shown as a separate target instead of merged into the open-source claim.</p></div>
+            <div class="method"><h3>Caveat</h3><p>Noisy paired rows and rejected probes are included so the result is not cherry-picked.</p></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Fresh direct Accelerate gaps</h2>
+              <p>Values above 1.0 mean Accelerate still leads COB for that direct one-shot row.</p>
+            </div>
+          </div>
+          ${ratioBarChart(accelerateGaps().slice(0, 8), "warn")}
+        </section>
+
+        <section class="panel">
+          <h2>Top packed-AB rows</h2>
+          ${table(packed, [["shape","shape"],["median","median GF/s","num"],["best","best GF/s","num"],["route","route"],["run_id","run"]], 8)}
+        </section>
+
+        <section class="panel">
+          <h2>Fresh current-vs-head rows</h2>
+          ${table(wins, [["shape","shape"],["median_ratio","current/head","num"],["bootstrap","bootstrap"],["route","route"],["quality_note","quality"]], 8)}
+        </section>
+
+        <section class="panel">
+          <h2>Fresh direct Accelerate rows</h2>
+          ${table(gaps, [["shape","shape"],["median_ratio","Accelerate/COB","num"],["bootstrap","bootstrap"],["route","route"],["quality_note","quality"]], 10)}
+        </section>
+      `;
+    }
+
+    function renderBenchmarks(query = "", implementation = "All", run = "All") {
+      const implementations = ["All", ...unique(DATA.benchmarks, "implementation")];
+      const runs = ["All", ...unique(DATA.benchmarks, "run_id")];
+      const rows = DATA.benchmarks
+        .filter(row => includes(row, query))
+        .filter(row => implementation === "All" || row.implementation === implementation)
+        .filter(row => run === "All" || row.run_id === run)
+        .sort((a, b) => num(b.median) - num(a.median))
+        .map(row => ({...row, median: fmt(row.median), best: fmt(row.best)}));
+      el("benchmarks").innerHTML = `
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Benchmark rows</h2>
+              <p>Search and slice the full route-aware benchmark export.</p>
+            </div>
+          </div>
+          <div class="toolbar">
+            <input id="benchQuery" placeholder="Search shape, route, run" value="${esc(query)}">
+            <select id="benchImpl">${implementations.map(value => `<option ${value === implementation ? "selected" : ""}>${esc(value)}</option>`).join("")}</select>
+            <select id="benchRun">${runs.map(value => `<option ${value === run ? "selected" : ""}>${esc(value)}</option>`).join("")}</select>
+            <span class="row-count">${rows.length} rows</span>
+          </div>
+          ${table(rows, [["shape","shape"],["implementation","implementation"],["median","median","num"],["best","best","num"],["unit","unit"],["route","route"],["run_id","run"]], 180)}
+        </section>
+      `;
+      document.getElementById("benchQuery").addEventListener("input", (event) => renderBenchmarks(event.target.value, implementation, run));
+      document.getElementById("benchImpl").addEventListener("change", (event) => renderBenchmarks(query, event.target.value, run));
+      document.getElementById("benchRun").addEventListener("change", (event) => renderBenchmarks(query, implementation, event.target.value));
+    }
+
+    function renderFresh(query = "", comparison = "All") {
+      const comparisons = ["All", ...unique(DATA.freshPaired, "comparison")];
+      const rows = DATA.freshPaired
+        .filter(row => includes(row, query))
+        .filter(row => comparison === "All" || row.comparison === comparison)
+        .map(row => ({...row, median_ratio: fmt(row.median_ratio, 4), bootstrap: `[${fmt(row.bootstrap_low, 4)}, ${fmt(row.bootstrap_high, 4)}]`}));
+      el("fresh").innerHTML = `
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Fresh paired runs</h2>
+              <p>Fresh repeat-61 paired direct checks for source changes and Accelerate.</p>
+            </div>
+          </div>
+          <div class="toolbar">
+            <input id="freshQuery" placeholder="Search shape, comparison, route" value="${esc(query)}">
+            <select id="freshComparison">${comparisons.map(value => `<option ${value === comparison ? "selected" : ""}>${esc(value)}</option>`).join("")}</select>
+            <span class="row-count">${rows.length} rows</span>
+          </div>
+          ${table(rows, [["shape","shape"],["comparison","comparison"],["ratio_label","ratio"],["median_ratio","median","num"],["bootstrap","bootstrap"],["a_median_gflops","A GF/s","num"],["b_median_gflops","B GF/s","num"],["quality_note","quality"]], 160)}
+        </section>
+      `;
+      document.getElementById("freshQuery").addEventListener("input", (event) => renderFresh(event.target.value, comparison));
+      document.getElementById("freshComparison").addEventListener("change", (event) => renderFresh(query, event.target.value));
+    }
+
+    function renderTimeline(result = "All", query = "") {
+      const results = ["All", ...unique(DATA.timeline, "result")];
+      const rows = DATA.timeline
+        .filter(row => result === "All" || row.result === result)
+        .filter(row => includes(row, query));
+      el("timeline").innerHTML = `
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Optimization timeline</h2>
+              <p>Structured parse of the full local optimization timeline.</p>
+            </div>
+          </div>
+          <div class="toolbar">
+            <select id="timelineResult">${results.map(value => `<option ${value === result ? "selected" : ""}>${esc(value)}</option>`).join("")}</select>
+            <input id="timelineQuery" placeholder="Search title, shape, summary" value="${esc(query)}">
+            <span class="row-count">${rows.length} rows</span>
+          </div>
+          ${table(rows, [["entry_index","entry","num"],["date","date"],["result","result"],["title","title"],["shape_scope","shape scope"],["summary","summary"],["metrics_snippet","metrics"]], 190)}
+        </section>
+      `;
+      document.getElementById("timelineResult").addEventListener("change", (event) => renderTimeline(event.target.value, query));
+      document.getElementById("timelineQuery").addEventListener("input", (event) => renderTimeline(result, event.target.value));
+    }
+
+    function renderResearch(result = "All", query = "") {
+      const results = ["All", ...unique(DATA.research, "result")];
+      const rows = DATA.research
+        .filter(row => result === "All" || row.result === result)
+        .filter(row => includes(row, query));
+      el("research").innerHTML = `
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Research attempts</h2>
+              <p>Accepted, mixed, and rejected probes that explain why the current route shape exists.</p>
+            </div>
+          </div>
+          <div class="toolbar">
+            <select id="researchResult">${results.map(value => `<option ${value === result ? "selected" : ""}>${esc(value)}</option>`).join("")}</select>
+            <input id="researchQuery" placeholder="Search attempt, shape, note" value="${esc(query)}">
+            <span class="row-count">${rows.length} rows</span>
+          </div>
+          ${table(rows, [["date","date"],["result","result"],["name","name"],["shape_scope","shape scope"],["headline","headline"],["why_interesting","why interesting"],["notes","notes"]], 100)}
+        </section>
+      `;
+      document.getElementById("researchResult").addEventListener("change", (event) => renderResearch(event.target.value, query));
+      document.getElementById("researchQuery").addEventListener("input", (event) => renderResearch(result, event.target.value));
+    }
+
+    function setTab(id) {
+      document.querySelectorAll(".tab").forEach(node => node.classList.add("hidden"));
+      document.querySelectorAll("nav button").forEach(node => node.classList.toggle("active", node.dataset.tab === id));
+      el(id).classList.remove("hidden");
+    }
+
+    document.querySelectorAll("nav button").forEach(button => button.addEventListener("click", () => setTab(button.dataset.tab)));
+    renderRecordCard();
+    renderSummary();
+    renderOverview();
+    renderBenchmarks();
+    renderFresh();
+    renderTimeline();
+    renderResearch();
+  </script>
+</body>
+</html>

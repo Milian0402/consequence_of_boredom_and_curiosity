@@ -1,0 +1,10 @@
+{
+  "machine": "Apple M5 Max",
+  "single_thread_assumption": "one P-core in one P-cluster",
+  "p_cluster_l2": "8 MB",
+  "l1d": "64 KB",
+  "page_size": "16 KB",
+  "cache_line": "128 B",
+  "sme": "SME2.1 available",
+  "date": "2026-05-27"
+}

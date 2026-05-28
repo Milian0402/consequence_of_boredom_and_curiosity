@@ -1,0 +1,11 @@
+{
+  "benchmark_results.csv": "Route-aware benchmark rows from selected May 2026 sweeps.",
+  "paired_confirmations.csv": "Manual extraction of accepted/rejected paired confirmations from the optimization session.",
+  "fresh_paired_runs.csv": "Parsed fresh repeat-61 paired A/B logs for current-vs-head and Accelerate-vs-COB.",
+  "validation_runs.csv": "Fresh correctness/test command results.",
+  "research_attempts.csv": "Accepted, mixed, and rejected optimization attempts worth preserving.",
+  "optimization_timeline.csv": "Structured parse of docs/optimization-timeline.md with one row per dated entry.",
+  "optimization_timeline.md": "Raw optimization timeline markdown copied from the source repo.",
+  "mpgemm_comparison.csv": "MpGEMM FP32 row_sgemm calibration comparison when locally available.",
+  "hardware_context.json": "Hardware context for the local benchmark machine."
+}

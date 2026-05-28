@@ -1,0 +1,2 @@
+run_id,date,command,status,reported_shapes,notes
+hf-fresh-make-test-20260527,2026-05-27,make test,passed,636,Local output: all GEMM tests passed (636 shapes).

@@ -1,0 +1,9 @@
+run_id,date,comparison,shape,m,n,k,mode,route,ratio_label,median_ratio,bootstrap_low,bootstrap_high,holdout_median,repeats,iters,cooldown_us,notes
+source-vs-head-512x1216x3072-prefetch,2026-05-27,candidate_vs_clean_head,512x1216x3072,512,1216,3072,one-shot,sme_medium_reuse,candidate/baseline,1.1829,1.1489,1.2105,1.1845,101,16,20000,Accepted exact SME source-B reuse route with source-B prefetch distance 16.
+accelerate-post-sme-large-768-1024,2026-05-27,accelerate_vs_cob,768x768x4096,768,768,4096,one-shot,sme_large_reuse,Accelerate/COB,0.9968,0.9732,1.0024,0.9938,61,16,20000,Neutral after SME source-B reuse extension.
+accelerate-post-sme-large-768-1024,2026-05-27,accelerate_vs_cob,1024x512x4096,1024,512,4096,one-shot,sme_large_reuse,Accelerate/COB,1.0517,1.034,1.074,1.0461,61,16,20000,Accelerate still ahead in this paired run.
+accelerate-post-sme-large-768-1024,2026-05-27,accelerate_vs_cob,768x512x4096,768,512,4096,one-shot,sme_large_reuse,Accelerate/COB,1.024,1.0051,1.0257,1.024,61,16,20000,Small remaining Accelerate lead in this paired run.
+accelerate-post-sme-large-768-1024,2026-05-27,accelerate_vs_cob,1024x768x4096,1024,768,4096,one-shot,sme_large_reuse,Accelerate/COB,0.9974,0.9313,1.0158,0.9936,61,16,20000,Neutral after SME source-B reuse extension.
+accelerate-post-m2048-extension,2026-05-27,accelerate_vs_cob,2048x512x4096,2048,512,4096,one-shot,sme_large_reuse,Accelerate/COB,1.0703,1.0124,1.1517,1.0703,61,16,20000,Clearest current proprietary baseline target; high sample CV.
+accelerate-post-m2048-extension,2026-05-27,accelerate_vs_cob,2048x768x4096,2048,768,4096,one-shot,sme_large_reuse,Accelerate/COB,1.0156,0.9757,1.0775,0.9937,61,16,20000,Neutral after m=2048 route extension.
+accelerate-post-m2048-extension,2026-05-27,accelerate_vs_cob,1536x768x4096,1536,768,4096,one-shot,sme_large_reuse,Accelerate/COB,0.9636,0.9435,0.9939,0.9549,61,16,20000,COB-favored in latest paired Accelerate run.

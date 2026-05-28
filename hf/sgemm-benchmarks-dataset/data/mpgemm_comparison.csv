@@ -1,0 +1,7 @@
+source_path,shape,target,target_median,target_route,baseline,baseline_median,ratio,gap_percent
+/private/tmp/cob-mpgemm-calibration-20260527-allcsv-toolcheck/mpgemm-row-sgemm.all.csv,64x2112x7168,cob one-shot,908.683912,sme_skinny_strided,row_sgemm,1382.150000,0.657442,52.10
+/private/tmp/cob-mpgemm-calibration-20260527-allcsv-toolcheck/mpgemm-row-sgemm.all.csv,64x7168x16384,cob one-shot,1071.026008,sme_skinny_reuse,row_sgemm,1112.110000,0.963058,3.84
+/private/tmp/cob-mpgemm-calibration-20260527-allcsv-toolcheck/mpgemm-row-sgemm.all.csv,64x4096x7168,cob one-shot,1097.254420,sme_skinny_reuse,row_sgemm,1074.660000,1.021025,-2.06
+/private/tmp/cob-mpgemm-calibration-20260527-allcsv-toolcheck/mpgemm-row-sgemm.all.csv,64x7168x2048,cob one-shot,1183.652402,sme_skinny_reuse,row_sgemm,1149.970000,1.029290,-2.85
+/private/tmp/cob-mpgemm-calibration-20260527-allcsv-toolcheck/mpgemm-row-sgemm.all.csv,64x24576x1536,cob one-shot,1124.467817,sme_skinny_reuse,row_sgemm,1077.330000,1.043754,-4.19
+/private/tmp/cob-mpgemm-calibration-20260527-allcsv-toolcheck/mpgemm-row-sgemm.all.csv,64x32768x512,cob one-shot,998.365248,sme_skinny_reuse,row_sgemm,916.160000,1.089728,-8.23
