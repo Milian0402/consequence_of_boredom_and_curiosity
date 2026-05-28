@@ -253,6 +253,9 @@ static int cob_sgemm_sme_direct_extra_n_shape(int m, int n, int k)
     if (m == 512 && n == 512 && k == 3072) {
         return 1;
     }
+    if (m == 512 && n == 512 && k == 4096) {
+        return 1;
+    }
     if (m == 384 && n == 512 && k == 3072) {
         return 1;
     }

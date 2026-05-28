@@ -22,6 +22,91 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-05-28 local-uncommitted: refreshed Accelerate gaps and m512/high-K rejects
+
+A fresh paired Accelerate sweep with repeat-41, `iters=4`, and
+`COB_AB_COOLDOWN_US=10000` re-ranked the visible proprietary baseline gaps after
+the high-K AMX fallback route landed. The largest direct one-shot gap in this
+short sweep moved back to exact `512x1152x2048`, but with high sample CV:
+
+- `512x1152x2048`: Accelerate/COB median `1.1484x`, bootstrap95
+  `[1.1327,1.1578]`, holdout median `1.1600x`.
+- `2048x512x4096`: median `1.0737x`, bootstrap95 `[1.0676,1.0828]`,
+  holdout median `1.0737x`.
+- `1536x768x4096`: median `1.0309x`, bootstrap95 `[1.0093,1.0493]`,
+  holdout median `1.0242x`.
+- `2048x768x4096`: median `1.0174x`, bootstrap95 `[1.0158,1.0223]`,
+  holdout median `1.0174x`.
+- `768x1216x4096`: median `1.0144x`, bootstrap95 `[1.0100,1.0211]`,
+  holdout median `1.0150x`.
+
+The same sweep confirmed the wide `m = 64` rows are not current Accelerate
+blockers: `64x4096x7168`, `64x7168x16384`, and `64x8192x1024` all favored COB
+by large margins.
+
+A route-cost split with `COB_BENCH_PACK_SETUP=1`, repeat-31, and `iters=4`
+showed why the direct m512 target is still hard: packed-B compute is already
+near Accelerate, but one-shot pays the B-pack bill. For `512x1152x2048`,
+COB one-shot measured `1698.96 GF/s`, COB packed-B `1980.26 GF/s`, COB
+packed-AB `2075.09 GF/s`, B-pack setup `105.44 GB/s`, and Accelerate
+`2001.18 GF/s`. For `2048x512x4096`, COB one-shot measured `1693.52 GF/s`,
+packed-B `1758.25 GF/s`, packed-AB `2105.76 GF/s`, B-pack setup
+`105.52 GB/s`, and Accelerate `1739.29 GF/s`. This points at one-shot setup /
+layout, not the packed compute kernel.
+
+One narrow source win did clear validation: exact `512x512x4096` now routes to
+the SME medium direct path instead of the packed AMX path. A repeat-151 paired
+source A/B against clean `HEAD`, with `iters=4` and
+`COB_AB_COOLDOWN_US=10000`, measured B/A median `1.0767x`, mean-log
+`1.0866x`, bootstrap95 `[1.0747,1.0970]`, B-faster `135/151`, and holdout
+median `1.0868x`. The sample CV was still high, but the sign and holdout
+support were strong. Neighbor checks did not justify broadening the gate:
+`512x512x3072` measured `1.0004x` with bootstrap crossing `1`,
+`512x512x2048` measured `0.9935x`, and `768x512x4096` stayed noisy with
+bootstrap crossing `1`. The benchmark route mirror and aligned-shape
+correctness coverage were updated with the exact row.
+
+Rejected C-level probes from this pass:
+
+- Splitting the m512 chunked AMX path so `B` chunks are packed outside AMX mode
+  was neutral to negative. Repeat-101 on the accepted widths measured
+  `512x896x2048` at `0.9982x`, `512x1024x2048` at a noisy `1.0059x`,
+  `512x1152x2048` at `0.9986x`, and `512x1280x2048` at `0.9979x`. No source
+  behavior change.
+- AMX packed-compute prefetching did not clear the bar. Distances `16`, `32`,
+  and `64` were tried through a compile-time probe. The best-looking m512 run
+  was distance `32` on `512x1152x2048` at median `1.0130x`, but bootstrap95
+  `[0.9972,1.0151]` crossed `1` with weak signs. A focused distance-64 high-K
+  repeat-101 rerun measured `2048x512x4096` at only `1.0023x`, bootstrap95
+  `[1.0004,1.0066]`, with weak sign and holdout support; neighboring high-K
+  rows were noisy or negative.
+- Retesting 384-column chunks for the exact m512 chunked-B route again produced
+  no reliable win. The repeat-101 run was thermally unstable, and the target
+  `512x1152x2048` measured median `0.9964x`, bootstrap95
+  `[0.9445,1.0281]`. Keep the existing 256-column chunks.
+- Exact `512x1152x2048` with four equal 288-column chunks was also too weak:
+  repeat-101 measured median `1.0051x`, bootstrap95 `[0.9832,1.0367]`, with
+  high sample CV.
+- Packing one 32-column B panel and immediately computing it across all A
+  panels was only `1.0101x` median with bootstrap95 `[0.9970,1.0124]` and weak
+  signs, so it stayed below the bar.
+- A fused AMX pack-plus-first-tile helper for exact `512x1152x2048` was a hard
+  regression. Loading AMX from the just-written packed panel measured `0.3225x`;
+  loading from the source row while still writing the packed panel measured
+  `0.4818x`. Do not pursue this AMX fused setup shape.
+- Rechecking global B-pack prefetch distances for the current setup-bound rows
+  also failed. Distance `32` measured `512x1152x2048` at `0.9978x` and
+  `2048x512x4096` at `0.9982x`; distance `96` measured `0.9961x` and
+  `1.0002x`; distance `128` measured `0.9998x` and regressed
+  `2048x512x4096` to `0.9966x`. Keep the existing distance `64`.
+- A target-only row-wise chunk packer for exact `512x1152x2048` preserved the
+  packed layout and passed correctness, but reproduced the older row-wise
+  problem: repeat-101 measured `0.8469x`, bootstrap95 `[0.7939,0.8521]`.
+- A four-row unrolled panel packer for exact `512x1152x2048` also passed
+  correctness but regressed the target to `0.9453x`, bootstrap95
+  `[0.9434,0.9606]`. The panel-wise `memcpy` loop remains the best known
+  B-pack setup spelling for this route.
+
 ### 2026-05-28 local-uncommitted: high-K n512 target recheck and rejected follow-ups
 
 Fresh continuation work rechecked the high-K SME source-B reuse extension after

@@ -286,8 +286,10 @@ These rules summarize repeated findings from the optimization timeline. They are
   `k >= 3072, m >= 1024, 1152 <= n <= 1280`; plus exact
   `768x1024x3072`. Keep it capped to the audited range.
 - In one-shot AMX medium routes, high-`K` strided-B loses to packing B even
-  after pack cost. Keep `m >= 512, k >= 4096` on the packed path, plus
-  `n = 1152, k >= 3072`, and exact `n = 1152, k = 2048` from `m >= 512`.
+  after pack cost. Keep `m >= 512, k >= 4096` on the packed path, except exact
+  `512x512x4096`, which now has a repeat-151 source A/B win from the SME
+  direct route. Also keep `n = 1152, k >= 3072`, and exact
+  `n = 1152, k = 2048` from `m >= 512`.
 - The same packed-path rule has a lower-height exception at `m = 384`: use the
   packed path for `n >= 1152, k >= 4096` and for exact `n = 1152, k >= 3072`.
   Guard `m = 384` widths below `1152` were neutral/noisy, so do not broaden it.
@@ -301,8 +303,14 @@ These rules summarize repeated findings from the optimization timeline. They are
   B chunks; 384/512-column retunes and normal packed-AMX fallback reruns did
   not produce a reliable target/guard win. A fresh cooled pass also rejected
   disabling the route for exact `512x1152x2048`, smaller 128-column chunks,
-  thread-local one-shot scratch caching, and `-mcpu=native`; the profiler points
-  back at compute/layout rather than setup.
+  thread-local one-shot scratch caching, and `-mcpu=native`. A later May 28
+  pass also rejected packing `B` chunks outside AMX mode, AMX compute prefetch
+  distances `16/32/64`, four equal 288-column chunks, another 384-column chunk
+  retest, panel-immediate packed-B reuse, and fused AMX pack-plus-first-tile
+  helpers. B-pack prefetch distances `32/96/128` also stayed neutral or
+  regressive versus the current `64`; exact row-wise chunk packing and a
+  four-row unrolled panel packer regressed too. The profiler and cost split
+  point back at a deeper setup/layout issue rather than a small chunking tweak.
 - For one-shot `n = 1216`, use the packed path from `k >= 3072`, and also at
   exact `k = 2048` when `m >= 768`. The `m = 512, k = 2048` neighbor and
   `k = 1536` guards are neutral/noisy; `k >= 4096` is covered by the high-`K`

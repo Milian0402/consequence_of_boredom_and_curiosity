@@ -90,24 +90,35 @@ The most important performance wins came from:
 - The newest cooled target sweep still needs broad re-audit against
   Accelerate and source-available competitors. The exact `512x1216x3072` row is
   neutral in the latest paired Accelerate confirmation, not a current confirmed
-  loss. The clearest remaining proprietary baseline target is
+  loss. A May 28 paired rerank put exact `512x1152x2048` back on top of the
+  proprietary gap list at Accelerate/COB median `1.1484x`, bootstrap95
+  `[1.1327,1.1578]`, but with high sample CV. The cleaner high-K target is
   `2048x512x4096`; after narrowing the high-K SME reuse route so this exact
-  row falls back to AMX, a May 28 paired Accelerate rerun measured
-  Accelerate/COB median `1.0695x` with bootstrap95 `[1.0688,1.0822]`. That is
-  materially better than the earlier `1.1101x` gap, but still not closed.
-  Exact `1536x768x4096` and `2048x768x4096` now also fall back to AMX because
-  paired A/B favored that route over SME reuse.
+  row falls back to AMX, paired Accelerate reruns measured about `1.07x`
+  Accelerate/COB, materially better than the earlier `1.1101x` gap but still
+  not closed. Exact `512x512x4096` moved the other direction: a repeat-151
+  source A/B now favors the SME medium direct route at B/A median `1.0767x`,
+  so that row is a narrow direct-route exception. Exact `1536x768x4096` and
+  `2048x768x4096` now also fall back to AMX because paired A/B favored that
+  route over SME reuse.
 - The next speed step is likely not another broad dispatch gate. It is probably
   a real kernel/layout change backed by Time Profiler or hardware-counter
-  evidence. The latest `2048x512x4096` Time Profiler trace put most samples in
+  evidence. Earlier high-K SME traces put most samples in
   `cob_sgemm_16x64_sme_from_packed_b64_tuple`, not the first source-B packing
   pass. Follow-up probes rejected scalar A packing, B-panel-major reuse
   traversal, weak/noisy high-K m-blocking, two-A-panel `16x32` reuse, full-B
-  single-store packing, fixed-`KC=1024` specialization, and `restrict`-only
-  codegen changes. The next useful candidate likely needs a deeper SME compute
-  schedule or packed-layout change than these C-level probes. CPU Counter
-  traces on `2048x512x4096` showed COB and Accelerate with similar CPU pipeline
-  ratios, so this does not look like a simple front-end/codegen cleanup.
+  single-store packing, fixed-`KC=1024` specialization, `restrict`-only codegen
+  changes, AMX compute prefetching, m512 B-pack outside AMX mode, and another
+  m512 384-column chunk retest. The next useful candidate likely needs a deeper
+  compute schedule or packed-layout change than these C-level probes. A direct
+  cost split now shows `512x1152x2048` packed-B compute near Accelerate while
+  one-shot loses the B-pack setup cost; exact 288-column chunks,
+  panel-immediate reuse, and fused AMX pack-plus-first-tile helpers did not
+  convert that into a source win. Exact row-wise chunk packing, B-pack prefetch
+  retunes, and a four-row unrolled panel packer also regressed or stayed
+  neutral. CPU Counter traces on `2048x512x4096` showed COB and Accelerate with
+  similar CPU pipeline ratios, so this does not look like a simple
+  front-end/codegen cleanup.
 
 ## Future Work
 
