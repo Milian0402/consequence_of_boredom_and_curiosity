@@ -42,10 +42,10 @@ portable `8`-column layout elsewhere. Aligned Apple Silicon inputs use AMX for
 the `A` panel transpose/pack step and direct AMX stores for both 128-byte and
 64-byte aligned output strides. Larger AMX problems use an `MC` block to reuse
 packed `B` panels across multiple `A` panels. On Apple Silicon with SME2.1, the
-packed-`B` API can use a `16x64` SME kernel for larger reused-`B` problems, and
-the one-shot path can reuse that kernel for the `512`-wide direct-`B` conflict
-case. The one-shot path also has a guarded SME direct-`B` route for selected
-medium contiguous cases where avoiding `B` packing is faster.
+packed-`B` API can use a `16x64` SME kernel for larger reused-`B` problems.
+The one-shot path also has guarded SME direct-`B` and fused source-`B` reuse
+routes for selected medium and large contiguous cases where avoiding full AMX
+one-shot packing is faster.
 
 ## Build
 
@@ -75,7 +75,10 @@ framework is available. The benchmark allocates aligned matrices so it measures
 the fastest AMX output path. Set `COB_BENCH_REPEATS` to use more benchmark
 repeats for noisier large shapes, for example `COB_BENCH_REPEATS=11`.
 Set `COB_BENCH_ITERS` to force multiple GEMM calls per timed sample when short
-shapes are too noisy for single-call timing.
+shapes are too noisy for single-call timing. Set `COB_BENCH_COOLDOWN_US=N` to
+sleep after each timed repeat in thermally noisy focused sweeps. On macOS, the
+benchmark raises its own thread QoS to reduce scheduler noise; it still pins
+common BLAS thread environment variables to `1`.
 Arguments can be square sizes (`512`) or rectangular `MxNxK` shapes
 (`832x960x896`).
 Set `COB_BENCH_PACK_SETUP=1` to also print the one-time packed-`B` setup cost.
@@ -99,6 +102,10 @@ COB_BENCH_ROUTE=1 sh tools/bench_grid.sh 832 896 960 > /tmp/cob-grid.csv
 python3 tools/bench_heatmap.py /tmp/cob-grid.csv --output /tmp/cob-grid.png
 ```
 
+Use `python3 tools/bench_gap_report.py --max-drop-percent 15` when a long sweep
+shows large best-to-median drops; `tools/claim_audit.sh` applies that same
+sanity filter before ranking gap rows.
+
 For candidate-vs-baseline source changes, use the paired A/B harness. It
 defaults to the one-shot API; set `COB_AB_MODE=packed` for packed-`B`, or
 `COB_AB_MODE=packed-AB` for the fully prepacked API:
@@ -109,6 +116,22 @@ COB_AB_REPEATS=61 COB_AB_MAX_REPEATS=101 \
 COB_AB_MODE=packed-AB COB_AB_REPEATS=61 \
   sh tools/paired_ab_bench.sh baseline/src/gemm.c src/gemm.c 512
 ```
+
+For thermally noisy shapes, set `COB_AB_COOLDOWN_US=N` to sleep after each
+paired sample. This makes long confirmation runs slower but can keep false
+dispatch wins out of the timeline.
+
+To compare the current one-shot COB path against Apple Accelerate with the same
+paired statistics, use the direct-only Accelerate harness:
+
+```sh
+COB_AB_REPEATS=101 COB_AB_ITERS=8 COB_AB_COOLDOWN_US=20000 \
+  sh tools/paired_accelerate_bench.sh src/gemm.c 512x1216x3072
+```
+
+For current gap hunting, prefer this paired Accelerate harness over separate
+COB and Accelerate benchmark medians. Several May 2026 medium/large rows moved
+by more than the candidate deltas between separate processes.
 
 For Apple Silicon hardware-counter probes, build `mperf-stat` from
 <https://github.com/tmcgilchrist/mperf>. On M5 machines, force the local `as5`
@@ -123,6 +146,40 @@ sudo env MPERF_KPEP_DB=as5 COB_COUNTER_ONLY=packed sh tools/counter_probe.sh 512
 The counter helper defaults to the remaining structural probe shapes and uses
 `COB_BENCH_ONLY` so counters are not polluted by Accelerate or the other COB
 benchmark rows.
+
+If `mperf` root access is blocked but full Xcode is installed, `xctrace` CPU
+Counters can still expose the top-level pipeline ratios. These are CPU pipeline
+ratios, not direct AMX/SME engine utilization counters:
+
+```sh
+env COB_BENCH_ONLY=one-shot COB_BENCH_REPEATS=1 COB_BENCH_ITERS=128 \
+  COB_BENCH_ROUTE=1 \
+  xcrun xctrace record --template 'CPU Counters' \
+  --output /private/tmp/cob-512.trace \
+  --launch -- "$(pwd)/build/cob_gemm_bench" 512x512x4096
+xcrun xctrace export --input /private/tmp/cob-512.trace \
+  --xpath '/trace-toc/run[@number="1"]/data/table[@schema="MetricTable"]' \
+  --output /private/tmp/cob-512-metric.xml
+python3 tools/xctrace_metric_summary.py /private/tmp/cob-512-metric.xml \
+  --process cob_gemm_bench --thread "Main Thread" --min-duration-ns 750000
+```
+
+For Time Profiler traces, prefer exporting the `time-profile` table because
+Xcode has already symbolized the frames. Raw `time-sample` PC exports are still
+supported, but require the correct binary load address:
+
+```sh
+env COB_BENCH_ONLY=one-shot COB_BENCH_REPEATS=1 COB_BENCH_ITERS=128 \
+  COB_BENCH_ROUTE=1 \
+  xcrun xctrace record --template 'Time Profiler' \
+  --output /private/tmp/cob-512-time.trace \
+  --launch -- "$(pwd)/build/cob_gemm_bench" 512x512x4096
+xcrun xctrace export --input /private/tmp/cob-512-time.trace \
+  --xpath '/trace-toc/run[@number="1"]/data/table[@schema="time-profile"]' \
+  --output /private/tmp/cob-512-time-profile.xml
+python3 tools/xctrace_time_sample_summary.py \
+  /private/tmp/cob-512-time-profile.xml --group symbol --limit 20
+```
 
 If root-backed counters are unavailable, the hot-loop mode can keep one process
 alive long enough for macOS `sample` from a normal terminal:
@@ -141,7 +198,9 @@ sh tools/mpgemm_calibration.sh
 ```
 
 Set `COB_MPGEMM_RUN_MPGEMM=0` to skip rebuilding/running MpGEMM and only
-refresh COB's matching route-aware CSV.
+refresh COB's matching route-aware CSV. The helper emits gap-only and all-row
+CSV comparisons for MpGEMM's FP32 `row_sgemm` output; MpGEMM's FP16 and int8
+benchmark rows are separate contracts.
 
 ## Comparison Status
 
@@ -154,7 +213,9 @@ KleidiAI's comparable public one-shot path. COB also has a fully prepacked
 stronger-contract gap on the sampled square calibration. Accelerate is still
 reported separately and still leads on some small or pack-overhead-heavy cases.
 Source-available projects without a clear license, such as MpGEMM, are tracked
-as calibration targets rather than folded into the open-source claim.
+as calibration targets rather than folded into the open-source claim. The
+latest focused MpGEMM FP32 `row_sgemm` calibration found no same-contract gaps
+on its stock skinny rows when COB uses forced benchmark iterations.
 
 To compare against an open-source CBLAS implementation, build the separate
 external CBLAS benchmark target. For example, with a local BLIS build:

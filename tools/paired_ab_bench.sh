@@ -7,6 +7,7 @@ if [ "$#" -lt 2 ]; then
     echo "       COB_AB_MAX_REPEATS and COB_AB_CV_TARGET enable automatic repeat extension." >&2
     echo "       COB_AB_A_FLAGS and COB_AB_B_FLAGS append side-specific compiler flags." >&2
     echo "       COB_AB_ITERS forces multiple GEMM calls per timed sample for noisy shapes." >&2
+    echo "       COB_AB_COOLDOWN_US sleeps after each paired sample for thermally noisy shapes." >&2
     echo "       COB_AB_HOLDOUT=0 disables split-half holdout reporting." >&2
     exit 2
 fi

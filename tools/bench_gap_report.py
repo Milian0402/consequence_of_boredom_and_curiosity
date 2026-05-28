@@ -17,6 +17,11 @@ def parse_args():
         "--all",
         action="store_true",
         help="print every comparable shape, not only target regressions")
+    parser.add_argument(
+        "--max-drop-percent",
+        type=float,
+        default=None,
+        help="ignore rows where best/median - 1 exceeds this percent")
     return parser.parse_args()
 
 
@@ -42,6 +47,16 @@ def shape_text(key):
     return "x".join(key)
 
 
+def stable_enough(row, median, max_drop_percent):
+    if max_drop_percent is None:
+        return True
+    best = f64(row, "best_throughput")
+    if best is None or median <= 0.0:
+        return False
+    drop_percent = (best / median - 1.0) * 100.0
+    return drop_percent <= max_drop_percent
+
+
 def main():
     args = parse_args()
     rows = [row for row in read_rows(args.csv_file) if row.get("kind") == "gemm"]
@@ -49,6 +64,8 @@ def main():
     for row in rows:
         median = f64(row, "median_throughput")
         if median is None:
+            continue
+        if not stable_enough(row, median, args.max_drop_percent):
             continue
         by_shape.setdefault(shape_key(row), []).append((row, median))
 

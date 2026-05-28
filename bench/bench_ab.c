@@ -11,6 +11,15 @@
 #include <string.h>
 #include <time.h>
 
+#if defined(__APPLE__)
+#include <pthread.h>
+#include <pthread/qos.h>
+#endif
+
+#if defined(COB_AB_B_ACCELERATE)
+#include <Accelerate/Accelerate.h>
+#endif
+
 void cob_a_sgemm_rowmajor(
     int m,
     int n,
@@ -43,6 +52,7 @@ void cob_a_sgemm_rowmajor_packed_ab(
     float* c,
     int ldc);
 
+#if !defined(COB_AB_B_ACCELERATE)
 void cob_b_sgemm_rowmajor(
     int m,
     int n,
@@ -74,6 +84,113 @@ void cob_b_sgemm_rowmajor_packed_ab(
     const cob_packed_b_f32* packed_b,
     float* c,
     int ldc);
+#else
+static void cob_b_sgemm_rowmajor(
+    int m,
+    int n,
+    int k,
+    const float* a,
+    int lda,
+    const float* b,
+    int ldb,
+    float* c,
+    int ldc)
+{
+    cblas_sgemm(
+        CblasRowMajor,
+        CblasNoTrans,
+        CblasNoTrans,
+        m,
+        n,
+        k,
+        1.0f,
+        a,
+        lda,
+        b,
+        ldb,
+        0.0f,
+        c,
+        ldc);
+}
+
+static int cob_b_sgemm_pack_b(
+    cob_packed_b_f32* packed,
+    int k,
+    int n,
+    const float* b,
+    int ldb)
+{
+    (void)packed;
+    (void)k;
+    (void)n;
+    (void)b;
+    (void)ldb;
+    return -1;
+}
+
+static void cob_b_sgemm_free_packed_b(cob_packed_b_f32* packed)
+{
+    (void)packed;
+}
+
+static int cob_b_sgemm_pack_a(
+    cob_packed_a_f32* packed,
+    int m,
+    int k,
+    const float* a,
+    int lda)
+{
+    (void)packed;
+    (void)m;
+    (void)k;
+    (void)a;
+    (void)lda;
+    return -1;
+}
+
+static void cob_b_sgemm_free_packed_a(cob_packed_a_f32* packed)
+{
+    (void)packed;
+}
+
+static void cob_b_sgemm_rowmajor_packed_b(
+    int m,
+    int n,
+    int k,
+    const float* a,
+    int lda,
+    const cob_packed_b_f32* packed_b,
+    float* c,
+    int ldc)
+{
+    (void)m;
+    (void)n;
+    (void)k;
+    (void)a;
+    (void)lda;
+    (void)packed_b;
+    (void)c;
+    (void)ldc;
+}
+
+static void cob_b_sgemm_rowmajor_packed_ab(
+    int m,
+    int n,
+    int k,
+    const cob_packed_a_f32* packed_a,
+    const cob_packed_b_f32* packed_b,
+    float* c,
+    int ldc)
+{
+    (void)m;
+    (void)n;
+    (void)k;
+    (void)packed_a;
+    (void)packed_b;
+    (void)c;
+    (void)ldc;
+}
+#endif
 
 typedef struct bench_shape {
     int m;
@@ -117,6 +234,13 @@ typedef enum bench_mode {
     BENCH_MODE_PACKED_B,
     BENCH_MODE_PACKED_AB
 } bench_mode;
+
+static void configure_benchmark_thread(void)
+{
+#if defined(__APPLE__) && defined(QOS_CLASS_USER_INTERACTIVE)
+    (void)pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
+#endif
+}
 
 static uint32_t rng_next(uint32_t* state)
 {
@@ -208,6 +332,18 @@ static double env_double_clamped(const char* name, double fallback, double min_v
         return max_value;
     }
     return parsed;
+}
+
+static void sleep_microseconds(int microseconds)
+{
+    if (microseconds <= 0) {
+        return;
+    }
+    struct timespec request;
+    request.tv_sec = microseconds / 1000000;
+    request.tv_nsec = (long)(microseconds % 1000000) * 1000L;
+    while (nanosleep(&request, &request) != 0) {
+    }
 }
 
 static int shape_max_dim(bench_shape shape)
@@ -490,10 +626,15 @@ static int bench_one_shape(
     int warmups,
     bench_mode mode,
     int bootstrap_draws,
+    int cooldown_us,
     int holdout_reporting)
 {
     const impl_api impl_a = {
+#if defined(COB_AB_B_ACCELERATE)
+        "COB",
+#else
         "A",
+#endif
         cob_a_sgemm_rowmajor,
         cob_a_sgemm_pack_b,
         cob_a_sgemm_free_packed_b,
@@ -503,7 +644,11 @@ static int bench_one_shape(
         cob_a_sgemm_rowmajor_packed_ab,
     };
     const impl_api impl_b = {
+#if defined(COB_AB_B_ACCELERATE)
+        "Accelerate",
+#else
         "B",
+#endif
         cob_b_sgemm_rowmajor,
         cob_b_sgemm_pack_b,
         cob_b_sgemm_free_packed_b,
@@ -640,6 +785,7 @@ static int bench_one_shape(
             gf_b[r] = ops / times_b[r] * 1.0e-9;
             speedups[r] = times_a[r] / times_b[r];
             log_speedups[r] = log(speedups[r]);
+            sleep_microseconds(cooldown_us);
         }
 
         repeats = target_repeats;
@@ -666,6 +812,9 @@ static int bench_one_shape(
         bench_mode_name(mode),
         repeats,
         iterations);
+    if (cooldown_us > 0) {
+        printf("  cooldown: %d us after each paired sample\n", cooldown_us);
+    }
     if (repeats > min_repeats) {
         printf(
             "  auto-repeats: requested %d, max %d, batch %d, cv target %.2f%%\n",
@@ -675,26 +824,35 @@ static int bench_one_shape(
             cv_target_percent);
     }
     printf(
-        "  A median %8.2f GF/s best %8.2f GF/s cv %5.2f%% checksum=% .6e\n",
+        "  %s median %8.2f GF/s best %8.2f GF/s cv %5.2f%% checksum=% .6e\n",
+        impl_a.name,
         a_stats.median,
         a_stats.best,
         a_stats.cv_percent,
         checksum_a);
     printf(
-        "  B median %8.2f GF/s best %8.2f GF/s cv %5.2f%% checksum=% .6e\n",
+        "  %s median %8.2f GF/s best %8.2f GF/s cv %5.2f%% checksum=% .6e\n",
+        impl_b.name,
         b_stats.median,
         b_stats.best,
         b_stats.cv_percent,
         checksum_b);
     printf(
-        "  paired B/A median %.4fx mean-log %.4fx cv %5.2f%%",
+        "  paired %s/%s median %.4fx mean-log %.4fx cv %5.2f%%",
+        impl_b.name,
+        impl_a.name,
         all_stats.speedup.median,
         exp(all_stats.mean_log_speedup),
         all_stats.speedup.cv_percent);
     if (all_stats.ci_low > 0.0 && all_stats.ci_high > 0.0) {
         printf(" bootstrap95 [%.4fx, %.4fx]", all_stats.ci_low, all_stats.ci_high);
     }
-    printf(" B-faster %d/%d sign-p %.3g\n", all_stats.b_faster, repeats, all_stats.sign_pvalue);
+    printf(
+        " %s-faster %d/%d sign-p %.3g\n",
+        impl_b.name,
+        all_stats.b_faster,
+        repeats,
+        all_stats.sign_pvalue);
     if (holdout_reporting && repeats >= 8) {
         const int split = repeats / 2;
         const int holdout_count = repeats - split;
@@ -704,7 +862,9 @@ static int bench_one_shape(
             holdout_count,
             bootstrap_draws);
         printf(
-            "  split-half holdout B/A median %.4fx mean-log %.4fx cv %5.2f%%",
+            "  split-half holdout %s/%s median %.4fx mean-log %.4fx cv %5.2f%%",
+            impl_b.name,
+            impl_a.name,
             holdout_stats.speedup.median,
             exp(holdout_stats.mean_log_speedup),
             holdout_stats.speedup.cv_percent);
@@ -715,7 +875,8 @@ static int bench_one_shape(
                 holdout_stats.ci_high);
         }
         printf(
-            " B-faster %d/%d sign-p %.3g\n",
+            " %s-faster %d/%d sign-p %.3g\n",
+            impl_b.name,
             holdout_stats.b_faster,
             holdout_count,
             holdout_stats.sign_pvalue);
@@ -760,6 +921,8 @@ static int bench_one_shape(
 
 int main(int argc, char** argv)
 {
+    configure_benchmark_thread();
+
     const int repeats = env_int_clamped("COB_AB_REPEATS", 31, 1, COB_AB_MAX_REPEATS);
     int max_repeats = env_int_clamped("COB_AB_MAX_REPEATS", repeats, 1, COB_AB_MAX_REPEATS);
     if (max_repeats < repeats) {
@@ -773,6 +936,7 @@ int main(int argc, char** argv)
     const int warmups = env_int_clamped("COB_AB_WARMUPS", 2, 0, 100);
     const int bootstrap_draws = env_int_clamped("COB_AB_BOOTSTRAP", 2000, 0, 100000);
     const int forced_iterations = env_int_clamped("COB_AB_ITERS", 0, 0, 100000000);
+    const int cooldown_us = env_int_clamped("COB_AB_COOLDOWN_US", 0, 0, 10000000);
     const int holdout_reporting = env_int_clamped("COB_AB_HOLDOUT", 1, 0, 1);
     const char* mode = getenv("COB_AB_MODE");
     bench_mode mode_kind = BENCH_MODE_DIRECT;
@@ -784,6 +948,12 @@ int main(int argc, char** argv)
             mode_kind = BENCH_MODE_PACKED_AB;
         }
     }
+#if defined(COB_AB_B_ACCELERATE)
+    if (mode_kind != BENCH_MODE_DIRECT) {
+        fprintf(stderr, "Accelerate paired benchmark supports only direct one-shot mode\n");
+        return 2;
+    }
+#endif
 
     bench_shape defaults[] = {
         {384, 384, 384},
@@ -809,6 +979,7 @@ int main(int argc, char** argv)
                 warmups,
                 mode_kind,
                 bootstrap_draws,
+                cooldown_us,
                 holdout_reporting);
         }
         return status;
@@ -832,6 +1003,7 @@ int main(int argc, char** argv)
             warmups,
             mode_kind,
             bootstrap_draws,
+            cooldown_us,
             holdout_reporting);
     }
     return status;

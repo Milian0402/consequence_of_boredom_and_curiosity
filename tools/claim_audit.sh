@@ -77,11 +77,15 @@ run_grid_env() {
         COB_GRID_N="$n_values" \
         COB_GRID_K="$k_values" \
         sh tools/bench_grid.sh > "$csv"
-    python3 tools/bench_gap_report.py --target "cob one-shot" "$csv" > "$OUT_DIR/$name.one-shot.gaps.csv"
-    python3 tools/bench_gap_report.py --target "cob one-shot" --include-cob-baselines "$csv" \
+    python3 tools/bench_gap_report.py --max-drop-percent "$SANITY_DROP" \
+        --target "cob one-shot" "$csv" > "$OUT_DIR/$name.one-shot.gaps.csv"
+    python3 tools/bench_gap_report.py --max-drop-percent "$SANITY_DROP" \
+        --target "cob one-shot" --include-cob-baselines "$csv" \
         > "$OUT_DIR/$name.one-shot-vs-best.gaps.csv"
-    python3 tools/bench_gap_report.py --target "cob packed-B" "$csv" > "$OUT_DIR/$name.packed-b.gaps.csv"
-    python3 tools/bench_gap_report.py --target "cob packed-AB" "$csv" > "$OUT_DIR/$name.packed-ab.gaps.csv"
+    python3 tools/bench_gap_report.py --max-drop-percent "$SANITY_DROP" \
+        --target "cob packed-B" "$csv" > "$OUT_DIR/$name.packed-b.gaps.csv"
+    python3 tools/bench_gap_report.py --max-drop-percent "$SANITY_DROP" \
+        --target "cob packed-AB" "$csv" > "$OUT_DIR/$name.packed-ab.gaps.csv"
     python3 tools/bench_sanity_report.py --max-drop-percent "$SANITY_DROP" "$csv" \
         > "$OUT_DIR/$name.sanity.csv"
 }
@@ -97,11 +101,15 @@ run_grid_shapes() {
         COB_GRID_BATCH="$BATCH" \
         COB_GRID_BENCH="$BENCH" \
         sh tools/bench_grid.sh "$@" > "$csv"
-    python3 tools/bench_gap_report.py --target "cob one-shot" "$csv" > "$OUT_DIR/$name.one-shot.gaps.csv"
-    python3 tools/bench_gap_report.py --target "cob one-shot" --include-cob-baselines "$csv" \
+    python3 tools/bench_gap_report.py --max-drop-percent "$SANITY_DROP" \
+        --target "cob one-shot" "$csv" > "$OUT_DIR/$name.one-shot.gaps.csv"
+    python3 tools/bench_gap_report.py --max-drop-percent "$SANITY_DROP" \
+        --target "cob one-shot" --include-cob-baselines "$csv" \
         > "$OUT_DIR/$name.one-shot-vs-best.gaps.csv"
-    python3 tools/bench_gap_report.py --target "cob packed-B" "$csv" > "$OUT_DIR/$name.packed-b.gaps.csv"
-    python3 tools/bench_gap_report.py --target "cob packed-AB" "$csv" > "$OUT_DIR/$name.packed-ab.gaps.csv"
+    python3 tools/bench_gap_report.py --max-drop-percent "$SANITY_DROP" \
+        --target "cob packed-B" "$csv" > "$OUT_DIR/$name.packed-b.gaps.csv"
+    python3 tools/bench_gap_report.py --max-drop-percent "$SANITY_DROP" \
+        --target "cob packed-AB" "$csv" > "$OUT_DIR/$name.packed-ab.gaps.csv"
     python3 tools/bench_sanity_report.py --max-drop-percent "$SANITY_DROP" "$csv" \
         > "$OUT_DIR/$name.sanity.csv"
 }

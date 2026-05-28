@@ -5,6 +5,10 @@ These rules summarize repeated findings from the optimization timeline. They are
 ## Measurement
 
 - Prefer paired A/B runs over comparing medians from separate benchmark invocations.
+- For suspect COB-vs-Accelerate one-shot gaps on macOS, use
+  `tools/paired_accelerate_bench.sh` before treating a standalone CSV row as an
+  optimization target. Separate COB and Accelerate medians have repeatedly
+  moved by more than the candidate deltas.
 - Treat runs with sample CV above 2% as noisy, even when the apparent median delta is large. Use `COB_AB_MAX_REPEATS` to let the paired harness collect more samples before deciding; paired speedup CV can stop a run early when common-mode noise is high but the ratio is stable.
 - Check the split-half holdout line before shipping a small change. If the full-run result looks positive but the reporting half is neutral or reversed, rerun cold instead of tuning a gate from that sample.
 - Prefer candidates whose bootstrap interval and sign-test p-value agree. If they disagree, rerun instead of shipping the change.
@@ -13,7 +17,12 @@ These rules summarize repeated findings from the optimization timeline. They are
   timings show large best-vs-median drops; otherwise prefer paired A/B with
   `COB_AB_ITERS`. Avoid applying high forced-iteration counts to broad hot
   grids without cooldown; use them for focused reruns of suspect rows.
+- Use `COB_BENCH_COOLDOWN_US` for focused standalone sweeps that compare COB
+  against Accelerate or external rows under thermal pressure. Do not mix hot
+  uncooled gap rankings with cooled reruns without recording the setting.
 - Use `COB_AB_A_FLAGS` / `COB_AB_B_FLAGS` for compile-time threshold or constant sweeps before forking source; it keeps A/B probes cheap and reproducible.
+- Use `COB_AB_COOLDOWN_US` for thermally noisy paired confirmations. Prefer a
+  slower cooled rerun over accepting a route from a high-CV first pass.
 - Use `COB_AB_MODE=packed` for public packed-B probes and
   `COB_AB_MODE=packed-AB` for fully prepacked A+B probes; do not validate
   packed-AB route changes with separate-process medians when paired mode can
@@ -27,8 +36,19 @@ These rules summarize repeated findings from the optimization timeline. They are
 - Use `COB_BENCH_ONLY` or `tools/counter_probe.sh` for hardware-counter runs so
   the counter totals cover only one implementation row, not the whole comparison
   benchmark.
+- When using Xcode `xctrace` CPU Counters, export `MetricTable` XML and
+  summarize it with `tools/xctrace_metric_summary.py --min-duration-ns` so short
+  startup/migration samples do not dominate. Treat `Useful` and `Instruction
+  Processing Bottleneck` as CPU pipeline ratios, not direct AMX/SME utilization.
+- When using Xcode Time Profiler, prefer the symbolized `time-profile` export
+  over raw `time-sample` PCs. Raw PC summaries require the correct load address;
+  a wrong slide can make inlined AMX loops look like unrelated symbols.
 - On M5, split hardware-counter groups when needed: `INST_SME_ENGINE_ALU`
   cannot be mixed into the same pipeline event set.
+- macOS QoS is not core pinning. A `pthread_override_qos_class_start_np`
+  benchmark probe still sampled mostly on S cores in Time Profiler, so do not
+  accept or reject small source changes from core-placement-sensitive traces
+  without paired reruns.
 
 ## Dispatch
 
@@ -146,6 +166,10 @@ These rules summarize repeated findings from the optimization timeline. They are
 - Hand-written K=2/K=4 unrolls in the prefetched m64 SME streaming-B C
   intrinsic kernel did not improve the remaining large-`K` gaps. Do not revisit
   that schedule without counter evidence or a dedicated assembly kernel.
+- A manual K-unroll2 version of the AMX 32x32 compute helper was neutral/noisy
+  or worse on the May 27 target set. The compiler already peels the first
+  zeroing iteration; do not revisit this C-level schedule without new counter
+  evidence or a dedicated assembly kernel.
 - Splitting the m64 prefetched SME streaming-B loops into an unconditional
   prefetch main loop plus a no-prefetch tail did not improve the remaining
   large-`K` gaps. Keep the compact in-loop prefetch guard.
@@ -191,6 +215,28 @@ These rules summarize repeated findings from the optimization timeline. They are
 - Full-K chunks are not a substitute for a real single-store epilogue. They
   helped only tiny isolated low-width `k = 2048` cases and badly regressed
   high-`K` m64 SME skinny shapes.
+- For `m = 512, k = 2048`, do not remove exact `n = 1152` from the current
+  chunked-B route based on standalone medians; paired repeat-101 made the
+  large-block fallback negative. The m512 chunked-B loop-order flip also stayed
+  noisy and below the acceptance bar.
+- Do not extend the m512 chunked-B one-shot route to exact
+  `512x1216x3072`; it passed correctness but regressed in cooled paired A/B.
+- For exact one-shot `512x1216x3072`, use the SME B-reuse path with
+  `NC=256`, `KC=1024`, and source-B prefetch distance `16`. This is an exact
+  route because nearby direct-B, chunked-B, SME direct, packed-B SME, AMX
+  row-block, block-size, and prefetch-distance probes were neutral or
+  regressive. A serial paired Accelerate rerun was neutral, not proof of a
+  broad Accelerate win.
+- For one-shot `k = 4096`, `m = 768/1024/1280/1536/2048`, and
+  `n = 512/768`, use the SME source-`B` reuse path with `NC=256`, `KC=1024`,
+  and the same tuple source-B prefetch helper. This route closes or neutralizes
+  several high-K medium/large Accelerate gaps without changing the public
+  packed-B API. Keep `NC=512`, `KC=512`, and `KC=2048` rejected; they were
+  neutral/noisy or regressive in cooled paired probes. Follow-up May 28 probes
+  also rejected `KC=1536`, `NC=384`, and prefetching inside the reused
+  `cob_sgemm_16x64_sme_from_packed_b64_tuple` helper. Do not resurrect the
+  row-streaming AMX B-pack rewrite or the packed-B SME inner-loop unroll from
+  this pass; both failed validation.
 - For the public packed-B API, AMX beats the current SME packed-B kernel at
   `k >= 4096`, at `n = 1152, k >= 2048`, and at exact `n = 1152, k = 1536`.
   Keep those shapes on AMX unless a future packed-B layout or kernel change is
@@ -226,7 +272,8 @@ These rules summarize repeated findings from the optimization timeline. They are
 - For one-shot AMX packed large-block high-`K` medium cases at `m >= 768`, use
   a 256-row A block for `n = 768, k >= 3072` and `n = 1024, k >= 4096`. A
   global 512-row block regressed, while the narrow 256-row block improved the
-  validated audit gaps without changing public packed-B blocking.
+  validated audit gaps without changing public packed-B blocking. Do not add
+  exact `768x1024x2048`; cooled A/B did not support the large-block route.
 - The one-shot 256-row AMX A-block rule also covers the audited high-`K`
   medium bands where local paired sweeps stayed positive: `k >= 4096,
   m >= 768, 512 <= n <= 1280`; `k >= 3072, m = 512, 768 <= n <= 1280`;
@@ -244,14 +291,27 @@ These rules summarize repeated findings from the optimization timeline. They are
 - For one-shot `m = 512, k = 2048`, use the chunked AMX B-pack path only at
   exact `n = 896`, `1024`, `1152`, and `1280`. Neighbor widths `832`, `960`,
   `1088`, and `1216` regressed under the same chunked path, so keep this as an
-  explicit-width rule unless a smoother kernel replaces it.
+  explicit-width rule unless a smoother kernel replaces it. Keep its 256-column
+  B chunks; 384/512-column retunes and normal packed-AMX fallback reruns did
+  not produce a reliable target/guard win. A fresh cooled pass also rejected
+  disabling the route for exact `512x1152x2048`, smaller 128-column chunks,
+  thread-local one-shot scratch caching, and `-mcpu=native`; the profiler points
+  back at compute/layout rather than setup.
 - For one-shot `n = 1216`, use the packed path from `k >= 3072`, and also at
   exact `k = 2048` when `m >= 768`. The `m = 512, k = 2048` neighbor and
   `k = 1536` guards are neutral/noisy; `k >= 4096` is covered by the high-`K`
-  rule.
+  rule. Exact `512x1216x3072` is now the SME source-`B` reuse exception above;
+  direct strided-B was a hard regression, and 384/512-row one-shot A-block
+  retunes also lost. Do not retread the first AMX setup probes there:
+  `KC=1024` accumulation, B-pack prefetch distance changes, explicit NEON
+  B-pack copy, separate scratch allocations, hoisted A-pack ones loads, and
+  `MC=256, NC=384` 2D tiling did not clear cooled A/B validation.
 - For the one-shot `n = 512` conflict path, keep SME packed-B at `k <= 1024`,
   but use packed AMX at `k >= 2048`. The `k = 1024` AMX fallback probe was a
-  regression/noise, while `k = 2048/3072` was consistently positive.
+  regression/noise, while `k = 2048/3072` was consistently positive. Do not
+  force direct strided-B for exact `512x512x4096`; the 512-stride conflict
+  remains slower than packing B. Do not force scalar A packing there; it is a
+  hard regression against the current AMX packer.
 - Exception: exact one-shot `512x512x3072` should use the SME direct-B route,
   not packed AMX. Broader SME-direct probes at nearby medium shapes regressed
   or stayed noisy.

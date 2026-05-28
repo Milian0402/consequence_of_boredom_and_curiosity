@@ -11,6 +11,11 @@
 #include <string.h>
 #include <time.h>
 
+#if defined(__APPLE__)
+#include <pthread.h>
+#include <pthread/qos.h>
+#endif
+
 #if defined(COB_HAVE_ACCELERATE)
 #include <Accelerate/Accelerate.h>
 #endif
@@ -127,6 +132,13 @@ enum {
 #ifndef COB_SGEMM_M64_SME_DIRECT_NC
 #define COB_SGEMM_M64_SME_DIRECT_NC 1024
 #endif
+
+static void configure_benchmark_thread(void)
+{
+#if defined(__APPLE__) && defined(QOS_CLASS_USER_INTERACTIVE)
+    (void)pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 0);
+#endif
+}
 
 static int cob_amx_strided_b_prefers_packed_shape(int m, int n, int k)
 {
@@ -290,6 +302,23 @@ static int bench_route_enabled(void)
 static int bench_hot_seconds(void)
 {
     return env_int_clamped("COB_BENCH_HOT_SECONDS", 0, 0, 3600);
+}
+
+static int bench_cooldown_us(void)
+{
+    return env_int_clamped("COB_BENCH_COOLDOWN_US", 0, 0, 10000000);
+}
+
+static void sleep_microseconds(int microseconds)
+{
+    if (microseconds <= 0) {
+        return;
+    }
+    struct timespec request;
+    request.tv_sec = microseconds / 1000000;
+    request.tv_nsec = (long)(microseconds % 1000000) * 1000L;
+    while (nanosleep(&request, &request) != 0) {
+    }
 }
 
 static int bench_only_matches(const char* only, const char* name)
@@ -598,6 +627,13 @@ static const char* cob_one_shot_route(bench_shape shape)
             (m == 96 || m == 128) && n >= COB_SGEMM_M96_128_SME_REUSE_K512_MIN_N && k == 512;
         const int use_m96_128_k1024 =
             (m == 96 || m == 128) && n >= COB_SGEMM_M96_128_SME_REUSE_K1024_MIN_N && k >= 1024;
+        if (m == 512 && n == 1216 && k == 3072 && (n % 64) == 0) {
+            return "sme_medium_reuse";
+        }
+        if ((m == 768 || m == 1024 || m == 1280 || m == 1536 || m == 2048) &&
+            (n == 512 || n == 768) && k == 4096 && (n % 64) == 0) {
+            return "sme_large_reuse";
+        }
         const int use_long_n_k512 =
             (use_m64 && n >= COB_SGEMM_M64_SME_LONG_N_K512_MIN_N && k == 512) ||
             use_m96_128_k512;
@@ -849,6 +885,7 @@ static double run_case(
     const int warmups = max_dim <= 256 ? 2 : 1;
     const int repeats = timed_repeats(shape);
     const int iters = timed_iterations(shape);
+    const int cooldown_us = bench_cooldown_us();
     double times[COB_BENCH_MAX_REPEATS];
 
     for (int i = 0; i < warmups; ++i) {
@@ -921,6 +958,7 @@ static double run_case(
         }
         const double t1 = now_seconds();
         times[i] = (t1 - t0) / (double)iters;
+        sleep_microseconds(cooldown_us);
     }
 
     const bench_stats stats = summarize_times(times, repeats);
@@ -992,6 +1030,7 @@ static double run_case_cob_packed_reuse(
     const int warmups = max_dim <= 256 ? 2 : 1;
     const int repeats = timed_repeats(shape);
     const int iters = timed_iterations(shape);
+    const int cooldown_us = bench_cooldown_us();
     double times[COB_BENCH_MAX_REPEATS];
 
     for (int i = 0; i < warmups; ++i) {
@@ -1067,6 +1106,7 @@ static double run_case_cob_packed_reuse(
         }
         const double t1 = now_seconds();
         times[i] = (t1 - t0) / (double)iters;
+        sleep_microseconds(cooldown_us);
     }
 
     const bench_stats stats = summarize_times(times, repeats);
@@ -1143,6 +1183,7 @@ static double run_case_cob_packed_ab_reuse(
     const int warmups = max_dim <= 256 ? 2 : 1;
     const int repeats = timed_repeats(shape);
     const int iters = timed_iterations(shape);
+    const int cooldown_us = bench_cooldown_us();
     double times[COB_BENCH_MAX_REPEATS];
 
     for (int i = 0; i < warmups; ++i) {
@@ -1158,6 +1199,7 @@ static double run_case_cob_packed_ab_reuse(
         }
         const double t1 = now_seconds();
         times[i] = (t1 - t0) / (double)iters;
+        sleep_microseconds(cooldown_us);
     }
 
     const bench_stats stats = summarize_times(times, repeats);
@@ -1215,6 +1257,7 @@ static double run_case_cob_pack_setup(bench_shape shape, const float* b, int csv
 {
     const int repeats = timed_repeats(shape);
     const int iters = pack_setup_iterations(shape);
+    const int cooldown_us = bench_cooldown_us();
     double times[COB_BENCH_MAX_REPEATS];
     size_t bytes_per_iter = 0;
 
@@ -1244,6 +1287,7 @@ static double run_case_cob_pack_setup(bench_shape shape, const float* b, int csv
         }
         const double t1 = now_seconds();
         times[i] = (t1 - t0) / (double)iters;
+        sleep_microseconds(cooldown_us);
     }
 
     const bench_stats stats = summarize_times(times, repeats);
@@ -1337,6 +1381,8 @@ static int parse_shape_arg(const char* arg, bench_shape* shape)
 int main(int argc, char** argv)
 {
     static const int default_sizes[] = {64, 128, 192, 256, 384, 512, 768, 1024};
+
+    configure_benchmark_thread();
 
     setenv("VECLIB_MAXIMUM_THREADS", "1", 1);
     setenv("ACCELERATE_MAXIMUM_THREADS", "1", 1);

@@ -57,8 +57,9 @@ Tracked separately:
 - Apple Accelerate, because it is a proprietary system framework and still wins
   some small or pack-overhead-heavy cases.
 - MpGEMM, because the local checkout had no license file; it remains a
-  source-available calibration target and still wins some `m = 64` one-shot
-  shapes.
+  source-available calibration target. The latest focused FP32 `row_sgemm`
+  calibration found no same-contract gaps on its stock skinny rows, while its
+  faster FP16 and int8 rows remain out of this claim's FP32 contract.
 - Packages that wrap Accelerate or ship no inspectable source.
 
 ## Required Audit Recipe
@@ -78,6 +79,10 @@ COB_BENCH_ROUTE=1 COB_BENCH_CSV=1 sh tools/bench_grid.sh > /tmp/cob-grid.csv
 python3 tools/bench_gap_report.py /tmp/cob-grid.csv
 ```
 
+When long sweeps show large best-to-median drops, pass
+`--max-drop-percent 15` to `bench_gap_report.py` so unstable rows do not drive
+the top-gap ranking.
+
 For a timestamped audit bundle with hardware context, route-aware CSVs, and
 gap reports for the public COB paths:
 
@@ -91,7 +96,8 @@ COB packed-B and packed-AB as internal baselines, sanity reports that flag rows
 where the median is far below the best sample, and `summary.md` into a
 `/tmp/cob-claim-audit-*` directory by default. Use `COB_AUDIT_SUITES`,
 `COB_AUDIT_OUT_DIR`, `COB_AUDIT_SANITY_DROP`, and the suite-specific shape
-environment variables when a narrower cold rerun is needed.
+environment variables when a narrower cold rerun is needed. The audit gap
+reports use `COB_AUDIT_SANITY_DROP` as their stability filter.
 
 For MpGEMM calibration, use a separate checkout and run:
 
@@ -101,7 +107,8 @@ COB_MPGEMM_DIR=/private/tmp/mpgemm_latest sh tools/mpgemm_calibration.sh
 
 This helper records the MpGEMM commit and license-file scan, runs MpGEMM's
 stock FP32 skinny benchmark when enabled, and emits COB route-aware CSVs for the
-same stock shapes.
+same stock shapes plus `mpgemm-row-sgemm.gaps.csv` and
+`mpgemm-row-sgemm.all.csv` comparison reports.
 
 3. For any candidate source change, use paired A/B:
 
@@ -129,7 +136,12 @@ sudo env MPERF_KPEP_DB=as5 COB_COUNTER_ONLY=packed sh tools/counter_probe.sh 512
 
 The helper uses `COB_BENCH_ONLY` to isolate the measured implementation. Use
 `COB_COUNTER_PROFILE=pipeline`, `sme`, or `memory` for compatible event groups;
-on short-running shapes, set `COB_COUNTER_REPEATS=101` or higher so process
+if noninteractive root access is blocked, use full-Xcode `xctrace` CPU Counters
+and summarize the exported `MetricTable` XML with
+`tools/xctrace_metric_summary.py`. Treat those ratios as CPU pipeline evidence,
+not direct AMX/SME utilization.
+
+On short-running shapes, set `COB_COUNTER_REPEATS=101` or higher so process
 setup does not dominate the sampled window.
 
 6. Re-run correctness and build checks:
@@ -149,7 +161,7 @@ git diff --check
 - Recent external baseline audits are listed below with their output
   directories; rerun them before broadening the claim beyond the recorded shape
   suites.
-- Correctness suite currently covers 135 GEMM shapes on Apple Silicon.
+- Correctness suite currently reports 636 GEMM shape checks on Apple Silicon.
 - The paired A/B harness reports median ratio, mean-log speedup, bootstrap
   confidence interval, sign-test p-value, and split-half holdout.
 - Route-aware benchmarking and `tools/bench_heatmap.py` make dispatcher
@@ -187,8 +199,15 @@ git diff --check
   routing for selected `n = 1280..1472` shapes, the public packed-AB path,
   m64 direct SME N-chunking for exact `n = 2560, k >= 12288`,
   `n = 3072, k >= 4096`, and `3584 <= n < 4096, k >= 7168`, plus m64 SME
-  reuse routing in the `n = 2560..5120` gap band and small-A packed-B B-panel
-  traversal for wide skinny packed-B shapes.
+  reuse routing in the `n = 2560..5120` gap band, small-A packed-B B-panel
+  traversal for wide skinny packed-B shapes, and one-shot SME source-`B` reuse
+  for exact `512x1216x3072` plus the current `k = 4096`,
+  `m = 768/1024/1280/1536/2048`, `n = 512/768` route.
+- The May 27 proprietary-baseline rerank moved `512x1216x3072` from an
+  apparent Accelerate gap to neutral under the paired Accelerate harness. Treat
+  `2048x512x4096` as the clearest current Accelerate target, but keep it
+  outside the licensed/open-source claim boundary unless a fresh audit changes
+  that scope.
 
 ## Claim Boundaries
 

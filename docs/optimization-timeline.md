@@ -1,6 +1,6 @@
 # Optimization Attempt Timeline
 
-Last updated: 2026-05-27
+Last updated: 2026-05-28
 
 This tracks the matrix-multiplication speed work so far. The narrow comparison
 scope is single-threaded FP32 row-major GEMM for `C = A * B` with `alpha = 1`
@@ -21,6 +21,451 @@ use the git history for this file; the current recent sequence is anchored by:
 - `7fae628` Increase B-pack prefetch distance.
 
 ## Timeline
+
+### 2026-05-28 local-uncommitted: high-K n512 target recheck and rejected follow-ups
+
+Fresh continuation work rechecked the high-K SME source-B reuse extension after
+the Hugging Face publish pass. Correctness still passed with `make test`:
+`all GEMM tests passed (636 shapes)`.
+
+A cooled one-shot route sweep over the `n = 512/768, k = 4096` family still
+showed the route labels on `sme_large_reuse`. The `n = 512` medians were much
+noisier than the best samples, so separate-process medians were not treated as
+decision evidence. A paired Accelerate rerun with repeat-61, `iters=8`, and
+`COB_AB_COOLDOWN_US=20000` made the current target set clearer:
+
+- `1024x512x4096`: Accelerate/COB median `1.0463x`, bootstrap95
+  `[1.0338,1.0685]`, holdout `1.0363x`, Accelerate-faster `55/61`.
+- `1280x512x4096`: median `1.0610x`, bootstrap95 `[1.0301,1.0846]`,
+  holdout `1.0596x`, Accelerate-faster `56/61`.
+- `1536x512x4096`: median `1.0659x`, bootstrap95 `[1.0455,1.0942]`,
+  holdout `1.0660x`, Accelerate-faster `57/61`.
+- `2048x512x4096`: median `1.1101x`, bootstrap95 `[1.0940,1.1352]`,
+  holdout `1.1101x`, Accelerate-faster `59/61`.
+
+The `n = 768` rows were mostly neutral or too noisy to drive a source change:
+`768x768x4096` and `1024x768x4096` centered around `1.0x`,
+`1280x768x4096` was noisy/COB-favored by median, and `1536/2048x768x4096`
+had intervals or signs too weak for a route edit.
+
+Default SME reuse was compared against the AMX fallback by compiling side A
+with `COB_DISABLE_APPLE_SME=1`. The default remained better than the fallback
+on the rows that mattered, so removing the SME gate is not the fix. The cleanest
+fallback comparison was `768x512x4096`, where default/A measured `1.0614x`
+with bootstrap95 `[1.0514,1.0846]`; larger rows were noisy but did not show a
+credible AMX win.
+
+Rejected follow-up probes from this continuation:
+
+- `COB_SGEMM_M768_2048_SME_REUSE_KC=1536` did not beat the default. Target and
+  guard rows were noisy, with `2048x512x4096` only `1.0102x` median and a
+  bootstrap interval crossing `1`.
+- `COB_SGEMM_M768_2048_SME_REUSE_NC=384` was neutral. The best-looking target,
+  `2048x512x4096`, measured only `1.0017x` median with weak signs and noisy
+  samples.
+- Adding a packed-B prefetch inside `cob_sgemm_16x64_sme_from_packed_b64_tuple`
+  was rejected. It regressed `1024x512x4096` hard (`0.8318x` median) and did not
+  move `2048x512x4096`.
+
+A Time Profiler trace for `2048x512x4096` with `COB_BENCH_ITERS=64` was
+exported from `/private/tmp/cob-2048x512x4096-current-time.trace`. The
+symbolized `time-profile` summary put `75.24%` of samples in
+`cob_sgemm_16x64_sme_from_packed_b64_tuple`, `17.55%` in
+`cob_sgemm_pack_a32_full`, and only `2.64%` in the first fused
+`cob_sgemm_16x64_sme_strided_b_pack_b32_tuple_prefetch2` pass. Interpretation:
+the remaining target is the reused packed-B SME compute schedule or A packing,
+not another source-B packing/prefetch knob.
+
+### 2026-05-27 local-uncommitted: Time Profiler and cooled benchmark pass
+
+Added a symbolization helper for Xcode Time Profiler exports:
+`tools/xctrace_time_sample_summary.py`. It can summarize raw `time-sample` PCs
+by address or symbol when given the binary and load address, but the safer path
+is exporting Xcode's symbolized `time-profile` table and grouping by symbol.
+This caught a bad load-address assumption in an earlier raw-PC read that made
+the AMX inner loop look like unrelated SME code.
+
+Fresh symbolized Time Profiler runs showed the expected split: most samples are
+inside the inlined AMX compute loop in `cob_sgemm_rowmajor`, with A packing as
+the visible named helper:
+
+- `768x1024x2048`: `94.87%` in `cob_sgemm_rowmajor`, `4.73%` in
+  `cob_sgemm_pack_a32_full`, and a tiny direct hit on
+  `cob_sgemm_32x32_amx_store_full`.
+- `512x512x4096`: `87.16%` in `cob_sgemm_rowmajor`, `12.58%` in
+  `cob_sgemm_pack_a32_full`.
+- `512x1216x3072`: `93.21%` in `cob_sgemm_rowmajor`, `6.44%` in
+  `cob_sgemm_pack_a32_full`.
+
+The benchmark binaries now raise the macOS benchmark thread QoS and
+`bench/bench_gemm.c` accepts `COB_BENCH_COOLDOWN_US`, matching the existing
+paired A/B cooldown knob. A cooled repeat-31 target sweep with
+`COB_BENCH_ITERS=4` and `COB_BENCH_COOLDOWN_US=20000` at
+`/private/tmp/cob-targets-current-qos-cooldown-r31.csv` replaced the stale hot
+gap list. After filtering rows with large best-to-median drops, the remaining
+COB one-shot rows behind Accelerate were:
+
+- `512x1216x3072`: ratio `0.9081`, route `amx_packed_large_block`.
+- `768x1216x4096`: ratio `0.9655`, route `amx_packed_large_block`.
+- `512x1152x2048`: ratio `0.9784`, route `amx_chunked_b`.
+
+Two older apparent gaps flipped under the cooled rebuild: `512x512x4096` and
+`768x1024x2048` were ahead of Accelerate in this sweep. Do not use the older
+hot filtered audit rows as source-change targets without a fresh cooled rerun.
+
+Added `tools/paired_accelerate_bench.sh`, which compiles the current COB source
+as side A and Apple Accelerate as side B inside the existing paired A/B harness.
+This matters because separate COB and Accelerate medians moved by more than
+several candidate deltas on the M5 Max. A repeat-31, `iters=8`, cooled paired
+run on the suspect rows found:
+
+- `512x1152x2048`: Accelerate/COB median `1.0484x`, bootstrap95
+  `[1.0182, 1.0866]`, but weak sign support and noisy samples.
+- `768x1216x4096`: Accelerate/COB median `1.0155x`, bootstrap95 crossed `1`.
+- `512x1216x3072`: Accelerate/COB median `1.1053x`, bootstrap95
+  `[1.0931, 1.2521]`, `29/31` Accelerate-faster. A repeat-101 rerun
+  strengthened this to median `1.2046x`, bootstrap95 `[1.1812, 1.2227]`, and
+  `98/101` Accelerate-faster. This is the cleaner remaining one-shot target.
+
+A benchmark-thread `pthread_override_qos_class_start_np` probe did not solve
+core placement: a fresh Time Profiler trace for `512x1152x2048` still sampled
+mostly on S cores. The override was removed; the lighter thread QoS call and
+cooldown controls remain useful measurement hygiene but should not be treated
+as P-core pinning.
+
+Accepted one exact source change from the MpGEMM-style research path:
+`512x1216x3072` now uses the existing SME B-reuse structure with
+`NC=256` and `KC=1024`, plus the existing tuple source-B prefetch helper at
+distance `16`. This fuses source-B packing with the first 16-row SME tile in
+each K chunk, then reuses the packed 64-column B block for the remaining
+16-row panels. Correctness now includes an exact `512x1216x3072`
+packed/direct aligned check.
+
+Before adding source-B prefetching to this exact route, cooled repeat-101,
+`iters=16` A/B against clean `HEAD` measured candidate/baseline median
+`1.0886x`, bootstrap95 `[1.0645, 1.1260]`, and holdout median `1.1043x`. A
+direct candidate-vs-candidate run then measured the prefetch helper at
+`1.0575x` over the non-prefetch candidate, bootstrap95 `[1.0346, 1.0954]`, and
+holdout median `1.0624x`. With prefetch kept, the final serial cooled
+repeat-101, `iters=16` A/B against clean `HEAD` measured candidate/baseline
+median `1.1829x`, bootstrap95 `[1.1489, 1.2105]`, and holdout median
+`1.1845x`. A serial paired Accelerate run with the same settings was neutral:
+Accelerate/COB median `0.9943x`, bootstrap95 `[0.9764, 1.0145]`, and holdout
+median `0.9956x`.
+
+Block-size probes around the new route rejected `NC=128/192/512` and
+`KC=512/2048/3072`; `KC=1536` looked tempting against the old baseline but did
+not beat the default candidate in direct candidate-vs-candidate A/B. Additional
+`NC=320/384/448` probes were neutral, and source-B prefetch distances
+`8/32/64` did not beat distance `16`.
+
+Rejected follow-up probes from this pass:
+
+- For exact `768x1024x2048`, forcing the one-shot large-block AMX route was
+  noisy in repeat-101 and failed holdout support.
+- For exact `512x512x4096`, forcing scalar A packing was a hard regression at
+  about `0.63x` of baseline.
+- For exact `512x1216x3072`, one-shot large-block row-block retunes to 384 or
+  512 rows regressed, and forcing direct strided-B was a hard regression at
+  about `0.75x`. The public packed-B route already competes with Accelerate on
+  this shape, so the remaining one-shot gap is setup/route-contract cost rather
+  than a direct-B opportunity.
+- Follow-up setup probes for exact `512x1216x3072` did not find an accepted
+  source change. K-blocking the one-shot packed path at `KC=1024` passed
+  correctness but was unsupported in repeat-101 cooled A/B: median `1.0132x`,
+  mean-log `0.9838x`, bootstrap95 `[0.9182, 1.0515]`, sign-p `0.842`, and weak
+  holdout. B-pack prefetch distance sweeps rejected `0` as a regression and
+  left `32/96/128/192` neutral or noisy. Replacing the 128-byte B-pack `memcpy`
+  with explicit NEON loads/stores regressed to median `0.9361x`. Separate
+  packed-B and packed-A scratch allocations had one tempting noisy pass
+  (`1.0708x`) but fell to `1.0125x` with `iters=8` and weak signs. Hoisting the
+  A-pack AMX ones load was neutral at `1.0031x`. A true `MC=256, NC=384`
+  2D-tiled one-shot prototype passed correctness but hard-regressed to median
+  `0.9106x`, so the current large-block packed path remains the baseline.
+- Fresh repeat-31, `iters=8`, cooled rerun moved the next target to
+  `512x1152x2048`: `768x1216x4096` was only about `1%` behind Accelerate in
+  that run, while `512x1152x2048` stayed materially behind and still routed
+  through `amx_chunked_b`. Route and setup probes did not produce a safe win:
+  disabling the chunked path was only weakly positive on `512x1152x2048`
+  (`1.0216x`) and hard-regressed `512x1024x2048` (`0.9492x`); chunk sizes
+  `128`, `384`, and `512` were neutral/noisy; a thread-local one-shot scratch
+  cache was neutral on target rows and negative on `512x1024x2048`; and
+  `-mcpu=native` was negative/noisy. A fresh Time Profiler trace at
+  `/private/tmp/cob-512x1152x2048-current-20260527-time.trace` summarized from
+  `time-profile` XML showed `90.97%` in `cob_sgemm_rowmajor`, `5.81%` in
+  `cob_sgemm_pack_a32_full`, and only a tiny direct sample in
+  `cob_sgemm_32x32_amx_store_full`, so this row also needs a compute/layout
+  change rather than more small setup knobs.
+- Manual AMX compute K-unroll2 was rejected on the May 27 target set:
+  `512x1152x2048` was only `1.0131x` median with mean-log `1.0000x` and a
+  bootstrap interval crossing `1`, `512x1216x3072` was neutral/noisy,
+  `768x1216x4096` was negative/noisy, and `512x1024x2048` was neutral/noisy.
+- Additional m512 route probes were rejected. Letting exact
+  `512x1152x2048` fall through to the large-block packed route regressed in
+  repeat-101 cooled A/B: median `0.9860x`, holdout `0.9766x`. Flipping the
+  m512 chunked-B compute loop to A-panel outer order stayed weak/noisy on the
+  target: median `1.0070x`, bootstrap95 `[0.9950, 1.0287]`, and weak signs.
+  Extending the m512 chunked-B route to exact `512x1216x3072` also failed:
+  median `0.9870x`, holdout `0.9823x`.
+
+### 2026-05-27 local-uncommitted: high-K SME source-B reuse extension
+
+After the exact `512x1216x3072` SME source-B reuse route landed, a broader
+cooled rerank moved the next real targets into high-K medium/large rows around
+`n = 512/768, k = 4096`. The old suspects changed under paired measurement:
+`512x1152x2048` became COB-favored, `768x1216x4096` was neutral, and
+`512x1216x3072` stayed neutral rather than a confirmed Accelerate loss.
+
+The accepted source route extends the renamed
+`cob_sgemm_rowmajor_sme_pack_b_reuse` helper to exact `k = 4096`,
+`m = 768/1024/1280/1536/2048`, and `n = 512/768`. It keeps `NC=256`,
+`KC=1024`, and the source-B prefetching tuple helper. Route labels now report
+these one-shot rows as `sme_large_reuse`, and correctness coverage adds
+`768/1536/2048 x 512 x 4096` plus `1280/1536/2048 x 768 x 4096`, raising the
+Apple Silicon test output to `636` shapes.
+
+First-pass source-vs-source validation for the `m = 768/1024` targets was
+clean enough to keep the route: `768x512x4096` median `1.0796x`,
+bootstrap95 `[1.0254, 1.1143]`, holdout `1.0875x`; `768x768x4096` median
+`1.0571x`, bootstrap95 `[1.0564, 1.0940]`, holdout `1.0648x`;
+`1024x512x4096` median `1.0429x`, bootstrap95 `[1.0419, 1.1070]`, holdout
+`1.0356x`; and `1024x768x4096` median `1.0831x`, bootstrap95
+`[1.0697, 1.1415]`, holdout `1.0303x`. The `768x1152x4096` sibling stayed
+neutral/noisy and was not added.
+
+The higher-row extension was noisier source-vs-source but still useful for
+paired Accelerate triage. After adding `m = 2048`, direct Accelerate checks
+showed `2048x768x4096` neutral (`Accelerate/COB` median `1.0156x`,
+bootstrap95 `[0.9757, 1.0775]`, holdout `0.9937x`) and `1536x768x4096`
+flipped to COB-favored in the latest run (`0.9636x`, bootstrap95
+`[0.9435, 0.9939]`, holdout `0.9549x`). `2048x512x4096` remains the clearest
+current proprietary baseline target: the latest paired Accelerate rerun was
+`1.0703x` Accelerate/COB, bootstrap95 `[1.0124, 1.1517]`, holdout `1.0703x`,
+with high sample CV.
+
+Rejected probes from this pass:
+
+- Forcing the old AMX non-large-block or strided-B variants did not beat the
+  current source on the confirmed rows.
+- `NC=512`, `KC=512`, and `KC=2048` for the SME reuse route were neutral/noisy
+  or regressive. The default stays `NC=256`, `KC=1024`.
+- Source-B prefetch distance changes away from `16` did not beat the default.
+- Unrolling the packed-B SME inner loop by two passed correctness but did not
+  clear A/B validation and weakened the earlier `512x1216x3072` route.
+- Row-streaming AMX B packing was a hard regression when SME was disabled,
+  dropping the tested rows to roughly `0.70x..0.79x` of the previous path.
+
+### 2026-05-27 local-uncommitted: external competitor check
+
+Current public Apple Silicon GEMM references still point at generated or
+assembly matrix-engine kernels as the real ceiling. The 2026 M5 roofline writeup
+reports public Accelerate `cblas_sgemm` around `1790 GF/s` peak FP32 and
+`~1720 GF/s` sustained for large square cases, while Core ML's internal CPU path
+can go much higher through non-BLAS kernels and is not the same public
+row-major SGEMM contract:
+<https://www.michaelstinkerings.org/apple-m5-gpu-roofline-analysis/>.
+
+The Hello SME GEMM notes report M4 Accelerate around `1825.1 GF/s` at
+`512^3`, and emphasize 32x32 SME tile blocking with one K update per inner
+iteration after finding no SME speedup from K-loop unrolling:
+<https://scalable.uni-jena.de/opt/sme/gemm.html>.
+
+MpGEMM remains the most relevant source-available architectural reference. Its
+paper and GitHub README describe cache-aware partitioning, on-the-fly
+transposition, multi-vector loads, and use of all SME tile registers, with a
+reported `1.23x` average speedup over Accelerate on M4 Pro workloads:
+<https://arxiv.org/abs/2512.21473> and <https://github.com/MpGEMM/mpgemm>.
+Local same-contract FP32 calibration currently clears its stock `row_sgemm`
+skinny rows, but the design direction is still useful: broad C-level dispatch
+gates are unlikely to be the next ceiling mover.
+
+### 2026-05-27 local-uncommitted: xctrace CPU counter path
+
+Noninteractive `mperf` remains blocked by root permissions, but full-Xcode
+`xctrace` can record and export the `CPU Counters` template when Instruments
+cache writes are allowed. Added `tools/xctrace_metric_summary.py` to summarize
+exported `MetricTable` XML with process/thread filters and a minimum-duration
+filter for dropping short startup or migration samples.
+
+Direct-target counter traces were collected for `512x512x4096` with
+`COB_BENCH_ITERS=128`:
+
+- COB one-shot:
+  `/private/tmp/cob-512x512x4096-oneshot-direct-r128-metric.xml`, summarized
+  with `--process cob_gemm_bench --thread "Main Thread" --min-duration-ns
+  750000`, produced 196 steady samples over 192.35 ms, `Cycles` about
+  `4.138 GHz`, `Instruction Processing Bottleneck` `0.6455`, `Useful`
+  `0.3485`, `Instruction Delivery Bottleneck` `0.0035`, and `Discarded
+  Bottleneck` `0.0026`.
+- Accelerate:
+  `/private/tmp/cob-512x512x4096-accelerate-direct-r128-metric.xml`, summarized
+  the same way, produced 190 steady samples over 187.82 ms, `Cycles` about
+  `4.130 GHz`, `Instruction Processing Bottleneck` `0.8377`, `Useful`
+  `0.1566`, `Instruction Delivery Bottleneck` `0.0031`, and `Discarded
+  Bottleneck` `0.0026`.
+
+Interpretation: the remaining `512x512x4096` gap is not a branch/discard or
+instruction-delivery problem in the steady compute region. The CPU pipeline
+ratios are also not a simple speed proxy for matrix-engine code: Accelerate is
+faster despite lower CPU `Useful`, so the next useful work is kernel schedule /
+matrix-engine utilization evidence rather than more broad dispatch gates.
+
+The same shape was split into public COB modes with serial cooldown runs, after
+discarding an accidentally parallel benchmark pass. With `COB_BENCH_ITERS=8`
+and 31 repeats, one-shot measured `1301.80 GF/s`, packed-B measured
+`1504.89 GF/s`, packed-AB measured `1662.30 GF/s`, and pack-B setup measured
+`92.18 GB/s`. That makes one-shot packing overhead visible, but not enough to
+justify a known-rejected packing rewrite. A compile-flag sweep of
+`COB_SGEMM_PACK_B_PREFETCH_DISTANCE` for exact `512x512x4096` rejected
+distance `0` (`0.9832x`) and `16` (`0.9888x`), while `32` (`1.0046x`) and
+`128` (`1.0019x`) were noise-grade. No source behavior change.
+
+Follow-up rejected probes from the high-variance medium gap set:
+
+- Exact `768x1216x4096` chunked one-shot B packing was a hard regression:
+  repeat-101, `iters=4` measured `0.9033x` with negative holdout.
+- Exact `768x1216x4096` AMX one-shot row-block retunes did not produce
+  evidence. MC512 regressed to `0.9438x`; MC128 was too noisy and had no sign
+  support.
+- Exact `768x1024x2048` chunked one-shot B packing showed a weak first-pass
+  `1.0214x`, but siblings did not support a smooth rule and the cooled
+  repeat-101, `iters=8`, `COB_AB_COOLDOWN_US=20000` rerun stayed below the
+  dispatch bar: `1.0193x`, sign-p `0.111`, holdout sign-p `0.262`.
+- Exact `1024x1280x1536` AMX one-shot row-block retunes were neutral/noisy:
+  MC512 measured `0.9989x`, and MC256 measured `1.0004x`.
+
+Tooling follow-up: `bench/bench_ab.c` and `tools/paired_ab_bench.sh` now accept
+`COB_AB_COOLDOWN_US`, which sleeps after each paired sample for thermally noisy
+confirmation runs.
+
+### 2026-05-27 local-uncommitted: m64 MpGEMM calibration refresh
+
+Fresh current-commit calibration in
+`/private/tmp/cob-mpgemm-calibration-20260527-current` compared COB one-shot
+against MpGEMM commit `8d83011` on its stock skinny rows. The first pass made
+COB look weaker than MpGEMM `row_sgemm` on `64x32768x512`,
+`64x24576x1536`, and slightly on `64x4096x7168`. A same-commit skinny audit at
+`/private/tmp/cob-claim-audit-20260527-skinny-current` found no COB one-shot
+gaps against non-COB benchmark baselines in the routed skinny suite, while the
+internal packed-AB ceiling remained much higher on many m64 rows.
+
+Focused repeat-101 calibration with `COB_BENCH_ITERS=4` cleared the same-contract
+MpGEMM FP32 gaps. The full six-shape rerun at
+`/private/tmp/cob-mpgemm-calibration-20260527-full-r101-i4` produced no
+`mpgemm-row-sgemm.gaps.csv` rows, and `mpgemm-row-sgemm.all.csv` showed COB
+ahead of `row_sgemm` by `1.0050x..1.1196x` across the stock rows. MpGEMM's
+faster `row_shgemm` and `row_bgemm` rows are not FP32 same-contract baselines:
+the local header declares `row_shgemm` with `__fp16*` inputs and `row_bgemm`
+with `int8_t*` inputs.
+
+Rejected follow-up probes:
+
+- Switching long-`n`, `k = 512` B-reuse from the scalar 64-column helper to the
+  tuple helper looked tempting in a light screen, but the heavier
+  `/private/tmp/cob-next-audit/longn-k512-m64-tuple-r201-i4.log` rejected it:
+  `64x32768x512` fell to `0.8881x`, and lower-width rows were neutral or noisy.
+- Retuning the long-wide `k = 1536` path did not close `64x24576x1536`.
+  `COB_SGEMM_M64_SME_LONG_WIDE_NC=128` and `512` were neutral/noisy in
+  `/private/tmp/cob-next-audit/longwide-nc128-r201-i4.log` and
+  `/private/tmp/cob-next-audit/longwide-nc512-r201-i4.log`; lowering
+  `COB_SGEMM_M64_SME_WIDE_K1536_KC` to `768` regressed guards in
+  `/private/tmp/cob-next-audit/longwide-k1536-kc768-r201-i4.log`.
+- Adding source-B prefetches to the scalar long-`n`, `k = 512` pack helper was
+  a hard regression in
+  `/private/tmp/cob-next-audit/longn-k512-scalar-prefetch-r201-i4.log`.
+- Disabling SME for the m64 `k = 512` row family remained a hard regression in
+  `/private/tmp/cob-next-audit/k512-disable-sme-r101-i4.log`, so the current
+  SME path is still the right baseline.
+- Forcing long-`n`, `k = 512` rows back to the direct streaming-B route by
+  raising `COB_SGEMM_M64_SME_LONG_N_K512_MIN_N` was also a hard regression in
+  `/private/tmp/cob-next-audit/k512-force-direct-r101-i4.log`: the main
+  `64x32768x512` gap fell to `0.3517x`.
+- A two-A-panel direct SME idea is blocked by the exposed intrinsic tile range:
+  Apple clang rejects `svmopa_za32_f32_m(4, ...)` and
+  `svreadz_hor_za32_f32(4, ...)`, with the valid ZA32 tile range limited to
+  `0..3`.
+- A 32x32 direct-B SME prototype that used the four exposed ZA32 tiles for two
+  16-row A panels over 32 columns compiled and passed correctness, but
+  `/private/tmp/cob-next-audit/m64-k512-direct32-r101-i4.log` rejected it hard:
+  `64x32768x512` fell to `0.3536x`.
+- A related B-reuse 32x32 prototype packed 32-column B panels and computed two
+  16-row A panels per packed-B read. It also passed correctness but lost badly
+  in `/private/tmp/cob-next-audit/m64-k512-reuse32-r101-i4.log`, with
+  `64x32768x512` at `0.6466x`.
+- Separating B64 packing from compute with a plain pack-only copy then four
+  packed-B compute passes was worse than the fused pack+first-panel loop:
+  `/private/tmp/cob-next-audit/m64-k512-packonly-r101-i4.log` measured
+  `64x32768x512` at `0.3108x`.
+- Keeping scalar source-B loads but storing the packed B row with
+  `svcreate4`/tuple `svst1` was neutral/noisy in
+  `/private/tmp/cob-next-audit/k512-tuple-store-r101-i4.log`, so the scalar
+  store sequence remains in place.
+- `COB_SGEMM_M64_SME_REUSE_NC=384` and `640` did not close the `k = 512`
+  long-`n` gap in
+  `/private/tmp/cob-next-audit/k512-reuse-nc384-r101-i4.log` and
+  `/private/tmp/cob-next-audit/k512-reuse-nc640-r101-i4.log`; the main
+  `64x32768x512` row stayed neutral/noisy.
+- For the smaller `64x4096x7168` calibration gap, `REUSE_NC=384` in
+  `/private/tmp/cob-next-audit/n4096-highk-nc384-r101-i4.log` moved the target
+  too little and did not produce a supported target/guard rule.
+- Disabling SME on the long-wide `k = 1536` rows was a hard regression in
+  `/private/tmp/cob-next-audit/longwide-disable-sme-r101-i4.log`, confirming
+  that the current SME inline-pack route is still much better than the AMX
+  fallback for `64x24576x1536`.
+
+Tooling follow-up: `tools/mpgemm_gap_report.py` now turns MpGEMM
+`singlePerformance.x` output plus COB CSV output into a comparable gap report,
+and `tools/mpgemm_calibration.sh` records `COB_BENCH_ITERS` and emits both
+`mpgemm-row-sgemm.gaps.csv` and `mpgemm-row-sgemm.all.csv`.
+
+### 2026-05-27 local-uncommitted: audit stability filtering and rejected probes
+
+A full repeat-31 claim audit with `COB_BENCH_ITERS=4` at
+`/private/tmp/cob-claim-audit-20260527-r31-i4` was not clean enough to use as a
+kernel-change driver. The sanity report showed large best-to-median drops across
+medium and square rows, including several impl/baseline rows over `50%`, so the
+raw gap ranking was polluted by thermal or scheduling instability. Focused
+serial reruns cleared some of the largest apparent gaps, such as
+`512x1280x1536`, and narrowed the useful suspect list.
+
+Tooling now lets the gap reporter ignore unstable rows:
+`tools/bench_gap_report.py --max-drop-percent N` filters rows whose
+`best/median - 1` exceeds the threshold, and `tools/claim_audit.sh` passes
+`COB_AUDIT_SANITY_DROP` into every per-suite gap report. The sanity CSVs still
+record the filtered rows so they can be rerun cold.
+
+Rejected source probes:
+
+- Exact full-K SME blocking for `64x1408x1536` and `64x1472x1536` looked
+  promising under a compile-flag proxy, but an actual source-gated repeat-101
+  A/B against clean `HEAD` did not hold up. `64x1472x1536` was only weakly
+  positive, `64x1408x1536` reversed in the holdout, and neighboring `1536`
+  stayed risky, so the source change was reverted.
+- Reopening exact `512x512x4096` for the AMX large-block schedule again
+  produced only noise-grade evidence. Repeat-101 A/B had high sample CV and no
+  convincing sign count on the target or guards, matching the older May 6 note,
+  so this source change was also reverted.
+- For exact `512x512x4096`, forcing the direct strided-B AMX path instead of
+  packed-B was a clear loss despite the one-shot packing overhead. Repeat-101
+  A/B measured the target at `0.9593x` with negative holdout, so the old
+  512-stride conflict guard remains valid.
+- For the existing `m = 512, k = 2048` chunked-B route, disabling the route
+  and falling back to the normal packed-AMX path regressed every accepted width:
+  `512x896x2048` `0.9910x`, `512x1024x2048` `0.9699x`,
+  `512x1152x2048` `0.9881x`, and `512x1280x2048` `0.9701x`.
+- Retuning that chunked-B route from 256-column B chunks to 512-column chunks
+  was neutral to negative, with selected widths at or below `1.0x`. A
+  384-column chunk probe had weak noisy positives on a few non-selected rows
+  but no reliable target/guard rule. Keep the current 256-column chunk.
+- Extending the same chunked one-shot B-pack structure to `m = 512, k = 3072`
+  was a regression against the current full packed path. The exact candidates
+  lost at `512x1152x3072` (`0.9796x`), `512x1216x3072` (`0.9879x`), and
+  `512x1280x3072` (`0.9704x`), with negative holdouts. Keep the `k = 3072`
+  band on the packed-AMX route.
+- Exact `512x512x4096` chunked one-shot B packing was also rejected. Even
+  though full one-shot B packing allocates an 8 MB packed-B panel, the chunked
+  variant measured `0.9879x` with tight paired CV and negative holdout. Keep
+  the current full packed-AMX route for this shape.
 
 ### 2026-05-27 local-uncommitted: mid-wide k1536 tuple-prefetch accepted
 

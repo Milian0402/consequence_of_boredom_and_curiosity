@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-05-26
+Last updated: 2026-05-28
 
 ## Goal
 
@@ -29,8 +29,9 @@ That is the claim supported by the current audit docs, including the final
 scoped audit note at `docs/audits/2026-05-10-claim-audit.md`. It is not a
 universal "fastest matmul software" claim. Accelerate is proprietary and still
 wins some small or pack-overhead-heavy cases. MpGEMM is source-available with
-unclear licensing in the local scan and remains a calibration target; it still
-wins a small number of one-shot `m = 64` large-`K` shapes.
+unclear licensing in the local scan and remains a calibration target; the
+latest focused FP32 `row_sgemm` calibration found no same-contract gaps on its
+stock skinny rows, while its FP16 and int8 rows remain out of scope.
 
 ## What Shipped
 
@@ -41,12 +42,18 @@ wins a small number of one-shot `m = 64` large-`K` shapes.
 - Apple Silicon AMX kernels and route-specific packing paths.
 - Apple Silicon SME2.1 direct-`B`, packed-`B`, and skinny/reuse routes.
 - ARM64 NEON and scalar fallback paths.
-- Correctness coverage for 135 GEMM shapes.
+- Correctness coverage for 636 GEMM test shapes.
 - A May 10 clean rebuild and claim-audit snapshot for the scoped routed suites.
 - Route-aware benchmarks, grid sweeps, gap reports, and heatmap generation.
+- Benchmark controls for forced iterations, cooled repeats, route isolation,
+  and macOS benchmark-thread QoS.
 - A paired A/B benchmark harness with median ratio, bootstrap confidence
   interval, sign-test p-value, split-half holdout, checksum guards, and
   CV-driven repeat extension.
+- A direct paired Accelerate harness for checking proprietary one-shot gaps
+  without relying on separate-process medians.
+- Xcode `xctrace` CPU Counter and Time Profiler XML summarizers for non-root
+  profiling runs.
 - Claim-audit tooling that records hardware context, route-aware CSVs, gap
   reports, sanity warnings, and summary output.
 
@@ -64,37 +71,49 @@ The most important performance wins came from:
 - Packed-B large-square and `m = 384` blocking.
 - Small-A packed-B B-panel traversal.
 - Medium SME direct routes in the `n = 1280..1472` band.
+- One-shot SME source-`B` reuse routes for exact `512x1216x3072` and for
+  `k = 4096`, `m = 768/1024/1280/1536/2048`, `n = 512/768`.
 - Public packed-AB support and packed-AB traversal tuning.
 
 ## Current Limits
 
 - The full "fastest fastest" goal is not proven.
-- The remaining serious speed gap is narrower after the May 26 m64 route pass,
-  but still not globally closed: some `m = 64` large-`K` shapes still need
-  fresh calibration against MpGEMM-style runs and licensed/open-source baselines.
+- The May 27 focused MpGEMM FP32 `row_sgemm` calibration cleared the previous
+  apparent `m = 64` stock-shape gaps when COB uses forced benchmark iterations.
+  This improves the calibration story but does not prove the full "fastest
+  fastest" goal across new shapes, libraries, hardware, or non-FP32 contracts.
 - Earlier C-level probes did not close that gap: B-panel-first traversal,
   prefetch locality changes, epilogue branch hoisting, broad compiler unrolling,
   `-mcpu=native`, K16 unroll pragmas, and prefetch-boundary branch splitting
   were neutral, noisy, or regressive.
-- The next speed step is likely not another dispatch gate. It is probably an
-  original fixed-shape SME kernel or hand-scheduled assembly for the `m = 64`
-  large-`K` path.
+- The newest cooled target sweep still needs broad re-audit against
+  Accelerate and source-available competitors. The exact `512x1216x3072` row is
+  neutral in the latest paired Accelerate confirmation, not a current confirmed
+  loss. The clearest remaining proprietary baseline target is
+  `2048x512x4096`; a May 28 paired Accelerate rerun measured
+  Accelerate/COB median `1.1101x` with bootstrap95 `[1.0940,1.1352]`.
+  Neighboring `n = 768, k = 4096` rows stayed neutral/noisy.
+- The next speed step is likely not another broad dispatch gate. It is probably
+  a real kernel/layout change backed by Time Profiler or hardware-counter
+  evidence. The latest `2048x512x4096` Time Profiler trace put most samples in
+  `cob_sgemm_16x64_sme_from_packed_b64_tuple`, not the first source-B packing
+  pass.
 
 ## Future Work
 
-1. Re-run the m64 large-`K` calibration grid after the May 26 route changes,
-   then write an original fixed-shape SME kernel only for the gaps that remain.
-   Keep `64x2112x7168` and the high-K `n = 1024` family on the short list.
-2. Use hardware counters before accepting more exact gates. The prior counter
-   evidence pointed at dispatch/scheduling pressure, not a simple memory-wait
-   problem.
+1. Re-audit the m64 large-`K` grid against licensed/open-source baselines and
+   any newly source-inspectable Apple Silicon packages before publishing a
+   broader claim. Keep `COB_BENCH_ITERS` available for short/noisy one-shot rows.
+2. Use Time Profiler or hardware counters before accepting more exact gates.
+   The latest target trace points at the reused packed-B SME compute helper,
+   while cooled A/B probes rejected the obvious route changes.
 3. Re-audit external baselines when publishing a claim. Include BLIS, OpenBLAS,
    BLASFEO, Eigen, LIBXSMM, Rust `matrixmultiply`, `coral-aarch64`,
    `tract-linalg`, KleidiAI, and any newly available source-inspectable
    Apple Silicon packages.
 4. Keep MpGEMM separate unless its license becomes clear. If it becomes
-   clearly open-source, rerun same-contract benchmarks and treat the remaining
-   `m = 64` gaps as release blockers.
+   clearly open-source, rerun same-contract FP32 benchmarks with the focused
+   calibration settings before treating any row as a release blocker.
 5. Investigate 64-column contiguous public packed-B layout only as a versioned
    ABI change. It may enable tuple loads in more public packed-B paths, but it
    should not be mixed into a small tuning pass.

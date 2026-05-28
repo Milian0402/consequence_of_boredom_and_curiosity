@@ -29,6 +29,7 @@ mkdir -p "$OUT_DIR"
     echo "cob_bench: $COB_BENCH"
     git rev-parse --short HEAD 2>/dev/null | sed 's/^/cob_commit: /' || true
     echo "cob_repeats: $COB_REPEATS"
+    echo "cob_bench_iters: ${COB_BENCH_ITERS:-auto}"
     echo "shapes: $SHAPES"
     license_files=$(find "$MPGEMM_DIR" -maxdepth 2 \( -iname 'license*' -o -iname 'copying*' \) -print)
     if [ "$license_files" ]; then
@@ -54,5 +55,16 @@ COB_GRID_BENCH="$COB_BENCH" \
 
 python3 tools/bench_sanity_report.py "$OUT_DIR/cob-one-shot.csv" \
     > "$OUT_DIR/cob-one-shot.sanity.csv"
+
+if [ -f "$OUT_DIR/mpgemm-singlePerformance.txt" ]; then
+    python3 tools/mpgemm_gap_report.py \
+        "$OUT_DIR/cob-one-shot.csv" \
+        "$OUT_DIR/mpgemm-singlePerformance.txt" \
+        > "$OUT_DIR/mpgemm-row-sgemm.gaps.csv"
+    python3 tools/mpgemm_gap_report.py --all \
+        "$OUT_DIR/cob-one-shot.csv" \
+        "$OUT_DIR/mpgemm-singlePerformance.txt" \
+        > "$OUT_DIR/mpgemm-row-sgemm.all.csv"
+fi
 
 echo "$OUT_DIR"
