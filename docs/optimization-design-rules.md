@@ -287,8 +287,8 @@ These rules summarize repeated findings from the optimization timeline. They are
   `768x1024x3072`. Keep it capped to the audited range.
 - In one-shot AMX medium routes, high-`K` strided-B loses to packing B even
   after pack cost. Keep `m >= 512, k >= 4096` on the packed path, except exact
-  `512x512x4096`, which now has a repeat-151 source A/B win from the SME
-  direct route. Also keep `n = 1152, k >= 3072`, and exact
+  `512x512x2048`, `512x512x3072`, and `512x512x4096`, which have source A/B
+  wins from the SME direct route. Also keep `n = 1152, k >= 3072`, and exact
   `n = 1152, k = 2048` from `m >= 512`.
 - The same packed-path rule has a lower-height exception at `m = 384`: use the
   packed path for `n >= 1152, k >= 4096` and for exact `n = 1152, k >= 3072`.

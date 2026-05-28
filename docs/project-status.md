@@ -96,11 +96,11 @@ The most important performance wins came from:
   `2048x512x4096`; after narrowing the high-K SME reuse route so this exact
   row falls back to AMX, paired Accelerate reruns measured about `1.07x`
   Accelerate/COB, materially better than the earlier `1.1101x` gap but still
-  not closed. Exact `512x512x4096` moved the other direction: a repeat-151
-  source A/B now favors the SME medium direct route at B/A median `1.0767x`,
-  so that row is a narrow direct-route exception. Exact `1536x768x4096` and
-  `2048x768x4096` now also fall back to AMX because paired A/B favored that
-  route over SME reuse.
+  not closed. Exact `512x512x2048` and `512x512x4096` moved the other
+  direction: repeat-151 source A/B now favors the SME medium direct route at
+  B/A medians `1.0752x` and `1.0767x`, so both rows are narrow direct-route
+  exceptions. Exact `1536x768x4096` and `2048x768x4096` now also fall back to
+  AMX because paired A/B favored that route over SME reuse.
 - The next speed step is likely not another broad dispatch gate. It is probably
   a real kernel/layout change backed by Time Profiler or hardware-counter
   evidence. Earlier high-K SME traces put most samples in

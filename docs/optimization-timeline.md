@@ -66,6 +66,16 @@ support were strong. Neighbor checks did not justify broadening the gate:
 bootstrap crossing `1`. The benchmark route mirror and aligned-shape
 correctness coverage were updated with the exact row.
 
+Another exact `n = 512` route cleared validation after a fresh paired
+Accelerate scan showed `512x512x2048` still trailing. Exact `512x512x2048` now
+uses the SME medium direct path too. A repeat-151 paired source A/B against
+clean `HEAD`, with `iters=4` and `COB_AB_COOLDOWN_US=10000`, measured B/A
+median `1.0752x`, mean-log `1.0785x`, bootstrap95 `[1.0662,1.0905]`,
+B-faster `123/151`, and holdout median `1.0760x`. Guard rows did not support a
+broader route change: `512x512x3072`, `512x512x4096`, and `768x512x2048` all
+had bootstrap intervals crossing `1`. The benchmark route mirror was updated;
+correctness already covered `512x512x2048`.
+
 Rejected C-level probes from this pass:
 
 - Splitting the m512 chunked AMX path so `B` chunks are packed outside AMX mode
@@ -106,6 +116,12 @@ Rejected C-level probes from this pass:
   correctness but regressed the target to `0.9453x`, bootstrap95
   `[0.9434,0.9606]`. The panel-wise `memcpy` loop remains the best known
   B-pack setup spelling for this route.
+- AMX one-shot A-block retunes did not improve the fresh `512x768x3072` and
+  `2048x768x3072` Accelerate targets. Exact `512x768x3072` with
+  `MC=128/384/512` measured `0.9912x`, `0.9879x`, and `0.9932x` versus the
+  current `MC=256` path. Exact `2048x768x3072` with `MC=384/512/768/1024`
+  measured `0.9970x`, `0.9979x`, `0.9560x`, and `0.8896x`. Keep the existing
+  `MC=256` rule for these rows.
 
 ### 2026-05-28 local-uncommitted: high-K n512 target recheck and rejected follow-ups
 
