@@ -31,6 +31,11 @@ These rules summarize repeated findings from the optimization timeline. They are
   at least 3%, split-half holdout median at least 2%, and sign-test
   `p < 1e-10`. Treat smaller gates as exceptional and document why they are
   worth the added route complexity.
+- Broad scheduler, packing, or kernel changes are the main path to the actual
+  goal. Judge them on a predeclared cross-family portfolio and require at least
+  a 5% equal-shape geometric-mean win with neutral excluded-family guards.
+  Exact-cell wins can polish a proven architecture, but do not count as a major
+  milestone by themselves.
 - Keep one-shot, packed-B, and packed-AB claims separate. More-prepacked results
   are useful ceilings but do not prove the less-prepacked public path is faster.
 - Use `COB_BENCH_ONLY` or `tools/counter_probe.sh` for hardware-counter runs so

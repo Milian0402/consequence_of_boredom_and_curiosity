@@ -640,6 +640,10 @@ static const char* cob_one_shot_route(bench_shape shape)
             (n == 512 || n == 768) && k == 4096 && (n % 64) == 0) {
             return "sme_large_reuse";
         }
+        if (m >= 512 && m <= 896 && (m % COB_BENCH_AMX_MR) == 0 &&
+            n >= 1024 && n <= 1280 && k >= 3072 && (n % 64) == 0) {
+            return "sme_medium_high_k_reuse";
+        }
         const int use_long_n_k512 =
             (use_m64 && n >= COB_SGEMM_M64_SME_LONG_N_K512_MIN_N && k == 512) ||
             use_m96_128_k512;

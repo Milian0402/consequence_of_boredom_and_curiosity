@@ -22,6 +22,46 @@ use the git history for this file; the current recent sequence is anchored by:
 
 ## Timeline
 
+### 2026-07-09: broad medium high-K SME pack-and-reuse
+
+The one-shot path now uses the existing fused SME pack-and-reuse architecture
+across a full medium high-K region: `M = 512..896` at 32-row multiples,
+`N = 1024..1280` at 64-column multiples, `K >= 3072`, and tight A/B strides.
+For each `KC=1024`, `NC=256` block, the first 16-row tile consumes source B
+while packing it; the remaining A panels reuse that packed B block. This avoids
+the old full-matrix one-shot B pack and is one dimensional family rule rather
+than a list of benchmark cells.
+
+A repeat-31, `iters=4` paired portfolio against immutable baseline `ac62cec`
+covered 12 target shapes across the region. Every median won, from `1.0485x`
+to `1.1207x`, with `1.0761x` equal-shape geometric mean. All 372 target pairs
+favored the new route except one. Split-half holdouts stayed positive on every
+shape. Five excluded guards at `K=2048`, `M=928`, `K=1536`, `M=1280`, and the
+`2048x512x4096` tall edge measured `0.9984x..1.0012x`, confirming that the
+narrowed dispatch leaves those routes unchanged.
+
+Three non-1024-multiple K holdouts confirmed the full `K >= 3072` rule:
+`704x1216x3200`, `x3584`, and `x4608` improved by `1.0672x`, `1.0622x`, and
+`1.0901x` respectively over 31 pairs, with every candidate sample faster.
+
+The 12 target medians were:
+
+- `512x1024x3072` `1.0976x`, `512x1152x4096` `1.1053x`,
+  `512x1280x5120` `1.1207x`.
+- `576x1024x4096` `1.0878x`, `608x1280x3072` `1.0803x`,
+  `640x1152x3072` `1.0862x`.
+- `704x1024x4096` `1.0653x`, `704x1216x3072` `1.0635x`,
+  `768x1152x4096` `1.0524x`.
+- `832x1280x3072` `1.0514x`, `896x1024x3072` `1.0485x`,
+  `896x1216x5120` `1.0572x`.
+
+A separate repeat-31 paired Accelerate check used six representatives. COB won
+all six medians and 184/186 pairs; Accelerate/COB medians were `0.8691x`,
+`0.9160x`, `0.9655x`, `0.9436x`, `0.9366x`, and `0.9604x`. The claim remains
+scoped to the tested M5 Max, FP32 row-major one-shot contract, aligned tight
+inputs, and this route family. `make test` passes the full correctness suite,
+including new interior and upper-corner route shapes.
+
 ### 2026-07-09: AMX source-B panel reuse
 
 The largest freshly measured one-shot gap was `512x1152x2048`:

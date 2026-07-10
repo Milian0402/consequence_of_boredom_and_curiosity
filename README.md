@@ -45,7 +45,9 @@ packed `B` panels across multiple `A` panels. On Apple Silicon with SME2.1, the
 packed-`B` API can use a `16x64` SME kernel for larger reused-`B` problems.
 The one-shot path also has guarded SME direct-`B` and fused source-`B` reuse
 routes for selected medium and large contiguous cases where avoiding full AMX
-one-shot packing is faster.
+one-shot packing is faster. The medium high-K route applies fused first-tile
+B packing and cross-panel reuse across the broad `M=512..896`, `N=1024..1280`,
+`K>=3072` family.
 
 ## Build
 

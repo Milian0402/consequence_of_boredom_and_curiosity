@@ -74,6 +74,10 @@ The most important performance wins came from:
 - One-shot SME source-`B` reuse routes for exact `512x1216x3072` and for
   selected `k = 4096`, `n = 512/768` rows up to `m = 1280`, plus exact
   `1536x512x4096`.
+- Broad one-shot SME pack-and-reuse for `M = 512..896`, `N = 1024..1280`, and
+  `K >= 3072`. A 12-shape repeat-31 portfolio improved by `1.076x` geometric
+  mean against the previous source, with every shape median winning; six
+  representatives also beat Accelerate in 184/186 pairs.
 - Public packed-AB support and packed-AB traversal tuning.
 - A guarded 64-row SME subpanel route for strided source-B views. It packs a
   192-512-column B slab once and reuses it across four 16-row groups, enabling
@@ -109,9 +113,11 @@ The most important performance wins came from:
   B/A medians `1.0752x` and `1.0767x`, so both rows are narrow direct-route
   exceptions. Exact `1536x768x4096` and `2048x768x4096` now also fall back to
   AMX because paired A/B favored that route over SME reuse.
-- The next speed step is likely not another broad dispatch gate. It is probably
-  a real kernel/layout change backed by Time Profiler or hardware-counter
-  evidence. Earlier high-K SME traces put most samples in
+- The July 9 medium high-K family shows that a broad route can still matter
+  when it changes the packing/compute ownership instead of merely moving a
+  threshold. Outside that family, the next speed step is probably a deeper
+  kernel, layout, or algorithm change backed by Time Profiler or
+  hardware-counter evidence. Earlier high-K SME traces put most samples in
   `cob_sgemm_16x64_sme_from_packed_b64_tuple`, not the first source-B packing
   pass. Follow-up probes rejected scalar A packing, B-panel-major reuse
   traversal, weak/noisy high-K m-blocking, two-A-panel `16x32` reuse, full-B
@@ -153,6 +159,10 @@ The most important performance wins came from:
    different flags and symbol names.
 7. Compress old timeline material only after the reusable lessons are preserved
    in `docs/optimization-design-rules.md`.
+8. Prototype one-level pack-fused Strassen only as a separate large-aligned
+   architecture lane. Its seven half-size products offer a theoretical
+   `1.143x` compute reduction, but promotion requires a broad 5% portfolio win
+   and cancellation-heavy accuracy tests before it can touch the default path.
 
 ## Useful Entry Points
 
