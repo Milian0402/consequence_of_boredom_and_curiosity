@@ -50,6 +50,36 @@ if(COB_BUILD_TESTS)
     target_link_libraries(cob_gemm_test PRIVATE cob_matmul)
 
     add_test(NAME cob_gemm_test COMMAND cob_gemm_test)
+
+    add_library(cob_matmul_strassen_test STATIC
+        src/gemm.c
+    )
+    target_include_directories(cob_matmul_strassen_test
+        PUBLIC
+            ${PROJECT_SOURCE_DIR}/include
+    )
+    target_compile_options(cob_matmul_strassen_test
+        PRIVATE
+            -Wall
+            -Wextra
+            -Wpedantic
+    )
+    target_compile_definitions(cob_matmul_strassen_test PRIVATE
+        COB_SGEMM_STRASSEN1_MIN_DIM=1024
+    )
+    if(APPLE)
+        target_compile_definitions(cob_matmul_strassen_test PRIVATE _DARWIN_C_SOURCE)
+    endif()
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm64|aarch64|ARM64|AARCH64)$")
+        target_compile_definitions(cob_matmul_strassen_test PRIVATE COB_USE_NEON=1)
+    endif()
+
+    add_executable(cob_gemm_strassen_test
+        tests/test_gemm.c
+    )
+    target_link_libraries(cob_gemm_strassen_test PRIVATE cob_matmul_strassen_test)
+
+    add_test(NAME cob_gemm_strassen_test COMMAND cob_gemm_strassen_test)
 endif()
 
 if(COB_BUILD_BENCH)

@@ -28,6 +28,7 @@ session and the next serious work items, see
 - Public packed-`B` API
 - Public packed-`A` + packed-`B` API for repeated-use workloads
 - Apple Silicon AMX `32x32` FP32 microkernel when available
+- One-level Strassen over the AMX scheduler for large balanced contiguous inputs
 - Apple Silicon SME2.1 packed-`B` path for larger reused-`B` cases when available
 - Apple Silicon SME2.1 direct-`B` one-shot path for selected medium contiguous cases
 - ARM64 NEON `8x8` microkernel when available
@@ -48,6 +49,10 @@ routes for selected medium and large contiguous cases where avoiding full AMX
 one-shot packing is faster. The medium high-K route applies fused first-tile
 B packing and cross-panel reuse across the broad `M=512..896`, `N=1024..1280`,
 `K>=3072` family.
+For balanced contiguous problems with every dimension at least 6144 and no
+dimension more than 4/3 of another, one level of Strassen reduces the core from
+eight half-size products to seven. Smaller and strongly rectangular problems
+stay on the classical AMX/SME scheduler.
 
 ## Build
 
@@ -81,6 +86,10 @@ shapes are too noisy for single-call timing. Set `COB_BENCH_COOLDOWN_US=N` to
 sleep after each timed repeat in thermally noisy focused sweeps. On macOS, the
 benchmark raises its own thread QoS to reduce scheduler noise; it still pins
 common BLAS thread environment variables to `1`.
+The paired A/B harness compares every output element and defaults to the same
+`0.002` maximum absolute difference used by the correctness suite. Override it
+with `COB_AB_MAX_ABS_DIFF` only when deliberately testing a different numeric
+contract; sampled checksums remain diagnostic rather than the correctness gate.
 Arguments can be square sizes (`512`) or rectangular `MxNxK` shapes
 (`832x960x896`).
 Set `COB_BENCH_PACK_SETUP=1` to also print the one-time packed-`B` setup cost.

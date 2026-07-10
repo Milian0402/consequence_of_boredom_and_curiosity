@@ -5092,3 +5092,32 @@ predates the newer paired-harness methodology, skinny SME generalization, and
 medium-width SME direct routes. Keep it as context for the old experiments, but
 use the `Current Conclusion` section above and `docs/claims.md` for the current
 claim boundary.
+
+## 2026-07-10: one-level Strassen crosses over on huge balanced inputs
+
+The first algorithmic route was promoted after the C-level alternatives stopped
+moving the ceiling. One Strassen level computes seven half-size products through
+the existing one-shot AMX scheduler, using three reusable half-matrix buffers for
+the two linear combinations and one product. The default route requires tight A
+and B, 64-element divisibility, every dimension at least 6144, and a maximum
+4:3 aspect ratio, matching the measured portfolio rather than extrapolating to
+untested long rectangles.
+
+The final cooled repeat-5 source A/B portfolio showed a `1.181x` geometric-mean
+speedup across six shapes. Medians ranged from `1.114x` to `1.233x`, every one
+of the 30 paired samples favored Strassen, and every bootstrap lower bound was
+above `1.08x`. Absolute implementation CV remained high under thermal load, so
+these ratios should not be read as stable peak-throughput numbers. The largest
+full-output maximum absolute error was `0.00104904` at `8192^3`, inside the
+existing `0.002` test tolerance, with RMS error below `0.00009` throughout.
+The normal suite now builds a second copy with a test-only 1024 crossover and
+runs a cancellation-heavy quadrant pattern whose Strassen sums and differences
+are deliberately close to zero.
+
+The crossover is real but high. `1536^3` and `2048^3` were roughly `0.67x` and
+`0.79x`, so the route is structural and deliberately excludes smaller work.
+Two deeper-looking alternatives were rejected: pack-fused per-tile Strassen
+fell to roughly `0.60x` at 4096, while persistent SME streaming mode and a
+hand-written AMX assembly K loop were neutral or regressive. The paired harness
+now reports full-output max-absolute and RMS error so future fast algorithms
+cannot hide behind a cancellation-prone checksum.

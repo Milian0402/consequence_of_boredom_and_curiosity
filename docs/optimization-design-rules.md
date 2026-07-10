@@ -36,6 +36,10 @@ These rules summarize repeated findings from the optimization timeline. They are
   a 5% equal-shape geometric-mean win with neutral excluded-family guards.
   Exact-cell wins can polish a proven architecture, but do not count as a major
   milestone by themselves.
+- One-level Strassen is worthwhile only for large balanced contiguous inputs on
+  this backend. Keep the default floor at 6144 and the 4:3 aspect-ratio guard;
+  1536 and 2048 shapes lost badly because packing, sums, and merges dominated.
+  Validate full-output max and RMS error, not only a sampled checksum.
 - Keep one-shot, packed-B, and packed-AB claims separate. More-prepacked results
   are useful ceilings but do not prove the less-prepacked public path is faster.
 - Use `COB_BENCH_ONLY` or `tools/counter_probe.sh` for hardware-counter runs so
@@ -63,6 +67,14 @@ These rules summarize repeated findings from the optimization timeline. They are
 
 ## Rejected Paths
 
+- A pack-fused Strassen variant that materialized and merged each 32x32 result
+  tile was much slower than letting the existing one-shot scheduler own each
+  half-size product. The extra per-tile epilogue and lost scheduler locality
+  outweighed the saved half-output buffer.
+- Holding one SME streaming-mode invocation across all reused A panels was
+  neutral to slightly slower. A hand-written inline-assembly AMX K loop was
+  also neutral on packed inputs and regressed a rectangle. Neither belongs in
+  the default path without a different surrounding schedule.
 - Row-wise B traversal during packing has repeatedly reduced pack bandwidth and collapsed one-shot performance.
 - Scalar or simpler A-pack fallbacks for small K have been hard regressions.
 - Broad low-threshold direct SME routing has not held up. Exact 384 and 768 were accepted only after focused repeat runs.

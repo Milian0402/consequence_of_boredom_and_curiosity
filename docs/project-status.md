@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-09
+Last updated: 2026-07-10
 
 ## Goal
 
@@ -42,7 +42,8 @@ stock skinny rows, while its FP16 and int8 rows remain out of scope.
 - Apple Silicon AMX kernels and route-specific packing paths.
 - Apple Silicon SME2.1 direct-`B`, packed-`B`, and skinny/reuse routes.
 - ARM64 NEON and scalar fallback paths.
-- Correctness coverage for 636 GEMM test shapes.
+- Correctness coverage for 642 GEMM test shapes, including a test-only lowered
+  Strassen crossover and a cancellation-heavy quadrant pattern.
 - A May 10 clean rebuild and claim-audit snapshot for the scoped routed suites.
 - Route-aware benchmarks, grid sweeps, gap reports, and heatmap generation.
 - Benchmark controls for forced iterations, cooled repeats, route isolation,
@@ -78,6 +79,14 @@ The most important performance wins came from:
   `K >= 3072`. A 12-shape repeat-31 portfolio improved by `1.076x` geometric
   mean against the previous source, with every shape median winning; six
   representatives also beat Accelerate in 184/186 pairs.
+- One-level Strassen for large balanced contiguous problems. It replaces eight
+  half-size products with seven and delegates those products to the existing
+  AMX scheduler. The final cooled repeat-5 portfolio improved by `1.181x`
+  geometric mean across six shapes, with medians from `1.114x` to `1.233x`
+  and every paired sample winning. The machine was thermally noisy, so the
+  bootstrap lower bounds, all above `1.08x`, are more useful than any single
+  peak ratio. Full-output maximum error stayed between `0.00066` and
+  `0.00105`, inside the existing `0.002` correctness contract.
 - Public packed-AB support and packed-AB traversal tuning.
 - A guarded 64-row SME subpanel route for strided source-B views. It packs a
   192-512-column B slab once and reuses it across four 16-row groups, enabling
@@ -159,10 +168,9 @@ The most important performance wins came from:
    different flags and symbol names.
 7. Compress old timeline material only after the reusable lessons are preserved
    in `docs/optimization-design-rules.md`.
-8. Prototype one-level pack-fused Strassen only as a separate large-aligned
-   architecture lane. Its seven half-size products offer a theoretical
-   `1.143x` compute reduction, but promotion requires a broad 5% portfolio win
-   and cancellation-heavy accuracy tests before it can touch the default path.
+8. Test whether a recursive or lower-workspace Strassen schedule can move the
+   crossover below 6144 without losing the classical path on smaller shapes.
+   Keep cancellation-heavy accuracy and memory pressure as hard gates.
 
 ## Useful Entry Points
 

@@ -225,6 +225,12 @@ typedef struct paired_stats {
     int b_faster;
 } paired_stats;
 
+typedef struct accuracy_stats {
+    double max_abs_diff;
+    double rms_diff;
+    double max_abs_reference;
+} accuracy_stats;
+
 enum {
     COB_AB_MAX_REPEATS = 1001
 };
@@ -585,6 +591,32 @@ static int checksums_match(float checksum_a, float checksum_b)
     return fabs((double)checksum_a - (double)checksum_b) / scale <= 1.0e-4;
 }
 
+static accuracy_stats compare_outputs(const float* reference, const float* candidate, size_t count)
+{
+    accuracy_stats stats = {0.0, 0.0, 0.0};
+    long double sum_squared = 0.0;
+    for (size_t i = 0; i < count; ++i) {
+        const double ref = (double)reference[i];
+        const double value = (double)candidate[i];
+        if (!isfinite(ref) || !isfinite(value)) {
+            stats.max_abs_diff = INFINITY;
+            stats.rms_diff = INFINITY;
+            return stats;
+        }
+        const double diff = fabs(ref - value);
+        const double abs_ref = fabs(ref);
+        if (diff > stats.max_abs_diff) {
+            stats.max_abs_diff = diff;
+        }
+        if (abs_ref > stats.max_abs_reference) {
+            stats.max_abs_reference = abs_ref;
+        }
+        sum_squared += (long double)diff * (long double)diff;
+    }
+    stats.rms_diff = count > 0 ? sqrt((double)(sum_squared / (long double)count)) : 0.0;
+    return stats;
+}
+
 static paired_stats summarize_paired(
     const double* speedups,
     const double* log_speedups,
@@ -627,7 +659,8 @@ static int bench_one_shape(
     bench_mode mode,
     int bootstrap_draws,
     int cooldown_us,
-    int holdout_reporting)
+    int holdout_reporting,
+    double max_abs_tolerance)
 {
     const impl_api impl_a = {
 #if defined(COB_AB_B_ACCELERATE)
@@ -803,6 +836,8 @@ static int bench_one_shape(
     const float checksum_a = checksum(c_a, c_count);
     const float checksum_b = checksum(c_b, c_count);
     const int checksum_ok = checksums_match(checksum_a, checksum_b);
+    const accuracy_stats accuracy = compare_outputs(c_a, c_b, c_count);
+    const int output_ok = accuracy.max_abs_diff <= max_abs_tolerance;
 
     printf(
         "%dx%dx%d mode=%s repeats=%d iterations=%d\n",
@@ -837,6 +872,11 @@ static int bench_one_shape(
         b_stats.best,
         b_stats.cv_percent,
         checksum_b);
+    printf(
+        "  accuracy max-abs %.6g rms %.6g reference-max %.6g\n",
+        accuracy.max_abs_diff,
+        accuracy.rms_diff,
+        accuracy.max_abs_reference);
     printf(
         "  paired %s/%s median %.4fx mean-log %.4fx cv %5.2f%%",
         impl_b.name,
@@ -891,15 +931,17 @@ static int bench_one_shape(
             "  note: implementation CV above %.2f%%, but paired speedup CV met target\n",
             cv_target_percent);
     }
-    if (!checksum_ok) {
+    if (!output_ok) {
         fprintf(
             stderr,
-            "checksum mismatch for %dx%dx%d: A=% .6e B=% .6e\n",
+            "output mismatch for %dx%dx%d: max-abs %.6g exceeds %.6g\n",
             shape.m,
             shape.n,
             shape.k,
-            checksum_a,
-            checksum_b);
+            accuracy.max_abs_diff,
+            max_abs_tolerance);
+    } else if (!checksum_ok) {
+        printf("  note: sampled checksums cancel differently; full output is within tolerance\n");
     }
 
     impl_a.free_packed_a(&packed_a_a);
@@ -916,7 +958,7 @@ static int bench_one_shape(
     free(gf_b);
     free(speedups);
     free(log_speedups);
-    return checksum_ok ? 0 : 2;
+    return output_ok ? 0 : 2;
 }
 
 int main(int argc, char** argv)
@@ -938,6 +980,8 @@ int main(int argc, char** argv)
     const int forced_iterations = env_int_clamped("COB_AB_ITERS", 0, 0, 100000000);
     const int cooldown_us = env_int_clamped("COB_AB_COOLDOWN_US", 0, 0, 10000000);
     const int holdout_reporting = env_int_clamped("COB_AB_HOLDOUT", 1, 0, 1);
+    const double max_abs_tolerance =
+        env_double_clamped("COB_AB_MAX_ABS_DIFF", 2.0e-3, 0.0, 1.0e6);
     const char* mode = getenv("COB_AB_MODE");
     bench_mode mode_kind = BENCH_MODE_DIRECT;
     if (mode != NULL) {
@@ -980,7 +1024,8 @@ int main(int argc, char** argv)
                 mode_kind,
                 bootstrap_draws,
                 cooldown_us,
-                holdout_reporting);
+                holdout_reporting,
+                max_abs_tolerance);
         }
         return status;
     }
@@ -1004,7 +1049,8 @@ int main(int argc, char** argv)
             mode_kind,
             bootstrap_draws,
             cooldown_us,
-            holdout_reporting);
+            holdout_reporting,
+            max_abs_tolerance);
     }
     return status;
 }

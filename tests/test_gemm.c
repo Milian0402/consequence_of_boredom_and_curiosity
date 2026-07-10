@@ -231,6 +231,72 @@ static int test_packed_matches_direct_aligned_shape(int m, int n, int k)
     return failed;
 }
 
+static int test_cancellation_heavy_aligned_shape(int size)
+{
+    const int half = size / 2;
+    const size_t count = (size_t)size * (size_t)size;
+    float* a = alloc_f32(count, 1);
+    float* b = alloc_f32(count, 1);
+    float* cdirect = alloc_f32(count, 1);
+    float* cpacked = alloc_f32(count, 1);
+    if (a == NULL || b == NULL || cdirect == NULL || cpacked == NULL) {
+        fprintf(stderr, "allocation failed for cancellation-heavy %d^3\n", size);
+        free(a);
+        free(b);
+        free(cdirect);
+        free(cpacked);
+        return 1;
+    }
+
+    for (int i = 0; i < half; ++i) {
+        for (int j = 0; j < half; ++j) {
+            const float av = (float)(((i * 17 + j * 29) % 509) - 254) / 257.0f;
+            const float bv = (float)(((i * 31 + j * 13) % 503) - 251) / 263.0f;
+            const float ae = ((i + j) & 1) ? 7.0e-4f : -9.0e-4f;
+            const float be = ((i + 2 * j) & 1) ? 8.0e-4f : -6.0e-4f;
+            const size_t top = (size_t)i * (size_t)size + (size_t)j;
+            const size_t bottom = (size_t)(i + half) * (size_t)size + (size_t)j;
+
+            a[top] = av;
+            a[top + (size_t)half] = -av + 2.0f * ae;
+            a[bottom] = av + ae;
+            a[bottom + (size_t)half] = -av + ae;
+
+            b[top] = bv;
+            b[top + (size_t)half] = -bv + 2.0f * be;
+            b[bottom] = bv + be;
+            b[bottom + (size_t)half] = -bv + be;
+        }
+    }
+    memset(cdirect, 0, count * sizeof(float));
+    memset(cpacked, 0, count * sizeof(float));
+
+    cob_sgemm_rowmajor(size, size, size, a, size, b, size, cdirect, size);
+    cob_packed_b_f32 packed_b;
+    if (cob_sgemm_pack_b(&packed_b, size, size, b, size) != 0) {
+        fprintf(stderr, "pack failed for cancellation-heavy %d^3\n", size);
+        free(a);
+        free(b);
+        free(cdirect);
+        free(cpacked);
+        return 1;
+    }
+    cob_sgemm_rowmajor_packed_b(size, size, size, a, size, &packed_b, cpacked, size);
+    cob_sgemm_free_packed_b(&packed_b);
+
+    const float diff = max_abs_diff(cdirect, cpacked, (int)count);
+    const int failed = diff > 2.0e-3f;
+    if (failed) {
+        fprintf(stderr, "cancellation-heavy %d^3 failed: diff=%g\n", size, (double)diff);
+    }
+
+    free(a);
+    free(b);
+    free(cdirect);
+    free(cpacked);
+    return failed;
+}
+
 int main(void)
 {
     static const int shapes[][3] = {
@@ -271,6 +337,7 @@ int main(void)
     failures += test_packed_matches_direct_aligned_shape(512, 512, 512);
     total_shapes += 5;
 #if defined(__APPLE__) && defined(__aarch64__)
+    failures += test_cancellation_heavy_aligned_shape(1024);
     failures += test_packed_matches_direct_aligned_shape(832, 832, 832);
     failures += test_packed_matches_direct_aligned_shape(960, 960, 960);
     failures += test_packed_matches_direct_aligned_shape(1088, 1088, 1088);
@@ -890,7 +957,7 @@ int main(void)
     failures += test_packed_matches_direct_aligned_shape(128, 2048, 2048);
     failures += test_packed_matches_direct_aligned_shape(1280, 1280, 1280);
     failures += test_packed_matches_direct_aligned_shape(2048, 2048, 2048);
-    total_shapes += 616;
+    total_shapes += 617;
 #endif
 
     if (failures != 0) {

@@ -22,6 +22,8 @@ endif
 
 LIB_OBJ := $(BUILD_DIR)/gemm.o
 TEST_BIN := $(BUILD_DIR)/cob_gemm_test
+STRASSEN_TEST_OBJ := $(BUILD_DIR)/gemm_strassen_test.o
+STRASSEN_TEST_BIN := $(BUILD_DIR)/cob_gemm_strassen_test
 BENCH_BIN := $(BUILD_DIR)/cob_gemm_bench
 CBLAS_BENCH_BIN := $(BUILD_DIR)/cob_gemm_bench_cblas
 FORTRAN_BLAS_BENCH_BIN := $(BUILD_DIR)/cob_gemm_bench_fortran_blas
@@ -48,6 +50,12 @@ $(LIB_OBJ): src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
 $(TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(LIB_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) tests/test_gemm.c $(LIB_OBJ) -o $@
 
+$(STRASSEN_TEST_OBJ): src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -DCOB_SGEMM_STRASSEN1_MIN_DIM=1024 -c src/gemm.c -o $@
+
+$(STRASSEN_TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(STRASSEN_TEST_OBJ) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_TEST_OBJ) -o $@
+
 $(BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(BENCH_LDFLAGS) -o $@
 
@@ -57,8 +65,9 @@ $(CBLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) FORCE | $(B
 $(FORTRAN_BLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) FORCE | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(FORTRAN_BLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(FORTRAN_BLAS_LDFLAGS) -o $@
 
-test: $(TEST_BIN)
+test: $(TEST_BIN) $(STRASSEN_TEST_BIN)
 	$(TEST_BIN)
+	$(STRASSEN_TEST_BIN)
 
 bench: $(BENCH_BIN)
 	$(BENCH_BIN)

@@ -133,6 +133,14 @@ enum {
 #define COB_SGEMM_M64_SME_DIRECT_NC 1024
 #endif
 
+#ifndef COB_SGEMM_STRASSEN1
+#define COB_SGEMM_STRASSEN1 1
+#endif
+
+#ifndef COB_SGEMM_STRASSEN1_MIN_DIM
+#define COB_SGEMM_STRASSEN1_MIN_DIM 6144
+#endif
+
 static void configure_benchmark_thread(void)
 {
 #if defined(__APPLE__) && defined(QOS_CLASS_USER_INTERACTIVE)
@@ -625,6 +633,16 @@ static const char* cob_one_shot_route(bench_shape shape)
     if (!is_apple_amx_build()) {
         return "fallback";
     }
+
+#if COB_SGEMM_STRASSEN1
+    const int min_dim = m < n ? (m < k ? m : k) : (n < k ? n : k);
+    const int max_dim = m > n ? (m > k ? m : k) : (n > k ? n : k);
+    if (min_dim >= COB_SGEMM_STRASSEN1_MIN_DIM &&
+        3 * (int64_t)max_dim <= 4 * (int64_t)min_dim &&
+        (m % 64) == 0 && (n % 64) == 0 && (k % 64) == 0) {
+        return "amx_strassen1";
+    }
+#endif
 
     const int aligned32 = (m % COB_BENCH_AMX_MR) == 0 && (n % COB_BENCH_AMX_NR) == 0;
     if (is_apple_sme_build()) {

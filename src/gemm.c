@@ -173,6 +173,22 @@ enum {
 #define COB_SGEMM_M64_SME_DIRECT_NC 1024
 #endif
 
+#ifndef COB_SGEMM_STRASSEN1
+#define COB_SGEMM_STRASSEN1 1
+#endif
+
+#if COB_SGEMM_STRASSEN1 != 0 && COB_SGEMM_STRASSEN1 != 1
+#error "COB_SGEMM_STRASSEN1 must be 0 or 1"
+#endif
+
+#ifndef COB_SGEMM_STRASSEN1_MIN_DIM
+#define COB_SGEMM_STRASSEN1_MIN_DIM 6144
+#endif
+
+#if COB_SGEMM_STRASSEN1_MIN_DIM <= 0
+#error "COB_SGEMM_STRASSEN1_MIN_DIM must be positive"
+#endif
+
 static int cob_min_i32(int a, int b)
 {
     return a < b ? a : b;
@@ -2931,6 +2947,187 @@ static int cob_sgemm_rowmajor_amx(
 
     return 1;
 }
+
+#if COB_SGEMM_STRASSEN1
+static void cob_strassen_linear2(
+    float* dst,
+    int rows,
+    int cols,
+    const float* x,
+    int ldx,
+    const float* y,
+    int ldy,
+    int y_sign)
+{
+    for (int i = 0; i < rows; ++i) {
+        const float* xr = x + (size_t)i * (size_t)ldx;
+        const float* yr = y + (size_t)i * (size_t)ldy;
+        float* dr = dst + (size_t)i * (size_t)cols;
+        int j = 0;
+#if defined(COB_USE_NEON)
+        for (; j + 4 <= cols; j += 4) {
+            const float32x4_t xv = vld1q_f32(xr + j);
+            const float32x4_t yv = vld1q_f32(yr + j);
+            vst1q_f32(dr + j, y_sign > 0 ? vaddq_f32(xv, yv) : vsubq_f32(xv, yv));
+        }
+#endif
+        for (; j < cols; ++j) {
+            dr[j] = y_sign > 0 ? xr[j] + yr[j] : xr[j] - yr[j];
+        }
+    }
+}
+
+static void cob_strassen_merge_product(
+    float* c,
+    int ldc,
+    const float* product,
+    int rows,
+    int cols,
+    int operation)
+{
+    for (int i = 0; i < rows; ++i) {
+        float* cr = c + (size_t)i * (size_t)ldc;
+        const float* pr = product + (size_t)i * (size_t)cols;
+        int j = 0;
+#if defined(COB_USE_NEON)
+        for (; j + 4 <= cols; j += 4) {
+            const float32x4_t pv = vld1q_f32(pr + j);
+            if (operation == 0) {
+                vst1q_f32(cr + j, pv);
+            } else {
+                const float32x4_t cv = vld1q_f32(cr + j);
+                vst1q_f32(
+                    cr + j,
+                    operation > 0 ? vaddq_f32(cv, pv) : vsubq_f32(cv, pv));
+            }
+        }
+#endif
+        for (; j < cols; ++j) {
+            if (operation == 0) {
+                cr[j] = pr[j];
+            } else if (operation > 0) {
+                cr[j] += pr[j];
+            } else {
+                cr[j] -= pr[j];
+            }
+        }
+    }
+}
+
+static int cob_sgemm_rowmajor_strassen1(
+    int m,
+    int n,
+    int k,
+    const float* a,
+    int lda,
+    const float* b,
+    int ldb,
+    float* c,
+    int ldc)
+{
+    const int min_dim = cob_min_i32(cob_min_i32(m, n), k);
+    const int max_dim = m > n ? (m > k ? m : k) : (n > k ? n : k);
+    if (min_dim < COB_SGEMM_STRASSEN1_MIN_DIM ||
+        3 * (int64_t)max_dim > 4 * (int64_t)min_dim ||
+        lda != k || ldb != n || (m % 64) != 0 || (n % 64) != 0 ||
+        (k % 64) != 0) {
+        return 0;
+    }
+
+    const int mh = m / 2;
+    const int nh = n / 2;
+    const int kh = k / 2;
+    const size_t x_values = (size_t)mh * (size_t)kh;
+    const size_t y_values = (size_t)kh * (size_t)nh;
+    const size_t p_values = (size_t)mh * (size_t)nh;
+    float* workspace = (float*)cob_aligned_alloc(
+        128,
+        (x_values + y_values + p_values) * sizeof(float));
+    if (workspace == NULL) {
+        return 0;
+    }
+    float* x = workspace;
+    float* y = x + x_values;
+    float* p = y + y_values;
+
+    const float* a11 = a;
+    const float* a12 = a + kh;
+    const float* a21 = a + (size_t)mh * (size_t)lda;
+    const float* a22 = a21 + kh;
+    const float* b11 = b;
+    const float* b12 = b + nh;
+    const float* b21 = b + (size_t)kh * (size_t)ldb;
+    const float* b22 = b21 + nh;
+    float* c11 = c;
+    float* c12 = c + nh;
+    float* c21 = c + (size_t)mh * (size_t)ldc;
+    float* c22 = c21 + nh;
+
+    /* One level reduces eight half-size products to seven. The existing AMX
+       scheduler handles each product; three reusable half-matrix buffers keep
+       the extra memory traffic bounded. */
+    cob_strassen_linear2(x, mh, kh, a11, lda, a22, lda, 1);
+    cob_strassen_linear2(y, kh, nh, b11, ldb, b22, ldb, 1);
+    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, y, nh, p, nh)) {
+        free(workspace);
+        return 0;
+    }
+    cob_strassen_merge_product(c11, ldc, p, mh, nh, 0);
+    cob_strassen_merge_product(c22, ldc, p, mh, nh, 0);
+
+    cob_strassen_linear2(x, mh, kh, a21, lda, a22, lda, 1);
+    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, b11, ldb, p, nh)) {
+        free(workspace);
+        return 0;
+    }
+    cob_strassen_merge_product(c21, ldc, p, mh, nh, 0);
+    cob_strassen_merge_product(c22, ldc, p, mh, nh, -1);
+
+    cob_strassen_linear2(y, kh, nh, b12, ldb, b22, ldb, -1);
+    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, a11, lda, y, nh, p, nh)) {
+        free(workspace);
+        return 0;
+    }
+    cob_strassen_merge_product(c12, ldc, p, mh, nh, 0);
+    cob_strassen_merge_product(c22, ldc, p, mh, nh, 1);
+
+    cob_strassen_linear2(y, kh, nh, b21, ldb, b11, ldb, -1);
+    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, a22, lda, y, nh, p, nh)) {
+        free(workspace);
+        return 0;
+    }
+    cob_strassen_merge_product(c11, ldc, p, mh, nh, 1);
+    cob_strassen_merge_product(c21, ldc, p, mh, nh, 1);
+
+    cob_strassen_linear2(x, mh, kh, a11, lda, a12, lda, 1);
+    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, b22, ldb, p, nh)) {
+        free(workspace);
+        return 0;
+    }
+    cob_strassen_merge_product(c11, ldc, p, mh, nh, -1);
+    cob_strassen_merge_product(c12, ldc, p, mh, nh, 1);
+
+    cob_strassen_linear2(x, mh, kh, a21, lda, a11, lda, -1);
+    cob_strassen_linear2(y, kh, nh, b11, ldb, b12, ldb, 1);
+    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, y, nh, p, nh)) {
+        free(workspace);
+        return 0;
+    }
+    cob_strassen_merge_product(c22, ldc, p, mh, nh, 1);
+
+    cob_strassen_linear2(x, mh, kh, a12, lda, a22, lda, -1);
+    cob_strassen_linear2(y, kh, nh, b21, ldb, b22, ldb, 1);
+    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, y, nh, p, nh)) {
+        free(workspace);
+        return 0;
+    }
+    cob_strassen_merge_product(c11, ldc, p, mh, nh, 1);
+
+    free(workspace);
+    return 1;
+}
+
+#endif
 #endif
 
 void cob_sgemm_rowmajor(
@@ -2947,7 +3144,14 @@ void cob_sgemm_rowmajor(
 #if defined(COB_USE_APPLE_AMX)
     if (m > 0 && n > 0 && k > 0 && a != NULL && b != NULL && c != NULL &&
         lda >= k && ldb >= n && ldc >= n &&
-        cob_sgemm_rowmajor_amx(m, n, k, a, lda, b, ldb, c, ldc)) {
+#if COB_SGEMM_STRASSEN1
+        (cob_sgemm_rowmajor_strassen1(m, n, k, a, lda, b, ldb, c, ldc) ||
+#endif
+        cob_sgemm_rowmajor_amx(m, n, k, a, lda, b, ldb, c, ldc)
+#if COB_SGEMM_STRASSEN1
+        )
+#endif
+        ) {
         return;
     }
 #endif
