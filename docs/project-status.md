@@ -94,9 +94,13 @@ The most important performance wins came from:
 - The newest cooled target sweep still needs broad re-audit against
   Accelerate and source-available competitors. The exact `512x1216x3072` row is
   neutral in the latest paired Accelerate confirmation, not a current confirmed
-  loss. A May 28 paired rerank put exact `512x1152x2048` back on top of the
-  proprietary gap list at Accelerate/COB median `1.1484x`, bootstrap95
-  `[1.1327,1.1578]`, but with high sample CV. The cleaner high-K target is
+  loss. A July 9 AMX source-B panel-reuse schedule closed the former
+  `512x1152x2048` gap: paired source A/B measured `1.1613x`, and the follow-up
+  Accelerate/COB median was `0.9598x`. The same schedule improved
+  `512x896x2048` by `1.1315x` and `512x1280x2048` by `1.0864x` against the
+  previous source. It also improved `384x896x2048` by `1.2294x`,
+  `384x1280x2048` by `1.1598x`, and `768x896x2048` by `1.0943x`. The cleaner
+  remaining high-K target is
   `2048x512x4096`; after narrowing the high-K SME reuse route so this exact
   row falls back to AMX, paired Accelerate reruns measured about `1.07x`
   Accelerate/COB, materially better than the earlier `1.1101x` gap but still
@@ -118,7 +122,9 @@ The most important performance wins came from:
   cost split now shows `512x1152x2048` packed-B compute near Accelerate while
   one-shot loses the B-pack setup cost; exact 288-column chunks,
   panel-immediate reuse, and fused AMX pack-plus-first-tile helpers did not
-  convert that into a source win. Exact row-wise chunk packing, B-pack prefetch
+  convert that into a source win until the July 9 no-copy source-B panel reuse
+  schedule changed the cache traversal and reversed the Accelerate comparison.
+  Exact row-wise chunk packing, B-pack prefetch
   retunes, and a four-row unrolled panel packer also regressed or stayed
   neutral. CPU Counter traces on `2048x512x4096` showed COB and Accelerate with
   similar CPU pipeline ratios, so this does not look like a simple

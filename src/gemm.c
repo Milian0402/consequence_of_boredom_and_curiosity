@@ -2496,6 +2496,65 @@ static void cob_sgemm_pack_b32_chunk_panels(
     }
 }
 
+static int cob_sgemm_rowmajor_amx_source_b_panel_reuse(
+    int m,
+    int n,
+    int k,
+    const float* a,
+    int lda,
+    const float* b,
+    int ldb,
+    float* c,
+    int ldc)
+{
+    const int selected_shape =
+        (n == 896 && (m == 384 || m == 512 || m == 768)) ||
+        (n == 1152 && m == 512) ||
+        (n == 1280 && (m == 384 || m == 512));
+    if (!selected_shape || k != 2048 || lda != k || ldb != n ||
+        (m % COB_SGEMM_AMX_MR) != 0 || (n % COB_SGEMM_AMX_NR) != 0) {
+        return 0;
+    }
+
+    const int a_panels = m / COB_SGEMM_AMX_MR;
+    const int b_panels = n / COB_SGEMM_AMX_NR;
+    const size_t a_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_MR;
+    float* packed_a =
+        (float*)cob_aligned_alloc(128, (size_t)a_panels * a_panel_floats * sizeof(float));
+    if (packed_a == NULL) {
+        return 0;
+    }
+
+    cob_amx_set();
+    for (int ap = 0; ap < a_panels; ++ap) {
+        const int ic = ap * COB_SGEMM_AMX_MR;
+        cob_sgemm_pack_a32_full(
+            packed_a + (size_t)ap * a_panel_floats,
+            k,
+            a + (size_t)ic * (size_t)lda,
+            lda);
+    }
+
+    for (int panel = 0; panel < b_panels; ++panel) {
+        const int jc = panel * COB_SGEMM_AMX_NR;
+        const float* bp = b + jc;
+        for (int ap = 0; ap < a_panels; ++ap) {
+            const int ic = ap * COB_SGEMM_AMX_MR;
+            cob_sgemm_32x32_amx_strided_b_full(
+                k,
+                packed_a + (size_t)ap * a_panel_floats,
+                bp,
+                ldb,
+                c + (size_t)ic * (size_t)ldc + jc,
+                ldc);
+        }
+    }
+    cob_amx_clr();
+
+    free(packed_a);
+    return 1;
+}
+
 static int cob_sgemm_rowmajor_amx_skinny_pack_b_chunks(
     int m,
     int n,
@@ -2691,6 +2750,10 @@ static int cob_sgemm_rowmajor_amx(
         return 1;
     }
 #endif
+
+    if (cob_sgemm_rowmajor_amx_source_b_panel_reuse(m, n, k, a, lda, b, ldb, c, ldc)) {
+        return 1;
+    }
 
     if (cob_sgemm_rowmajor_amx_skinny_pack_b_chunks(m, n, k, a, lda, b, ldb, c, ldc)) {
         return 1;

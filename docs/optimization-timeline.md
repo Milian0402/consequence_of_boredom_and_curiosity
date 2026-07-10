@@ -1,6 +1,6 @@
 # Optimization Attempt Timeline
 
-Last updated: 2026-05-28
+Last updated: 2026-07-09
 
 This tracks the matrix-multiplication speed work so far. The narrow comparison
 scope is single-threaded FP32 row-major GEMM for `C = A * B` with `alpha = 1`
@@ -21,6 +21,52 @@ use the git history for this file; the current recent sequence is anchored by:
 - `7fae628` Increase B-pack prefetch distance.
 
 ## Timeline
+
+### 2026-07-09: AMX source-B panel reuse
+
+The largest freshly measured one-shot gap was `512x1152x2048`:
+repeat-31 paired Accelerate/COB measured median `1.1404x`, bootstrap95
+`[1.1280,1.1809]`, with Accelerate faster in `31/31` pairs. The packed-B
+contract was already faster than Accelerate on the same row, so the missing
+performance was still in one-shot B packing rather than the AMX multiply.
+
+The accepted path removes that B pack entirely at selected `k = 2048` cells.
+It packs all A panels once, visits one 32-column source-B panel at a time, and
+computes that panel across every A panel before moving on. The first tile brings
+the 256 KiB B panel into cache; later row tiles reuse it directly. This changes
+the memory schedule instead of retuning the old 256-column packed-B chunks.
+
+Cooled repeat-101, `iters=8` paired source A/B against the pre-change source
+confirmed six shapes:
+
+- `384x896x2048`: median `1.2294x`, B-faster `100/101`, holdout `1.2087x`.
+- `384x1280x2048`: median `1.1598x`, B-faster `101/101`, holdout `1.1395x`.
+- `512x896x2048`: median `1.1315x`, B-faster `100/101`, holdout `1.1315x`.
+- `512x1152x2048`: median `1.1613x`, B-faster `99/101`, holdout `1.1631x`.
+- `512x1280x2048`: median `1.0864x`, B-faster `100/101`, holdout `1.0780x`.
+- `768x896x2048`: median `1.0943x`, B-faster `68/101`, holdout `1.0943x`.
+
+A repeat-61 paired Accelerate check after the change put
+`512x1152x2048` on the COB side: Accelerate/COB median `0.9598x`,
+bootstrap95 `[0.9465,0.9862]`. `512x1280x2048` was neutral at `0.9955x`;
+`512x896x2048` remained noisy. The route stays on the six proven shape cells;
+the other tested `m = 384/768/1024` combinations and exact
+`m = 512, n = 960/1024/1088` stay on their old routes. A broader `n = 1216`
+candidate was rejected because repeat-101 sign support was weak despite a
+positive median.
+
+The three added row-count cells were also checked against Accelerate at
+repeat-61. `384x1280x2048` favored COB by median (Accelerate/COB `0.9623x`),
+`384x896x2048` was neutral/noisy (`0.9959x`), and `768x896x2048` still trailed
+Accelerate (`1.0837x`) despite its `1.0943x` source improvement. The last row
+is a real improvement, not a claim that the remaining proprietary gap is gone.
+
+A distinct compact row-major B-slab design was also rejected. Copying each
+256-column slab contiguously and consuming it with the strided-B AMX kernel
+passed correctness but regressed all useful widths, including
+`512x1152x2048` to `0.8918x` median in the screen. The no-copy source-B reuse
+schedule is the accepted design. `make test` passes all 641 shapes, and the
+benchmark route mirror reports `amx_source_b_reuse`.
 
 ### 2026-05-28 local-uncommitted: refreshed Accelerate gaps and m512/high-K rejects
 

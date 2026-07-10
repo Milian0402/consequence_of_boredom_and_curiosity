@@ -296,12 +296,18 @@ These rules summarize repeated findings from the optimization timeline. They are
 - For one-shot `512x1280x1536`, use the SME direct-B route. It avoids B-pack
   setup and beat the packed AMX path, while nearby `k = 1024/2048`, `m = 768`,
   `n = 1216`, and `n = 1344` guards stayed neutral/noisy.
-- For one-shot `m = 512, k = 2048`, use the chunked AMX B-pack path only at
-  exact `n = 896`, `1024`, `1152`, and `1280`. Neighbor widths `832`, `960`,
-  `1088`, and `1216` regressed under the same chunked path, so keep this as an
-  explicit-width rule unless a smoother kernel replaces it. Keep its 256-column
-  B chunks; 384/512-column retunes and normal packed-AMX fallback reruns did
-  not produce a reliable target/guard win. A fresh cooled pass also rejected
+- At six one-shot `k = 2048` cells, pack all A panels once and reuse one
+  32-column source-B panel across them: `m = 384/512/768, n = 896`;
+  `m = 512, n = 1152`; and `m = 384/512, n = 1280`. This no-copy
+  B-panel-major schedule replaces the previous AMX route on those cells. Keep
+  exact `m = 512, n = 1024` on the old 256-column chunked AMX B-pack route;
+  its 4096-byte source stride regressed under direct source-B reuse. Other
+  tested `m = 384/768/1024` combinations and `m = 512` neighbor widths
+  `960`, `1088`, and `1216` did not clear validation, so keep the new schedule
+  shape-explicit rather than deriving a broad width rule. Earlier work
+  already showed that 384/512-column chunk retunes and normal packed-AMX
+  fallback reruns did not produce a reliable target/guard win. A fresh cooled
+  pass also rejected
   disabling the route for exact `512x1152x2048`, smaller 128-column chunks,
   thread-local one-shot scratch caching, and `-mcpu=native`. A later May 28
   pass also rejected packing `B` chunks outside AMX mode, AMX compute prefetch
@@ -313,7 +319,10 @@ These rules summarize repeated findings from the optimization timeline. They are
   `512x768x3072` chunked-B, `512x768x3072` A-panel-outer large-block compute,
   and B-pack prefetch distance `0/32/96` probes also failed to clear
   validation. The profiler and cost split point back at a deeper setup/layout
-  issue rather than a small chunking tweak.
+  issue rather than a small chunking tweak. A compact row-major 256-column
+  B-slab layout was tested after source-B reuse and regressed the selected
+  widths; the winning property is avoiding the B copy, not merely making it
+  contiguous.
 - For one-shot `n = 1216`, use the packed path from `k >= 3072`, and also at
   exact `k = 2048` when `m >= 768`. The `m = 512, k = 2048` neighbor and
   `k = 1536` guards are neutral/noisy; `k >= 4096` is covered by the high-`K`

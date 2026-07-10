@@ -655,6 +655,12 @@ static const char* cob_one_shot_route(bench_shape shape)
     if (m >= 96 && m <= 128 && n >= 1024 && k >= 512 && aligned32) {
         return "amx_skinny_chunks";
     }
+    if (k == 2048 && aligned32 &&
+        ((n == 896 && (m == 384 || m == 512 || m == 768)) ||
+            (n == 1152 && m == 512) ||
+            (n == 1280 && (m == 384 || m == 512)))) {
+        return "amx_source_b_reuse";
+    }
     if (m == 512 && k == 2048 &&
         (n == 896 || n == 1024 || n == 1152 || n == 1280) && aligned32) {
         return "amx_chunked_b";
