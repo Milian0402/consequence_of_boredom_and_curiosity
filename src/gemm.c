@@ -4,6 +4,7 @@
 
 #include "cob_gemm.h"
 
+#include <stdatomic.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -82,6 +83,22 @@ enum {
 
 #ifndef COB_SGEMM_M64_SME_LONG_WIDE_NC
 #define COB_SGEMM_M64_SME_LONG_WIDE_NC 256
+#endif
+
+#ifndef COB_SGEMM_M64_SME_SUBPANEL
+#define COB_SGEMM_M64_SME_SUBPANEL 1
+#endif
+
+#ifndef COB_SGEMM_M64_SME_SUBPANEL_KC
+#define COB_SGEMM_M64_SME_SUBPANEL_KC 512
+#endif
+
+#if COB_SGEMM_M64_SME_SUBPANEL != 0 && COB_SGEMM_M64_SME_SUBPANEL != 1
+#error "COB_SGEMM_M64_SME_SUBPANEL must be 0 or 1"
+#endif
+
+#if COB_SGEMM_M64_SME_SUBPANEL_KC <= 0
+#error "COB_SGEMM_M64_SME_SUBPANEL_KC must be positive"
 #endif
 
 #ifndef COB_SGEMM_M512_SME_REUSE_NC
@@ -888,17 +905,27 @@ __attribute__((target("sme"))) static int cob_apple_sme_f32_lanes(void)
 
 static int cob_apple_sme2p1_available(void)
 {
-    static int cached = -1;
-    if (cached >= 0) {
-        return cached;
+    static atomic_int cached = ATOMIC_VAR_INIT(-1);
+    const int cached_value = atomic_load_explicit(&cached, memory_order_acquire);
+    if (cached_value >= 0) {
+        return cached_value;
     }
 
     int value = 0;
     size_t size = sizeof(value);
-    cached =
+    const int detected =
         sysctlbyname("hw.optional.arm.FEAT_SME2p1", &value, &size, NULL, 0) == 0 &&
         value != 0 && __arm_has_sme() && cob_apple_sme_f32_lanes() == 16;
-    return cached;
+    int expected = -1;
+    if (atomic_compare_exchange_strong_explicit(
+            &cached,
+            &expected,
+            detected,
+            memory_order_release,
+            memory_order_acquire)) {
+        return detected;
+    }
+    return expected;
 }
 
 __arm_new("za") __arm_locally_streaming __attribute__((target("sme,sme2,sme2p1")))
@@ -1406,17 +1433,20 @@ static int cob_sgemm_rowmajor_sme_pack_b_reuse(
         use_m96_128_k512;
     const int use_n4096_large_k = use_m64 && n == 4096 && k >= 7168;
     const int use_wide = use_m64 && cob_sgemm_m64_sme_wide_reuse_shape(n, k);
+    const int use_m64_subpanel = COB_SGEMM_M64_SME_SUBPANEL &&
+        use_m64 && n >= 192 && n <= 512 && (n % 64) == 0 && k >= 3072 && ldb > n;
     const int use_k1536_midwide_prefetch =
         k == 1536 && n >= 5120 && n <= 7680;
-    const int use_wide_prefetch_pack =
-        use_wide && (k == 2048 || use_k1536_midwide_prefetch ||
+    const int use_wide_prefetch_pack = use_m64_subpanel ||
+        (use_wide && (k == 2048 || use_k1536_midwide_prefetch ||
             (n == 24576 && k == 1536) ||
-            (n == 7168 && k >= 8192));
+            (n == 7168 && k >= 8192)));
     if ((!use_m64 && !use_m96_128_k512 && !use_m96_128_k1024 &&
             !use_m512_medium && !use_m768_1536_sme_small_n) ||
-        (!use_long_n_k512 && !use_n4096_large_k && !use_wide &&
+        (!use_long_n_k512 && !use_n4096_large_k && !use_wide && !use_m64_subpanel &&
             !use_m96_128_k1024 && !use_m512_medium && !use_m768_1536_sme_small_n) ||
-        lda != k || ldb != n || (n % 64) != 0 || !cob_apple_sme2p1_available()) {
+        lda != k || (!use_m64_subpanel && ldb != n) || ldb < n ||
+        (n % 64) != 0 || !cob_apple_sme2p1_available()) {
         return 0;
     }
 
@@ -1425,6 +1455,7 @@ static int cob_sgemm_rowmajor_sme_pack_b_reuse(
     const int nc_max =
         use_m512_medium ? COB_SGEMM_M512_SME_REUSE_NC :
         use_m768_1536_sme_small_n ? COB_SGEMM_M768_2048_SME_REUSE_NC :
+        use_m64_subpanel ? n :
         (use_wide && n >= 24576 && k == 1536) ?
             COB_SGEMM_M64_SME_LONG_WIDE_NC : COB_SGEMM_M64_SME_REUSE_NC;
     if (nc_max < 64 || (nc_max % 64) != 0) {
@@ -1433,6 +1464,7 @@ static int cob_sgemm_rowmajor_sme_pack_b_reuse(
     const int use_m96_128_large_kc = use_m96_128_k1024 && (k == 1024 || n >= 8192);
     const int use_large_kc = use_m96_128_large_kc || (use_m64 && use_wide && k == 1024);
     const int kc_max =
+        use_m64_subpanel ? COB_SGEMM_M64_SME_SUBPANEL_KC :
         use_long_n_k512 ? k :
         use_m512_medium ? COB_SGEMM_M512_SME_REUSE_KC :
         use_m768_1536_sme_small_n ? COB_SGEMM_M768_2048_SME_REUSE_KC :

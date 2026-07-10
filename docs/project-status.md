@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-05-28
+Last updated: 2026-07-09
 
 ## Goal
 
@@ -75,6 +75,10 @@ The most important performance wins came from:
   selected `k = 4096`, `n = 512/768` rows up to `m = 1280`, plus exact
   `1536x512x4096`.
 - Public packed-AB support and packed-AB traversal tuning.
+- A guarded 64-row SME subpanel route for strided source-B views. It packs a
+  192-512-column B slab once and reuses it across four 16-row groups, enabling
+  the multi-threaded consumer to avoid duplicate external B reads. The SME
+  capability cache is now race-free for concurrent first use.
 
 ## Current Limits
 

@@ -267,8 +267,9 @@ int main(void)
     failures += test_aligned_shape(32, 32, 32);
     failures += test_aligned_shape(64, 64, 64);
     failures += test_aligned_shape(128, 128, 129);
+    failures += test_shape_ex(64, 256, 3072, 3072, 320, 263, 1);
     failures += test_packed_matches_direct_aligned_shape(512, 512, 512);
-    total_shapes += 4;
+    total_shapes += 5;
 #if defined(__APPLE__) && defined(__aarch64__)
     failures += test_packed_matches_direct_aligned_shape(832, 832, 832);
     failures += test_packed_matches_direct_aligned_shape(960, 960, 960);
