@@ -26,7 +26,7 @@ Common controls:
 | `COB_BENCH_CSV=1` | Print machine-readable rows. |
 | `COB_BENCH_ROUTE=1` | Include the selected COB route. |
 | `COB_BENCH_PACK_SETUP=1` | Include one-time packed-B setup cost. |
-| `COB_BENCH_ONLY=...` | Isolate `one-shot`, `packed`, `packed-AB`, `pack-setup`, or `accelerate`. |
+| `COB_BENCH_ONLY=...` | Isolate `one-shot`, `packed`, `packed-AB`, `pack-setup`, or `accelerate`. `pack-setup` also needs `COB_BENCH_PACK_SETUP=1`. |
 | `COB_BENCH_HOT_SECONDS=N` | Keep one isolated row hot for profiler attachment. |
 
 The paired harness compares every output element and defaults to the same
@@ -56,13 +56,15 @@ filter before ranking gaps.
 
 Use the paired A/B harness for source changes. It defaults to the one-shot API.
 Set `COB_AB_MODE=packed` for packed B or `COB_AB_MODE=packed-AB` for both
-inputs prepacked.
+inputs prepacked. First materialize the baseline source. This example compares
+the current checkout with its parent commit:
 
 ```sh
+git show HEAD^:src/gemm.c > /tmp/cob-baseline-gemm.c
 COB_AB_REPEATS=61 COB_AB_MAX_REPEATS=101 \
-  sh tools/paired_ab_bench.sh baseline/src/gemm.c src/gemm.c 512
+  sh tools/paired_ab_bench.sh /tmp/cob-baseline-gemm.c src/gemm.c 512
 COB_AB_MODE=packed-AB COB_AB_REPEATS=61 \
-  sh tools/paired_ab_bench.sh baseline/src/gemm.c src/gemm.c 512
+  sh tools/paired_ab_bench.sh /tmp/cob-baseline-gemm.c src/gemm.c 512
 ```
 
 For thermally noisy shapes, set `COB_AB_COOLDOWN_US=N`. This makes confirmation
@@ -112,13 +114,20 @@ FP32 comparisons. MpGEMM's FP16 and int8 results are different contracts.
 
 ## Hardware counters
 
-Build `mperf-stat` from <https://github.com/tmcgilchrist/mperf>. On M5 systems,
-force the local `as5` PMC database:
+Build `mperf-stat` from <https://github.com/tmcgilchrist/mperf>. The helper
+looks for `/private/tmp/mperf/mperf-stat` by default. If your binary is
+elsewhere, set `COB_COUNTER_MPERF` to its absolute path.
+
+On M5 systems, force the local `as5` PMC database. Some upstream builds do not
+honor `MPERF_KPEP_DB`; use a build that supports the override if the database
+cannot be loaded.
 
 ```sh
-sudo env MPERF_KPEP_DB=as5 COB_COUNTER_ONLY=one-shot \
+sudo env MPERF_KPEP_DB=as5 COB_COUNTER_MPERF=/path/to/mperf-stat \
+  COB_COUNTER_ONLY=one-shot \
   sh tools/counter_probe.sh 64x4096x7168
-sudo env MPERF_KPEP_DB=as5 COB_COUNTER_ONLY=packed \
+sudo env MPERF_KPEP_DB=as5 COB_COUNTER_MPERF=/path/to/mperf-stat \
+  COB_COUNTER_ONLY=packed \
   sh tools/counter_probe.sh 512x1280x1536
 ```
 

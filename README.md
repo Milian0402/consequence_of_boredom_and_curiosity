@@ -96,15 +96,19 @@ The one-shot API looks like this:
 ```c
 #include "cob_gemm.h"
 
-float a[6] = {1, 2, 3, 4, 5, 6};
-float b[6] = {7, 8, 9, 10, 11, 12};
-float c[4];
+int main(void) {
+    float a[6] = {1, 2, 3, 4, 5, 6};
+    float b[6] = {7, 8, 9, 10, 11, 12};
+    float c[4];
 
-/* A is 2x3, B is 3x2, and C is 2x2. */
-cob_sgemm_rowmajor(2, 2, 3, a, 3, b, 2, c, 2);
+    /* A is 2x3, B is 3x2, and C is 2x2. */
+    cob_sgemm_rowmajor(2, 2, 3, a, 3, b, 2, c, 2);
+    return 0;
+}
 ```
 
-If `B` will be reused, pack it once:
+If `B` will be reused, pack it once. Inside a function where the matrix
+dimensions and buffers are already defined:
 
 ```c
 cob_packed_b_f32 packed_b = {0};
@@ -130,9 +134,10 @@ matrix shape, layout, and available hardware:
 - Large balanced inputs use one level of Strassen, reducing eight half-size
   products to seven.
 
-Exact contiguous square matrices switch to Strassen at `5632`. Other balanced
-contiguous matrices switch at `6144`. Smaller or strongly rectangular inputs
-stay on the classical AMX/SME scheduler.
+Eligible exact square matrices switch to Strassen at `5632`. Other eligible
+balanced matrices switch at `6144`. The route requires contiguous `A` and `B`,
+dimensions divisible by 64, and a largest-to-smallest dimension ratio no
+greater than `4:3`. Everything else stays on the classical AMX/SME scheduler.
 
 The Apple AMX path is enabled by default. Define
 `COB_DISABLE_APPLE_AMX=1` at compile time to disable it. Route thresholds and
