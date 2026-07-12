@@ -1,70 +1,84 @@
-# consequence_of_boredom_and_curiosity
+# COB GEMM
 
-An experimental single-threaded matrix multiplication project.
+A fast, experimental, single-threaded matrix multiplication library.
 
-The first target is intentionally narrow: FP32 row-major GEMM with no transpose
-and `C = A * B`. The implementation is built around a packed-`B` path, because
-that gives us a clean route to beat general BLAS calls when the right-hand
-matrix is reused.
+COB focuses on one job: multiplying FP32 row-major matrices on a CPU as fast
+as possible, especially on Apple Silicon. It is not a full BLAS replacement.
+The deliberately narrow contract leaves more room for specialized AMX, SME,
+and packing strategies.
 
-Goal: become the fastest open-source single-threaded matrix multiplication
-software in the world
+> **Current status:** COB is the fastest implementation tested here at the
+> exact `5632 x 5632 x 5632` shape on an Apple M5 Max. It does not win every
+> shape, so the broader "fastest open-source GEMM" goal is not yet proven.
 
-Current evidence: COB is an elite experimental implementation with verified
-wins on selected routed shapes, including huge balanced inputs. A July 2026
-current-head re-audit found losses to current OpenBLAS and MIT-licensed MpGEMM,
-so a broad fastest claim is not currently supported. See
-[docs/claims.md](docs/claims.md) for the audit recipe and
-[docs/optimization-design-rules.md](docs/optimization-design-rules.md) for the
-measurement rules and exclusions. For the final state of the long optimization
-session and the next serious work items, see
-[docs/project-status.md](docs/project-status.md).
+## Performance snapshot
 
-## Current Scope
+The latest verified highlight is one single-threaded FP32 multiplication at
+`5632^3` on an Apple M5 Max:
 
-- CPU only
-- Single-threaded
-- FP32 GEMM first
-- Row-major only
-- `alpha = 1`, `beta = 0`
-- Public packed-`B` API
-- Public packed-`A` + packed-`B` API for repeated-use workloads
-- Apple Silicon AMX `32x32` FP32 microkernel when available
-- One-level Strassen over the AMX scheduler for large balanced contiguous inputs
-- Apple Silicon SME2.1 packed-`B` path for larger reused-`B` cases when available
-- Apple Silicon SME2.1 direct-`B` one-shot path for selected medium contiguous cases
-- ARM64 NEON `8x8` microkernel when available
-- Scalar reference and scalar edge path
+| Implementation | Throughput |
+| --- | ---: |
+| COB | **1769 GF/s** |
+| MpGEMM | 1642 GF/s |
+| Apple Accelerate | 1549 GF/s |
+| OpenBLAS | 894 GF/s |
 
-On Apple Silicon, the AMX path is enabled by default and can be disabled with
-`-DCOB_DISABLE_APPLE_AMX=1`. The AMX kernel uses a safe buffered store for
-arbitrary output matrices and a faster direct-store path when `C` is 128-byte
-aligned with a row stride that is a multiple of 32 floats.
-Packed `B` uses a native `32`-column AMX layout on Apple Silicon and the
-portable `8`-column layout elsewhere. Aligned Apple Silicon inputs use AMX for
-the `A` panel transpose/pack step and direct AMX stores for both 128-byte and
-64-byte aligned output strides. Larger AMX problems use an `MC` block to reuse
-packed `B` panels across multiple `A` panels. On Apple Silicon with SME2.1, the
-packed-`B` API can use a `16x64` SME kernel for larger reused-`B` problems.
-The one-shot path also has guarded SME direct-`B` and fused source-`B` reuse
-routes for selected medium and large contiguous cases where avoiding full AMX
-one-shot packing is faster. The medium high-K route applies fused first-tile
-B packing and cross-panel reuse across the broad `M=512..896`, `N=1024..1280`,
-`K>=3072` family.
-For balanced contiguous problems with every dimension at least 6144 and no
-dimension more than 4/3 of another, one level of Strassen reduces the core from
-eight half-size products to seven. Exact square problems use a lower verified
-crossover at 5632. Smaller and strongly rectangular problems stay on the
-classical AMX/SME scheduler.
+These numbers are a shape-specific snapshot, not a universal ranking. The
+competitors were measured with the best reliable harness available for each,
+so they were not all collected in one perfectly paired run. COB still loses to
+OpenBLAS, Accelerate, and MpGEMM at other shapes.
 
-## Build
+See the [full `5632^3` audit](docs/audits/2026-07-12-square-crossover.md) for
+commands, versions, accuracy, and caveats. The broader publication boundary is
+kept in [docs/claims.md](docs/claims.md).
+
+## Supported operation
+
+| Property | Current contract |
+| --- | --- |
+| Operation | `C = A * B` |
+| Data type | FP32 |
+| Layout | Row-major |
+| Threads | One |
+| Transposes | None |
+| BLAS scalars | `alpha = 1`, `beta = 0` |
+| Main target | Apple Silicon |
+
+COB exposes three ways to run the same multiplication:
+
+- **One-shot:** pass normal `A` and `B` matrices. Best when both change.
+- **Packed B:** pack `B` once and reuse it across many calls.
+- **Packed A + B:** pack both inputs once for repeated-use workloads.
+
+Packing rearranges matrix data into the format the hardware kernels want. It
+costs time once, then avoids repeating that work on later multiplications.
+
+## Quick start
+
+Requirements: a C11 compiler and `make`.
 
 ```sh
 make
 make test
+./build/cob_gemm_bench 512
 ```
 
-Or with CMake:
+The test command runs the normal scheduler plus lowered-threshold Strassen test
+configurations. On Apple Silicon, the suite currently checks 645 shapes in each
+configuration.
+
+You can also benchmark rectangular matrices. Arguments use `M x N x K`, where
+`A[M x K] * B[K x N] = C[M x N]`:
+
+```sh
+./build/cob_gemm_bench 832x960x896
+COB_BENCH_REPEATS=11 COB_BENCH_ROUTE=1 \
+  ./build/cob_gemm_bench 5632
+```
+
+On macOS, benchmark output includes Apple Accelerate when it is available.
+
+### CMake
 
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
@@ -72,225 +86,86 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-## Benchmark
+## Using the API
+
+Include [`include/cob_gemm.h`](include/cob_gemm.h) and compile
+[`src/gemm.c`](src/gemm.c) into your program.
+
+The one-shot API looks like this:
+
+```c
+#include "cob_gemm.h"
+
+float a[6] = {1, 2, 3, 4, 5, 6};
+float b[6] = {7, 8, 9, 10, 11, 12};
+float c[4];
+
+/* A is 2x3, B is 3x2, and C is 2x2. */
+cob_sgemm_rowmajor(2, 2, 3, a, 3, b, 2, c, 2);
+```
+
+If `B` will be reused, pack it once:
+
+```c
+cob_packed_b_f32 packed_b = {0};
+
+if (cob_sgemm_pack_b(&packed_b, k, n, b, ldb) == 0) {
+    cob_sgemm_rowmajor_packed_b(m, n, k, a, lda, &packed_b, c, ldc);
+    cob_sgemm_free_packed_b(&packed_b);
+}
+```
+
+The header also contains the packed-`A` + packed-`B` API. Packed objects own
+their allocated memory and must be released with their matching free function.
+
+## How it gets fast
+
+The public API stays simple while the dispatcher chooses a route from the
+matrix shape, layout, and available hardware:
+
+- A scalar reference path handles portability and edge cases.
+- ARM64 systems can use an `8x8` NEON kernel.
+- Apple Silicon uses a `32x32` AMX kernel and hardware-assisted packing.
+- SME2.1 routes reduce packing work and reuse `B` data on selected shapes.
+- Large balanced inputs use one level of Strassen, reducing eight half-size
+  products to seven.
+
+Exact contiguous square matrices switch to Strassen at `5632`. Other balanced
+contiguous matrices switch at `6144`. Smaller or strongly rectangular inputs
+stay on the classical AMX/SME scheduler.
+
+The Apple AMX path is enabled by default. Define
+`COB_DISABLE_APPLE_AMX=1` at compile time to disable it. Route thresholds and
+blocking constants are tuned for the tested M5 Max and need fresh measurements
+on other Apple Silicon generations.
+
+## Benchmarking and development
+
+For routine work:
 
 ```sh
 make bench
-./build/cob_gemm_bench 128 256 512
-./build/cob_gemm_bench 832x960x896
+COB_BENCH_ROUTE=1 COB_BENCH_CSV=1 sh tools/bench_grid.sh 512 1024
 ```
 
-On macOS the benchmark also builds an Apple Accelerate comparison when the
-framework is available. The benchmark allocates aligned matrices so it measures
-the fastest AMX output path. Set `COB_BENCH_REPEATS` to use more benchmark
-repeats for noisier large shapes, for example `COB_BENCH_REPEATS=11`.
-Set `COB_BENCH_ITERS` to force multiple GEMM calls per timed sample when short
-shapes are too noisy for single-call timing. Set `COB_BENCH_COOLDOWN_US=N` to
-sleep after each timed repeat in thermally noisy focused sweeps. On macOS, the
-benchmark raises its own thread QoS to reduce scheduler noise; it still pins
-common BLAS thread environment variables to `1`.
-The paired A/B harness compares every output element and defaults to the same
-`0.002` maximum absolute difference used by the correctness suite. Override it
-with `COB_AB_MAX_ABS_DIFF` only when deliberately testing a different numeric
-contract; sampled checksums remain diagnostic rather than the correctness gate.
-Arguments can be square sizes (`512`) or rectangular `MxNxK` shapes
-(`832x960x896`).
-Set `COB_BENCH_PACK_SETUP=1` to also print the one-time packed-`B` setup cost.
-Set `COB_BENCH_CSV=1` to print machine-readable benchmark rows for grid sweeps
-and plotting. Set `COB_BENCH_ROUTE=1` to add the benchmark's current COB route
-label to CSV or text output. Set `COB_BENCH_ONLY=one-shot`, `packed`,
-`packed-AB`, `pack-setup`, or `accelerate` to isolate one benchmark row, which
-is useful for hardware-counter runs; `pack-setup` still requires
-`COB_BENCH_PACK_SETUP=1`.
-Set `COB_BENCH_HOT_SECONDS=N` with `COB_BENCH_ONLY` and one shape to run a
-single row in a hot loop for profiler attachment; normal benchmark behavior is
-unchanged when it is unset.
+Use the [benchmarking guide](docs/benchmarking.md) for paired source A/B tests,
+external BLAS comparisons, grid reports, hardware counters, and profiler
+commands. Performance changes should pass the paired statistical checks and
+the `0.002` full-output maximum absolute error limit before landing.
 
-For repeated boundary sweeps, use the CSV wrapper:
+Useful project notes:
 
-```sh
-sh tools/bench_grid.sh 832 896 960
-COB_GRID_M="64 96 128" COB_GRID_N="1024 2048" COB_GRID_K="512 1024" sh tools/bench_grid.sh
-COB_BENCH_ROUTE=1 sh tools/bench_grid.sh 832 896 960 | python3 tools/bench_gap_report.py
-COB_BENCH_ROUTE=1 sh tools/bench_grid.sh 832 896 960 > /tmp/cob-grid.csv
-python3 tools/bench_heatmap.py /tmp/cob-grid.csv --output /tmp/cob-grid.png
-```
+- [Claim status and audit recipe](docs/claims.md)
+- [Current project status](docs/project-status.md)
+- [Optimization rules and rejected ideas](docs/optimization-design-rules.md)
+- [Full optimization timeline](docs/optimization-timeline.md)
 
-Use `python3 tools/bench_gap_report.py --max-drop-percent 15` when a long sweep
-shows large best-to-median drops; `tools/claim_audit.sh` applies that same
-sanity filter before ranking gap rows.
+## Goal
 
-For candidate-vs-baseline source changes, use the paired A/B harness. It
-defaults to the one-shot API; set `COB_AB_MODE=packed` for packed-`B`, or
-`COB_AB_MODE=packed-AB` for the fully prepacked API:
-
-```sh
-COB_AB_REPEATS=61 COB_AB_MAX_REPEATS=101 \
-  sh tools/paired_ab_bench.sh baseline/src/gemm.c src/gemm.c 512
-COB_AB_MODE=packed-AB COB_AB_REPEATS=61 \
-  sh tools/paired_ab_bench.sh baseline/src/gemm.c src/gemm.c 512
-```
-
-For thermally noisy shapes, set `COB_AB_COOLDOWN_US=N` to sleep after each
-paired sample. This makes long confirmation runs slower but can keep false
-dispatch wins out of the timeline.
-
-To compare the current one-shot COB path against Apple Accelerate with the same
-paired statistics, use the direct-only Accelerate harness:
-
-```sh
-COB_AB_REPEATS=101 COB_AB_ITERS=8 COB_AB_COOLDOWN_US=20000 \
-  sh tools/paired_accelerate_bench.sh src/gemm.c 512x1216x3072
-```
-
-For current gap hunting, prefer this paired Accelerate harness over separate
-COB and Accelerate benchmark medians. Several May 2026 medium/large rows moved
-by more than the candidate deltas between separate processes.
-
-For Apple Silicon hardware-counter probes, build `mperf-stat` from
-<https://github.com/tmcgilchrist/mperf>. On M5 machines, force the local `as5`
-PMC database; if an upstream `mperf-stat` build cannot load that database, use
-a build that honors `MPERF_KPEP_DB`:
-
-```sh
-sudo env MPERF_KPEP_DB=as5 COB_COUNTER_ONLY=one-shot sh tools/counter_probe.sh 64x4096x7168
-sudo env MPERF_KPEP_DB=as5 COB_COUNTER_ONLY=packed sh tools/counter_probe.sh 512x1280x1536
-```
-
-The counter helper defaults to the remaining structural probe shapes and uses
-`COB_BENCH_ONLY` so counters are not polluted by Accelerate or the other COB
-benchmark rows.
-
-If `mperf` root access is blocked but full Xcode is installed, `xctrace` CPU
-Counters can still expose the top-level pipeline ratios. These are CPU pipeline
-ratios, not direct AMX/SME engine utilization counters:
-
-```sh
-env COB_BENCH_ONLY=one-shot COB_BENCH_REPEATS=1 COB_BENCH_ITERS=128 \
-  COB_BENCH_ROUTE=1 \
-  xcrun xctrace record --template 'CPU Counters' \
-  --output /private/tmp/cob-512.trace \
-  --launch -- "$(pwd)/build/cob_gemm_bench" 512x512x4096
-xcrun xctrace export --input /private/tmp/cob-512.trace \
-  --xpath '/trace-toc/run[@number="1"]/data/table[@schema="MetricTable"]' \
-  --output /private/tmp/cob-512-metric.xml
-python3 tools/xctrace_metric_summary.py /private/tmp/cob-512-metric.xml \
-  --process cob_gemm_bench --thread "Main Thread" --min-duration-ns 750000
-```
-
-For Time Profiler traces, prefer exporting the `time-profile` table because
-Xcode has already symbolized the frames. Raw `time-sample` PC exports are still
-supported, but require the correct binary load address:
-
-```sh
-env COB_BENCH_ONLY=one-shot COB_BENCH_REPEATS=1 COB_BENCH_ITERS=128 \
-  COB_BENCH_ROUTE=1 \
-  xcrun xctrace record --template 'Time Profiler' \
-  --output /private/tmp/cob-512-time.trace \
-  --launch -- "$(pwd)/build/cob_gemm_bench" 512x512x4096
-xcrun xctrace export --input /private/tmp/cob-512-time.trace \
-  --xpath '/trace-toc/run[@number="1"]/data/table[@schema="time-profile"]' \
-  --output /private/tmp/cob-512-time-profile.xml
-python3 tools/xctrace_time_sample_summary.py \
-  /private/tmp/cob-512-time-profile.xml --group symbol --limit 20
-```
-
-If root-backed counters are unavailable, the hot-loop mode can keep one process
-alive long enough for macOS `sample` from a normal terminal:
-
-```sh
-COB_BENCH_ONLY=one-shot COB_BENCH_ROUTE=1 COB_BENCH_HOT_SECONDS=20 \
-  build/cob_gemm_bench 512x1024x1536
-```
-
-For MpGEMM calibration, keep the checkout outside this repo and point the helper
-at it:
-
-```sh
-git clone https://github.com/MpGEMM/mpgemm /private/tmp/mpgemm_latest
-sh tools/mpgemm_calibration.sh
-```
-
-Set `COB_MPGEMM_RUN_MPGEMM=0` to skip rebuilding/running MpGEMM and only
-refresh COB's matching route-aware CSV. The helper emits gap-only and all-row
-CSV comparisons for MpGEMM's FP32 `row_sgemm` output; MpGEMM's FP16 and int8
-benchmark rows are separate contracts.
-
-## Comparison Status
-
-Current evidence is scoped to the benchmarked shape set and this repo's narrow
-single-threaded FP32 row-major contract. Older audits verified wins over BLIS,
-BLASFEO, Eigen, Rust `matrixmultiply`, `coral-aarch64`, LIBXSMM,
-`tract-linalg`, and comparable KleidiAI paths. Those results do not establish a
-current broad title. A July 2026 re-audit found a confirmed `64^3` loss to
-OpenBLAS, several losses to proprietary Accelerate, and multiple noisy but
-material gaps to current MIT-licensed MpGEMM on its stock `m = 64` shapes.
-Same-process MpGEMM interleaving is not currently reliable, so exact margins
-need an isolated-process paired harness before they drive dispatch changes.
-
-To compare against an open-source CBLAS implementation, build the separate
-external CBLAS benchmark target. For example, with a local BLIS build:
-
-```sh
-make bench-cblas \
-  CBLAS_NAME=blis_apple \
-  CBLAS_HEADER=blis.h \
-  CBLAS_CFLAGS=-isystem/path/to/blis/include/aaplmx \
-  CBLAS_LDFLAGS=/path/to/blis/lib/aaplmx/libblis.a
-```
-
-The benchmark pins common BLAS thread environment variables to `1`.
-
-For libraries that export the standard Fortran `sgemm_` symbol, use the
-Fortran-BLAS target. For example, with a local BLASFEO build:
-
-```sh
-make bench-fortran-blas \
-  FORTRAN_BLAS_NAME=blasfeo \
-  FORTRAN_BLAS_LDFLAGS=/path/to/blasfeo/lib/libblasfeo.a
-```
-
-## API
-
-```c
-void cob_sgemm_rowmajor(
-    int m, int n, int k,
-    const float* a, int lda,
-    const float* b, int ldb,
-    float* c, int ldc);
-
-int cob_sgemm_pack_b(
-    cob_packed_b_f32* packed,
-    int k, int n,
-    const float* b, int ldb);
-
-int cob_sgemm_pack_a(
-    cob_packed_a_f32* packed,
-    int m, int k,
-    const float* a, int lda);
-
-void cob_sgemm_rowmajor_packed_b(
-    int m, int n, int k,
-    const float* a, int lda,
-    const cob_packed_b_f32* packed_b,
-    float* c, int ldc);
-
-void cob_sgemm_rowmajor_packed_ab(
-    int m, int n, int k,
-    const cob_packed_a_f32* packed_a,
-    const cob_packed_b_f32* packed_b,
-    float* c, int ldc);
-```
-
-## Next Work
-
-- Re-run m64 large-`K` calibration after the latest exact `n = 2560` route
-  changes, then write fixed-shape SME only for the gaps that remain.
-- Use hardware counters before accepting more exact dispatch gates.
-- Re-audit external baselines before publishing any broader fastest claim.
-- Treat MIT-licensed MpGEMM as an in-scope blocker and rerun it with an
-  isolated-process paired harness.
-- Treat any public packed-B layout change as a versioned ABI change.
+The goal is still to become the fastest open-source single-threaded matrix
+multiplication implementation inside this narrow contract. The current next
+step is deeper M5-specific SME kernel schedule exploration, backed by paired
+measurements rather than isolated peak numbers.
 
 ## License
 
