@@ -10,9 +10,11 @@ matrix is reused.
 Goal: become the fastest open-source single-threaded matrix multiplication
 software in the world
 
-Current audited evidence: fastest among the tested licensed/open-source
-baselines for single-thread FP32 row-major SGEMM on Apple Silicon, in the routed
-shape ranges. See [docs/claims.md](docs/claims.md) for the audit recipe and
+Current evidence: COB is an elite experimental implementation with verified
+wins on selected routed shapes, including huge balanced inputs. A July 2026
+current-head re-audit found losses to current OpenBLAS and MIT-licensed MpGEMM,
+so a broad fastest claim is not currently supported. See
+[docs/claims.md](docs/claims.md) for the audit recipe and
 [docs/optimization-design-rules.md](docs/optimization-design-rules.md) for the
 measurement rules and exclusions. For the final state of the long optimization
 session and the next serious work items, see
@@ -216,17 +218,14 @@ benchmark rows are separate contracts.
 ## Comparison Status
 
 Current evidence is scoped to the benchmarked shape set and this repo's narrow
-single-threaded FP32 row-major contract. In the routed shape ranges, COB beats
-the tested licensed/open-source baselines so far: BLIS, OpenBLAS, BLASFEO,
-Eigen, Rust `matrixmultiply`, `coral-aarch64`, LIBXSMM, `tract-linalg`, and
-KleidiAI's comparable public one-shot path. COB also has a fully prepacked
-`A`+`B` path for repeated-use cases, so tract's packed-both mode is no longer a
-stronger-contract gap on the sampled square calibration. Accelerate is still
-reported separately and still leads on some small or pack-overhead-heavy cases.
-Source-available projects without a clear license, such as MpGEMM, are tracked
-as calibration targets rather than folded into the open-source claim. The
-latest focused MpGEMM FP32 `row_sgemm` calibration found no same-contract gaps
-on its stock skinny rows when COB uses forced benchmark iterations.
+single-threaded FP32 row-major contract. Older audits verified wins over BLIS,
+BLASFEO, Eigen, Rust `matrixmultiply`, `coral-aarch64`, LIBXSMM,
+`tract-linalg`, and comparable KleidiAI paths. Those results do not establish a
+current broad title. A July 2026 re-audit found a confirmed `64^3` loss to
+OpenBLAS, several losses to proprietary Accelerate, and multiple noisy but
+material gaps to current MIT-licensed MpGEMM on its stock `m = 64` shapes.
+Same-process MpGEMM interleaving is not currently reliable, so exact margins
+need an isolated-process paired harness before they drive dispatch changes.
 
 To compare against an open-source CBLAS implementation, build the separate
 external CBLAS benchmark target. For example, with a local BLIS build:
@@ -288,8 +287,8 @@ void cob_sgemm_rowmajor_packed_ab(
   changes, then write fixed-shape SME only for the gaps that remain.
 - Use hardware counters before accepting more exact dispatch gates.
 - Re-audit external baselines before publishing any broader fastest claim.
-- Keep MpGEMM separate unless its license becomes clear, then rerun
-  same-contract benchmarks.
+- Treat MIT-licensed MpGEMM as an in-scope blocker and rerun it with an
+  isolated-process paired harness.
 - Treat any public packed-B layout change as a versioned ABI change.
 
 ## License

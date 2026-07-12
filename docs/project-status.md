@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-10
+Last updated: 2026-07-12
 
 ## Goal
 
@@ -18,20 +18,12 @@ The chosen scope is intentionally narrow:
 
 ## Where It Landed
 
-The current implementation is in a strong publishable state for the scoped
-claim:
-
-COB is fastest among the tested licensed/open-source baselines for
-single-thread FP32 row-major SGEMM on Apple Silicon, in the routed shape
-ranges.
-
-That is the claim supported by the current audit docs, including the final
-scoped audit note at `docs/audits/2026-05-10-claim-audit.md`. It is not a
-universal "fastest matmul software" claim. Accelerate is proprietary and still
-wins some small or pack-overhead-heavy cases. MpGEMM is source-available with
-unclear licensing in the local scan and remains a calibration target; the
-latest focused FP32 `row_sgemm` calibration found no same-contract gaps on its
-stock skinny rows, while its FP16 and int8 rows remain out of scope.
+The implementation is elite on selected routed shapes, but the previous broad
+fastest claim is suspended. A July current-head re-audit found a confirmed
+OpenBLAS loss at `64^3`, several proprietary Accelerate wins, and multiple
+noisy but material gaps to current MIT-licensed MpGEMM on its stock `m = 64`
+portfolio. The May claim audit remains useful historical evidence, not current
+publication support.
 
 ## What Shipped
 
@@ -96,10 +88,12 @@ The most important performance wins came from:
 ## Current Limits
 
 - The full "fastest fastest" goal is not proven.
-- The May 27 focused MpGEMM FP32 `row_sgemm` calibration cleared the previous
-  apparent `m = 64` stock-shape gaps when COB uses forced benchmark iterations.
-  This improves the calibration story but does not prove the full "fastest
-  fastest" goal across new shapes, libraries, hardware, or non-FP32 contracts.
+- The narrower licensed/open-source claim is also not currently proven.
+- MpGEMM is now MIT licensed and must be included in future open-source audits.
+- Same-process COB/MpGEMM interleaving crashed during the July 12 audit. Use
+  isolated alternating processes until that interaction is understood.
+- The May 27 focused MpGEMM calibration appeared to clear the old `m = 64`
+  gaps, but the July current-head audit supersedes that result for publication.
 - Earlier C-level probes did not close that gap: B-panel-first traversal,
   prefetch locality changes, epilogue branch hoisting, broad compiler unrolling,
   `-mcpu=native`, K16 unroll pragmas, and prefetch-boundary branch splitting
@@ -157,9 +151,8 @@ The most important performance wins came from:
    BLASFEO, Eigen, LIBXSMM, Rust `matrixmultiply`, `coral-aarch64`,
    `tract-linalg`, KleidiAI, and any newly available source-inspectable
    Apple Silicon packages.
-4. Keep MpGEMM separate unless its license becomes clear. If it becomes
-   clearly open-source, rerun same-contract FP32 benchmarks with the focused
-   calibration settings before treating any row as a release blocker.
+4. Treat MpGEMM as an in-scope release blocker. Build an isolated-process paired
+   harness and rerun its FP32 stock shapes before tuning exact routes.
 5. Investigate 64-column contiguous public packed-B layout only as a versioned
    ABI change. It may enable tuple loads in more public packed-B paths, but it
    should not be mixed into a small tuning pass.

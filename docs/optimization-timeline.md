@@ -4966,7 +4966,7 @@ behavior-identical/noisy or neutral, so the rule is exact to `k = 2048` for
 `m >= 768`; the existing `k >= 3072` path remains unchanged. Correctness
 coverage adds `768x1216x2048` and `1024x1216x2048`.
 
-## Current Conclusion
+## Historical May-era conclusion (superseded)
 
 COB is very competitive in its exact current scope. The qualified claim now is:
 fastest among tested licensed/open-source baselines on the routed shape ranges
@@ -5087,11 +5087,10 @@ Historical post-`5e6da0a` rejected/probed follow-ups:
 - MpGEMM checkout `/private/tmp/mpgemm_latest` was refreshed and was already up
   to date at `8d83011`.
 
-Historical note: this older conclusion treated MpGEMM as an in-scope blocker and
-predates the newer paired-harness methodology, skinny SME generalization, and
-medium-width SME direct routes. Keep it as context for the old experiments, but
-use the `Current Conclusion` section above and `docs/claims.md` for the current
-claim boundary.
+Historical note: this older conclusion predates the current MpGEMM license,
+paired-harness methodology, skinny SME generalization, and medium-width SME
+direct routes. Keep it as context for the old experiments, but use
+`docs/claims.md` and the July 12 section below for the current claim boundary.
 
 ## 2026-07-10: one-level Strassen crosses over on huge balanced inputs
 
@@ -5121,3 +5120,30 @@ fell to roughly `0.60x` at 4096, while persistent SME streaming mode and a
 hand-written AMX assembly K loop were neutral or regressive. The paired harness
 now reports full-output max-absolute and RMS error so future fast algorithms
 cannot hide behind a cancellation-prone checksum.
+
+## 2026-07-12: current-head claim reset and rejected architecture probes
+
+The broad licensed/open-source fastest claim was suspended after the July
+current-head audit. Current OpenBLAS won a focused `64^3` comparison, current
+MIT-licensed MpGEMM became an in-scope baseline, and proprietary Accelerate
+still won several small and medium rows. The saved MpGEMM calibration had large
+best-to-median drops, so its exact margins still need isolated-process paired
+confirmation, but the losses are enough to block the old publication claim.
+
+Four implementation candidates were tested and rejected:
+
+- Two-level Strassen at `8192^3` exceeded the `0.002` error contract with
+  max-absolute error `0.0023613` and had a `0.9316x` paired median in the noisy
+  repeat-5 run. Keep one level.
+- A 16-way compiler-unrolled SME K loop regressed `64x4096x7168` to a
+  `0.8191x` paired median and did not show a stable portfolio win.
+- Stack-backed AMX A-panel scratch did not produce a stable square win and
+  regressed a small rectangular guard. Heap removal is not the blocker.
+- Fusing the two output merges for each Strassen product regressed `6144^3` to
+  a `0.8343x` paired median. The separate sequential merge streams have better
+  memory behavior on this machine.
+
+An attempted direct link of MpGEMM's assembly kernel exited on an illegal
+instruction in a freshly rebuilt standalone binary, while same-process
+interleaving also crashed. Do not vendor or benchmark that kernel in-process
+until its SME ABI and runtime requirements are understood.

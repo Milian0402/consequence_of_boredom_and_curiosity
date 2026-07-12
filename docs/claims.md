@@ -3,10 +3,13 @@
 This document defines the claim this repository is allowed to make and the
 evidence needed to re-audit it.
 
-## Claim
+## Current Claim Status
 
-COB is fastest among the tested licensed/open-source baselines for
-single-thread FP32 row-major SGEMM on Apple Silicon, in the routed shape ranges.
+The previous broad claim is suspended. COB has verified wins on selected routed
+shapes, including huge balanced inputs, but a July 2026 current-head re-audit
+found losses to current OpenBLAS and MIT-licensed MpGEMM. Do not describe the
+repo as the fastest open-source implementation until a fresh portfolio audit
+shows that result.
 
 This is not a universal matrix-multiplication claim. It does not cover
 multi-threaded GEMM, non-FP32 types, transposed operands, arbitrary
@@ -51,15 +54,12 @@ Licensed/open-source baselines tested so far:
 - LIBXSMM exact `beta = 0`.
 - `tract-linalg` comparable public paths.
 - KleidiAI comparable public one-shot path.
+- MpGEMM. Its faster FP16 and int8 rows remain outside this FP32 contract.
 
 Tracked separately:
 
 - Apple Accelerate, because it is a proprietary system framework and still wins
   some small or pack-overhead-heavy cases.
-- MpGEMM, because the local checkout had no license file; it remains a
-  source-available calibration target. The latest focused FP32 `row_sgemm`
-  calibration found no same-contract gaps on its stock skinny rows, while its
-  faster FP16 and int8 rows remain out of this claim's FP32 contract.
 - Packages that wrap Accelerate or ship no inspectable source.
 
 ## Required Audit Recipe
@@ -154,6 +154,11 @@ git diff --check
 
 ## Current Evidence Summary
 
+- The July 2026 current-head re-audit supersedes the May claim for current
+  publication. It confirmed an OpenBLAS win at `64^3`, found several Accelerate
+  wins, and found current MpGEMM ahead on multiple stock `m = 64` rows. The
+  MpGEMM margins were noisy and still need isolated-process paired confirmation,
+  but they are enough to suspend the broad claim.
 - Final scoped audit note: `docs/audits/2026-05-10-claim-audit.md` records a
   clean rebuild, 127-shape correctness pass, and fresh `square`, `medium`, and
   `skinny` route-aware audit bundle at
@@ -161,7 +166,7 @@ git diff --check
 - Recent external baseline audits are listed below with their output
   directories; rerun them before broadening the claim beyond the recorded shape
   suites.
-- Correctness suite currently reports 636 GEMM shape checks on Apple Silicon.
+- Correctness suite currently reports 642 GEMM shape checks on Apple Silicon.
 - The paired A/B harness reports median ratio, mean-log speedup, bootstrap
   confidence interval, sign-test p-value, and split-half holdout.
 - Route-aware benchmarking and `tools/bench_heatmap.py` make dispatcher
@@ -211,9 +216,8 @@ git diff --check
 
 ## Claim Boundaries
 
-- Say "fastest among tested licensed/open-source baselines on the routed shape
-  ranges."
+- Say "verified wins on selected routed shapes" and name the hardware, contract,
+  shapes, and competitor version.
 - Do not say "fastest matrix multiplication software" without the scope above.
-- Do not fold MpGEMM into the open-source claim unless its licensing becomes
-  clear and the same-contract benchmarks are re-run.
+- Include MIT-licensed MpGEMM in any future open-source claim audit.
 - Do not fold Accelerate into the open-source baseline set.

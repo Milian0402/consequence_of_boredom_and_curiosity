@@ -369,8 +369,10 @@ These rules summarize repeated findings from the optimization timeline. They are
 
 ## External Baselines
 
-- Treat MpGEMM as a calibration target, not a source to copy from. Its checkout has no license file in the local scan.
+- Treat MIT-licensed MpGEMM as an in-scope baseline. Use isolated alternating
+  processes until same-process SME interleaving is proven stable.
 - Treat KleidiAI FP32 SME2 compute-only results as an upper-bound/reference. Its direct one-shot path includes both LHS and RHS packing and was not faster on the tested public one-shot shapes.
 - Treat packages that wrap Accelerate or ship no inspectable source separately from licensed open-source GEMM implementations.
 - If a source-available project has unclear licensing, document its numbers separately from the "open-source" claim.
-- State the speed claim as "fastest among tested licensed/open-source baselines on the routed shape ranges" unless a fresh source scan and benchmark run cover a broader claim.
+- Do not publish a broad fastest claim until a fresh current-head portfolio
+  audit clears current OpenBLAS and MpGEMM under the same contract.

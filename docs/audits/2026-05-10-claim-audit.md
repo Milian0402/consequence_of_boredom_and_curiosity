@@ -1,5 +1,9 @@
 # 2026-05-10 Claim Audit
 
+> Historical snapshot. A July 2026 current-head re-audit found losses to
+> current OpenBLAS and MIT-licensed MpGEMM. This file records what the May audit
+> showed, but it no longer supports a current broad fastest claim.
+
 ## Finish Line
 
 This pass audits the scoped finish line, not the unqualified research goal.
