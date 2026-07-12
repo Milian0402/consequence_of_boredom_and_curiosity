@@ -159,6 +159,12 @@ git diff --check
   wins, and found current MpGEMM ahead on multiple stock `m = 64` rows. The
   MpGEMM margins were noisy and still need isolated-process paired confirmation,
   but they are enough to suspend the broad claim.
+- A later July 12 exact-square crossover audit established a narrower win at
+  `5632^3` on this M5 Max: COB `1769 GF/s`, current MpGEMM `1642 GF/s`,
+  Accelerate `1549 GF/s`, and OpenBLAS `894 GF/s`. The MpGEMM number came from
+  an isolated process, so publish this only as a shape- and machine-specific
+  result, not a restored broad claim. See
+  `docs/audits/2026-07-12-square-crossover.md` for commands and metadata.
 - Final scoped audit note: `docs/audits/2026-05-10-claim-audit.md` records a
   clean rebuild, 127-shape correctness pass, and fresh `square`, `medium`, and
   `skinny` route-aware audit bundle at
@@ -166,7 +172,7 @@ git diff --check
 - Recent external baseline audits are listed below with their output
   directories; rerun them before broadening the claim beyond the recorded shape
   suites.
-- Correctness suite currently reports 642 GEMM shape checks on Apple Silicon.
+- Correctness suite currently reports 645 GEMM shape checks on Apple Silicon.
 - The paired A/B harness reports median ratio, mean-log speedup, bootstrap
   confidence interval, sign-test p-value, and split-half holdout.
 - Route-aware benchmarking and `tools/bench_heatmap.py` make dispatcher

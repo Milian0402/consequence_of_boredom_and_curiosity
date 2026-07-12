@@ -335,7 +335,10 @@ int main(void)
     failures += test_aligned_shape(128, 128, 129);
     failures += test_shape_ex(64, 256, 3072, 3072, 320, 263, 1);
     failures += test_packed_matches_direct_aligned_shape(512, 512, 512);
-    total_shapes += 5;
+    failures += test_packed_matches_direct_aligned_shape(128, 128, 128);
+    failures += test_packed_matches_direct_aligned_shape(128, 192, 128);
+    failures += test_shape_ex(128, 128, 128, 131, 133, 135, 1);
+    total_shapes += 8;
 #if defined(__APPLE__) && defined(__aarch64__)
     failures += test_cancellation_heavy_aligned_shape(1024);
     failures += test_packed_matches_direct_aligned_shape(832, 832, 832);

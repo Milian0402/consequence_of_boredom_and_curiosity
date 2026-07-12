@@ -5147,3 +5147,28 @@ An attempted direct link of MpGEMM's assembly kernel exited on an illegal
 instruction in a freshly rebuilt standalone binary, while same-process
 interleaving also crashed. Do not vendor or benchmark that kernel in-process
 until its SME ABI and runtime requirements are understood.
+
+## 2026-07-12: exact-square Strassen crossover moves down to 5632
+
+The ambitious SME assembly lane uncovered a useful tooling fact but did not
+ship. The old SIGILL came from compiling ordinary C globally with SME `-march`,
+which let Clang emit streaming-only instructions before dispatch. A safe bridge
+must compile generic C normally, apply SME flags only to assembly, and use a
+locally-streaming, new-ZA wrapper. An ABI-safe persistent 16x64 control was
+correct but regressed key high-K rows by about 3%. A generated 32x32 schedule
+was also correct but lost about 30% on those rows. Both were rejected.
+
+The algorithmic crossover sweep was the actual win. One-level Strassen beat the
+classical scheduler throughout the high-square edge, with the cold repeat-15
+`5632^3` confirmation at `1.1296x` median, bootstrap95
+`[1.0803x, 1.1813x]`, and max-absolute error `0.000667572`. `5760^3` also won
+at `1.0722x` median. The accepted dispatch change lowers the crossover only for
+exact squares; the general balanced-input floor remains 6144 because nearby
+rectangles were neutral and lower square measurements were thermally unstable.
+
+External spot checks at `5632^3` measured COB `1769 GF/s`, current MIT-licensed
+MpGEMM `1642 GF/s`, Accelerate `1549 GF/s`, and OpenBLAS `894 GF/s`. MpGEMM
+needed an isolated-process harness with callee-saved FP registers preserved;
+its current assembly clobbers `d8-d15`, so this is not a same-process paired
+claim. The result supports a narrow fastest-tested statement for this exact
+shape, contract, hardware, and competitor set only.

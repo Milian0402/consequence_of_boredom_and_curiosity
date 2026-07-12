@@ -53,8 +53,9 @@ B packing and cross-panel reuse across the broad `M=512..896`, `N=1024..1280`,
 `K>=3072` family.
 For balanced contiguous problems with every dimension at least 6144 and no
 dimension more than 4/3 of another, one level of Strassen reduces the core from
-eight half-size products to seven. Smaller and strongly rectangular problems
-stay on the classical AMX/SME scheduler.
+eight half-size products to seven. Exact square problems use a lower verified
+crossover at 5632. Smaller and strongly rectangular problems stay on the
+classical AMX/SME scheduler.
 
 ## Build
 

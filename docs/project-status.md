@@ -34,7 +34,7 @@ publication support.
 - Apple Silicon AMX kernels and route-specific packing paths.
 - Apple Silicon SME2.1 direct-`B`, packed-`B`, and skinny/reuse routes.
 - ARM64 NEON and scalar fallback paths.
-- Correctness coverage for 642 GEMM test shapes, including a test-only lowered
+- Correctness coverage for 645 GEMM test shapes, including test-only lowered
   Strassen crossover and a cancellation-heavy quadrant pattern.
 - A May 10 clean rebuild and claim-audit snapshot for the scoped routed suites.
 - Route-aware benchmarks, grid sweeps, gap reports, and heatmap generation.
@@ -79,6 +79,12 @@ The most important performance wins came from:
   bootstrap lower bounds, all above `1.08x`, are more useful than any single
   peak ratio. Full-output maximum error stayed between `0.00066` and
   `0.00105`, inside the existing `0.002` correctness contract.
+- A lower exact-square Strassen crossover at 5632. The cooled repeat-15 source
+  A/B run measured `1.1296x` median with bootstrap95 `[1.0803x, 1.1813x]`;
+  full-output max error was `0.000667572`. Same-contract spot checks measured
+  COB at `1769 GF/s`, current MpGEMM at `1642 GF/s`, Accelerate at `1549 GF/s`,
+  and OpenBLAS at `894 GF/s` on `5632^3`. MpGEMM was timed in an isolated
+  process because its current assembly violates the platform ABI.
 - Public packed-AB support and packed-AB traversal tuning.
 - A guarded 64-row SME subpanel route for strided source-B views. It packs a
   192-512-column B slab once and reuses it across four 16-row groups, enabling

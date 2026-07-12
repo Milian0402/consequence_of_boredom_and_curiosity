@@ -183,10 +183,23 @@ enum {
 
 #ifndef COB_SGEMM_STRASSEN1_MIN_DIM
 #define COB_SGEMM_STRASSEN1_MIN_DIM 6144
+#define COB_SGEMM_STRASSEN1_MIN_DIM_DEFAULTED 1
 #endif
 
 #if COB_SGEMM_STRASSEN1_MIN_DIM <= 0
 #error "COB_SGEMM_STRASSEN1_MIN_DIM must be positive"
+#endif
+
+#ifndef COB_SGEMM_STRASSEN1_SQUARE_MIN_DIM
+#if defined(COB_SGEMM_STRASSEN1_MIN_DIM_DEFAULTED)
+#define COB_SGEMM_STRASSEN1_SQUARE_MIN_DIM 5632
+#else
+#define COB_SGEMM_STRASSEN1_SQUARE_MIN_DIM COB_SGEMM_STRASSEN1_MIN_DIM
+#endif
+#endif
+
+#if COB_SGEMM_STRASSEN1_SQUARE_MIN_DIM <= 0
+#error "COB_SGEMM_STRASSEN1_SQUARE_MIN_DIM must be positive"
 #endif
 
 static int cob_min_i32(int a, int b)
@@ -3027,7 +3040,9 @@ static int cob_sgemm_rowmajor_strassen1(
 {
     const int min_dim = cob_min_i32(cob_min_i32(m, n), k);
     const int max_dim = m > n ? (m > k ? m : k) : (n > k ? n : k);
-    if (min_dim < COB_SGEMM_STRASSEN1_MIN_DIM ||
+    const int use_lower_square_crossover =
+        m == n && n == k && min_dim >= COB_SGEMM_STRASSEN1_SQUARE_MIN_DIM;
+    if ((!use_lower_square_crossover && min_dim < COB_SGEMM_STRASSEN1_MIN_DIM) ||
         3 * (int64_t)max_dim > 4 * (int64_t)min_dim ||
         lda != k || ldb != n || (m % 64) != 0 || (n % 64) != 0 ||
         (k % 64) != 0) {

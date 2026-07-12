@@ -37,8 +37,10 @@ These rules summarize repeated findings from the optimization timeline. They are
   Exact-cell wins can polish a proven architecture, but do not count as a major
   milestone by themselves.
 - One-level Strassen is worthwhile only for large balanced contiguous inputs on
-  this backend. Keep the default floor at 6144 and the 4:3 aspect-ratio guard;
-  1536 and 2048 shapes lost badly because packing, sums, and merges dominated.
+  this backend. Keep the general floor at 6144 and the 4:3 aspect-ratio guard.
+  Exact squares have a separately validated lower floor at 5632. Keep other
+  sub-6144 rectangles classical; 1536 and 2048 shapes lost badly because
+  packing, sums, and merges dominated.
   Validate full-output max and RMS error, not only a sampled checksum.
 - Keep one-shot, packed-B, and packed-AB claims separate. More-prepacked results
   are useful ceilings but do not prove the less-prepacked public path is faster.

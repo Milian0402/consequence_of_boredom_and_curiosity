@@ -139,6 +139,15 @@ enum {
 
 #ifndef COB_SGEMM_STRASSEN1_MIN_DIM
 #define COB_SGEMM_STRASSEN1_MIN_DIM 6144
+#define COB_SGEMM_STRASSEN1_MIN_DIM_DEFAULTED 1
+#endif
+
+#ifndef COB_SGEMM_STRASSEN1_SQUARE_MIN_DIM
+#if defined(COB_SGEMM_STRASSEN1_MIN_DIM_DEFAULTED)
+#define COB_SGEMM_STRASSEN1_SQUARE_MIN_DIM 5632
+#else
+#define COB_SGEMM_STRASSEN1_SQUARE_MIN_DIM COB_SGEMM_STRASSEN1_MIN_DIM
+#endif
 #endif
 
 static void configure_benchmark_thread(void)
@@ -637,7 +646,9 @@ static const char* cob_one_shot_route(bench_shape shape)
 #if COB_SGEMM_STRASSEN1
     const int min_dim = m < n ? (m < k ? m : k) : (n < k ? n : k);
     const int max_dim = m > n ? (m > k ? m : k) : (n > k ? n : k);
-    if (min_dim >= COB_SGEMM_STRASSEN1_MIN_DIM &&
+    const int use_lower_square_crossover =
+        m == n && n == k && min_dim >= COB_SGEMM_STRASSEN1_SQUARE_MIN_DIM;
+    if ((use_lower_square_crossover || min_dim >= COB_SGEMM_STRASSEN1_MIN_DIM) &&
         3 * (int64_t)max_dim <= 4 * (int64_t)min_dim &&
         (m % 64) == 0 && (n % 64) == 0 && (k % 64) == 0) {
         return "amx_strassen1";
