@@ -7,8 +7,10 @@ as possible, especially on Apple Silicon. It is not a full BLAS replacement.
 The deliberately narrow contract leaves more room for specialized AMX, SME,
 and packing strategies.
 
-> **Current status:** COB is the fastest implementation tested here at the
-> exact `5632 x 5632 x 5632` shape on an Apple M5 Max. It does not win every
+> **Current status:** for large balanced multiplications on the tested Apple
+> M5 Max, headlined by the exact `5632 x 5632 x 5632` shape, COB is outright
+> the fastest implementation measured: it beat MpGEMM, Apple Accelerate, and
+> OpenBLAS in the July 2026 audit. Outside that family COB does not win every
 > shape, so the broader "fastest open-source GEMM" goal is not yet proven.
 
 ## Performance snapshot
@@ -31,6 +33,24 @@ OpenBLAS, Accelerate, and MpGEMM at other shapes.
 See the [full `5632^3` audit](docs/audits/2026-07-12-square-crossover.md) for
 commands, versions, accuracy, and caveats. The broader publication boundary is
 kept in [docs/claims.md](docs/claims.md).
+
+### Where COB wins outright
+
+The verified wins cover large balanced FP32 multiplications: contiguous
+row-major inputs with every dimension a multiple of 64, a largest-to-smallest
+dimension ratio of at most 4:3, and sizes from `6144` (exact squares from
+`5632`). Those inputs route through one level of Strassen on top of AMX
+kernels that run at about 96% of the measured single-core matrix-unit
+ceiling, so there is little room left above them.
+
+Huge dense multiplies like these are the expensive core of real workloads:
+covariance and Gram matrices in scientific computing, dense layers in
+CPU-side ML experiments, and blocked solvers that reduce to GEMM. When such a
+multiplication runs on one core of an Apple Silicon machine, COB currently
+finishes it faster than any other implementation tested here, while leaving
+the GPU and the remaining cores free for other work. The code is also a
+compact single-file reference for combining AMX, SME2.1, and Strassen
+techniques behind one dispatcher.
 
 ## Supported operation
 
