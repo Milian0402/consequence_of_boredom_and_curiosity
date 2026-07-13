@@ -69,10 +69,25 @@ These rules summarize repeated findings from the optimization timeline. They are
 
 ## Rejected Paths
 
+- Do not mix Apple AMX with the live SME states tested on the current M5.
+  Isolated AMX probes trapped with streaming mode plus ZA live and with ZA left
+  live after `SMSTOP`; AMX set/clear passed only after both were disabled.
+  Revisit only on new hardware or OS behavior.
+- Static rescheduling alone did not move the tested packed-B reuse routes.
+  Eleven `16x64` and six native-layout `32x32` generated schedules all passed
+  correctness, but none survived the dual-target performance screen. Two other
+  m64 blockers remained on unchanged fallback code, so this was not a search of
+  the full m64 portfolio. A future generator needs a materially different
+  layout or ownership model, not a larger search over the same loads and
+  `FMOPA`s.
 - A pack-fused Strassen variant that materialized and merged each 32x32 result
   tile was much slower than letting the existing one-shot scheduler own each
   half-size product. The extra per-tile epilogue and lost scheduler locality
   outweighed the saved half-output buffer.
+- Forming all seven Strassen operands directly in packed-A32/B32 layouts was
+  correct and removed row-major X/Y materialization, but a cooled `5632^3`
+  source A/B run was neutral and noisy (`1.0028x` median, bootstrap interval
+  crossing one). Removing that materialization alone is not enough.
 - Holding one SME streaming-mode invocation across all reused A panels was
   neutral to slightly slower. A hand-written inline-assembly AMX K loop was
   also neutral on packed inputs and regressed a rectangle. Neither belongs in

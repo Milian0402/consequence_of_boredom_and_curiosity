@@ -96,6 +96,19 @@ The most important performance wins came from:
 - The full "fastest fastest" goal is not proven.
 - The narrower licensed/open-source claim is also not currently proven.
 - MpGEMM is now MIT licensed and must be included in future open-source audits.
+- A bounded hardware-guided search over 11 `16x64` and six native-layout
+  `32x32` SME schedules found no stable winner on the exercised packed-B reuse
+  routes. All variants were correct, but discovery gains either disappeared or
+  regressed guard shapes; two other m64 blockers stayed on unchanged fallback
+  code.
+- AMX trapped with `SIGILL` in the tested SM+ZA-live state and with ZA left
+  live after `SMSTOP` on this M5. AMX set/clear passed only after both states
+  were disabled, closing the tested dual-engine overlap designs on the current
+  hardware and OS.
+- Pack-native Strassen removed intermediate row-major materialization and
+  repacking while retaining the same three-buffer workspace, but was neutral at
+  `5632^3` in cooled paired validation. Keep the current row-major
+  linear-combination schedule.
 - Same-process COB/MpGEMM interleaving crashed during the July 12 audit. Use
   isolated alternating processes until that interaction is understood.
 - The May 27 focused MpGEMM calibration appeared to clear the old `m = 64`
@@ -167,8 +180,8 @@ The most important performance wins came from:
    different flags and symbol names.
 7. Compress old timeline material only after the reusable lessons are preserved
    in `docs/optimization-design-rules.md`.
-8. Test whether a recursive or lower-workspace Strassen schedule can move the
-   crossover below 6144 without losing the classical path on smaller shapes.
+8. Test recursive or lower-workspace Strassen only if the schedule reduces
+   total traffic beyond direct packed-operand formation, which was neutral.
    Keep cancellation-heavy accuracy and memory pressure as hard gates.
 
 ## Useful Entry Points

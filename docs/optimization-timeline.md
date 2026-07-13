@@ -5172,3 +5172,40 @@ needed an isolated-process harness with callee-saved FP registers preserved;
 its current assembly clobbers `d8-d15`, so this is not a same-process paired
 claim. The result supports a narrow fastest-tested statement for this exact
 shape, contract, hardware, and competitor set only.
+
+## 2026-07-12: ambitious dual-engine, generated-schedule, and packed-Strassen probes rejected
+
+Three larger architecture bets were tested after the exact-square result. None
+cleared the existing promotion gates, so production GEMM code stayed
+unchanged.
+
+- AMX plus SME overlap failed at legality rather than performance. AMX traps
+  with `SIGILL` in the tested SM+ZA-live combination and with ZA left live after
+  `SMSTOP` on this M5. SME-only and mode-transition controls passed, and AMX
+  set/clear worked after both SM and ZA were disabled. This rules out the tested
+  same-stream overlap and resident-ZA alternation designs on the current
+  hardware and OS.
+- The first hardware-guided SME search generated 11 ABI-safe `16x64` schedules
+  across K4/K8/K16, load-to-`FMOPA` distances, and tuple/scalar loads. All
+  passed 645 shapes. The apparent discovery winner failed cooled confirmation
+  and regressed `64x7168x16384` to `0.9366x` and the `64x2112x7168` guard to
+  `0.8801x`.
+- A second search generated six native-packed-layout `32x32` K1/K2/K4
+  schedules. All passed 645 shapes, but none cleared the 3% discovery floor on
+  both `64x7168x2048` and `64x4096x7168`. Discovery CV ranged from 4.8% to
+  25.2%, and no noisy result was strong enough to advance to confirmation. Two
+  other m64 blockers stayed on unchanged fallback code and were outside this
+  search route.
+- Pack-native one-level Strassen formed all seven A and B operands directly in
+  AMX packed layouts, eliminating row-major X/Y materialization while keeping
+  the three-half-matrix workspace and full half-product scheduler. It was
+  bit-identical to the baseline output, but the cooled repeat-9 `5632^3`
+  source A/B result was neutral: `1.0028x` paired median, bootstrap95
+  `[0.9390x, 1.0867x]`, 5/9 wins, and `0.9938x` holdout mean-log with 11.98%
+  paired CV. Pack microbenchmark gains did not translate end to end.
+
+Reusable conclusion: the tested ceiling was not moved by interleaving the two
+Apple matrix interfaces, static instruction rescheduling on the exercised
+packed-B routes, or removing Strassen's intermediate row-major operands alone.
+The next serious lane needs a different packed-layout contract, a new
+algorithmic schedule with less total traffic, or new hardware evidence.
