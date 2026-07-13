@@ -2990,6 +2990,80 @@ static void cob_strassen_linear2(
     }
 }
 
+/* Applies M1 to all four C quadrants in one pass. On entry the quadrants
+   hold direct-written products: c11 = M4, c12 = M3, c21 = M2. The pass
+   reads each product row once and evaluates in the same floating-point
+   order as the previous one-merge-per-pass schedule, so the output is
+   bit-identical to it. */
+static void cob_strassen_merge_m1(
+    float* c11,
+    float* c12,
+    float* c21,
+    float* c22,
+    int ldc,
+    const float* product,
+    int rows,
+    int cols)
+{
+    for (int i = 0; i < rows; ++i) {
+        const float* pr = product + (size_t)i * (size_t)cols;
+        float* r11 = c11 + (size_t)i * (size_t)ldc;
+        const float* r12 = c12 + (size_t)i * (size_t)ldc;
+        float* r21 = c21 + (size_t)i * (size_t)ldc;
+        float* r22 = c22 + (size_t)i * (size_t)ldc;
+        int j = 0;
+#if defined(COB_USE_NEON)
+        for (; j + 4 <= cols; j += 4) {
+            const float32x4_t m1 = vld1q_f32(pr + j);
+            const float32x4_t m4 = vld1q_f32(r11 + j);
+            const float32x4_t m3 = vld1q_f32(r12 + j);
+            const float32x4_t m2 = vld1q_f32(r21 + j);
+            vst1q_f32(r11 + j, vaddq_f32(m1, m4));
+            vst1q_f32(r21 + j, vaddq_f32(m2, m4));
+            vst1q_f32(r22 + j, vaddq_f32(vsubq_f32(m1, m2), m3));
+        }
+#endif
+        for (; j < cols; ++j) {
+            const float m1 = pr[j];
+            const float m4 = r11[j];
+            const float m3 = r12[j];
+            const float m2 = r21[j];
+            r11[j] = m1 + m4;
+            r21[j] = m2 + m4;
+            r22[j] = (m1 - m2) + m3;
+        }
+    }
+}
+
+/* Applies M5 to both destination quadrants in one pass over the product. */
+static void cob_strassen_merge_m5(
+    float* c11,
+    float* c12,
+    int ldc,
+    const float* product,
+    int rows,
+    int cols)
+{
+    for (int i = 0; i < rows; ++i) {
+        const float* pr = product + (size_t)i * (size_t)cols;
+        float* r11 = c11 + (size_t)i * (size_t)ldc;
+        float* r12 = c12 + (size_t)i * (size_t)ldc;
+        int j = 0;
+#if defined(COB_USE_NEON)
+        for (; j + 4 <= cols; j += 4) {
+            const float32x4_t m5 = vld1q_f32(pr + j);
+            vst1q_f32(r11 + j, vsubq_f32(vld1q_f32(r11 + j), m5));
+            vst1q_f32(r12 + j, vaddq_f32(vld1q_f32(r12 + j), m5));
+        }
+#endif
+        for (; j < cols; ++j) {
+            const float m5 = pr[j];
+            r11[j] -= m5;
+            r12[j] += m5;
+        }
+    }
+}
+
 static void cob_strassen_merge_product(
     float* c,
     int ldc,
@@ -3080,47 +3154,43 @@ static int cob_sgemm_rowmajor_strassen1(
 
     /* One level reduces eight half-size products to seven. The existing AMX
        scheduler handles each product; three reusable half-matrix buffers keep
-       the extra memory traffic bounded. */
+       the extra memory traffic bounded. M2, M3, and M4 are written straight
+       into their first destination quadrant instead of the product buffer,
+       and the remaining recombination is fused so each product buffer pass
+       is read once. Every quadrant keeps the previous schedule's
+       floating-point evaluation order, so results stay bit-identical. */
+    cob_strassen_linear2(x, mh, kh, a21, lda, a22, lda, 1);
+    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, b11, ldb, c21, ldc)) {
+        free(workspace);
+        return 0;
+    }
+
+    cob_strassen_linear2(y, kh, nh, b12, ldb, b22, ldb, -1);
+    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, a11, lda, y, nh, c12, ldc)) {
+        free(workspace);
+        return 0;
+    }
+
+    cob_strassen_linear2(y, kh, nh, b21, ldb, b11, ldb, -1);
+    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, a22, lda, y, nh, c11, ldc)) {
+        free(workspace);
+        return 0;
+    }
+
     cob_strassen_linear2(x, mh, kh, a11, lda, a22, lda, 1);
     cob_strassen_linear2(y, kh, nh, b11, ldb, b22, ldb, 1);
     if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, y, nh, p, nh)) {
         free(workspace);
         return 0;
     }
-    cob_strassen_merge_product(c11, ldc, p, mh, nh, 0);
-    cob_strassen_merge_product(c22, ldc, p, mh, nh, 0);
-
-    cob_strassen_linear2(x, mh, kh, a21, lda, a22, lda, 1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, b11, ldb, p, nh)) {
-        free(workspace);
-        return 0;
-    }
-    cob_strassen_merge_product(c21, ldc, p, mh, nh, 0);
-    cob_strassen_merge_product(c22, ldc, p, mh, nh, -1);
-
-    cob_strassen_linear2(y, kh, nh, b12, ldb, b22, ldb, -1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, a11, lda, y, nh, p, nh)) {
-        free(workspace);
-        return 0;
-    }
-    cob_strassen_merge_product(c12, ldc, p, mh, nh, 0);
-    cob_strassen_merge_product(c22, ldc, p, mh, nh, 1);
-
-    cob_strassen_linear2(y, kh, nh, b21, ldb, b11, ldb, -1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, a22, lda, y, nh, p, nh)) {
-        free(workspace);
-        return 0;
-    }
-    cob_strassen_merge_product(c11, ldc, p, mh, nh, 1);
-    cob_strassen_merge_product(c21, ldc, p, mh, nh, 1);
+    cob_strassen_merge_m1(c11, c12, c21, c22, ldc, p, mh, nh);
 
     cob_strassen_linear2(x, mh, kh, a11, lda, a12, lda, 1);
     if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, b22, ldb, p, nh)) {
         free(workspace);
         return 0;
     }
-    cob_strassen_merge_product(c11, ldc, p, mh, nh, -1);
-    cob_strassen_merge_product(c12, ldc, p, mh, nh, 1);
+    cob_strassen_merge_m5(c11, c12, ldc, p, mh, nh);
 
     cob_strassen_linear2(x, mh, kh, a21, lda, a11, lda, -1);
     cob_strassen_linear2(y, kh, nh, b11, ldb, b12, ldb, 1);
