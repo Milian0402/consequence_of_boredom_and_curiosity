@@ -80,6 +80,12 @@ These rules summarize repeated findings from the optimization timeline. They are
   the full m64 portfolio. A future generator needs a materially different
   layout or ownership model, not a larger search over the same loads and
   `FMOPA`s.
+- Full-route m64 ownership changes also lost. No-copy AMX source-B panel-outer
+  traversal fell to `0.59x..0.65x` on the two main targets. A direct-source-B
+  SME `32x32` route fell to `0.54x..0.83x`, and a fused-pack plus immediate
+  scratch-reuse `32x32` hybrid fell to `0.71x..0.80x`. The current `16x64`
+  SME direct and packed-B-reuse geometries remain materially better than those
+  lower-traffic models on this hardware.
 - A pack-fused Strassen variant that materialized and merged each 32x32 result
   tile was much slower than letting the existing one-shot scheduler own each
   half-size product. The extra per-tile epilogue and lost scheduler locality

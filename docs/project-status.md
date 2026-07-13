@@ -109,6 +109,10 @@ The most important performance wins came from:
   repacking while retaining the same three-buffer workspace, but was neutral at
   `5632^3` in cooled paired validation. Keep the current row-major
   linear-combination schedule.
+- Three full-route m64 ownership redesigns were correct but substantially
+  slower: no-copy AMX source-B panel reuse, direct-source-B SME `32x32`, and a
+  fused-pack SME `32x32` one-panel scratch design. Keep the current `16x64`
+  SME direct and packed-B-reuse routes.
 - Same-process COB/MpGEMM interleaving crashed during the July 12 audit. Use
   isolated alternating processes until that interaction is understood.
 - The May 27 focused MpGEMM calibration appeared to clear the old `m = 64`

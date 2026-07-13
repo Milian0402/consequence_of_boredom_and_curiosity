@@ -1,6 +1,6 @@
 # Optimization Attempt Timeline
 
-Last updated: 2026-07-09
+Last updated: 2026-07-12
 
 This tracks the matrix-multiplication speed work so far. The narrow comparison
 scope is single-threaded FP32 row-major GEMM for `C = A * B` with `alpha = 1`
@@ -5209,3 +5209,33 @@ Apple matrix interfaces, static instruction rescheduling on the exercised
 packed-B routes, or removing Strassen's intermediate row-major operands alone.
 The next serious lane needs a different packed-layout contract, a new
 algorithmic schedule with less total traffic, or new hardware evidence.
+
+## 2026-07-12: full-route m64 ownership redesigns rejected
+
+Three follow-up prototypes changed who owns each source-B panel instead of
+rescheduling the existing `16x64` K loop. Every prototype passed all three
+645-shape correctness suites, but each missed the discovery gate by a wide
+margin and none was retained in production source.
+
+- A no-copy AMX B-panel-outer route packed both A32 panels once, then computed
+  both against each source-B32 panel before advancing. Its paired discovery
+  medians were `0.8631x` at `64x2112x7168`, `0.5882x` at
+  `64x4096x7168`, and `0.6450x` at `64x7168x2048`. This was the previously
+  untested source-B ownership version, not the older packed-B chunk route.
+- A full-route direct-source-B SME `32x32` design used all four ZA tiles for
+  two 16-row by two 16-column quadrants and removed packed-B allocation,
+  writes, and reloads. It was exact against baseline output, but measured
+  `0.5372x` at `64x4096x7168` and `0.8348x` at `64x7168x2048`. The lower
+  modeled traffic did not translate into speed on the large-stride route.
+- A hybrid SME `32x32` design fused source-B packing with the top 32 rows,
+  immediately reused one compact 32-column scratch panel for the bottom 32
+  rows, then discarded it. This reduced modeled vector traffic and avoided a
+  second strided-B traversal, but still measured only `0.8032x` and `0.7050x`
+  on the same two targets.
+
+Reusable conclusion: the current `16x64` SME direct and packed-B-reuse routes
+are not just carrying avoidable scratch traffic. Their execution efficiency
+outweighs the modeled load/store savings from AMX panel ownership and both
+full-route `32x32` alternatives on these shapes. Do not revisit those
+dataflows without a new instruction-level mechanism or different hardware
+evidence.
