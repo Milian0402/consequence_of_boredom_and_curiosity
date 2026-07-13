@@ -32,7 +32,8 @@ Current local audit context:
 
 - Machine: Apple M5 Max.
 - Single-thread assumption: one P-core in one P-cluster.
-- P-cluster L2: 8 MB.
+- P-cluster L2: 16 MB per `sysctl hw.perflevel0.l2cachesize` (an earlier 8 MB
+  note was wrong).
 - L1d: 64 KB.
 - Page size: 16 KB.
 - Cache line: 128 B.
@@ -165,6 +166,10 @@ git diff --check
   an isolated process, so publish this only as a shape- and machine-specific
   result, not a restored broad claim. See
   `docs/audits/2026-07-12-square-crossover.md` for commands and metadata.
+- A July 13 fused Strassen recombination improved the same `5632^3` route by
+  `1.0495x` paired median (bootstrap95 `[1.0414x, 1.0988x]`, 46/61 wins,
+  bit-identical output), so the July 12 COB number understates current head.
+  Rerun the square-crossover audit before publishing an updated figure.
 - Final scoped audit note: `docs/audits/2026-05-10-claim-audit.md` records a
   clean rebuild, 127-shape correctness pass, and fresh `square`, `medium`, and
   `skinny` route-aware audit bundle at

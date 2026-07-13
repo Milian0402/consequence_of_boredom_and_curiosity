@@ -42,6 +42,13 @@ These rules summarize repeated findings from the optimization timeline. They are
   sub-6144 rectangles classical; 1536 and 2048 shapes lost badly because
   packing, sums, and merges dominated.
   Validate full-output max and RMS error, not only a sampled checksum.
+- Keep the fused Strassen recombination: `M2`/`M3`/`M4` write directly into
+  their first C quadrant via `ldc`, `M1` and `M5` apply through fused
+  multi-quadrant passes that read each product buffer once, and every quadrant
+  preserves the old per-pass floating-point evaluation order so output stays
+  bit-identical. Accepted at `1.0495x` paired median on `5632^3` with the
+  `6144x6400x6144` guard positive. Any future schedule change should keep the
+  bit-identical-order property or revalidate accuracy explicitly.
 - Keep one-shot, packed-B, and packed-AB claims separate. More-prepacked results
   are useful ceilings but do not prove the less-prepacked public path is faster.
 - Use `COB_BENCH_ONLY` or `tools/counter_probe.sh` for hardware-counter runs so
@@ -387,7 +394,18 @@ These rules summarize repeated findings from the optimization timeline. They are
 - Do not use SME direct-B for high-`K` medium `n = 512/768/1024` audit gaps.
   Exact probes at `768x512x4096`, `768x768x4096`, `1024x768x4096`, and
   `768x1024x4096` regressed hard.
-- Do not port cache-blocking constants from other Apple Silicon generations. On this M5 Max, per-P-cluster L2 is 8 MB, page size is 16 KB, and route-specific cache-fit probes still need paired A/B proof.
+- Do not port cache-blocking constants from other Apple Silicon generations. On this M5 Max, `sysctl hw.perflevel0.l2cachesize` reports 16 MB per P-cluster (an earlier 8 MB note was wrong), page size is 16 KB, and route-specific cache-fit probes still need paired A/B proof.
+- Do not pursue lower-precision SME emulation of FP32 GEMM on this M5 Max. A
+  register-only issue-rate probe measured FP16-to-FP32 and BF16-to-FP32
+  widening `FMOPA` at the same `~2180 GF/s` net rate as FP32 (half the
+  instruction rate, double the work per instruction), so split-precision
+  schemes multiply cost without adding throughput. INT8 `SMOPA` is only 2x
+  (`~4340 GOP/s`), below what integer-slice emulation needs, and FP16 `ZA.H`
+  accumulation cannot meet the `0.002` error contract at routed `K` sizes.
+- Treat the in-cache packed-AB rate (`~2091 GF/s` at `1024^3`) as roughly 96%
+  of the measured single-core FP32 issue ceiling (`~2180 GF/s`). Kernel
+  instruction scheduling is not the remaining bottleneck; large-shape gaps are
+  memory-hierarchy and harness overheads.
 - Do not prioritize fused inline B-packing rewrites unless a profiler shows packing is the bottleneck on an in-scope licensed-baseline gap.
 
 ## External Baselines

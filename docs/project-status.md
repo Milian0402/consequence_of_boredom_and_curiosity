@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-12
+Last updated: 2026-07-13
 
 ## Goal
 
@@ -85,6 +85,14 @@ The most important performance wins came from:
   COB at `1769 GF/s`, current MpGEMM at `1642 GF/s`, Accelerate at `1549 GF/s`,
   and OpenBLAS at `894 GF/s` on `5632^3`. MpGEMM was timed in an isolated
   process because its current assembly violates the platform ABI.
+- Fused Strassen recombination (July 13). `M2`/`M3`/`M4` now compute directly
+  into their first C quadrant, and `M1`/`M5` apply through fused
+  multi-quadrant passes, cutting merge traffic from about 32 to 18
+  half-matrix touches while keeping output bit-identical. Iteration-averaged
+  cooled paired A/B at `5632^3` measured `1.0495x` median with bootstrap95
+  `[1.0414x, 1.0988x]` and 46/61 wins; the `6144x6400x6144` guard was also
+  positive. The published `5632^3` competitor table predates this change and
+  needs a fresh audit before republication.
 - Public packed-AB support and packed-AB traversal tuning.
 - A guarded 64-row SME subpanel route for strided source-B views. It packs a
   192-512-column B slab once and reuses it across four 16-row groups, enabling
@@ -108,7 +116,8 @@ The most important performance wins came from:
 - Pack-native Strassen removed intermediate row-major materialization and
   repacking while retaining the same three-buffer workspace, but was neutral at
   `5632^3` in cooled paired validation. Keep the current row-major
-  linear-combination schedule.
+  linear-combination schedule, now with the July 13 fused recombination
+  passes on the merge side.
 - Three full-route m64 ownership redesigns were correct but substantially
   slower: no-copy AMX source-B panel reuse, direct-source-B SME `32x32`, and a
   fused-pack SME `32x32` one-panel scratch design. Keep the current `16x64`

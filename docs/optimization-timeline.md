@@ -5239,3 +5239,79 @@ outweighs the modeled load/store savings from AMX panel ownership and both
 full-route `32x32` alternatives on these shapes. Do not revisit those
 dataflows without a new instruction-level mechanism or different hardware
 evidence.
+
+## 2026-07-13: fused Strassen recombination accepted; SME issue-rate ceilings measured
+
+Two results: a register-only probe established the single-core SME
+outer-product issue ceilings on this M5 Max, and a phase trace of the `5632^3`
+Strassen route showed the recombination passes were the largest recoverable
+overhead. A fused recombination schedule was accepted on the paired harness.
+
+Register-only SME issue-rate probe (no loads or stores in the timed loop,
+four `ZA` tiles round-robin, all `z`/`p` registers clobbered because
+`smstart`/`smstop` invalidates vector state):
+
+- FP32 `FMOPA`: about `2180 GF/s` sustained from one core.
+- FP16-to-FP32 and BF16-to-FP32 widening `FMOPA`/`BFMOPA`: the same
+  `~2180 GF/s` net, because the widening forms issue at half the instruction
+  rate. Split-precision emulation of FP32 through widening outer products can
+  never win on this hardware; a three-product split is roughly 3x slower.
+- INT8 `SMOPA`: about `4340 GOP/s`, only 2x FP32. Ozaki-style integer-slice
+  emulation needs well over two slice products for FP32-grade accuracy, so it
+  cannot break even either.
+- FP16 `ZA.H` `FMOPA`: about `4360 GF/s`, but FP16 accumulation cannot meet
+  the `0.002` full-output error contract at the routed `K` sizes.
+
+Context for the ceiling: the packed-AB AMX kernel measures `2091 GF/s`
+in-cache at `1024^3`, i.e. about 96% of the probe ceiling, so kernel-schedule
+work is effectively done in-cache and the lower-precision emulation lane is
+closed by measurement.
+
+A per-phase trace of the `5632^3` one-shot Strassen route (steady-state
+process, best cool repetitions) split the runtime as: seven sub-products
+`~169.4 ms` (each within about 3% of the standalone `2816^3` one-shot rate),
+operand-forming `linear2` passes `~11.3 ms`, merge passes `~12.9 ms`,
+workspace allocation negligible. The merge schedule was 12 single-quadrant
+passes: 4 copies plus 8 read-modify-write updates, about 32 half-matrix
+touches.
+
+The accepted change restructures recombination without touching the kernels
+or dispatcher:
+
+- `M2`, `M3`, and `M4` are computed directly into `C21`, `C12`, and `C11`
+  through the existing scheduler's `ldc` support, removing three copy passes.
+- `M1` is applied to all four quadrants in one fused pass that reads the
+  product buffer once (`cob_strassen_merge_m1`).
+- `M5` updates `C11` and `C12` in one fused pass (`cob_strassen_merge_m5`).
+- `M6` and `M7` keep single merge passes. Merge traffic drops from about 32
+  to 18 half-matrix touches; the traced merge time fell from `~12.9 ms` to
+  `~5.1 ms` with sub-product and `linear2` times unchanged.
+- Every quadrant keeps the previous schedule's floating-point evaluation
+  order (FP addition commutes bitwise), so the output is bit-identical; the
+  paired harness reported `max-abs 0` and identical checksums.
+
+Acceptance on a thermally noisy day used iteration-averaged cooled pairs:
+`COB_AB_ITERS=3`, `COB_AB_COOLDOWN_US=4000000`, auto-extension to repeats=61.
+Result at `5632^3` one-shot: paired median `1.0495x`, mean-log `1.0680x`,
+bootstrap95 `[1.0414x, 1.0988x]`, B-faster 46/61, sign-p `8.84e-05`;
+split-half holdout median `1.0327x` with bootstrap95 `[1.0270x, 1.0755x]`.
+B-side median measured `1864 GF/s` in-session. The balanced non-square guard
+`6144x6400x6144` (repeats=15, iters=2) measured paired median `1.0738x` with
+bootstrap95 `[1.0049x, 1.0744x]` and identical checksums. A `2816^3`
+non-Strassen guard stayed checksum-identical; its route is untouched by
+construction and its paired timing was pure thermal noise (CV above 20%).
+All three 645-shape correctness suites passed.
+
+Hardware note: `sysctl hw.perflevel0.l2cachesize` reports `16 MB` on this
+M5 Max, not the `8 MB` previously recorded in the docs. Blocking constants
+were tuned empirically so no route changes follow automatically, but
+cache-fit reasoning should use the measured value.
+
+Reusable conclusion: after this change the `5632^3` route spends roughly
+`169 ms` in sub-products, `11 ms` forming operands, and `5 ms` merging.
+The remaining elementwise budget is close to single-core bandwidth-bound
+(`~91 GB/s` measured for a NEON half-matrix add), so the next meaningful
+Strassen gain would have to come from the operand-forming passes, and
+pack-native operand formation was already neutral end to end. The larger
+remaining gap is the sub-product rate itself: `~1850 GF/s` at `2816^3`
+against `2091 GF/s` in-cache, a memory-hierarchy gap, not a kernel gap.
