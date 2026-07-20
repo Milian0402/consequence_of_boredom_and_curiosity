@@ -34,7 +34,7 @@ publication support.
 - Apple Silicon AMX kernels and route-specific packing paths.
 - Apple Silicon SME2.1 direct-`B`, packed-`B`, and skinny/reuse routes.
 - ARM64 NEON and scalar fallback paths.
-- Correctness coverage for 645 GEMM test shapes, including test-only lowered
+- Correctness coverage for 648 GEMM test shapes, including test-only lowered
   Strassen crossover and a cancellation-heavy quadrant pattern.
 - A May 10 clean rebuild and claim-audit snapshot for the scoped routed suites.
 - Route-aware benchmarks, grid sweeps, gap reports, and heatmap generation.

@@ -177,7 +177,9 @@ git diff --check
 - Recent external baseline audits are listed below with their output
   directories; rerun them before broadening the claim beyond the recorded shape
   suites.
-- Correctness suite currently reports 645 GEMM shape checks on Apple Silicon.
+- Correctness suite currently reports 648 GEMM shape checks on Apple Silicon.
+  An earlier hardcoded tally printed 645; the count is now computed per
+  executed check, which surfaced three previously uncounted shapes.
 - The paired A/B harness reports median ratio, mean-log speedup, bootstrap
   confidence interval, sign-test p-value, and split-half holdout.
 - Route-aware benchmarking and `tools/bench_heatmap.py` make dispatcher

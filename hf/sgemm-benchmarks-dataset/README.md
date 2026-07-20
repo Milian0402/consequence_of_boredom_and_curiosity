@@ -57,15 +57,24 @@ The scoped contract is:
 
 ## Claim Boundary
 
+The previous claim that COB is fastest among the tested licensed/open-source
+baselines is suspended. A July 2026 current-head re-audit found a confirmed
+OpenBLAS loss at `64^3` and noisy but material gaps to current MIT-licensed
+MpGEMM on its stock `m = 64` portfolio. Do not cite this dataset as proof of a
+fastest-open-source claim until a fresh portfolio audit shows that result.
+
 The safe claim is:
 
-> COB is fastest among the tested licensed/open-source baselines for
-> single-thread FP32 row-major SGEMM on Apple Silicon, in the routed shape
-> ranges.
+> COB has verified wins on selected routed shapes for single-thread FP32
+> row-major SGEMM on Apple Silicon.
+
+When citing a win, name the hardware, contract, shapes, and competitor
+version. The data files here are a May 2026 snapshot and predate the July
+re-audit.
 
 This is not a universal matrix-multiplication claim. Apple Accelerate is a
-proprietary system framework and is tracked separately. MpGEMM is treated as a
-source-available calibration target unless its licensing becomes clear.
+proprietary system framework and is tracked separately. MpGEMM is now MIT
+licensed and must be included in any future open-source claim audit.
 
 The fresh May 27 additions are intentionally honest: they include the
 impressive packed-AB rows near 1.9 TFLOP/s median, the strong

@@ -54,8 +54,14 @@ static float max_abs_diff(const float* a, const float* b, int count)
     return max_diff;
 }
 
+/* Incremented once per shape check in the leaf test helpers below, so the
+ * printed total never drifts from the checks that actually ran. */
+static int total_shapes = 0;
+
 static int test_shape_ex(int m, int n, int k, int lda, int ldb, int ldc, int aligned_c)
 {
+    ++total_shapes;
+
     const int a_count = m * lda;
     const int b_count = k * ldb;
     const int c_count = m * ldc;
@@ -157,6 +163,8 @@ static int test_aligned_shape(int m, int n, int k)
 
 static int test_packed_matches_direct_aligned_shape(int m, int n, int k)
 {
+    ++total_shapes;
+
     const int count = m * n;
     float* a = alloc_f32((size_t)m * (size_t)k, 1);
     float* b = alloc_f32((size_t)k * (size_t)n, 1);
@@ -233,6 +241,8 @@ static int test_packed_matches_direct_aligned_shape(int m, int n, int k)
 
 static int test_cancellation_heavy_aligned_shape(int size)
 {
+    ++total_shapes;
+
     const int half = size / 2;
     const size_t count = (size_t)size * (size_t)size;
     float* a = alloc_f32(count, 1);
@@ -323,12 +333,10 @@ int main(void)
     };
 
     int failures = 0;
-    int total_shapes = 0;
     const int shape_count = (int)(sizeof(shapes) / sizeof(shapes[0]));
     for (int i = 0; i < shape_count; ++i) {
         failures += test_shape(shapes[i][0], shapes[i][1], shapes[i][2]);
     }
-    total_shapes += shape_count;
 
     failures += test_aligned_shape(32, 32, 32);
     failures += test_aligned_shape(64, 64, 64);
@@ -338,7 +346,6 @@ int main(void)
     failures += test_packed_matches_direct_aligned_shape(128, 128, 128);
     failures += test_packed_matches_direct_aligned_shape(128, 192, 128);
     failures += test_shape_ex(128, 128, 128, 131, 133, 135, 1);
-    total_shapes += 8;
 #if defined(__APPLE__) && defined(__aarch64__)
     failures += test_cancellation_heavy_aligned_shape(1024);
     failures += test_packed_matches_direct_aligned_shape(832, 832, 832);
@@ -960,7 +967,6 @@ int main(void)
     failures += test_packed_matches_direct_aligned_shape(128, 2048, 2048);
     failures += test_packed_matches_direct_aligned_shape(1280, 1280, 1280);
     failures += test_packed_matches_direct_aligned_shape(2048, 2048, 2048);
-    total_shapes += 617;
 #endif
 
     if (failures != 0) {

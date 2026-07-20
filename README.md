@@ -84,7 +84,7 @@ make test
 ```
 
 The test command runs the normal scheduler plus lowered-threshold Strassen test
-configurations. On Apple Silicon, the suite currently checks 645 shapes in each
+configurations. On Apple Silicon, the suite currently checks 648 shapes in each
 configuration.
 
 You can also benchmark rectangular matrices. Arguments use `M x N x K`, where
