@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import csv
 import json
+import os
 import re
 from pathlib import Path
 
@@ -10,32 +11,46 @@ DATASET_DIR = ROOT / "hf" / "sgemm-benchmarks-dataset"
 SPACE_DIR = ROOT / "hf" / "sgemm-dashboard-space"
 DATA_DIR = DATASET_DIR / "data"
 TIMELINE_PATH = ROOT / "docs" / "optimization-timeline.md"
+ARTIFACT_DIR = Path(
+    os.environ.get("COB_HF_ARTIFACT_DIR", ROOT / "hf" / "source-artifacts")
+).expanduser()
+
+
+def artifact_path(relative_path):
+    return ARTIFACT_DIR / relative_path
+
+
+def portable_source_path(path):
+    try:
+        return str(path.relative_to(ARTIFACT_DIR))
+    except ValueError:
+        return path.name
 
 
 BENCHMARK_SOURCES = [
     (
         "hf-fresh-trophy-r21-i8",
-        Path("/private/tmp/cob-hf-interesting-20260527/trophy_sweep.csv"),
+        artifact_path("cob-hf-interesting-20260527/trophy_sweep.csv"),
         "Fresh May 27 headline sweep: repeat-21, iters=8, route-aware, single-thread env pins.",
     ),
     (
         "current-post-sme-r21-i8",
-        Path("/private/tmp/cob-current-post-sme-r21-i8.csv"),
+        artifact_path("cob-current-post-sme-r21-i8.csv"),
         "Current May 27 post-SME-reuse cooled target sweep.",
     ),
     (
         "current-targets-r21-i8",
-        Path("/private/tmp/cob-current-targets-r21-i8.csv"),
+        artifact_path("cob-current-targets-r21-i8.csv"),
         "May 27 cooled target sweep before high-K SME reuse extension.",
     ),
     (
         "qos-cooldown-r31",
-        Path("/private/tmp/cob-targets-current-qos-cooldown-r31.csv"),
+        artifact_path("cob-targets-current-qos-cooldown-r31.csv"),
         "May 27 QoS/cooldown target sweep.",
     ),
     (
         "mpgemm-calibration-full-r101-i4-cob",
-        Path("/private/tmp/cob-mpgemm-calibration-20260527-full-r101-i4/cob-one-shot.csv"),
+        artifact_path("cob-mpgemm-calibration-20260527-full-r101-i4/cob-one-shot.csv"),
         "May 27 focused MpGEMM FP32 row_sgemm calibration, COB rows.",
     ),
 ]
@@ -44,21 +59,21 @@ BENCHMARK_SOURCES = [
 FRESH_PAIRED_SOURCES = [
     (
         "hf-fresh-current-vs-head-direct-r61-i16",
-        Path("/private/tmp/cob-hf-interesting-20260527/current_vs_head_direct.txt"),
+        artifact_path("cob-hf-interesting-20260527/current_vs_head_direct.txt"),
         "current_vs_repo_head",
         {"A": "repo_head", "B": "current"},
         "Fresh current source against clean HEAD. Direct one-shot mode.",
     ),
     (
         "hf-fresh-current-vs-head-direct-r61-i16",
-        Path("/private/tmp/cob-hf-interesting-20260527/current_vs_head_direct_768_1024.txt"),
+        artifact_path("cob-hf-interesting-20260527/current_vs_head_direct_768_1024.txt"),
         "current_vs_repo_head",
         {"A": "repo_head", "B": "current"},
         "Fresh current source against clean HEAD for m=768/1024 high-K SME reuse rows.",
     ),
     (
         "hf-fresh-accelerate-vs-cob-direct-r61-i16",
-        Path("/private/tmp/cob-hf-interesting-20260527/current_vs_accelerate_direct.txt"),
+        artifact_path("cob-hf-interesting-20260527/current_vs_accelerate_direct.txt"),
         "accelerate_vs_cob",
         {"COB": "COB", "Accelerate": "Accelerate"},
         "Fresh Apple Accelerate direct one-shot paired comparison.",
@@ -360,13 +375,15 @@ def export_benchmarks():
                 out.update(
                     {
                         "run_id": run_id,
-                        "source_path": str(source),
+                        "source_path": portable_source_path(source),
                         "notes": notes,
                         "shape": f"{m}x{n}x{k}" if m and n and k else "",
                     }
                 )
                 rows.append(out)
-    write_csv(DATA_DIR / "benchmark_results.csv", rows, fieldnames)
+    target = DATA_DIR / "benchmark_results.csv"
+    if rows or not target.exists():
+        write_csv(target, rows, fieldnames)
 
 
 def export_paired_confirmations():
@@ -559,7 +576,9 @@ def export_fresh_paired_runs():
     rows = []
     for run_id, path, comparison, label_map, notes in FRESH_PAIRED_SOURCES:
         rows.extend(parse_paired_text(path, run_id, comparison, label_map, notes))
-    write_csv(DATA_DIR / "fresh_paired_runs.csv", rows, fieldnames)
+    target = DATA_DIR / "fresh_paired_runs.csv"
+    if rows or not target.exists():
+        write_csv(target, rows, fieldnames)
 
 
 def export_validation_runs():
@@ -770,8 +789,8 @@ def export_optimization_timeline():
 
 def export_mpgemm():
     candidates = [
-        Path("/private/tmp/cob-mpgemm-calibration-20260527-allcsv-toolcheck/mpgemm-row-sgemm.all.csv"),
-        Path("/private/tmp/cob-mpgemm-calibration-20260527-full-r101-i4/mpgemm-row-sgemm.all.csv"),
+        artifact_path("cob-mpgemm-calibration-20260527-allcsv-toolcheck/mpgemm-row-sgemm.all.csv"),
+        artifact_path("cob-mpgemm-calibration-20260527-full-r101-i4/mpgemm-row-sgemm.all.csv"),
     ]
     source = next((path for path in candidates if path.exists()), None)
     rows = []
@@ -781,20 +800,23 @@ def export_mpgemm():
             reader = csv.DictReader(handle)
             fieldnames = ["source_path"] + (reader.fieldnames or [])
             for row in reader:
-                out = {"source_path": str(source)}
+                out = {"source_path": portable_source_path(source)}
                 out.update(row)
                 rows.append(out)
+    target = DATA_DIR / "mpgemm_comparison.csv"
+    if fieldnames is None and target.exists():
+        return
     if fieldnames is None:
         fieldnames = ["source_path", "note"]
         rows.append({"source_path": "", "note": "No MpGEMM all-row CSV found locally."})
-    write_csv(DATA_DIR / "mpgemm_comparison.csv", rows, fieldnames)
+    write_csv(target, rows, fieldnames)
 
 
 def export_metadata():
     hardware = {
         "machine": "Apple M5 Max",
         "single_thread_assumption": "one P-core in one P-cluster",
-        "p_cluster_l2": "8 MB",
+        "p_cluster_l2": "16 MB",
         "l1d": "64 KB",
         "page_size": "16 KB",
         "cache_line": "128 B",

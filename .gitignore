@@ -8,3 +8,5 @@ cmake-build-*/
 *.dylib
 *.so
 *.dSYM/
+__pycache__/
+*.py[cod]

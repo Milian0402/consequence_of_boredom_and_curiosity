@@ -1,7 +1,7 @@
 {
   "machine": "Apple M5 Max",
   "single_thread_assumption": "one P-core in one P-cluster",
-  "p_cluster_l2": "8 MB",
+  "p_cluster_l2": "16 MB",
   "l1d": "64 KB",
   "page_size": "16 KB",
   "cache_line": "128 B",

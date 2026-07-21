@@ -16,6 +16,8 @@ if [ "$VISIBILITY" = "private" ]; then
     PRIVATE_FLAG=--private
 fi
 
+# Set COB_HF_ARTIFACT_DIR to a directory containing the raw benchmark logs
+# when refreshing them. Without it, the committed benchmark exports are kept.
 python3 tools/export_hf_dataset.py
 hf auth whoami >/dev/null
 

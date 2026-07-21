@@ -7,36 +7,40 @@ as possible, especially on Apple Silicon. It is not a full BLAS replacement.
 The deliberately narrow contract leaves more room for specialized AMX, SME,
 and packing strategies.
 
-> **Current status:** for large balanced multiplications on the tested Apple
-> M5 Max, headlined by the exact `5632 x 5632 x 5632` shape, COB is outright
-> the fastest implementation measured: it beat MpGEMM, Apple Accelerate, and
-> OpenBLAS in the July 2026 audit. Outside that family COB does not win every
-> shape, so the broader "fastest open-source GEMM" goal is not yet proven.
+> **Current status:** COB has verified wins on selected large balanced
+> multiplications on the tested Apple M5 Max. The most recent competitor audit
+> found the July 12 source fastest at the exact `5632 x 5632 x 5632` shape.
+> Current head includes a later Strassen recombination change, so that audit is
+> historical rather than a current-head benchmark. The broader "fastest
+> open-source GEMM" goal is not yet proven.
 
 ## Performance snapshot
 
-The latest verified highlight is one single-threaded FP32 multiplication at
-`5632^3` on an Apple M5 Max:
+The latest cross-implementation snapshot is one single-threaded FP32
+multiplication at `5632^3` on an Apple M5 Max:
 
 | Implementation | Throughput |
 | --- | ---: |
-| COB | **1769 GF/s** |
+| COB (July 12 source) | **1769 GF/s** |
 | MpGEMM | 1642 GF/s |
 | Apple Accelerate | 1549 GF/s |
 | OpenBLAS | 894 GF/s |
 
-These numbers are a shape-specific snapshot, not a universal ranking. The
-competitors were measured with the best reliable harness available for each,
-so they were not all collected in one perfectly paired run. COB still loses to
-OpenBLAS, Accelerate, and MpGEMM at other shapes.
+These numbers are a shape-specific historical snapshot, not a universal or
+current-head ranking. The competitors were measured with the best reliable
+harness available for each, so they were not all collected in one perfectly
+paired run. A July 13 fused-recombination change subsequently improved COB by
+`1.0495x` against the audited source in a paired run, but the competitor audit
+has not been repeated on that source. COB still loses to OpenBLAS, Accelerate,
+and MpGEMM at other shapes.
 
 See the [full `5632^3` audit](docs/audits/2026-07-12-square-crossover.md) for
 commands, versions, accuracy, and caveats. The broader publication boundary is
 kept in [docs/claims.md](docs/claims.md).
 
-### Where COB wins outright
+### Where COB has verified wins
 
-The verified wins cover large balanced FP32 multiplications: contiguous
+The recorded wins cover large balanced FP32 multiplications: contiguous
 row-major inputs with every dimension a multiple of 64, a largest-to-smallest
 dimension ratio of at most 4:3, and sizes from `6144` (exact squares from
 `5632`). Those inputs route through one level of Strassen on top of AMX
@@ -46,10 +50,10 @@ ceiling, so there is little room left above them.
 Huge dense multiplies like these are the expensive core of real workloads:
 covariance and Gram matrices in scientific computing, dense layers in
 CPU-side ML experiments, and blocked solvers that reduce to GEMM. When such a
-multiplication runs on one core of an Apple Silicon machine, COB currently
-finishes it faster than any other implementation tested here, while leaving
-the GPU and the remaining cores free for other work. The code is also a
-compact single-file reference for combining AMX, SME2.1, and Strassen
+multiplication runs on one core of the audited Apple M5 Max, the July 12 COB
+source finished it faster than the other implementations tested there, while
+leaving the GPU and the remaining cores free for other work. The code is also
+a compact single-file reference for combining AMX, SME2.1, and Strassen
 techniques behind one dispatcher.
 
 ## Supported operation

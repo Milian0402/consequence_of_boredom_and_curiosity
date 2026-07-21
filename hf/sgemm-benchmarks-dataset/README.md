@@ -87,11 +87,18 @@ calibration notes are browseable without reading the whole markdown file.
 
 ## Hardware
 
-The current local audit context is an Apple M5 Max with SME2.1 available, 8 MB
+The current local audit context is an Apple M5 Max with SME2.1 available, 16 MB
 P-cluster L2, 64 KB L1d, 16 KB pages, and 128 B cache lines.
 
 Different Apple Silicon generations need fresh measurements. Do not port route
 thresholds or blocking constants without paired validation.
+
+## Rebuilding the export
+
+Run `python3 tools/export_hf_dataset.py` from the source repository. The
+committed benchmark exports are preserved when the original raw logs are not
+available. To refresh them, set `COB_HF_ARTIFACT_DIR` to a directory containing
+the May 2026 benchmark-log layout referenced by the export script.
 
 ## Source
 
