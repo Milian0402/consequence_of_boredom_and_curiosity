@@ -542,6 +542,22 @@ static int cob_sgemm_amx_one_shot_large_mc(int m, int n, int k)
     return COB_SGEMM_AMX_MC;
 }
 
+static void cob_sgemm_pack_a_generic(
+    float* packed,
+    int mr_pack,
+    int rows,
+    int k,
+    const float* a,
+    int lda)
+{
+    for (int p = 0; p < k; ++p) {
+        float* dst = packed + (size_t)p * (size_t)mr_pack;
+        for (int i = 0; i < mr_pack; ++i) {
+            dst[i] = i < rows ? a[(size_t)i * (size_t)lda + p] : 0.0f;
+        }
+    }
+}
+
 #if defined(COB_USE_APPLE_AMX)
 static void cob_amx_set(void)
 {
@@ -646,22 +662,6 @@ static void cob_sgemm_pack_a32_partial(
         float* dst = packed + (size_t)p * (size_t)COB_SGEMM_AMX_MR;
         for (int i = 0; i < COB_SGEMM_AMX_MR; ++i) {
             dst[i] = i < mr ? a[(size_t)i * (size_t)lda + p] : 0.0f;
-        }
-    }
-}
-
-static void cob_sgemm_pack_a_generic(
-    float* packed,
-    int mr_pack,
-    int rows,
-    int k,
-    const float* a,
-    int lda)
-{
-    for (int p = 0; p < k; ++p) {
-        float* dst = packed + (size_t)p * (size_t)mr_pack;
-        for (int i = 0; i < mr_pack; ++i) {
-            dst[i] = i < rows ? a[(size_t)i * (size_t)lda + p] : 0.0f;
         }
     }
 }
