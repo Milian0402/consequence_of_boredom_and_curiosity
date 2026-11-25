@@ -6,13 +6,21 @@ BLAS-backed algorithms for large rectangular products on Linux.
 
 ## Measured performance
 
-On Arm Neoverse N2, the released COB build with sequential OpenBLAS subproducts
-beat every measured one-shot competitor on both prespecified odd rectangles.
-It beat FastMMW in all twelve paired calls. On Intel Xeon 6975P-C, direct
-oneMKL won both comparisons against the released builds. At
-2039 × 2969 × 3367 it took 221.63 ms against COB's 233.14 ms.
-The release also has wins on Apple M5 Max and AMD EPYC for the shapes and builds
-listed in the [benchmark results](docs/audits/2026-11-25-ranking/README.md).
+COB has single-thread wins on Apple M5 Max, AMD EPYC and Arm Neoverse N2.
+Which implementation wins depends on the matrix dimensions, strides, CPU and
+build. The table gives whole-call FP32 comparisons with the fastest measured
+independent implementation on each layout.
+
+| CPU and workload | Result |
+|---|---|
+| Arm Neoverse N2, two odd large rectangles | Released COB with OpenBLAS leaves beat FastMMW in all twelve paired calls. |
+| Intel Xeon 6975P-C, the same two rectangles | Direct oneMKL beat every released build. At 2039 × 2969 × 3367 it took 221.63 ms versus 233.14 ms for COB. |
+| Intel Xeon 6975P-C, five wide rectangles | The standalone streamed-B experiment improved on prior COB on all five, with a geometric mean of 1.120×. It beat the fastest independent library on two. |
+
+The [benchmark results](docs/audits/2026-11-25-ranking/README.md) include the
+matrix layouts, raw timings, numerical qualification and scripts for replay.
+The [earlier comparisons](docs/audits/2026-11-25-ranking/earlier/README.md)
+cover Apple and AMD workloads.
 
 ## Rectangular and strided benchmarks
 

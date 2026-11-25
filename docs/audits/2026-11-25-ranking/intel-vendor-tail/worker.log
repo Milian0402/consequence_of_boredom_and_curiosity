@@ -1,0 +1,2064 @@
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker openblas block=1 seed=348271759 ['49', '2861', '157', '11', '348271759', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=1 seed=348271759 ['49', '2861', '157', '11', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=1 seed=348271759 ['49', '2861', '157', '11', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=1 seed=348271759 ['49', '2861', '157', '11', '348271759', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=1 seed=348271759 ['49', '2861', '157', '11', '348271759', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=1 seed=348271759 ['49', '2861', '157', '11', '348271759', 'random']
+affinity_cpu=0
+worker onednn-cached-plan block=1 seed=348271759 ['49', '2861', '157', '11', '348271759', 'random']
+affinity_cpu=0
+worker matched-openblas block=1 seed=348271759 ['49', '2861', '157', '11', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=1 seed=348271759 ['49', '2861', '157', '11', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=1 seed=348271759 ['49', '2861', '157', '11', '348271759', 'random']
+affinity_cpu=0
+worker stream-native block=1 seed=348271759 ['49', '2861', '157', '11', '348271759', 'random']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=1 seed=348271759 ['49', '2861', '157', '11', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=1 seed=348271759 ['49', '2861', '157', '11', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=1 seed=348271759 ['49', '2861', '157', '11', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=1 seed=348271759 ['49', '2861', '157', '11', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=1 seed=348271759 ['112', '1744', '357', '0', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=1 seed=348271759 ['112', '1744', '357', '0', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=1 seed=348271759 ['112', '1744', '357', '0', '348271759', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=1 seed=348271759 ['112', '1744', '357', '0', '348271759', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=1 seed=348271759 ['112', '1744', '357', '0', '348271759', 'random']
+affinity_cpu=0
+worker onednn-cached-plan block=1 seed=348271759 ['112', '1744', '357', '0', '348271759', 'random']
+affinity_cpu=0
+worker matched-openblas block=1 seed=348271759 ['112', '1744', '357', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=1 seed=348271759 ['112', '1744', '357', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=1 seed=348271759 ['112', '1744', '357', '0', '348271759', 'random']
+affinity_cpu=0
+worker stream-native block=1 seed=348271759 ['112', '1744', '357', '0', '348271759', 'random']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=1 seed=348271759 ['112', '1744', '357', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=1 seed=348271759 ['112', '1744', '357', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=1 seed=348271759 ['112', '1744', '357', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=1 seed=348271759 ['112', '1744', '357', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=1 seed=348271759 ['112', '1744', '357', '0', '348271759', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl-jit block=1 seed=348271759 ['37', '2387', '119', '5', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=1 seed=348271759 ['37', '2387', '119', '5', '348271759', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=1 seed=348271759 ['37', '2387', '119', '5', '348271759', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=1 seed=348271759 ['37', '2387', '119', '5', '348271759', 'random']
+affinity_cpu=0
+worker onednn-cached-plan block=1 seed=348271759 ['37', '2387', '119', '5', '348271759', 'random']
+affinity_cpu=0
+worker matched-openblas block=1 seed=348271759 ['37', '2387', '119', '5', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=1 seed=348271759 ['37', '2387', '119', '5', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=1 seed=348271759 ['37', '2387', '119', '5', '348271759', 'random']
+affinity_cpu=0
+worker stream-native block=1 seed=348271759 ['37', '2387', '119', '5', '348271759', 'random']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=1 seed=348271759 ['37', '2387', '119', '5', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=1 seed=348271759 ['37', '2387', '119', '5', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=1 seed=348271759 ['37', '2387', '119', '5', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=1 seed=348271759 ['37', '2387', '119', '5', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=1 seed=348271759 ['37', '2387', '119', '5', '348271759', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=1 seed=348271759 ['37', '2387', '119', '5', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker aocl block=1 seed=348271759 ['61', '3451', '191', '13', '348271759', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=1 seed=348271759 ['61', '3451', '191', '13', '348271759', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=1 seed=348271759 ['61', '3451', '191', '13', '348271759', 'random']
+affinity_cpu=0
+worker onednn-cached-plan block=1 seed=348271759 ['61', '3451', '191', '13', '348271759', 'random']
+affinity_cpu=0
+worker matched-openblas block=1 seed=348271759 ['61', '3451', '191', '13', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=1 seed=348271759 ['61', '3451', '191', '13', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=1 seed=348271759 ['61', '3451', '191', '13', '348271759', 'random']
+affinity_cpu=0
+worker stream-native block=1 seed=348271759 ['61', '3451', '191', '13', '348271759', 'random']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=1 seed=348271759 ['61', '3451', '191', '13', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=1 seed=348271759 ['61', '3451', '191', '13', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=1 seed=348271759 ['61', '3451', '191', '13', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=1 seed=348271759 ['61', '3451', '191', '13', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=1 seed=348271759 ['61', '3451', '191', '13', '348271759', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=1 seed=348271759 ['61', '3451', '191', '13', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=1 seed=348271759 ['61', '3451', '191', '13', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker blasfeo block=1 seed=348271759 ['89', '1933', '257', '0', '348271759', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=1 seed=348271759 ['89', '1933', '257', '0', '348271759', 'random']
+affinity_cpu=0
+worker onednn-cached-plan block=1 seed=348271759 ['89', '1933', '257', '0', '348271759', 'random']
+affinity_cpu=0
+worker matched-openblas block=1 seed=348271759 ['89', '1933', '257', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=1 seed=348271759 ['89', '1933', '257', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=1 seed=348271759 ['89', '1933', '257', '0', '348271759', 'random']
+affinity_cpu=0
+worker stream-native block=1 seed=348271759 ['89', '1933', '257', '0', '348271759', 'random']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=1 seed=348271759 ['89', '1933', '257', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=1 seed=348271759 ['89', '1933', '257', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=1 seed=348271759 ['89', '1933', '257', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=1 seed=348271759 ['89', '1933', '257', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=1 seed=348271759 ['89', '1933', '257', '0', '348271759', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=1 seed=348271759 ['89', '1933', '257', '0', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=1 seed=348271759 ['89', '1933', '257', '0', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=1 seed=348271759 ['89', '1933', '257', '0', '348271759', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker onednn-oneshot block=1 seed=348271759 ['108', '1728', '320', '4', '348271759', 'random']
+affinity_cpu=0
+worker onednn-cached-plan block=1 seed=348271759 ['108', '1728', '320', '4', '348271759', 'random']
+affinity_cpu=0
+worker matched-openblas block=1 seed=348271759 ['108', '1728', '320', '4', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=1 seed=348271759 ['108', '1728', '320', '4', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=1 seed=348271759 ['108', '1728', '320', '4', '348271759', 'random']
+affinity_cpu=0
+worker stream-native block=1 seed=348271759 ['108', '1728', '320', '4', '348271759', 'random']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=1 seed=348271759 ['108', '1728', '320', '4', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=1 seed=348271759 ['108', '1728', '320', '4', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=1 seed=348271759 ['108', '1728', '320', '4', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=1 seed=348271759 ['108', '1728', '320', '4', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=1 seed=348271759 ['108', '1728', '320', '4', '348271759', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=1 seed=348271759 ['108', '1728', '320', '4', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=1 seed=348271759 ['108', '1728', '320', '4', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=1 seed=348271759 ['108', '1728', '320', '4', '348271759', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=1 seed=348271759 ['108', '1728', '320', '4', '348271759', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker onednn-cached-plan block=1 seed=348271759 ['137', '2179', '347', '7', '348271759', 'random']
+affinity_cpu=0
+worker matched-openblas block=1 seed=348271759 ['137', '2179', '347', '7', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=1 seed=348271759 ['137', '2179', '347', '7', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=1 seed=348271759 ['137', '2179', '347', '7', '348271759', 'random']
+affinity_cpu=0
+worker stream-native block=1 seed=348271759 ['137', '2179', '347', '7', '348271759', 'random']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=1 seed=348271759 ['137', '2179', '347', '7', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=1 seed=348271759 ['137', '2179', '347', '7', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=1 seed=348271759 ['137', '2179', '347', '7', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=1 seed=348271759 ['137', '2179', '347', '7', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=1 seed=348271759 ['137', '2179', '347', '7', '348271759', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=1 seed=348271759 ['137', '2179', '347', '7', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=1 seed=348271759 ['137', '2179', '347', '7', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=1 seed=348271759 ['137', '2179', '347', '7', '348271759', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=1 seed=348271759 ['137', '2179', '347', '7', '348271759', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=1 seed=348271759 ['137', '2179', '347', '7', '348271759', 'random']
+affinity_cpu=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker matched-openblas block=1 seed=348271759 ['39', '959', '193', '2', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=1 seed=348271759 ['39', '959', '193', '2', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=1 seed=348271759 ['39', '959', '193', '2', '348271759', 'random']
+affinity_cpu=0
+worker stream-native block=1 seed=348271759 ['39', '959', '193', '2', '348271759', 'random']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=1 seed=348271759 ['39', '959', '193', '2', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=1 seed=348271759 ['39', '959', '193', '2', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=1 seed=348271759 ['39', '959', '193', '2', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=1 seed=348271759 ['39', '959', '193', '2', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=1 seed=348271759 ['39', '959', '193', '2', '348271759', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=1 seed=348271759 ['39', '959', '193', '2', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=1 seed=348271759 ['39', '959', '193', '2', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=1 seed=348271759 ['39', '959', '193', '2', '348271759', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=1 seed=348271759 ['39', '959', '193', '2', '348271759', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=1 seed=348271759 ['39', '959', '193', '2', '348271759', 'random']
+affinity_cpu=0
+worker onednn-cached-plan block=1 seed=348271759 ['39', '959', '193', '2', '348271759', 'random']
+affinity_cpu=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker matched-mkl block=1 seed=348271759 ['65', '1541', '227', '3', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=1 seed=348271759 ['65', '1541', '227', '3', '348271759', 'random']
+affinity_cpu=0
+worker stream-native block=1 seed=348271759 ['65', '1541', '227', '3', '348271759', 'random']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=1 seed=348271759 ['65', '1541', '227', '3', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=1 seed=348271759 ['65', '1541', '227', '3', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=1 seed=348271759 ['65', '1541', '227', '3', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=1 seed=348271759 ['65', '1541', '227', '3', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=1 seed=348271759 ['65', '1541', '227', '3', '348271759', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=1 seed=348271759 ['65', '1541', '227', '3', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=1 seed=348271759 ['65', '1541', '227', '3', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=1 seed=348271759 ['65', '1541', '227', '3', '348271759', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=1 seed=348271759 ['65', '1541', '227', '3', '348271759', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=1 seed=348271759 ['65', '1541', '227', '3', '348271759', 'random']
+affinity_cpu=0
+worker onednn-cached-plan block=1 seed=348271759 ['65', '1541', '227', '3', '348271759', 'random']
+affinity_cpu=0
+worker matched-openblas block=1 seed=348271759 ['65', '1541', '227', '3', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker stream-incumbent block=1 seed=348271759 ['82', '1859', '313', '0', '348271759', 'random']
+affinity_cpu=0
+worker stream-native block=1 seed=348271759 ['82', '1859', '313', '0', '348271759', 'random']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=1 seed=348271759 ['82', '1859', '313', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=1 seed=348271759 ['82', '1859', '313', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=1 seed=348271759 ['82', '1859', '313', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=1 seed=348271759 ['82', '1859', '313', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=1 seed=348271759 ['82', '1859', '313', '0', '348271759', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=1 seed=348271759 ['82', '1859', '313', '0', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=1 seed=348271759 ['82', '1859', '313', '0', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=1 seed=348271759 ['82', '1859', '313', '0', '348271759', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=1 seed=348271759 ['82', '1859', '313', '0', '348271759', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=1 seed=348271759 ['82', '1859', '313', '0', '348271759', 'random']
+affinity_cpu=0
+worker onednn-cached-plan block=1 seed=348271759 ['82', '1859', '313', '0', '348271759', 'random']
+affinity_cpu=0
+worker matched-openblas block=1 seed=348271759 ['82', '1859', '313', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=1 seed=348271759 ['82', '1859', '313', '0', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker stream-native block=1 seed=348271759 ['99', '2207', '145', '5', '348271759', 'random']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=1 seed=348271759 ['99', '2207', '145', '5', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=1 seed=348271759 ['99', '2207', '145', '5', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=1 seed=348271759 ['99', '2207', '145', '5', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=1 seed=348271759 ['99', '2207', '145', '5', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=1 seed=348271759 ['99', '2207', '145', '5', '348271759', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=1 seed=348271759 ['99', '2207', '145', '5', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=1 seed=348271759 ['99', '2207', '145', '5', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=1 seed=348271759 ['99', '2207', '145', '5', '348271759', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=1 seed=348271759 ['99', '2207', '145', '5', '348271759', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=1 seed=348271759 ['99', '2207', '145', '5', '348271759', 'random']
+affinity_cpu=0
+worker onednn-cached-plan block=1 seed=348271759 ['99', '2207', '145', '5', '348271759', 'random']
+affinity_cpu=0
+worker matched-openblas block=1 seed=348271759 ['99', '2207', '145', '5', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=1 seed=348271759 ['99', '2207', '145', '5', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=1 seed=348271759 ['99', '2207', '145', '5', '348271759', 'random']
+affinity_cpu=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker vendor-wide-openblas-full block=1 seed=348271759 ['116', '2717', '291', '9', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=1 seed=348271759 ['116', '2717', '291', '9', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=1 seed=348271759 ['116', '2717', '291', '9', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=1 seed=348271759 ['116', '2717', '291', '9', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=1 seed=348271759 ['116', '2717', '291', '9', '348271759', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=1 seed=348271759 ['116', '2717', '291', '9', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=1 seed=348271759 ['116', '2717', '291', '9', '348271759', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=1 seed=348271759 ['116', '2717', '291', '9', '348271759', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=1 seed=348271759 ['116', '2717', '291', '9', '348271759', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=1 seed=348271759 ['116', '2717', '291', '9', '348271759', 'random']
+affinity_cpu=0
+worker onednn-cached-plan block=1 seed=348271759 ['116', '2717', '291', '9', '348271759', 'random']
+affinity_cpu=0
+worker matched-openblas block=1 seed=348271759 ['116', '2717', '291', '9', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=1 seed=348271759 ['116', '2717', '291', '9', '348271759', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=1 seed=348271759 ['116', '2717', '291', '9', '348271759', 'random']
+affinity_cpu=0
+worker stream-native block=1 seed=348271759 ['116', '2717', '291', '9', '348271759', 'random']
+affinity_cpu=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker stream-native block=2 seed=710438957 ['116', '2717', '291', '9', '710438957', 'random']
+affinity_cpu=0
+worker stream-incumbent block=2 seed=710438957 ['116', '2717', '291', '9', '710438957', 'random']
+affinity_cpu=0
+worker matched-mkl block=2 seed=710438957 ['116', '2717', '291', '9', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker matched-openblas block=2 seed=710438957 ['116', '2717', '291', '9', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker onednn-cached-plan block=2 seed=710438957 ['116', '2717', '291', '9', '710438957', 'random']
+affinity_cpu=0
+worker onednn-oneshot block=2 seed=710438957 ['116', '2717', '291', '9', '710438957', 'random']
+affinity_cpu=0
+worker blasfeo block=2 seed=710438957 ['116', '2717', '291', '9', '710438957', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker aocl block=2 seed=710438957 ['116', '2717', '291', '9', '710438957', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker mkl-jit block=2 seed=710438957 ['116', '2717', '291', '9', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl block=2 seed=710438957 ['116', '2717', '291', '9', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker openblas block=2 seed=710438957 ['116', '2717', '291', '9', '710438957', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker vendor-wide-mkl-split block=2 seed=710438957 ['116', '2717', '291', '9', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-full block=2 seed=710438957 ['116', '2717', '291', '9', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-openblas-split block=2 seed=710438957 ['116', '2717', '291', '9', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-full block=2 seed=710438957 ['116', '2717', '291', '9', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker stream-incumbent block=2 seed=710438957 ['99', '2207', '145', '5', '710438957', 'random']
+affinity_cpu=0
+worker matched-mkl block=2 seed=710438957 ['99', '2207', '145', '5', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker matched-openblas block=2 seed=710438957 ['99', '2207', '145', '5', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker onednn-cached-plan block=2 seed=710438957 ['99', '2207', '145', '5', '710438957', 'random']
+affinity_cpu=0
+worker onednn-oneshot block=2 seed=710438957 ['99', '2207', '145', '5', '710438957', 'random']
+affinity_cpu=0
+worker blasfeo block=2 seed=710438957 ['99', '2207', '145', '5', '710438957', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker aocl block=2 seed=710438957 ['99', '2207', '145', '5', '710438957', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker mkl-jit block=2 seed=710438957 ['99', '2207', '145', '5', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl block=2 seed=710438957 ['99', '2207', '145', '5', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker openblas block=2 seed=710438957 ['99', '2207', '145', '5', '710438957', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker vendor-wide-mkl-split block=2 seed=710438957 ['99', '2207', '145', '5', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-full block=2 seed=710438957 ['99', '2207', '145', '5', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-openblas-split block=2 seed=710438957 ['99', '2207', '145', '5', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-full block=2 seed=710438957 ['99', '2207', '145', '5', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker stream-native block=2 seed=710438957 ['99', '2207', '145', '5', '710438957', 'random']
+affinity_cpu=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker matched-mkl block=2 seed=710438957 ['82', '1859', '313', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker matched-openblas block=2 seed=710438957 ['82', '1859', '313', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker onednn-cached-plan block=2 seed=710438957 ['82', '1859', '313', '0', '710438957', 'random']
+affinity_cpu=0
+worker onednn-oneshot block=2 seed=710438957 ['82', '1859', '313', '0', '710438957', 'random']
+affinity_cpu=0
+worker blasfeo block=2 seed=710438957 ['82', '1859', '313', '0', '710438957', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker aocl block=2 seed=710438957 ['82', '1859', '313', '0', '710438957', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker mkl-jit block=2 seed=710438957 ['82', '1859', '313', '0', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl block=2 seed=710438957 ['82', '1859', '313', '0', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker openblas block=2 seed=710438957 ['82', '1859', '313', '0', '710438957', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker vendor-wide-mkl-split block=2 seed=710438957 ['82', '1859', '313', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-full block=2 seed=710438957 ['82', '1859', '313', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-openblas-split block=2 seed=710438957 ['82', '1859', '313', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-full block=2 seed=710438957 ['82', '1859', '313', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker stream-native block=2 seed=710438957 ['82', '1859', '313', '0', '710438957', 'random']
+affinity_cpu=0
+worker stream-incumbent block=2 seed=710438957 ['82', '1859', '313', '0', '710438957', 'random']
+affinity_cpu=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker matched-openblas block=2 seed=710438957 ['65', '1541', '227', '3', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker onednn-cached-plan block=2 seed=710438957 ['65', '1541', '227', '3', '710438957', 'random']
+affinity_cpu=0
+worker onednn-oneshot block=2 seed=710438957 ['65', '1541', '227', '3', '710438957', 'random']
+affinity_cpu=0
+worker blasfeo block=2 seed=710438957 ['65', '1541', '227', '3', '710438957', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker aocl block=2 seed=710438957 ['65', '1541', '227', '3', '710438957', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker mkl-jit block=2 seed=710438957 ['65', '1541', '227', '3', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl block=2 seed=710438957 ['65', '1541', '227', '3', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker openblas block=2 seed=710438957 ['65', '1541', '227', '3', '710438957', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker vendor-wide-mkl-split block=2 seed=710438957 ['65', '1541', '227', '3', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-full block=2 seed=710438957 ['65', '1541', '227', '3', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-openblas-split block=2 seed=710438957 ['65', '1541', '227', '3', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-full block=2 seed=710438957 ['65', '1541', '227', '3', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker stream-native block=2 seed=710438957 ['65', '1541', '227', '3', '710438957', 'random']
+affinity_cpu=0
+worker stream-incumbent block=2 seed=710438957 ['65', '1541', '227', '3', '710438957', 'random']
+affinity_cpu=0
+worker matched-mkl block=2 seed=710438957 ['65', '1541', '227', '3', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker onednn-cached-plan block=2 seed=710438957 ['39', '959', '193', '2', '710438957', 'random']
+affinity_cpu=0
+worker onednn-oneshot block=2 seed=710438957 ['39', '959', '193', '2', '710438957', 'random']
+affinity_cpu=0
+worker blasfeo block=2 seed=710438957 ['39', '959', '193', '2', '710438957', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker aocl block=2 seed=710438957 ['39', '959', '193', '2', '710438957', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker mkl-jit block=2 seed=710438957 ['39', '959', '193', '2', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl block=2 seed=710438957 ['39', '959', '193', '2', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker openblas block=2 seed=710438957 ['39', '959', '193', '2', '710438957', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker vendor-wide-mkl-split block=2 seed=710438957 ['39', '959', '193', '2', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-full block=2 seed=710438957 ['39', '959', '193', '2', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-openblas-split block=2 seed=710438957 ['39', '959', '193', '2', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-full block=2 seed=710438957 ['39', '959', '193', '2', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker stream-native block=2 seed=710438957 ['39', '959', '193', '2', '710438957', 'random']
+affinity_cpu=0
+worker stream-incumbent block=2 seed=710438957 ['39', '959', '193', '2', '710438957', 'random']
+affinity_cpu=0
+worker matched-mkl block=2 seed=710438957 ['39', '959', '193', '2', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker matched-openblas block=2 seed=710438957 ['39', '959', '193', '2', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker onednn-oneshot block=2 seed=710438957 ['137', '2179', '347', '7', '710438957', 'random']
+affinity_cpu=0
+worker blasfeo block=2 seed=710438957 ['137', '2179', '347', '7', '710438957', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker aocl block=2 seed=710438957 ['137', '2179', '347', '7', '710438957', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker mkl-jit block=2 seed=710438957 ['137', '2179', '347', '7', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl block=2 seed=710438957 ['137', '2179', '347', '7', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker openblas block=2 seed=710438957 ['137', '2179', '347', '7', '710438957', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker vendor-wide-mkl-split block=2 seed=710438957 ['137', '2179', '347', '7', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-full block=2 seed=710438957 ['137', '2179', '347', '7', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-openblas-split block=2 seed=710438957 ['137', '2179', '347', '7', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-full block=2 seed=710438957 ['137', '2179', '347', '7', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker stream-native block=2 seed=710438957 ['137', '2179', '347', '7', '710438957', 'random']
+affinity_cpu=0
+worker stream-incumbent block=2 seed=710438957 ['137', '2179', '347', '7', '710438957', 'random']
+affinity_cpu=0
+worker matched-mkl block=2 seed=710438957 ['137', '2179', '347', '7', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker matched-openblas block=2 seed=710438957 ['137', '2179', '347', '7', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker onednn-cached-plan block=2 seed=710438957 ['137', '2179', '347', '7', '710438957', 'random']
+affinity_cpu=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker blasfeo block=2 seed=710438957 ['108', '1728', '320', '4', '710438957', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker aocl block=2 seed=710438957 ['108', '1728', '320', '4', '710438957', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker mkl-jit block=2 seed=710438957 ['108', '1728', '320', '4', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl block=2 seed=710438957 ['108', '1728', '320', '4', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker openblas block=2 seed=710438957 ['108', '1728', '320', '4', '710438957', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker vendor-wide-mkl-split block=2 seed=710438957 ['108', '1728', '320', '4', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-full block=2 seed=710438957 ['108', '1728', '320', '4', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-openblas-split block=2 seed=710438957 ['108', '1728', '320', '4', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-full block=2 seed=710438957 ['108', '1728', '320', '4', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker stream-native block=2 seed=710438957 ['108', '1728', '320', '4', '710438957', 'random']
+affinity_cpu=0
+worker stream-incumbent block=2 seed=710438957 ['108', '1728', '320', '4', '710438957', 'random']
+affinity_cpu=0
+worker matched-mkl block=2 seed=710438957 ['108', '1728', '320', '4', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker matched-openblas block=2 seed=710438957 ['108', '1728', '320', '4', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker onednn-cached-plan block=2 seed=710438957 ['108', '1728', '320', '4', '710438957', 'random']
+affinity_cpu=0
+worker onednn-oneshot block=2 seed=710438957 ['108', '1728', '320', '4', '710438957', 'random']
+affinity_cpu=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker aocl block=2 seed=710438957 ['89', '1933', '257', '0', '710438957', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker mkl-jit block=2 seed=710438957 ['89', '1933', '257', '0', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl block=2 seed=710438957 ['89', '1933', '257', '0', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker openblas block=2 seed=710438957 ['89', '1933', '257', '0', '710438957', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker vendor-wide-mkl-split block=2 seed=710438957 ['89', '1933', '257', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-full block=2 seed=710438957 ['89', '1933', '257', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-openblas-split block=2 seed=710438957 ['89', '1933', '257', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-full block=2 seed=710438957 ['89', '1933', '257', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker stream-native block=2 seed=710438957 ['89', '1933', '257', '0', '710438957', 'random']
+affinity_cpu=0
+worker stream-incumbent block=2 seed=710438957 ['89', '1933', '257', '0', '710438957', 'random']
+affinity_cpu=0
+worker matched-mkl block=2 seed=710438957 ['89', '1933', '257', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker matched-openblas block=2 seed=710438957 ['89', '1933', '257', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker onednn-cached-plan block=2 seed=710438957 ['89', '1933', '257', '0', '710438957', 'random']
+affinity_cpu=0
+worker onednn-oneshot block=2 seed=710438957 ['89', '1933', '257', '0', '710438957', 'random']
+affinity_cpu=0
+worker blasfeo block=2 seed=710438957 ['89', '1933', '257', '0', '710438957', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl-jit block=2 seed=710438957 ['61', '3451', '191', '13', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl block=2 seed=710438957 ['61', '3451', '191', '13', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker openblas block=2 seed=710438957 ['61', '3451', '191', '13', '710438957', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker vendor-wide-mkl-split block=2 seed=710438957 ['61', '3451', '191', '13', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-full block=2 seed=710438957 ['61', '3451', '191', '13', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-openblas-split block=2 seed=710438957 ['61', '3451', '191', '13', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-full block=2 seed=710438957 ['61', '3451', '191', '13', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker stream-native block=2 seed=710438957 ['61', '3451', '191', '13', '710438957', 'random']
+affinity_cpu=0
+worker stream-incumbent block=2 seed=710438957 ['61', '3451', '191', '13', '710438957', 'random']
+affinity_cpu=0
+worker matched-mkl block=2 seed=710438957 ['61', '3451', '191', '13', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker matched-openblas block=2 seed=710438957 ['61', '3451', '191', '13', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker onednn-cached-plan block=2 seed=710438957 ['61', '3451', '191', '13', '710438957', 'random']
+affinity_cpu=0
+worker onednn-oneshot block=2 seed=710438957 ['61', '3451', '191', '13', '710438957', 'random']
+affinity_cpu=0
+worker blasfeo block=2 seed=710438957 ['61', '3451', '191', '13', '710438957', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker aocl block=2 seed=710438957 ['61', '3451', '191', '13', '710438957', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=2 seed=710438957 ['37', '2387', '119', '5', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker openblas block=2 seed=710438957 ['37', '2387', '119', '5', '710438957', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker vendor-wide-mkl-split block=2 seed=710438957 ['37', '2387', '119', '5', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-full block=2 seed=710438957 ['37', '2387', '119', '5', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-openblas-split block=2 seed=710438957 ['37', '2387', '119', '5', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-full block=2 seed=710438957 ['37', '2387', '119', '5', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker stream-native block=2 seed=710438957 ['37', '2387', '119', '5', '710438957', 'random']
+affinity_cpu=0
+worker stream-incumbent block=2 seed=710438957 ['37', '2387', '119', '5', '710438957', 'random']
+affinity_cpu=0
+worker matched-mkl block=2 seed=710438957 ['37', '2387', '119', '5', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker matched-openblas block=2 seed=710438957 ['37', '2387', '119', '5', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker onednn-cached-plan block=2 seed=710438957 ['37', '2387', '119', '5', '710438957', 'random']
+affinity_cpu=0
+worker onednn-oneshot block=2 seed=710438957 ['37', '2387', '119', '5', '710438957', 'random']
+affinity_cpu=0
+worker blasfeo block=2 seed=710438957 ['37', '2387', '119', '5', '710438957', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker aocl block=2 seed=710438957 ['37', '2387', '119', '5', '710438957', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker mkl-jit block=2 seed=710438957 ['37', '2387', '119', '5', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker openblas block=2 seed=710438957 ['112', '1744', '357', '0', '710438957', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker vendor-wide-mkl-split block=2 seed=710438957 ['112', '1744', '357', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-full block=2 seed=710438957 ['112', '1744', '357', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-openblas-split block=2 seed=710438957 ['112', '1744', '357', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-full block=2 seed=710438957 ['112', '1744', '357', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker stream-native block=2 seed=710438957 ['112', '1744', '357', '0', '710438957', 'random']
+affinity_cpu=0
+worker stream-incumbent block=2 seed=710438957 ['112', '1744', '357', '0', '710438957', 'random']
+affinity_cpu=0
+worker matched-mkl block=2 seed=710438957 ['112', '1744', '357', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker matched-openblas block=2 seed=710438957 ['112', '1744', '357', '0', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker onednn-cached-plan block=2 seed=710438957 ['112', '1744', '357', '0', '710438957', 'random']
+affinity_cpu=0
+worker onednn-oneshot block=2 seed=710438957 ['112', '1744', '357', '0', '710438957', 'random']
+affinity_cpu=0
+worker blasfeo block=2 seed=710438957 ['112', '1744', '357', '0', '710438957', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker aocl block=2 seed=710438957 ['112', '1744', '357', '0', '710438957', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker mkl-jit block=2 seed=710438957 ['112', '1744', '357', '0', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl block=2 seed=710438957 ['112', '1744', '357', '0', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker vendor-wide-mkl-split block=2 seed=710438957 ['49', '2861', '157', '11', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-full block=2 seed=710438957 ['49', '2861', '157', '11', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-openblas-split block=2 seed=710438957 ['49', '2861', '157', '11', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-full block=2 seed=710438957 ['49', '2861', '157', '11', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker stream-native block=2 seed=710438957 ['49', '2861', '157', '11', '710438957', 'random']
+affinity_cpu=0
+worker stream-incumbent block=2 seed=710438957 ['49', '2861', '157', '11', '710438957', 'random']
+affinity_cpu=0
+worker matched-mkl block=2 seed=710438957 ['49', '2861', '157', '11', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker matched-openblas block=2 seed=710438957 ['49', '2861', '157', '11', '710438957', 'random']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker onednn-cached-plan block=2 seed=710438957 ['49', '2861', '157', '11', '710438957', 'random']
+affinity_cpu=0
+worker onednn-oneshot block=2 seed=710438957 ['49', '2861', '157', '11', '710438957', 'random']
+affinity_cpu=0
+worker blasfeo block=2 seed=710438957 ['49', '2861', '157', '11', '710438957', 'random']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker aocl block=2 seed=710438957 ['49', '2861', '157', '11', '710438957', 'random']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker mkl-jit block=2 seed=710438957 ['49', '2861', '157', '11', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl block=2 seed=710438957 ['49', '2861', '157', '11', '710438957', 'random']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker openblas block=2 seed=710438957 ['49', '2861', '157', '11', '710438957', 'random']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker openblas block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'cancel']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'cancel']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'cancel']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'cancel']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'cancel']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'cancel']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'cancel']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker openblas block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'scaled']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'scaled']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'scaled']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'scaled']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'scaled']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'scaled']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'scaled']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['49', '2861', '157', '11', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'cancel']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'cancel']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'cancel']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'cancel']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'cancel']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'cancel']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'cancel']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'scaled']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'scaled']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'scaled']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'scaled']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'scaled']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'scaled']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['112', '1744', '357', '0', '348271759', 'scaled']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl-jit block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'cancel']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'cancel']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'cancel']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'cancel']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'cancel']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'cancel']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'cancel']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl-jit block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'scaled']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'scaled']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'scaled']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'scaled']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'scaled']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'scaled']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'scaled']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['37', '2387', '119', '5', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker aocl block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'cancel']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'cancel']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'cancel']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'cancel']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'cancel']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'cancel']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'cancel']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker aocl block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'scaled']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'scaled']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'scaled']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'scaled']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'scaled']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'scaled']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'scaled']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['61', '3451', '191', '13', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker blasfeo block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'cancel']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'cancel']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'cancel']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'cancel']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'cancel']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'cancel']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'cancel']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker blasfeo block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'scaled']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'scaled']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'scaled']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'scaled']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'scaled']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'scaled']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['89', '1933', '257', '0', '348271759', 'scaled']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker onednn-oneshot block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'cancel']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'cancel']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'cancel']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'cancel']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'cancel']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'cancel']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'cancel']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker onednn-oneshot block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'scaled']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'scaled']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'scaled']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'scaled']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'scaled']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'scaled']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['108', '1728', '320', '4', '348271759', 'scaled']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker onednn-cached-plan block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'cancel']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'cancel']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'cancel']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'cancel']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'cancel']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'cancel']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'cancel']
+affinity_cpu=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker onednn-cached-plan block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'scaled']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'scaled']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'scaled']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'scaled']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'scaled']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'scaled']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['137', '2179', '347', '7', '348271759', 'scaled']
+affinity_cpu=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker matched-openblas block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'cancel']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'cancel']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'cancel']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'cancel']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'cancel']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'cancel']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'cancel']
+affinity_cpu=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker matched-openblas block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'scaled']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'scaled']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'scaled']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'scaled']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'scaled']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'scaled']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['39', '959', '193', '2', '348271759', 'scaled']
+affinity_cpu=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker matched-mkl block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'cancel']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'cancel']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'cancel']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'cancel']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'cancel']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'cancel']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'cancel']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker matched-mkl block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'scaled']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'scaled']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'scaled']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'scaled']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'scaled']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'scaled']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'scaled']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['65', '1541', '227', '3', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker stream-incumbent block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'cancel']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'cancel']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'cancel']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'cancel']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'cancel']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'cancel']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'cancel']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker stream-incumbent block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'scaled']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'scaled']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'scaled']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'scaled']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'scaled']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'scaled']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'scaled']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['82', '1859', '313', '0', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker stream-native block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'cancel']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'cancel']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'cancel']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'cancel']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'cancel']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'cancel']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'cancel']
+affinity_cpu=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker stream-native block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'scaled']
+affinity_cpu=0
+worker vendor-wide-openblas-full block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'scaled']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'scaled']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'scaled']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'scaled']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'scaled']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['99', '2207', '145', '5', '348271759', 'scaled']
+affinity_cpu=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker vendor-wide-openblas-full block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'cancel']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'cancel']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'cancel']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'cancel']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'cancel']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'cancel']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'cancel']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'cancel']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'cancel']
+affinity_cpu=0
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker vendor-wide-openblas-full block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-openblas-split block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker vendor-wide-mkl-full block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker vendor-wide-mkl-split block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker openblas block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'scaled']
+affinity_cpu=0
+openblas_core=SAPPHIRERAPIDS openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED threads=1
+worker mkl block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker mkl-jit block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'scaled']
+affinity_cpu=0
+oneMKL LP64 sequential direct-call JIT: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.3uNQva/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+worker aocl block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'scaled']
+affinity_cpu=0
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+worker blasfeo block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'scaled']
+affinity_cpu=0
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+worker onednn-oneshot block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'scaled']
+affinity_cpu=0
+worker onednn-cached-plan block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'scaled']
+affinity_cpu=0
+worker matched-openblas block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libcob_rank_openblas.so
+worker matched-mkl block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'scaled']
+affinity_cpu=0
+qualified single-thread LP64 SGEMM binding libmkl_intel_lp64.so.3
+worker stream-incumbent block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'scaled']
+affinity_cpu=0
+worker stream-native block=0 seed=348271759 ['116', '2717', '291', '9', '348271759', 'scaled']
+affinity_cpu=0

@@ -1,0 +1,66 @@
+{
+  "phase": "stream-b",
+  "panel_sha256": "466c2b51ee6df5fd737f3f4b1977c5b4ad75cdb7ae61bbaec7bc5919530f18fd",
+  "seeds": [
+    348271759,
+    710438957
+  ],
+  "rounds_per_seed": 3,
+  "full_output_tolerance": 0.002,
+  "completed_cases": 8,
+  "expected_cases": 8,
+  "implementations": {
+    "openblas": [
+      "direct",
+      "openblas.so"
+    ],
+    "mkl": [
+      "direct",
+      "mkl.so"
+    ],
+    "mkl-jit": [
+      "direct",
+      "mkl-jit.so"
+    ],
+    "aocl": [
+      "direct",
+      "aocl.so"
+    ],
+    "blasfeo": [
+      "direct",
+      "blasfeo.so"
+    ],
+    "onednn-oneshot": [
+      "direct",
+      "onednn-f32-oneshot.so"
+    ],
+    "onednn-cached-plan": [
+      "direct",
+      "onednn-f32-cached-plan.so"
+    ],
+    "stream-incumbent": [
+      "linked-public",
+      "stream-incumbent.worker"
+    ],
+    "stream-native": [
+      "linked-public",
+      "stream-native.worker"
+    ],
+    "stream-avx2-incumbent": [
+      "linked-public",
+      "stream-avx2-incumbent.worker"
+    ],
+    "stream-avx2": [
+      "linked-public",
+      "stream-avx2.worker"
+    ],
+    "stream-avx512-incumbent": [
+      "linked-public",
+      "stream-avx512-incumbent.worker"
+    ],
+    "stream-avx512": [
+      "linked-public",
+      "stream-avx512.worker"
+    ]
+  }
+}

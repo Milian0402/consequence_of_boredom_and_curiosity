@@ -1,0 +1,10 @@
+vendor-wide.patch: OK
+panel.csv: OK
+protocol.md: OK
+backend.c: OK
+adapter.c: OK
+prepare.py: OK
+routes.py: OK
+score.py: OK
+build.sh: OK
+run.sh: OK

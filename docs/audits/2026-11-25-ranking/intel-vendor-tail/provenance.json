@@ -1,0 +1,7 @@
+{
+  "run": 45691645697,
+  "commit": "b2cdc6a2985726cb1658dc7cc730b5a1c4b99680",
+  "production_base": "b218beff1eaf8fd606d0934405cdc1e28ecdfe15",
+  "cpu": "Intel(R) Xeon(R) 6975P-C",
+  "patch_sha256": "2e74c6043a0fb4e5a6a1989b8bfe7740c95085b05f81bb721bbe557e067d0b90"
+}

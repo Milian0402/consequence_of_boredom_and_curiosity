@@ -1,0 +1,23 @@
+{
+  "run": 45691645697,
+  "attempt": 1,
+  "job_id": 139478395098,
+  "source_revision": "b2cdc6a2985726cb1658dc7cc730b5a1c4b99680",
+  "artifact_id": 15059751517,
+  "artifact_name": "world-rank-x86_64-45691645697-1",
+  "hosted_digest": "sha256:1759f1ef42a1b7007cc9572b2e1e27c31cdb1a962449f1c168cdc40c43ecf02e",
+  "download_sha256": "1759f1ef42a1b7007cc9572b2e1e27c31cdb1a962449f1c168cdc40c43ecf02e",
+  "zip_crc_passed": true,
+  "archive_bytes": 362892,
+  "files_verified": 96,
+  "raw_bytes": 2563529,
+  "file_manifest_sha256": "04869ba52808eb3904947ba564ed98dd9c0d6b2b9cd6de0c7d6f8d34e0ab9f6d",
+  "job_conclusion": "success",
+  "job_url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45691645697/job/139478395098",
+  "run_url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45691645697",
+  "host": {
+    "model": "Intel(R) Xeon(R) 6975P-C",
+    "architecture": "x86_64"
+  },
+  "production_revision": "b218beff1eaf8fd606d0934405cdc1e28ecdfe15"
+}

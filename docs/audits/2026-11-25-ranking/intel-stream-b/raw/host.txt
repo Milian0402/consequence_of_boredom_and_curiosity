@@ -1,0 +1,3 @@
+Architecture: x86_64
+Model name: Intel(R) Xeon(R) 6975P-C
+b2cdc6a2985726cb1658dc7cc730b5a1c4b99680

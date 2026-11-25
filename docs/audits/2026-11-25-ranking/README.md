@@ -23,6 +23,10 @@ Checking the input magnitudes and switching to double accumulation fixed that fa
 
 A standalone candidate packed A across output rows and read B in place. It lost all five fresh warm-call comparisons against the release on each of Intel Xeon Platinum 8573C and Arm Neoverse N2. Its geometric-mean speed relative to the release was 0.775× on Intel and 0.980× on Arm. All 576 full-output validations passed. On the Intel 49 × 2861 × 157 layout with eleven floats of row padding, the released implementation reached 0.679× oneMKL's speed. [Timings, checks and offline verifier](linux-medium/README.md) · [Native run](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45686443679)
 
+On a Xeon 6975P-C, packing one strip of B and using it across the output rows improved standalone COB on all five previously untimed layouts and all 30 paired observations. The five-layout geometric mean was 1.120× the previous implementation. COB beat the fastest independent library at 108 × 1728 × 320 and 137 × 2179 × 347. The fastest independent library beat COB on the other three. The experiment also checked AVX2 and AVX-512 builds separately and compared 69,104,464 output elements with FP64. [Per-layout times, direct competitors and verifier](intel-stream-b/README.md)
+
+A separate test delegated whole products or all but the last few rows to a sequential BLAS. Over eight fresh eligible layouts, the whole oneMKL wrapper reached 1.100× the speed of released standalone COB and 1.002× the speed of calling the same oneMKL library directly. Moving the last one to four rows back into COB slowed down both providers on average. [Matched comparisons and single-thread checks](intel-vendor-tail/README.md)
+
 ## Removing fourteen Winograd output updates
 
 A two-level variant uses serial BLAS to accumulate fourteen terminal products directly into C. On Neoverse N2 the OpenBLAS-backed variant had the lowest median of all eleven methods on each of five layouts. It beat the strongest independent method, FastMMW, in all twelve pairs on the two fresh odd layouts. Most of the advantage was already present in released COB.

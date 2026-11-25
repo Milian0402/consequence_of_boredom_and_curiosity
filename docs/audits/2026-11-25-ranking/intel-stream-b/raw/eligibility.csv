@@ -1,0 +1,14 @@
+implementation,role,leaf,status,reason
+openblas,direct,openblas,included,requires_full_fp64_and_applicable_route
+mkl,direct,mkl,included,requires_full_fp64_and_applicable_route
+mkl-jit,direct,mkl-jit,included,requires_full_fp64_and_applicable_route
+aocl,direct,aocl,included,requires_full_fp64_and_applicable_route
+blasfeo,direct,blasfeo,included,requires_full_fp64_and_applicable_route
+onednn-oneshot,direct,onednn,included,requires_full_fp64_and_applicable_route
+onednn-cached-plan,direct,onednn,included,requires_full_fp64_and_applicable_route
+stream-incumbent,standalone,cob,included,requires_full_fp64_and_applicable_route
+stream-native,standalone,cob,included,requires_full_fp64_and_applicable_route
+stream-avx2-incumbent,standalone,cob,included,requires_full_fp64_and_applicable_route
+stream-avx2,standalone,cob,included,requires_full_fp64_and_applicable_route
+stream-avx512-incumbent,standalone,cob,included,requires_full_fp64_and_applicable_route
+stream-avx512,standalone,cob,included,requires_full_fp64_and_applicable_route
