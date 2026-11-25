@@ -4064,7 +4064,11 @@ void cob_sgemm_rowmajor(
 #endif
 
 #if defined(COB_USE_FUSED_STRASSEN)
-    if (cob_sgemm_strassen_fused(m,n,k,a,lda,b,ldb,c,ldc)) return;
+    if (
+#if defined(COB_USE_RECURSIVE_STRASSEN)
+        !(lda == k && ldb == n && cob_recursive_square_is_eligible(m, n, k)) &&
+#endif
+        cob_sgemm_strassen_fused(m, n, k, a, lda, b, ldb, c, ldc)) return;
 #endif
 
 #if COB_SGEMM_STRASSEN1 && defined(COB_USE_PORTABLE_STRASSEN)

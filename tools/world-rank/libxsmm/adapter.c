@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef RANK_LIBXSMM_MAX_MNK
+#define RANK_LIBXSMM_MAX_MNK (64 * 64 * 64)
+#endif
+
 int rank_vendor_init(void)
 {
     libxsmm_init();
@@ -15,7 +19,7 @@ void rank_vendor_sgemm(int m, int n, int k, const float *a, int lda,
                        const float *b, int ldb, float *c, int ldc)
 {
     /* The study uses this independent JIT peer only on its frozen small panel. */
-    if (m <= 0 || n <= 0 || k <= 0 || (int64_t)m * n > (64 * 64 * 64) / k) {
+    if (m <= 0 || n <= 0 || k <= 0 || (int64_t)m * n > RANK_LIBXSMM_MAX_MNK / k) {
         fputs("LIBXSMM comparator received an ineligible shape\n", stderr);
         abort();
     }

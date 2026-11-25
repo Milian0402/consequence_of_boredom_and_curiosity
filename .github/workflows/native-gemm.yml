@@ -55,6 +55,9 @@ jobs:
         run: bash tools/world-rank/libxsmm/build.sh "$VENDOR_DIR"
       - name: Compare installed candidates against an independent FP64 product
         run: bash tools/world-rank/run.sh "$RUNNER_TEMP/rank-result" "$VENDOR_DIR"
+      - name: Compare nine small workloads with warmed and cold JIT
+        if: ${{ !cancelled() }}
+        run: bash tools/world-rank/run-small.sh "$RUNNER_TEMP/rank-result/supplemental-small" "$VENDOR_DIR"
       - name: Record incomplete installation as a failed comparison
         if: >-
           ${{ !cancelled() && (steps.openblas.outcome == 'failure' ||

@@ -29,3 +29,9 @@ python3 "$here/smoke.py" "$tmp/libxsmm.so" > "$tmp/settings.txt" 2>&1 || {
 { printf 'Upstream LIBXSMM %s %s\n' "$tag" "$sha"; cat "$tmp/settings.txt"; } > "$out/libxsmm-build.txt"
 cat "$out/libxsmm-build.txt"
 mv "$tmp/libxsmm.so" "$out/libxsmm.so"
+
+
+# Explicit public JIT dispatch over the wider supplementary small panel.
+"$cc" -O3 -std=c11 -Wall -Wextra -Werror -DRANK_LIBXSMM_MAX_MNK=2097152 \
+      -I"$src/include" "$here/adapter.c" "$src/lib/libxsmm.a" "${flags[@]}" -o "$out/libxsmm-wide.so"
+python3 "$here/smoke.py" "$out/libxsmm-wide.so"

@@ -259,7 +259,7 @@ static void cob_blocked_apply_panel(cob_blocked_kernel kernel, int m, int n, int
 static int cob_sgemm_one_shot_blocked(int m, int n, int k, const float* a, int lda,
     const float* b, int ldb, float* c, int ldc)
 {
-    if (m < 12 || n < 24 || k < 32) return 0;
+    if (m < 12 || n < 24 || k < 32 || (m <= 128 && n <= 128 && k <= 128)) return 0;
     size_t c_count = (size_t)(m-1)*ldc+n;
     if (cob_f32_ranges_overlap(c, c_count, a, (size_t)(m-1)*lda+k) ||
         cob_f32_ranges_overlap(c, c_count, b, (size_t)(k-1)*ldb+n)) return 0;

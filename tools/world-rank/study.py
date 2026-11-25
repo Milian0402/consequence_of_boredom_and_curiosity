@@ -14,7 +14,8 @@ import subprocess
 import tempfile
 from contextlib import ExitStack, contextmanager
 
-SEEDS = {"discovery": (19473017, 37292229), "confirm": (6191231, 89743091)}
+SEEDS = {"discovery": (19473017, 37292229), "confirm": (6191231, 89743091),
+         "small": (40762813, 92862107)}
 SHAPE_KEYS = ("family", "m", "n", "k", "pad", "mode")
 SMALL_VENDOR_MAX_MNK = 64 ** 3
 
@@ -48,7 +49,10 @@ def implementations(args):
             raise ValueError(f"expected NAME=SO, got {spec}")
         peers.append((name, lib))
     for name, lib in peers:
-        for variant, label in (("direct", name), ("hybrid", f"cob-{name}")):
+        variants = [("direct", name)]
+        if args.phase != "small":
+            variants.append(("hybrid", f"cob-{name}"))
+        for variant, label in variants:
             if label in entries:
                 raise ValueError(f"duplicate implementation {label}")
             entries[label] = (variant, str(Path(lib).resolve()))
@@ -291,8 +295,8 @@ def main():
     cli.add_argument("--timeout", type=float, default=600)
     cli.add_argument("--matrix-budget-mib", type=int, default=6144)
     args = cli.parse_args()
-    args.rounds = args.rounds if args.rounds is not None else (3 if args.phase == "confirm" else 2)
-    minimum = 3 if args.phase == "confirm" else 1
+    args.rounds = args.rounds if args.rounds is not None else (2 if args.phase == "discovery" else 3)
+    minimum = 1 if args.phase == "discovery" else 3
     if args.rounds < minimum or not 0 < args.tolerance <= 0.002 or args.timeout <= 0 or args.matrix_budget_mib <= 0:
         cli.error("invalid timing or validation configuration")
     args.out.mkdir(parents=True, exist_ok=True)
