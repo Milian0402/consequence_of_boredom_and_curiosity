@@ -43,6 +43,15 @@ and 1.225× as fast on a Neoverse N2. OpenBLAS was the fastest independent
 library in both comparisons. The M5 Max's existing route was faster on both
 tested Apple rectangles. The Hopcroft–Kerr option defaults to off.
 
+In native Linux builds with fused Strassen enabled, the fifteen subproducts
+can start fused Strassen when the harmonic mean of their dimensions reaches
+960. The ordinary fused entry retains its cutoff of 1024. On two fresh padded
+rectangles this improved the standalone route by 6.5–7.8% on Neoverse N2 and
+1.0–1.7% on AMD EPYC 7763. The project's Winograd schedule with OpenBLAS
+leaves was faster on both rectangles on each CPU. All standalone COB output
+checks passed. Two-level FastMMW exceeded the accuracy limit on the Arm
+control. [Native comparisons](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45664272660)
+
 For large products on native Linux x86-64 or Arm64, enable the one-level Strassen path with `make COB_ENABLE_PORTABLE_STRASSEN=ON` or configure CMake with `-DCOB_ENABLE_PORTABLE_STRASSEN=ON`. It uses the native single-thread kernels for each subproduct. Contiguous balanced products use the original 1536 crossover. For rectangular or strided inputs, the dispatcher also weighs the number of products saved against the workspace needed for the three temporary matrices.
 
 Linux builds can also select a second Winograd level by enabling

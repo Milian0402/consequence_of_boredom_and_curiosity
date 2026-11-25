@@ -1,5 +1,26 @@
 /* One level of the 2-by-3-by-3 Hopcroft-Kerr schedule. Each leaf uses
    the existing dispatcher, including any enabled Strassen routes. */
+#if defined(COB_USE_FUSED_STRASSEN)
+#ifndef COB_HK15_CHILD_HARMONIC
+#define COB_HK15_CHILD_HARMONIC 960
+#endif
+#if COB_HK15_CHILD_HARMONIC <= 0
+#error "COB_HK15_CHILD_HARMONIC must be positive"
+#endif
+
+static void cob_hk15_fused_child(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+    if (
+#if defined(COB_USE_RECURSIVE_STRASSEN)
+        !(lda == k && ldb == n && cob_recursive_square_is_eligible(m, n, k)) &&
+#endif
+        cob_sgemm_strassen_fused_at(m, n, k, a, lda, b, ldb, c, ldc,
+            COB_HK15_CHILD_HARMONIC)) return;
+    cob_sgemm_rowmajor_base(m, n, k, a, lda, b, ldb, c, ldc);
+}
+#endif
+
 static int cob_hk15_shape(int m, int n, int k)
 {
     if (m < 2*768 || m > 2*1280 || n < 3*768 || n > 3*1280 ||
@@ -38,10 +59,16 @@ static int cob_hk15_try(int m, int n, int k, const float* aa, int lda,
     for (int i=0; i<9; ++i)
         b[i] = bb + (size_t)(i/3)*kh*ldb + (i%3)*nh;
 
-    /* The certified source spells its 15 calls cob_sgemm_rowmajor. Bind that
-       local name to the original dispatcher so no leaf re-enters HK15. */
-    void (*const cob_sgemm_rowmajor)(int,int,int,const float*,int,
+    /* All 15 products share one geometry and must bypass the outer HK dispatcher. */
+    void (*cob_sgemm_rowmajor)(int,int,int,const float*,int,
         const float*,int,float*,int) = cob_sgemm_rowmajor_base;
+#if defined(COB_USE_FUSED_STRASSEN)
+    const double area = (double)mh*nh + (double)mh*kh + (double)nh*kh;
+    const double volume = 3.0*mh*nh*kh;
+    if (volume >= COB_HK15_CHILD_HARMONIC*area &&
+        volume < COB_FUSED_STRASSEN_MIN_HARMONIC_DIM*area)
+        cob_sgemm_rowmajor = cob_hk15_fused_child;
+#endif
 #include "../third_party/fast-matmul/hk233.inc"
     free(workspace);
     return 1;

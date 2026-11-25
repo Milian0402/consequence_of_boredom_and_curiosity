@@ -172,16 +172,16 @@ static void cob_fused_finish_edges(int m, int n, int k, const float* a, int lda,
     }
 }
 
-static int cob_sgemm_strassen_fused(int m, int n, int k, const float* a, int lda,
-    const float* b, int ldb, float* c, int ldc)
+static int cob_sgemm_strassen_fused_at(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc, int min_harmonic)
 {
     const int min_dim = cob_min_i32(m, cob_min_i32(n,k));
     const int max_dim = m > n ? (m > k ? m : k) : (n > k ? n : k);
-    if (min_dim < 2 || min_dim < COB_FUSED_STRASSEN_MIN_HARMONIC_DIM / 2 ||
+    if (min_dim < 2 || min_dim < min_harmonic / 2 ||
         (int64_t)max_dim > (int64_t)min_dim*8 || !a || !b || !c ||
         lda < k || ldb < n || ldc < n) return 0;
     const double areas = (double)m*n + (double)m*k + (double)n*k;
-    if (3.0*m*n*k < COB_FUSED_STRASSEN_MIN_HARMONIC_DIM*areas) return 0;
+    if (3.0*m*n*k < min_harmonic*areas) return 0;
     const size_t cspan = (size_t)(m-1)*ldc+n;
     if (cob_f32_ranges_overlap(c, cspan, a, (size_t)(m-1)*lda+k) ||
         cob_f32_ranges_overlap(c, cspan, b, (size_t)(k-1)*ldb+n)) return 0;
@@ -240,4 +240,11 @@ static int cob_sgemm_strassen_fused(int m, int n, int k, const float* a, int lda
     free(work);
     cob_fused_finish_edges(m, n, k, a, lda, b, ldb, c, ldc);
     return 1;
+}
+
+static int cob_sgemm_strassen_fused(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+    return cob_sgemm_strassen_fused_at(m, n, k, a, lda, b, ldb, c, ldc,
+        COB_FUSED_STRASSEN_MIN_HARMONIC_DIM);
 }
