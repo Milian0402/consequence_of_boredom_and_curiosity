@@ -50,7 +50,7 @@ Linux/aarch64)
 *) echo "The vendor adapters require a native Linux x86-64 or aarch64 runner." >&2; exit 2 ;;
 esac
 
-if [[ $(cat "$src/../phase.txt") == aligned-core || $(cat "$src/../phase.txt") == release-replay || $(cat "$src/../phase.txt") == signed-leaves || $(cat "$src/../phase.txt") == stream-b ]]; then
+if [[ $(cat "$src/../phase.txt") == aligned-core || $(cat "$src/../phase.txt") == release-replay || $(cat "$src/../phase.txt") == signed-leaves || $(cat "$src/../phase.txt") == stream-b || $(cat "$src/../phase.txt") == prefix-eight ]]; then
     printf '%s\n%s\n' "$inc" "$lib" > "$dest/$name-prefix.txt"
 fi
 
@@ -79,6 +79,19 @@ build_adapter() {
             MKL_VERBOSE=1 MKL_NUM_THREADS=1 python3 "$src/smoke_mkl.py" "$dest/$variant.so"
         fi
     } > "$dest/$variant-build.txt" 2>&1
+    if [[ $(cat "$src/../phase.txt") == prefix-eight ]]; then
+        local identity="$dest/$variant-identity.sha256"
+        : > "$identity"
+        for member in "$dest/$variant.so" "$backend" "$lib/libmkl_intel_lp64.so.3" "$lib/libmkl_sequential.so.3" "$lib/libmkl_core.so.3" "$src/vendor_backend.c" "$src/vendor_adapter.c" "$src/build.sh"; do
+            printf '%s  %s\n' "$(sha256sum "$member" | cut -d' ' -f1)" "$(basename "$member")" >> "$identity"
+        done
+        nm -D --undefined-only "$backend" > "$dest/$variant-backend-imports.txt"
+        readelf -d "$backend" > "$scratch/$variant-dynamic.txt"
+        for library in libmkl_intel_lp64.so.3 libmkl_sequential.so.3 libmkl_core.so.3; do
+            grep -F "[$library]" "$scratch/$variant-dynamic.txt" >/dev/null
+        done
+        if grep -E 'NEEDED.*(iomp|gomp|mkl_intel_thread|mkl_gnu_thread|mkl_tbb_thread)' "$scratch/$variant-dynamic.txt"; then return 1; fi
+    fi
     cat "$dest/$variant-build.txt"
 }
 

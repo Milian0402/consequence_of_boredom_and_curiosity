@@ -10,7 +10,7 @@ import tarfile
 release = "a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6"
 tree = "18f22622de1a4b1b7aebbdb66985741aa38c6e9e"
 here = pathlib.Path(__file__).resolve().parent
-repo, work, out = map(lambda raw: pathlib.Path(raw).resolve(),sys.argv[1:])
+repo, work, out = map(lambda raw: pathlib.Path(raw).resolve(),sys.argv[1:4])
 checked = subprocess.check_output(["git","-C",repo,"rev-parse","HEAD","HEAD^{tree}"],text=True).splitlines()
 if checked != [release,tree]:
     raise ValueError("Unexpected public production revision or source tree")
@@ -30,8 +30,12 @@ with subprocess.Popen(["git","-C",repo,"archive","--format=tar",release,*paths],
         archive.extractall(original,filter="data")
     if proc.wait():
         raise RuntimeError("git archive failed")
-shutil.copytree(original,candidate)
 base=inventory(original)
+if sys.argv[4:] == ["--incumbent-only"]:
+    release_only = {"release":release, "tree":tree, "methods":{"stream-incumbent":{"sha256":manifest(base),"files":base}}}
+    (out/"grouped-sources.json").write_text(json.dumps(release_only,indent=2,sort_keys=True)+"\n")
+    sys.exit(0)
+shutil.copytree(original,candidate)
 patch=here/"candidate.patch"
 patch_hash=digest(patch)
 if patch_hash != (here/"candidate.sha256").read_text().split()[0]:

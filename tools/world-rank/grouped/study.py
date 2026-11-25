@@ -12,11 +12,13 @@ import sys
 BUILD, VENDOR, OUT = (Path(p).resolve() for p in sys.argv[1:4])
 CPU = int(sys.argv[4])
 HERE = Path(__file__).resolve().parent
-SEEDS = (267491683, 1893702713)
+SEEDS = globals().get("seed_override", (267491683, 1893702713))
 CASES = (("random", SEEDS[0]), ("random", SEEDS[1]), ("cancel", SEEDS[0]), ("scaled", SEEDS[1]))
 METHODS = ("openblas", "mkl", "mkl-jit", "aocl", "blasfeo", "onednn-oneshot", "onednn-cached-plan",
            "libxsmm-dispatch", "libxsmm-retained", "stream-incumbent", "grouped-b")
-SUBJECTS = METHODS[-2:]
+METHODS = globals().get("method_override", METHODS)
+SUBJECTS = globals().get("subject_override", METHODS[-2:])
+ASSISTED = globals().get("assisted_override", ())
 GEOMETRY = "m n k lda ldb ldc ar ac br bc cr cc".split()
 MEASURED = "checked guards a_mod64 b_mod64 c_mod64 cpu threads error first_s per_call_s lda ldb ldc".split()
 PAGE = os.sysconf("SC_PAGE_SIZE")
@@ -43,6 +45,8 @@ def check(ok, message):
 def source(method):
     if method in SUBJECTS:
         return BUILD / (method + ".worker")
+    if method in ASSISTED:
+        return BUILD / "prefix" / (method + ".so")
     if method.startswith("onednn-"):
         return VENDOR / "onednn" / (method.replace("onednn-", "onednn-f32-") + ".so")
     return VENDOR / (method + ".so")
@@ -83,7 +87,7 @@ for method, path in paths.items():
             xsmm_inspect[method] = inspect
         else:
             available[method] = False
-    methods.writerow(dict(method=method, role="standalone" if method in SUBJECTS else "independent",
+    methods.writerow(dict(method=method, role="standalone" if method in SUBJECTS else ("vendor-assisted" if method in ASSISTED else "independent"),
         policy="retained" if method in ("libxsmm-retained", "onednn-cached-plan") else "one-shot",
         status="available" if available[method] else "unavailable", sha256=digest(path) if path.is_file() else ""))
 
@@ -91,7 +95,7 @@ receipt = dict(production="a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6",
     benchmark=subprocess.check_output(["git","-C",str(HERE),"rev-parse","HEAD"],text=True).strip(),
     run=int(os.environ["GITHUB_RUN_ID"]), attempt=int(os.environ["GITHUB_RUN_ATTEMPT"]),
     replica=int(os.environ["FRONTIER_REPLICA"]), cpu=CPU, page=PAGE,
-    source_files={name:digest(OUT/name) for name in ("panel.csv","protocol.md","novelty.json","candidate.sha256","methods.csv")})
+    source_files={name:digest(OUT/name) for name in globals().get("receipt_files", ("panel.csv","protocol.md","novelty.json","candidate.sha256","methods.csv"))})
 (OUT/"run.json").write_text(json.dumps(receipt, indent=2)+"\n")
 
 

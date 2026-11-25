@@ -5,12 +5,20 @@ release=$(cd "$1" && pwd)
 work=$(mkdir -p "$2" && cd "$2" && pwd)
 out=$(mkdir -p "$3" && cd "$3" && pwd)
 cpu=$4
+methods=(stream-incumbent grouped-b)
+source_options=()
+if [[ $# == 5 && $5 == --incumbent-only ]]; then
+    methods=(stream-incumbent)
+    source_options+=(--incumbent-only)
+elif [[ $# != 4 ]]; then
+    exit 2
+fi
 here=$(cd "$(dirname "$0")" && pwd)
 shared=$(dirname "$here")
 cc=${CC:-gcc}
 sha(){ sha256sum "$1" | cut -d' ' -f1; }
 [[ $(uname -s) == Linux && $(uname -m) == x86_64 ]]
-python3 -B "$here/sources.py" "$release" "$work" "$out" > "$out/grouped-prepare.txt"
+python3 -B "$here/sources.py" "$release" "$work" "$out" "${source_options[@]}" > "$out/grouped-prepare.txt"
 repo=$(git -C "$shared" rev-parse --show-toplevel)
 git -C "$repo" show b83033d199137b370c03a5a3d63365f1025162b7:tools/world-rank/challenger-flags.txt > "$out/grouped-dispatch-flags.txt"
 "$cc" -std=c11 -O2 "$shared/stream/isa.c" -o "$work/grouped-isa"
@@ -21,7 +29,7 @@ read -r has2 has512 < "$out/grouped-native-features.txt"
 [[ $has2 == 1 && ( $has512 == 0 || $has512 == 1 ) ]]
 printf 'implementation,source_revision,source_manifest_sha256,patch_sha256,archive_sha256,installed_archive_sha256,header_sha256,worker_sha256,trace_sha256,flags_sha256,public_symbol\n' > "$out/grouped-builds.csv"
 : > "$out/grouped-guard-tests.txt"
-for method in stream-incumbent grouped-b; do
+for method in "${methods[@]}"; do
     root=$work/$method; src=$root/source; sdk=$root/sdk; obj=$root/objects
     cflags='-march=native -masm=att'
     while IFS= read -r spec; do [[ -z $spec ]] || cflags+=" -D$spec"; done < "$out/grouped-dispatch-flags.txt"
@@ -76,6 +84,7 @@ for method in stream-incumbent grouped-b; do
         "$(git -C "$release" rev-parse HEAD)" "$manifest" "$patch_id" "$(sha "$obj/libcob_matmul.a")" "$(sha "$lib")" \
         "$(sha "$header")" "$(sha "$work/$method.worker")" "$(sha "$work/$method.trace.worker")" "$(sha "$out/$method-flags.json")" >> "$out/grouped-builds.csv"
 done
+if [[ ${#methods[@]} == 1 ]]; then exit 0; fi
 python3 -B - "$out" <<'PY'
 import json,sys
 from pathlib import Path
