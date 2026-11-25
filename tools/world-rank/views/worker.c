@@ -24,6 +24,9 @@ static struct view parent(int rows,int cols,int ld,int row,int col,uint32_t bits
     return v;
 }
 
+#ifdef RANK_VIEW_REFERENCE
+#include "../ragged-hk/golden.h"
+#else
 static double verify(struct view a,struct view b,struct view c,size_t *guards)
 {
     double *row=calloc((size_t)c.cols,sizeof(*row));
@@ -53,6 +56,8 @@ static double verify(struct view a,struct view b,struct view c,size_t *guards)
     return worst;
 }
 
+#endif
+
 #ifdef VIEW_AUDIT_HEADER
 #include VIEW_AUDIT_HEADER
 #endif
@@ -70,7 +75,12 @@ int main(int argc,char **argv)
 #endif
     const char *mode=argv[2]; uint32_t seed=number(argv[3]);
     const int calls=number(argv[4]),m=number(argv[5]),n=number(argv[6]),k=number(argv[7]);
-    if (m<=0 || m>4096 || n<=0 || n>8192 || k<=0 || k>2048 || calls>1024) fatal("invalid dimensions");
+#ifdef RANK_VIEW_REFERENCE
+    const int k_limit=3840;
+#else
+    const int k_limit=2048;
+#endif
+    if (m<=0 || m>4096 || n<=0 || n>8192 || k<=0 || k>k_limit || calls>1024) fatal("invalid dimensions");
     struct view a=parent(m,k,number(argv[8]),number(argv[11]),number(argv[12]),input_guard);
     struct view b=parent(k,n,number(argv[9]),number(argv[13]),number(argv[14]),input_guard);
     struct view c=parent(m,n,number(argv[10]),number(argv[15]),number(argv[16]),output_guard);
@@ -86,13 +96,27 @@ int main(int argc,char **argv)
     } else fatal("unknown distribution");
     if (mprotect(a.start,a.bytes,PROT_READ) || mprotect(b.start,b.bytes,PROT_READ)) fatal("read-only parents");
     for(int i=0;i<m;++i) for(int j=0;j<n;++j) c.data[(size_t)i*c.ld+j]=NAN;
+#ifdef RANK_VIEW_REFERENCE
+    if (getenv("RAGGED_WRITE_REFERENCE")) { generate_reference(a,b,c,trace_lib); return 0; }
+    double cpu_start=thread_clock();
+#endif
     double start=seconds();
     product(m,n,k,a.data,a.ld,b.data,b.ld,c.data,c.ld);
     double first=seconds()-start;
+#ifdef RANK_VIEW_REFERENCE
+    double cpu_first=thread_clock()-cpu_start;
+#endif
     if (!single_task()) fatal("thread count after first call");
+#ifdef RANK_VIEW_REFERENCE
+    cpu_start=thread_clock();
+#endif
     start=seconds();
     for (int r=0;r<calls;++r) product(m,n,k,a.data,a.ld,b.data,b.ld,c.data,c.ld);
     double elapsed=seconds()-start;
+#ifdef RANK_VIEW_REFERENCE
+    double cpu_elapsed=thread_clock()-cpu_start;
+    report_hashes(a,b,c,cpu_first,calls ? cpu_elapsed/calls : 0,trace_lib);
+#endif
     if (!single_task()) fatal("thread count after batch");
     size_t guards;
     double error=verify(a,b,c,&guards);
