@@ -3166,6 +3166,11 @@ static int cob_sgemm_one_shot_x86(int m, int n, int k, const float* a, int lda,
 #define COB_USE_NATIVE_PANELS 1
 #include "cob_blocked_leaf.inc"
 #include "cob_short_axes.inc"
+#if defined(COB_USE_X86_SIMD) && ((defined(__AVX2__) && defined(__FMA__)) || \
+    (defined(__AVX512F__) && !defined(COB_DISABLE_X86_AVX512)))
+#define COB_USE_SMALL_X86 1
+#include "cob_small_x86.inc"
+#endif
 #endif
 
 static void cob_sgemm_rowmajor_fallback(
@@ -4197,6 +4202,11 @@ static int cob_sgemm_try_sme_classical(int m, int n, int k, const float* a, int 
 }
 #endif
 
+#if defined(COB_WITH_STRASSEN_SME_LEAF) && defined(COB_USE_APPLE_SME) && defined(COB_USE_APPLE_AMX)
+extern int cob_sgemm_sme_tiny(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc);
+#endif
+
 void cob_sgemm_rowmajor(
     int m,
     int n,
@@ -4208,6 +4218,18 @@ void cob_sgemm_rowmajor(
     float* c,
     int ldc)
 {
+#if defined(COB_WITH_STRASSEN_SME_LEAF) && defined(COB_USE_APPLE_SME) && defined(COB_USE_APPLE_AMX)
+    if (m >= 16 && m <= 96 && n >= 16 && n <= 96 && k >= 16 && k <= 96 &&
+        a && b && c && lda >= k && ldb >= n && ldc >= n && cob_apple_sme2p1_available() &&
+        !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, a, (size_t)(m - 1) * lda + k) &&
+        !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, b, (size_t)(k - 1) * ldb + n) &&
+        cob_sgemm_sme_tiny(m, n, k, a, lda, b, ldb, c, ldc)) {
+        return;
+    }
+#endif
+#if defined(COB_USE_SMALL_X86)
+    if (cob_try_small_x86(m, n, k, a, lda, b, ldb, c, ldc)) return;
+#endif
 #if defined(COB_USE_NATIVE_PANELS)
     if (cob_try_short_axes(m, n, k, a, lda, b, ldb, c, ldc)) return;
 #endif

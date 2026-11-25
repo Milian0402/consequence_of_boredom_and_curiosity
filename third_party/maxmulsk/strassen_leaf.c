@@ -704,7 +704,9 @@ static inline void cob_sme_vector_tile(int rows, int groups, int columns, int k,
     int p = 0;
     for (; k - p >= 4; p += 4) {
         const svfloat32_t left0 = svld1rq_f32(lanes, a + p);
-        const svfloat32_t left1 = rows == 2 ? svld1rq_f32(lanes, a + lda + p) : left0;
+        const svfloat32_t left1 = rows >= 2 ? svld1rq_f32(lanes, a + lda + p) : left0;
+        const svfloat32_t left2 = rows >= 3 ? svld1rq_f32(lanes, a + 2 * (size_t)lda + p) : left0;
+        const svfloat32_t left3 = rows >= 4 ? svld1rq_f32(lanes, a + 3 * (size_t)lda + p) : left0;
         /* The indexed FMA requires a literal lane number. */
 #define COB_SME_VECTOR_STEP(lane) do { \
     for (int g = 0; g < groups; ++g) { \
@@ -712,8 +714,14 @@ static inline void cob_sme_vector_tile(int rows, int groups, int columns, int k,
         const float* bp = b + (size_t)(p + lane) * ldb + 64 * g; \
         const svfloat32x4_t right = svld1_f32_x4(mask, bp); \
         svmla_lane_za32_f32_vg1x4(g, right, left0, lane); \
-        if (rows == 2) { \
+        if (rows >= 2) { \
             svmla_lane_za32_f32_vg1x4(groups + g, right, left1, lane); \
+        } \
+        if (rows >= 3) { \
+            svmla_lane_za32_f32_vg1x4(2 * groups + g, right, left2, lane); \
+        } \
+        if (rows >= 4) { \
+            svmla_lane_za32_f32_vg1x4(3 * groups + g, right, left3, lane); \
         } \
     } \
 } while (0)
@@ -837,6 +845,127 @@ static inline void cob_sme_outer_rows(int m, int n, int k, const float *a, int l
         kb += count;
     }
 }
+/* Reorient up to sixteen A rows inside ZA and pad its unused rows with zeros.
+   Each four consecutive packed K vectors can then be loaded in one instruction. */
+__attribute__((always_inline)) static inline void
+cob_sme_pack_short_a(int m, int count, const float* a, int lda,
+                     float* dst) __arm_streaming __arm_inout("za")
+{
+    const svbool_t full = svptrue_b32();
+    for (int p = 0; p < count;) {
+        const int width = count - p < 16 ? count - p : 16;
+        const svbool_t cols = svwhilelt_b32_s32(0, width);
+        svzero_za();
+        for (int i = 0; i < m; ++i) {
+            svld1_hor_za32(0, i, cols, a + (size_t)i * lda + p);
+        }
+        for (int t = 0; t < width; ++t) {
+            svst1_ver_za32(0, t, full, dst + (size_t)(p + t) * 16);
+        }
+        p += width;
+    }
+}
+
+__attribute__((always_inline)) static inline void
+cob_sme_short_k_tile(int count, const float* packed, const float* b, int stride,
+                     svcount_t columns) __arm_streaming __arm_inout("za")
+{
+    const svbool_t all = svptrue_b32();
+    const svcount_t all4 = svptrue_c32();
+    int p = 0;
+    for (; count - p >= 4; p += 4) {
+        svfloat32x4_t a4 = svld1_f32_x4(all4, packed + (size_t)p * 16);
+#define COB_SME_SHORT_K_STEP(kk)                                                                     \
+    do {                                                                                             \
+        svfloat32x4_t bv = svld1_f32_x4(columns, b + (size_t)(p + kk) * stride);                     \
+        svfloat32_t av = svget4_f32(a4, kk);                                                         \
+        svmopa_za32_f32_m(0, all, all, av, svget4_f32(bv, 0));                                       \
+        svmopa_za32_f32_m(1, all, all, av, svget4_f32(bv, 1));                                       \
+        svmopa_za32_f32_m(2, all, all, av, svget4_f32(bv, 2));                                       \
+        svmopa_za32_f32_m(3, all, all, av, svget4_f32(bv, 3));                                       \
+    } while (0)
+        COB_SME_SHORT_K_STEP(0);
+        COB_SME_SHORT_K_STEP(1);
+        COB_SME_SHORT_K_STEP(2);
+        COB_SME_SHORT_K_STEP(3);
+#undef COB_SME_SHORT_K_STEP
+    }
+    for (; p < count; ++p) {
+        svfloat32_t av = svld1_f32(all, packed + (size_t)p * 16);
+        svfloat32x4_t bv = svld1_f32_x4(columns, b + (size_t)p * stride);
+        svmopa_za32_f32_m(0, all, all, av, svget4_f32(bv, 0));
+        svmopa_za32_f32_m(1, all, all, av, svget4_f32(bv, 1));
+        svmopa_za32_f32_m(2, all, all, av, svget4_f32(bv, 2));
+        svmopa_za32_f32_m(3, all, all, av, svget4_f32(bv, 3));
+    }
+}
+
+__attribute__((always_inline)) static inline void
+cob_sme_transfer_short_c(int m, int n, float* c, int ldc, int store) __arm_streaming __arm_inout("za")
+{
+    const svbool_t all = svptrue_b32();
+    for (int i = 0; i < m; ++i) {
+        float* row = c + (size_t)i * ldc;
+#define COB_SME_SHORT_TRANSFER(tile)                                                                 \
+    do {                                                                                             \
+        if (n > 16 * tile) {                                                                         \
+            svbool_t pred = n >= 16 * (tile + 1) ? all : svwhilelt_b32_s32(16 * tile, n);            \
+            if (store) {                                                                             \
+                svst1_hor_za32(tile, i, pred, row + 16 * tile);                                      \
+            } else {                                                                                 \
+                svld1_hor_za32(tile, i, pred, row + 16 * tile);                                      \
+            }                                                                                        \
+        }                                                                                            \
+    } while (0)
+        COB_SME_SHORT_TRANSFER(0);
+        COB_SME_SHORT_TRANSFER(1);
+        COB_SME_SHORT_TRANSFER(2);
+        COB_SME_SHORT_TRANSFER(3);
+#undef COB_SME_SHORT_TRANSFER
+    }
+}
+
+/* Keep the short A panel in L1 and stream B in four consecutive tiles.
+   The final mask covers the real columns even when the row has no padding. */
+__attribute__((always_inline)) static inline void
+cob_sme_transposed_short_rows(int m, int n, int k, const float* a, int lda, const float* b, int ldb,
+                              float* c, int ldc) __arm_streaming __arm_inout("za")
+{
+    enum { panel_depth = 128, group_columns = 256 };
+    _Alignas(64) float packed_a[panel_depth * 16];
+    const svcount_t full = svptrue_c32();
+    for (int p = 0; p < k;) {
+        const int depth = k - p < panel_depth ? k - p : panel_depth;
+        cob_sme_pack_short_a(m, depth, a + p, lda, packed_a);
+        for (int j = 0; j < n;) {
+            const int width = n - j < group_columns ? n - j : group_columns;
+            for (int g = 0; g < (width + 63) / 64; ++g) {
+                const int start = 64 * g;
+                const int cols = width - start < 64 ? width - start : 64;
+                float* output = c + j + start;
+                const float* right = b + (size_t)p * ldb + j + start;
+                if (p == 0) {
+                    svzero_za();
+                } else if (cols == 64) {
+                    cob_sme_transfer_short_c(m, 64, output, ldc, 0);
+                } else {
+                    cob_sme_transfer_short_c(m, cols, output, ldc, 0);
+                }
+                if (cols == 64) {
+                    cob_sme_short_k_tile(depth, packed_a, right, ldb, full);
+                    cob_sme_transfer_short_c(m, 64, output, ldc, 1);
+                } else {
+                    const svcount_t mask = svwhilelt_c32_u64(0, cols, 4);
+                    cob_sme_short_k_tile(depth, packed_a, right, ldb, mask);
+                    cob_sme_transfer_short_c(m, cols, output, ldc, 1);
+                }
+            }
+            j += width;
+        }
+        p += depth;
+    }
+}
+
 __arm_new("za") __arm_locally_streaming
 int cob_sgemm_sme_few_rows(int m, int n, int k, const float* a, int lda,
     const float* b, int ldb, float* c, int ldc)
@@ -848,6 +977,12 @@ int cob_sgemm_sme_few_rows(int m, int n, int k, const float* a, int lda,
         cob_sme_vector_rows(1, n, k, a, lda, b, ldb, c, ldc);
     } else if (m == 2) {
         cob_sme_vector_rows(2, n, k, a, lda, b, ldb, c, ldc);
+    } else if (m == 3) {
+        cob_sme_vector_rows(3, n, k, a, lda, b, ldb, c, ldc);
+    } else if (m == 4) {
+        cob_sme_vector_rows(4, n, k, a, lda, b, ldb, c, ldc);
+    } else if (m >= 8) {
+        cob_sme_transposed_short_rows(m, n, k, a, lda, b, ldb, c, ldc);
     } else {
         cob_sme_outer_rows(m, n, k, a, lda, b, ldb, c, ldc);
     }
@@ -1077,4 +1212,66 @@ int cob_sgemm_strassen_fused_square(int n, const float* a, int lda,
     int ok = fused_square(&w, a, b, c);
     free(workspace);
     return ok;
+}
+
+/* A packed 16-row panel feeds four 16-column SME tiles for small SGEMM. */
+__attribute__((always_inline))
+static inline void cob_sme_tiny_step(int groups,int p,svbool_t rows,svbool_t c0,svbool_t c1,
+                              svbool_t c2,svbool_t c3,const float *pack,const float *b,int ldb)
+    __arm_streaming __arm_inout("za")
+{
+    svfloat32_t a=svld1_f32(rows,pack+16*p);
+    const float *r=b+(size_t)p*ldb;
+    svmopa_za32_f32_m(0,rows,c0,a,svld1_f32(c0,r));
+    if (groups>1) svmopa_za32_f32_m(1,rows,c1,a,svld1_f32(c1,r+16));
+    if (groups>2) svmopa_za32_f32_m(2,rows,c2,a,svld1_f32(c2,r+32));
+    if (groups>3) svmopa_za32_f32_m(3,rows,c3,a,svld1_f32(c3,r+48));
+}
+
+__attribute__((always_inline))
+static inline void cob_sme_tiny_tile(int groups,int rows,int width,int k,const float *pack,const float *b,
+                        int ldb,float *c,int ldc) __arm_streaming __arm_inout("za")
+{
+    svbool_t r=svwhilelt_b32_s32(0,rows), c0=svwhilelt_b32_s32(0,width);
+    svbool_t c1=svwhilelt_b32_s32(16,width), c2=svwhilelt_b32_s32(32,width), c3=svwhilelt_b32_s32(48,width);
+    svzero_za();
+    int p=0;
+    for (;p+8<=k;p+=8) {
+#pragma clang loop unroll(full)
+        for (int t=0;t<8;++t) cob_sme_tiny_step(groups,p+t,r,c0,c1,c2,c3,pack,b,ldb);
+    }
+    for (;p<k;++p) cob_sme_tiny_step(groups,p,r,c0,c1,c2,c3,pack,b,ldb);
+    for (int i=0;i<rows;++i) {
+        float *out=c+(size_t)i*ldc;
+        svst1_hor_za32(0,i,c0,out);
+        if (groups>1) svst1_hor_za32(1,i,c1,out+16);
+        if (groups>2) svst1_hor_za32(2,i,c2,out+32);
+        if (groups>3) svst1_hor_za32(3,i,c3,out+48);
+    }
+}
+
+__arm_new("za") __arm_locally_streaming
+int cob_sgemm_sme_tiny(int m,int n,int k,const float *a,int lda,const float *b,int ldb,float *c,int ldc)
+{
+    if (svcntsw()!=16 || k>96) return 0;
+    _Alignas(64) float pack[96*16];
+    for (int base=0;base<m;base+=16) {
+        int rows=m-base<16?m-base:16;
+        svbool_t rowmask=svwhilelt_b32_s32(0,rows);
+        for (int kb=0;kb<k;kb+=16) {
+            int count=k-kb<16?k-kb:16;
+            svbool_t kmask=svwhilelt_b32_s32(0,count);
+            for (int i=0;i<rows;++i) svld1_hor_za32(0,i,kmask,a+(size_t)(base+i)*lda+kb);
+            for (int p=0;p<count;++p) svst1_ver_za32(0,p,rowmask,pack+(kb+p)*16);
+        }
+        for (int col=0;col<n;col+=64) {
+            int width=n-col<64?n-col:64;
+            float *out=c+(size_t)base*ldc+col;
+            if (width>48) cob_sme_tiny_tile(4,rows,width,k,pack,b+col,ldb,out,ldc);
+            else if (width>32) cob_sme_tiny_tile(3,rows,width,k,pack,b+col,ldb,out,ldc);
+            else if (width>16) cob_sme_tiny_tile(2,rows,width,k,pack,b+col,ldb,out,ldc);
+            else cob_sme_tiny_tile(1,rows,width,k,pack,b+col,ldb,out,ldc);
+        }
+    }
+    return 1;
 }
