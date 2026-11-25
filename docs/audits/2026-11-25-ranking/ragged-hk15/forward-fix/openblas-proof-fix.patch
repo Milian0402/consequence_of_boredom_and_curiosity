@@ -1,0 +1,124 @@
+diff --git a/tools/world-rank/ragged-hk/vendor-release.sh b/tools/world-rank/ragged-hk/vendor-release.sh
+index ee3cc22197d35642ef963e67097137e28d2d7ce1..8ae21e763bb3e05244f93809085cf43b092ba91b 100644
+--- a/tools/world-rank/ragged-hk/vendor-release.sh
++++ b/tools/world-rank/ragged-hk/vendor-release.sh
+@@ -40,6 +40,7 @@ fi
+ provider=$6
+ [[ $provider == openblas || $provider == "$native" ]]
+ mode=$7
++trap 'printf "Release proof failed for %s/%s at line %d: %s\n" "$provider" "$mode" "$LINENO" "$BASH_COMMAND" >&2' ERR
+ case "$mode" in aligned-two) align=ON; align_bit=1 ;; two) align=OFF; align_bit=0 ;; *) exit 2 ;; esac
+ label=release-$provider-$mode
+ build=$work/$label-build
+@@ -124,7 +125,12 @@ common=(-std=c11 -O3 "$tuning" -ffunction-sections -fdata-sections "-Wl,--gc-sec
+         "-I$install/include" "-I$here/..")
+ timed=$work/$label.worker
+ trace=$work/$label.trace.worker
+-"$cc" "${common[@]}" "$here/worker.c" "$archive" "${libs[@]}" -o "$timed"
++link_proof=()
++if [[ $provider == openblas ]]; then
++    link_proof=(-Wl,--trace-symbol=cblas_sgemm,--trace-symbol=openblas_get_num_threads)
++fi
++LC_ALL=C "$cc" "${common[@]}" "${link_proof[@]}" "$here/worker.c" "$archive" "${libs[@]}" -o "$timed" \
++    2> "$build/ordinary-link.log" || { cat "$build/ordinary-link.log" >&2; exit 1; }
+ "$cc" "${common[@]}" "-D$selector=1" "-DRAGGED_ALIGNED=$align_bit" "-I$inc" "$here/worker.c" "$here/vendor-witness.c" \
+     "$archive" -Wl,--wrap=cblas_sgemm,--wrap=cob_sgemm_rowmajor "${libs[@]}" -o "$trace"
+ 
+@@ -150,9 +156,8 @@ for symbol in __wrap_cob_sgemm_rowmajor __wrap_cblas_sgemm; do
+     grep -F " T $symbol" "$build/$(basename "$trace").symbols" >/dev/null
+ done
+ if [[ $provider == openblas ]]; then
+-    for s in cblas_sgemm sgemm_; do
+-        grep -E " [Tt] $s\$" "$build/$(basename "$timed").symbols" >/dev/null
+-    done
++    python3 "$here/check-openblas-link.py" "$archive" "$lib/libopenblas.a" \
++        "$build/ordinary-link.log" "$build/$(basename "$timed").symbols" > "$out/$label-static-openblas.txt"
+ fi
+ identity=$out/$label-identity.sha256
+ : > "$identity"
+diff --git a/tools/world-rank/ragged-hk/check-openblas-link.py b/tools/world-rank/ragged-hk/check-openblas-link.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..0f2c5928490c55e526348f78eefc9adf445366a0
+--- /dev/null
++++ b/tools/world-rank/ragged-hk/check-openblas-link.py
+@@ -0,0 +1,30 @@
++"""Verify GNU ld's static symbol origins and the ordinary Linux executable's definitions."""
++from pathlib import Path
++import re
++import sys
++
++
++def member(lines, archive, relation, symbol):
++    suffix = ': ' + relation + ' ' + symbol
++    records = {line for line in lines if line.endswith(suffix)}
++    pattern = re.compile(r'(?:^|: )' + re.escape(str(archive)) + r'\(([^()]+)\)' + re.escape(suffix) + '$')
++    matches = {match[1] for line in records if (match := pattern.search(line))}
++    if len(matches) != 1 or (relation == 'definition of' and len(records) != 1):
++        raise ValueError(f'Expected one {archive.name} member with {relation} {symbol}, found {sorted(matches)}')
++    return matches.pop()
++
++
++def verify(cob, openblas, trace, symbols):
++    lines = trace.read_text().splitlines()
++    functions = {row[-1] for line in symbols.read_text().splitlines()
++                 if len(row := line.split()) == 3 and row[1] in ('T', 't')}
++    for api in ('cblas_sgemm', 'openblas_get_num_threads'):
++        if api not in functions:
++            raise ValueError(f'Missing {api} in the statically linked ordinary worker')
++        caller = member(lines, cob, 'reference to', api)
++        provider = member(lines, openblas, 'definition of', api)
++        print(f'{cob.name}({caller}) -> {openblas.name}({provider}): {api}')
++
++
++if __name__ == '__main__':
++    verify(*(Path(arg) for arg in sys.argv[1:]))
+diff --git a/tools/world-rank/ragged-hk/test-openblas-link.py b/tools/world-rank/ragged-hk/test-openblas-link.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..88c90e8bd93f998895ce56a6bdb84dd884481b2f
+--- /dev/null
++++ b/tools/world-rank/ragged-hk/test-openblas-link.py
+@@ -0,0 +1,44 @@
++"""Check static-provider qualification without executing an SGEMM or requiring a BLAS installation."""
++from contextlib import redirect_stdout
++from io import StringIO
++from pathlib import Path
++from tempfile import TemporaryDirectory
++import runpy
++import unittest
++
++verify = runpy.run_path(str(Path(__file__).with_name('check-openblas-link.py')))['verify']
++COB, BLAS = Path('/install/libcob_matmul.a'), Path('/native/libopenblas.a')
++SYMBOLS = '0000 T cblas_sgemm\n0008 T openblas_get_num_threads\n'
++RECORDS = '\n'.join(f'ld: {archive}({member}): {relation} {api}'
++                    for api, owner in [('cblas_sgemm','cblas_sgemm.o'), ('openblas_get_num_threads','memory.o')]
++                    for archive, member, relation in ((COB,'gemm.c.o','reference to'), (BLAS,owner,'definition of')))
++
++
++class StaticProviderTest(unittest.TestCase):
++    def check(self, trace=RECORDS, nm=SYMBOLS):
++        with TemporaryDirectory() as tmp:
++            log, symbols = Path(tmp)/'link.log', Path(tmp)/'symbols'
++            log.write_text(trace)
++            symbols.write_text(nm)
++            with redirect_stdout(StringIO()):
++                verify(COB, BLAS, log, symbols)
++
++    def test_only_the_called_interfaces_are_required(self):
++        self.check()
++        self.check(nm=SYMBOLS + '0010 T sgemm_\n')
++
++    def test_reject_wrong_or_missing_proof(self):
++        for trace, nm in [
++            (RECORDS.replace(str(COB),'/foreign/libcob_matmul.a'), SYMBOLS),
++            (RECORDS.replace(str(BLAS),'/foreign/libopenblas.a'), SYMBOLS),
++            (RECORDS + '\nld: /foreign/lib.so: definition of cblas_sgemm', SYMBOLS),
++            (RECORDS.replace('reference to cblas_sgemm','reference to sgemm_'), SYMBOLS),
++            (RECORDS, SYMBOLS.replace('openblas_get_num_threads','sgemm_')),
++            (RECORDS, SYMBOLS.replace('T cblas_sgemm','U cblas_sgemm')),
++        ]:
++            with self.subTest(trace=trace, nm=nm), self.assertRaisesRegex(ValueError,'cblas_sgemm|openblas_get_num_threads'):
++                self.check(trace,nm)
++
++
++if __name__ == '__main__':
++    unittest.main()

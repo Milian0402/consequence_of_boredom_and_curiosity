@@ -1,0 +1,4 @@
+/usr/bin/ld: /work/product/release-openblas-two-install/lib/libcob_matmul.a(gemm.c.o): reference to openblas_get_num_threads
+/usr/bin/ld: /work/product/release-openblas-two-install/lib/libcob_matmul.a(gemm.c.o): reference to cblas_sgemm
+/usr/bin/ld: /tmp/openblas-sdk/lib/libopenblas.a(cblas_sgemm.o): definition of cblas_sgemm
+/usr/bin/ld: /tmp/openblas-sdk/lib/libopenblas.a(memory.o): definition of openblas_get_num_threads

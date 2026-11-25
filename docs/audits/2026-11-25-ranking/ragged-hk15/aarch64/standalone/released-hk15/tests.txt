@@ -1,0 +1,6 @@
+1/5 Test #1: cob_gemm_test ....................   Passed    0.20 sec
+2/5 Test #2: cob_gemm_strassen_test ...........   Passed    0.20 sec
+3/5 Test #3: cob_gemm_strassen_square_test ....   Passed    0.20 sec
+4/5 Test #4: cob_portable_strassen_test .......   Passed    0.16 sec
+5/5 Test #5: cob_fused_strassen_test ..........   Passed    0.06 sec
+100% tests passed, 0 tests failed out of 5

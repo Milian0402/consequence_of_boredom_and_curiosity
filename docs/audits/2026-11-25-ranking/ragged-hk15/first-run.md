@@ -1,0 +1,5 @@
+# First measurement and reporting recovery
+
+The initial run at benchmark `70dec367ddbf56072e3e6672a8adbe55188df33a` recorded all 30 warm shape-and-round progress markers in each native job. During CSV reporting, the name holding the already-checked trace output digest was reused for a child dimension. Both offline scorers correctly rejected that stored integer. The artifact uploader also rejected the literal `..` component in its path. GitHub retained zero measurement artifacts for that run, so its timings cannot enter the estimates. [First run](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45706678234)
+
+The recovery gives the output digest and child dimensions separate names and uploads from an ordinary workspace child. A fresh native draw on each architecture supplies the complete measurements. The release source, candidate patch, panel, schedule, numerical fixtures, scoring code and thresholds are identical to the first run. The first-run progress markers establish execution through the timing schedule, without establishing numerical or speed outcomes for individual methods.

@@ -1,0 +1,28 @@
+{
+  "gemm.c": [
+    "-DCOB_ENABLE_HK15=1",
+    "-DCOB_ENABLE_HK15_RAGGED=1",
+    "-DCOB_ENABLE_PORTABLE_STRASSEN=1",
+    "-DCOB_ENABLE_RECURSIVE_STRASSEN=1",
+    "-DCOB_SGEMM_STRASSEN1_MIN_DIM=8192",
+    "-DCOB_SGEMM_STRASSEN1_SQUARE_MIN_DIM=128",
+    "-DCOB_USE_NEON=1",
+    "-mcpu=native",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c11"
+  ],
+  "cob_hk15_ragged.c": [
+    "-DCOB_ENABLE_HK15=1",
+    "-DCOB_ENABLE_HK15_RAGGED=1",
+    "-DCOB_ENABLE_PORTABLE_STRASSEN=1",
+    "-DCOB_ENABLE_RECURSIVE_STRASSEN=1",
+    "-DCOB_SGEMM_STRASSEN1_MIN_DIM=8192",
+    "-DCOB_SGEMM_STRASSEN1_SQUARE_MIN_DIM=128",
+    "-DCOB_USE_NEON=1",
+    "-mcpu=native",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c11"
+  ]
+}

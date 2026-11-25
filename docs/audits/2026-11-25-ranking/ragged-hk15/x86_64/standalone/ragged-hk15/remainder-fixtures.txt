@@ -1,0 +1,1 @@
+PASS 11 actual size boundaries, 18 residue classes x 5 fixtures, 90 one-shot calls, 46620 FP64 outputs, max_abs_error=1.84856156e-06; exact integer outputs, 11 null/stride/tail-overlap/address-overflow guards; scratch failure before write with full public retry.

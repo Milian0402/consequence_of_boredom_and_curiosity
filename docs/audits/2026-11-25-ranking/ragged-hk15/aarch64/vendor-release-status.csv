@@ -1,0 +1,5 @@
+method,provider,status
+release-openblas-aligned-two,openblas,build_or_public_fixture_failed
+release-openblas-two,openblas,build_or_public_fixture_failed
+release-armpl-aligned-two,armpl,build_or_public_fixture_failed
+release-armpl-two,armpl,build_or_public_fixture_failed

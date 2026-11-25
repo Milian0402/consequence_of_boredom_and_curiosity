@@ -1,0 +1,136 @@
+{
+  "a_hash": "fd35368a75f77e2ec288dcad555c8c0ba2216c756c7d892fef6e1672d0917b02",
+  "b_hash": "90bd6f1c812a7769d5d014e869882f4e9bfe91bcfcc4ff914eb2f979839b7a99",
+  "distribution": "random",
+  "measured_benchmark": "37ead44b9f3a144dada8a92b17bd447b138e6689",
+  "measured_sha256": "df2f2afe44be4473b23a78bbf9a04a7523c3075fd6a246f65c08dc00c4251b7a",
+  "methods": {
+    "release-openblas-aligned-two": {
+      "core_leaves": 49,
+      "ctest_passed": 2,
+      "route": "aligned-two-winograd",
+      "total_vendor_calls": 52,
+      "vendor": "OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING VORTEX SINGLE_THREADED",
+      "workers": {
+        "ordinary": {
+          "checked": 4202499,
+          "cpu": 0,
+          "executable": "release-openblas-aligned-two.worker",
+          "guards": 50173,
+          "max_error": 0.000464662327985,
+          "output_sha256": "9b006850729958d590c569c6c6b3fea1fe41dfb79f1dbf94071e431f2a0f945c",
+          "residues_mod64": [
+            8,
+            48,
+            56
+          ],
+          "sha256": "be62e630ff648841064cccb90f0111188b21cb698ddd5c1c312062caeb84d6ce",
+          "threads": 1
+        },
+        "trace": {
+          "checked": 4202499,
+          "cpu": 0,
+          "executable": "release-openblas-aligned-two.trace.worker",
+          "guards": 50173,
+          "max_error": 0.000464662327985,
+          "output_sha256": "9b006850729958d590c569c6c6b3fea1fe41dfb79f1dbf94071e431f2a0f945c",
+          "residues_mod64": [
+            8,
+            48,
+            56
+          ],
+          "sha256": "aac66ae980787381a4641d70959831669f9ba0b57540c37741c8d5d2e2cb2a77",
+          "threads": 1
+        }
+      }
+    },
+    "release-openblas-two": {
+      "core_leaves": 49,
+      "ctest_passed": 2,
+      "route": "two-level-winograd",
+      "total_vendor_calls": 51,
+      "vendor": "OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING VORTEX SINGLE_THREADED",
+      "workers": {
+        "ordinary": {
+          "checked": 4202499,
+          "cpu": 0,
+          "executable": "release-openblas-two.worker",
+          "guards": 50173,
+          "max_error": 0.000536793343308,
+          "output_sha256": "34de05611254004886ef2ae1a693a53eaf9df8cbf39694764c5c8fd008c87a50",
+          "residues_mod64": [
+            8,
+            48,
+            56
+          ],
+          "sha256": "7f2bd0c73b01bcb78dd9ba39c2bdc4ef8f0037657a5d178e951a401451d2d221",
+          "threads": 1
+        },
+        "trace": {
+          "checked": 4202499,
+          "cpu": 0,
+          "executable": "release-openblas-two.trace.worker",
+          "guards": 50173,
+          "max_error": 0.000536793343308,
+          "output_sha256": "34de05611254004886ef2ae1a693a53eaf9df8cbf39694764c5c8fd008c87a50",
+          "residues_mod64": [
+            8,
+            48,
+            56
+          ],
+          "sha256": "84b71e34542999a5be7843cd2c8106ca722a846d0d1d423a572e1f2298090ac1",
+          "threads": 1
+        }
+      }
+    }
+  },
+  "openblas_revision": "e0166008be8e466242aa76b2ff75ce3f0fbf574a",
+  "oracle": {
+    "adapter_sha256": "ff5000206fd2900dab6d87193c3d82d7273aa93baa8712bc07d497740dbb006b",
+    "fp64_outputs": 4202499,
+    "max_scalar_minus_dgemm": 4.97379915032e-14,
+    "scalar_fp64_spot_checks": 23
+  },
+  "origins": [
+    [
+      3,
+      2
+    ],
+    [
+      2,
+      4
+    ],
+    [
+      1,
+      6
+    ]
+  ],
+  "platform": "Linux aarch64, local correctness preflight",
+  "production_revision": "22d925ed5a31f7246eb2269675e9a3e85d502410",
+  "proposed_patch_sha256": "c7bedb0a89508773f7c2fd9d9f934d6c6545351037414a99c5605bcb636ca4ec",
+  "provider_archive_sha256": "ec2f44960a04608624c7a5832a3fa72c226093d42ef097fd3e0cdbed1a57ad29",
+  "retained_serial_elf": {
+    "cblas_sgemm_defined": true,
+    "fortran_interface_defined": false,
+    "runtime_configuration": "openblas_core=VORTEX openblas_configuration=OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING VORTEX SINGLE_THREADED threads=1",
+    "sha256": "ff5000206fd2900dab6d87193c3d82d7273aa93baa8712bc07d497740dbb006b",
+    "thread_getter_defined": true
+  },
+  "seed": 271713,
+  "shape": [
+    2049,
+    2051,
+    2053
+  ],
+  "source": "Retained OpenBLAS Git revision, rebuilt with USE_THREAD=0, USE_LOCKING=1, NO_SHARED=1, NO_LAPACK=1, NOFORTRAN=1. Compile-time node VORTEX.",
+  "source_files_sha256": {
+    "check-openblas-link.py": "46814cbc5349607fc1cef48b52d27238d5f82c6d5d4db5df8181e4a71bff8124",
+    "test-openblas-link.py": "c38ff9082c681e0b3b284c344390e66f84195118dfdae432f3289945ba0224ee",
+    "vendor-release.sh": "a43db93eff6c5fb57bb18d58c5bc4248ce5f99d198450d879e483bed6c6854ce"
+  },
+  "strides": [
+    2064,
+    2068,
+    2072
+  ]
+}

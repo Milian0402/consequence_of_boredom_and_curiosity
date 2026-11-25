@@ -1,5 +1,9 @@
 # Single-thread FP32 benchmark results
 
+The optional ragged Hopcroft–Kerr kernel made its largest verified gain on Arm Neoverse N2. Across three previously unmeasured large rectangles it was 10.8% faster than tuned standalone COB and 4.2% faster than FastMMW, the fastest qualified independent implementation. It won all 18 paired warmed comparisons against each and gave the lowest median of the nine qualified entries on all three. Four BLAS-backed COB configurations lacked qualifying times on Arm. On Intel Xeon 6975P-C the same code gained 0.4% over standalone COB and reached 88.8% of the fastest qualified independent library’s speed. The build option defaults to off. [Three fresh layouts, full field and offline replay](ragged-hk15/README.md) · [Kernel source](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/commit/6b91b849e2f4af91cdf7142dbeb75d2f027ba8c5)
+
+## Earlier large odd rectangles
+
 COB's regular public entry with sequential OpenBLAS subproducts won both registered odd layouts on an Arm Neoverse N2. Direct oneMKL beat every released build on both Intel Xeon 6975P-C holdouts. The same library can win on one CPU and lose on another for identical matrices.
 
 | CPU | Output rows × columns × inner dimension | COB, ms | Fastest independent one-shot entry, ms | COB paired wins |

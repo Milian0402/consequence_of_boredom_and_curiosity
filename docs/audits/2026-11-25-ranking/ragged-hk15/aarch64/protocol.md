@@ -1,0 +1,47 @@
+# Preregistered standalone ragged HK15 comparison
+
+The primary question is whether peeling the remainders of a single 2-by-3-by-3 Hopcroft–Kerr split speeds up the released standalone algorithm on large, nearly proportional rectangles. The five layouts, fixtures and comparison rule are fixed before new timing. Report each actual CPU model separately. Intel, AMD and Arm results do not share timing samples.
+
+## Cases
+
+| Role | M × N × K | Remainders M mod 2, N mod 3, K mod 3 | Why it is included |
+| --- | --- | --- | --- |
+| Divisible control | 1920 × 2880 × 2880 | 0, 0, 0 | Released HK15 previously led the qualified Neoverse N2 field at 500.508 ms. This comparison checks the same code path and reproducibility. |
+| Previously weak ragged | 2039 × 2969 × 3367 | 1, 2, 1 | Both standalone incumbents were behind stronger alternatives. N2 took 744.26 ms against 666.75 ms for released OpenBLAS-backed COB. Intel took 258.07 ms against 221.63 ms for direct oneMKL. |
+| Fresh depth only | 2024 × 3081 × 3005 | 0, 0, 2 | Adds two K contributions over the interior. |
+| Fresh row and column | 2153 × 3007 × 3159 | 1, 1, 0 | Computes both output borders with a full reduction depth, including their corner. |
+| Fresh all fringes | 1949 × 3227 × 3023 | 1, 2, 2 | Exercises all three remainder operations and a real view into three independently sized parents. |
+
+The exact strides and origins are in `panel.csv`, SHA-256 `6d9d898375f2f57eea76ae42d6ec04b0792d5440967da260b52c47b59c77dc42`. The cropped case starts 44, 56 and 48 bytes into the respective 64-byte cache lines. A scan of 856 distinct dimension tables and 280,599 prior geometry records found zero permutations of the three fresh triples. The repeats receive zero weight in the fresh-layout aggregate. [Historical control](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/tree/29f5817ed45a728bc012f332fa378dc95c6e7ef5/tools/world-rank) · [Prior ragged comparison](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45682774110)
+
+## Core, fringes and witnesses
+
+Set M₀ = M − M mod 2, N₀ = N − N mod 3, K₀ = K − K mod 3. The original fifteen products overwrite the M₀ × N₀ output using K₀ depth. The three remaining regions are:
+
+1. Add products from K₀ through K−1 to the M₀ × N₀ interior in increasing depth order.
+2. Overwrite the M₀ × (N−N₀) right strip using all K terms.
+3. Overwrite the (M−M₀) × N bottom strip using all K terms, including the bottom-right corner.
+
+Their scalar FMA counts sum to MNK−M₀N₀K₀ exactly. Every core child satisfies the original size and aspect tests. The minimal projected split covers all fresh geometries without changing the skinniest-child cutoff. Each active parent reuses its single existing 128-byte-aligned outer workspace of four times (mh×kh + kh×nh + mh×nh) bytes, where mh=M₀/2, nh=N₀/3 and kh=K₀/3. The candidate may compact at most K×(N−N₀) right-edge values in this workspace after the core completes. Count this work, all temporary allocation, all transforms and all output writes in the timed public call.
+
+A companion route worker verifies the same installed production build options and public entry on each actual view. Record core dimensions, 15 outer children and actual depth, right and bottom operations or scalar counts with their addresses. Expected candidate remainders are listed above. Divisible old and new builds must return identical logical FP32 output bytes on all four fixtures. The released standalone route must use HK on the divisible control and bypass HK on the four ragged layouts. The candidate must preserve all inputs and all surroundings of C. The patch owner also validates all 18 remainder triples (two row choices times three column and three depth choices) in a small exhaustive test at the native public boundary or an explicitly size-relaxed test, with the original production gate tested separately. Deny the sole outer workspace before any writes and verify fallback output against the ordinary public baseline. Existing child allocations may be separate.
+
+## Numerical qualification and cost
+
+Run two pseudorandom fixtures at seeds 154983127 and 720184093, cancellation with the first seed and split-scale with the second. Compute all output positions against full FP64 references with maximum absolute error ≤ 0.002, zero nonfinites, intact guards and read-only parents. Preserve the actual worst errors, checked cell counts, first-call timings, failures, placement, strides, pointer residues, thread count and binary fingerprints for every method/layout pair. Pre-fill logical C with NaNs to check overwrite behavior. A failed numerical fixture excludes that implementation only on that host and shape. An inadmissible candidate blocks that host's fresh primary claim. A missing required comparison blocks a complete-field claim.
+
+Cache each of the twenty reference matrices once per host. The input generator fills logical values row by row independent of parent layout. The existing scalar-input/serial DGEMM oracle can use compact input matrices, verified using the same logical-input hashes as the benchmark views. Slice FP64 A and C into at most 256 rows, use full FP64 B and write the reference row-major. Each consumer checks the exact length and compares every result. No scalar cubic reference is needed per method/trial. The five layouts together need 756,095,120,280 FP64 reference FLOPs for four fixtures and 978,650,528 bytes of reference files. The largest single reference is 51,792,568 bytes. The largest three FP32 parent allocations total 92,094,464 bytes including guard pages at 4 KiB page size. Vendor workspaces and oracle buffering are additional. Each candidate outer workspace is between 11,059,200 and 13,065,144 bytes. Retain reference digests rather than large temporary binaries after qualification.
+
+## Field and timing
+
+Link the same native compiler options and release source to an ordinary executable with HK15, portable and recursive Strassen enabled. The matched candidate adds only the ragged HK patch and switch. Exclude all external BLAS leaves from the standalone pair. Include released OpenBLAS-backed and platform-provider-backed aligned two-level Winograd, then compare the fastest on each layout. Include the two unaligned two-level configurations when built by the registered matrix. The provider on x86 is sequential oneMKL, and on Arm it is sequential ArmPL. Record each provider variant individually. These are COB methods with BLAS leaves.
+
+The external one-shot field includes direct single-thread OpenBLAS and BLASFEO, direct oneMKL and its separate JIT-capable interface plus AOCL on x86, and direct ArmPL on Arm. Include stock FastMMW Winograd compiled with serial OpenBLAS at leaf thresholds 768 and 1536. Each padding adapter preserves the upstream recursion; the allocation, copy and trim for an unsupported irregular split take place within the timed call. Verify its exact 49 or 7 real BLAS leaves and padded/unpadded mode per layout. Retained plans such as oneDNN are identified and ranked separately when available. The reported fastest independent warm entry and fastest overall warm entry use individually qualified methods. A retained plan or a vendor-backed wrapper must have its own role. Report limitations from any absent predeclared competitor.
+
+Pin every native worker to one allowed logical CPU; check a single OS task after initialization and execution. Record the first complete single SGEMM after library initialization separately. Use a fresh process per method, shape, seed and warm round, make one warm-up call, then time exactly one complete call. Three rounds per seed give six matched comparisons without a 32-call microbenchmark batch. Counterbalance method and shape order and reverse it between blocks. Keep the full ordering, the six raw measurements and all numerical evidence. Four fixture calls plus six warm-ups and six timed calls make 16 complete SGEMMs per method/layout. Twelve qualifying methods would require 960 whole products across five shapes, before route witnesses and reference work.
+
+## Decision rules
+
+For each fresh layout the speed ratio is the median of six same-seed, same-round peer time / candidate time ratios. Compute their equal-weight geometric mean. The standalone change passes on a host only if that mean is at least 1.03× versus the tuned incumbent, at least two of three fresh medians exceed 1×, every fresh median is at least 0.98×, both within-seed geometric means exceed 1×, every candidate/standalone fixture and required route passes, and the divisible parity control has identical outputs and a paired median of at least 0.97×. Report the weak historical repeat separately. A host family retains its own outcome under failures, and a cross-family improvement requires both hosted architectures to pass.
+
+Select the qualified method with the lowest raw median for each comparison tier and layout before forming paired ratios. An all-three-fresh field lead additionally requires a paired median above 1.02× and five or six individual wins on every fresh layout against the fastest other method in the tier. Report this separately versus all independent one-shot peers, all one-shot peers including COB vendor-leaf builds, and the field including any retained plans. Report all individual winners even when a gate fails. Three successes on these defined matrices support only these measured shapes, inputs, methods and CPUs.
