@@ -48,9 +48,20 @@ The installed public library passed both acceptance tests on an Intel Xeon 6975P
 
 A separate test delegated whole products or all but the last few rows to a sequential BLAS. Across eight eligible layouts (four shared with the streamed-B panel and four additional), the whole oneMKL wrapper reached 1.100× the speed of prior standalone COB on Intel and 0.464× on AMD. It reached 1.002× the speed of calling the same oneMKL library directly on both hosts. Moving the last one to four rows into COB produced no consistently winning split across providers and CPUs. [Matched comparisons and single-thread checks](vendor-tail/README.md)
 
-A further candidate packed A in addition to B. It lost every one of the 96 paired comparisons against the installed streamed-B kernel on eight fresh layouts across two separate Xeon 6975P-C runners, at 0.896× and 0.893× the incumbent's speed. The fastest independent method by median was the oneMKL direct-call interface on all eight layouts on both runners. At 79 × 1793 × 223 the incumbent took 361–362 µs and oneMKL took 303 µs. The tested field included verified LIBXSMM JIT kernels, both direct and retained oneDNN interfaces, OpenBLAS, AOCL and BLASFEO. [Full x86 comparison](packed-a-x86/README.md)
+A further candidate packed A in addition to B. It lost every one of the 96 paired comparisons against the installed streamed-B kernel on eight fresh layouts across two separate Xeon 6975P-C runners, at 0.896× and 0.893× the incumbent's speed. The fastest independent method by median was the oneMKL direct-call interface on all eight layouts on both runners. At 79 × 1793 × 223 the incumbent took 361–362 µs and oneMKL took 303 µs. The tested field included verified LIBXSMM JIT kernels, both direct and retained oneDNN interfaces, OpenBLAS, AOCL and BLASFEO. A separately declared third run landed on AMD EPYC 9V45. Packed A lost all 48 paired calls against the released kernel there as well (0.901×). Among independent one-shot implementations, LIBXSMM dispatch led two fresh layouts and AOCL led six. [Full x86 comparison, including the AMD transfer](packed-a-x86/README.md)
 
 Rounding selected row counts up to a multiple of eight before calling the host's BLAS also slowed down every genuinely padded fresh comparison on the two Xeon runners. [Matched direct calls and actual provider dimensions](row-padding/README.md)
+
+## Cropped matrices on Intel
+
+Two previously reported wins against direct libraries reproduced with the original aligned layouts and reversed on cropped views of the same mathematical inputs. Cropping changed the three starting addresses and leading dimensions, with all guard regions preserved.
+
+| M × N × K | COB speed relative to fastest direct peer, aligned | COB speed relative to fastest direct peer, cropped |
+|---|---:|---:|
+| 108 × 1728 × 320 | 1.038× | 0.928× |
+| 137 × 2179 × 347 | 1.067× | 0.936× |
+
+On the six cropped cases, oneMKL beat the installed streamed-B kernel in all 36 paired comparisons. COB still beat its own default in all 36. On the two rows above, COB's elapsed times changed by +1.0% and +0.6% from aligned to cropped. The oneMKL direct-call interface took 9.7% and 13.4% less time. This comparison changes offsets and strides together. [Native records, views, exact routes and full FP64 replay](cropped-views/README.md)
 
 ## Removing fourteen Winograd output updates
 

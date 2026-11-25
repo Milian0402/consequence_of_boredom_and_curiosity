@@ -1,0 +1,29 @@
+{
+  "avx2": [
+    "-DCOB_STREAM_B_AVX512=0",
+    "-march=x86-64",
+    "-masm=att",
+    "-O3",
+    "-DNDEBUG",
+    "-march=x86-64",
+    "-mavx2",
+    "-mfma"
+  ],
+  "avx512": [
+    "-DCOB_STREAM_B_AVX512=1",
+    "-march=x86-64",
+    "-masm=att",
+    "-O3",
+    "-DNDEBUG",
+    "-march=x86-64",
+    "-mavx512f",
+    "-mfma"
+  ],
+  "public": [
+    "-DCOB_ENABLE_X86_STREAM_B=1",
+    "-march=x86-64",
+    "-masm=att",
+    "-O3",
+    "-DNDEBUG"
+  ]
+}

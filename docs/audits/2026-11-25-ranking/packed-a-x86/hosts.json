@@ -16,6 +16,14 @@
       "attempt": 1,
       "url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45697897911/job/139500093862",
       "artifact_sha256": "2e992ec1140a0b74265fd70c8125c70ac066d1e941685aaeeff6b2f805db34d1"
+    },
+    {
+      "folder": "attempt-2-job-139503993618",
+      "model": "AMD EPYC 9V45 96-Core Processor",
+      "job": 139503993618,
+      "attempt": 2,
+      "url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45697897911/job/139503993618",
+      "artifact_sha256": "e5f567d870962bf68b684b531484ee3a580745c24397569c9757d651a5da1fc9"
     }
   ]
 }

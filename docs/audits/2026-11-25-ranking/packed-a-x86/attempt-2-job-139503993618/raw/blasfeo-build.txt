@@ -1,0 +1,3 @@
+source=https://github.com/giaf/blasfeo revision=e5d1cbbb2f458acd7adb7d9e8a6522416b7e336f tar_sha256=3e9276f686dad725049600b37459197e464fd3445a49fa7d87c690a5527de9b5 target=X64_INTEL_HASWELL
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+ELF dependencies=['libc.so.6'], private BLASFEO symbols, no thread-launch imports

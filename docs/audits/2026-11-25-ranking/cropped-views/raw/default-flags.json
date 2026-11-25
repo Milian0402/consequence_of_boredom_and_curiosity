@@ -1,0 +1,8 @@
+{
+  "public": [
+    "-march=x86-64",
+    "-masm=att",
+    "-O3",
+    "-DNDEBUG"
+  ]
+}

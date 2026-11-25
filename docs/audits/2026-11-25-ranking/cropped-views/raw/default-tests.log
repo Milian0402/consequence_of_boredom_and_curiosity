@@ -1,0 +1,12 @@
+Internal ctest changing into directory: /tmp/tmp.ZeIRA60PuT/default/build
+Test project /tmp/tmp.ZeIRA60PuT/default/build
+    Start 1: cob_gemm_test
+1/3 Test #1: cob_gemm_test ....................   Passed    0.24 sec
+    Start 2: cob_gemm_strassen_test
+2/3 Test #2: cob_gemm_strassen_test ...........   Passed    0.24 sec
+    Start 3: cob_gemm_strassen_square_test
+3/3 Test #3: cob_gemm_strassen_square_test ....   Passed    0.24 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   0.72 sec

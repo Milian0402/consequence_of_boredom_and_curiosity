@@ -1,0 +1,58 @@
+{
+  "benchmark_base": "668d794ea6485bb77c4178e8bffc848b7e187a19",
+  "prior_geometry_csvs": {
+    "tools/world-rank/aligned-core/panel.csv": "3a52ab424b754caaa80b4467fbcd947754cfdd77f8f7b6f3a44f1bae4969d0a8",
+    "tools/world-rank/confirm.csv": "9e7f224cc2c527e90ff11d3d77f51581321c2b7398bff79dba42a68598489bcf",
+    "tools/world-rank/discovery.csv": "1fe5855073bbd0501f7cc94fd60861f4aee99906a866fce8b6126d309a96f1af",
+    "tools/world-rank/dual/panel.csv": "9d806dcef7617367e0b146a9c773dc311343a5036e4dbf4c01a0e4bacbd377cf",
+    "tools/world-rank/entry-replay.csv": "881688e5ad380995d4f1e32adfb6dca8bbe4d0bbcc9a1f69cb26fbf6a0dd43d9",
+    "tools/world-rank/final-panel-heldout.csv": "69874ba12620ea5798afc58990ab4bb5d8f2b181fe7a082c2f90915e6ca46b7b",
+    "tools/world-rank/frontier/panel.csv": "b6d451644a0a979e1b09796ff22c6b4ff24b537a7a701e68afad72ada14d5190",
+    "tools/world-rank/hk-child.csv": "46ace1da477d6058ad57da0877b5f75f91914568773fe638a999432fc659ee10",
+    "tools/world-rank/hk-confirm.csv": "9c83db2bed046e0399a52d12474e6378a9fe9e3716eeb0672e62ce3ba998693c",
+    "tools/world-rank/hk-forms/panel.csv": "af82edd4b9c3200279d0bbea7471e0738359417780efaec73b8bbb60433d9603",
+    "tools/world-rank/hk-parent.csv": "707584c88806ea83b13cc0b5e63815a967751a099cc49b0b27e8fdba413b386b",
+    "tools/world-rank/hk-screen.csv": "8a66cf031fc800feb8c187ebfa7009547ff0c693cc108558ee319aabcc9c0738",
+    "tools/world-rank/leaf-wave.csv": "e1fb795b4de6b84ad332bdf55bcc8571f3861325009c92ea904ca22ae57cf5e6",
+    "tools/world-rank/medium-heldout.csv": "fe623fe50c685ae5383265a1f9f4aa913ba222b0fc334938f97691a3600d51d5",
+    "tools/world-rank/medium-pilot.csv": "464d5f2723aad9f7ca065bc38ed68d5fee698ed14afe7da99adaf34cc395acdd",
+    "tools/world-rank/medium/panel.csv": "eb886434a55e82f6aa6ececafcd65e3b8dd9c746e1c15b2b05de3dff5f7e0a44",
+    "tools/world-rank/n2-small-heldout.csv": "1c7292d4a2a1ba4cb8e0d68027908a36af528974933003df1b1925dc4f7aefd7",
+    "tools/world-rank/n2-small-pilot.csv": "c4409e05b85e6d2b12d99f7f4f5c7282f324d71185bc3a55a587c0cb5e7465d5",
+    "tools/world-rank/n2-tiles-confirm.csv": "eec0254f663a7ed04cf9106fcca11a93ac4ef6d9ee6f29e187871895d652014d",
+    "tools/world-rank/n2-tiles-screen.csv": "c861030a29dfd2ba89ce995aacf9d4e54d280b2b0978e9594eb51d1e2e7d8022",
+    "tools/world-rank/rank48-confirm/panel.csv": "70e4472c510eb7df71378e9cc6681af6e29eecbac92f940dc4747871455d794f",
+    "tools/world-rank/rank48/panel.csv": "21aca48602498f5413ffea99197d078eec5fcede5580253dcbf9068dfdd65aeb",
+    "tools/world-rank/recursive-heldout.csv": "eb871cbcbc75a74581f9205cc3bec95bf28039d7be3154d26efe41a23eb418c5",
+    "tools/world-rank/recursive-pilot.csv": "17f941547e2833894cd23bff2ed6254189d0a999816d7351ba3c228868281493",
+    "tools/world-rank/release-replay/panel.csv": "887b737adebeaa132045b71835e05d38cc707227283cec2fc61412d48f3331fa",
+    "tools/world-rank/replicate.csv": "a56c0e4d129e8faa085529ffee91f6371b49d1f2df75e1e1baed35c15d5d0b07",
+    "tools/world-rank/short.csv": "f52ce006d4e43480bb0a2aac6ae44537d0df6f255e190ed17e1e8d4d26bd468e",
+    "tools/world-rank/signed/frozen/panel.csv": "a6252eac41350bc92c87c15476441ab30aec65b6dc9602715ddbb44f98a2d2c9",
+    "tools/world-rank/signed/frozen/validation.csv": "432dbc812bce26153bf79bc438a880311d407fb5837515f4048d166d79d89c0f",
+    "tools/world-rank/small-panel.csv": "40a286532632bd81b99dec6c38103b8b41eec69cce4b84143f1dbafdf2791a8e",
+    "tools/world-rank/stream/panel.csv": "466c2b51ee6df5fd737f3f4b1977c5b4ad75cdb7ae61bbaec7bc5919530f18fd",
+    "tools/world-rank/tiles-confirm.csv": "520fd7e8b408898f776dbdcf35da97ccb9abb6bf61e16d14c72e22f8a5a25e4c",
+    "tools/world-rank/tiles-screen.csv": "1579b296690a5f76b680d43cce13d450845e0b2a4a5020e2696f900fb54ff949",
+    "tools/world-rank/vendor-wide/panel.csv": "c05f30a91720c54086c0b6d5e858267501af8488e4af9614555e2f5e12c55bd6"
+  },
+  "exact_geometry_matches": {
+    "repeat-win-deeper": [
+      "tools/world-rank/stream/panel.csv",
+      "tools/world-rank/vendor-wide/panel.csv"
+    ],
+    "repeat-win-ragged": [
+      "tools/world-rank/frontier/panel.csv",
+      "tools/world-rank/stream/panel.csv",
+      "tools/world-rank/vendor-wide/panel.csv"
+    ],
+    "repeat-loss-thin": [
+      "tools/world-rank/medium/panel.csv",
+      "tools/world-rank/stream/panel.csv",
+      "tools/world-rank/vendor-wide/panel.csv"
+    ],
+    "fresh-short": [],
+    "fresh-mid": [],
+    "fresh-upper": []
+  }
+}

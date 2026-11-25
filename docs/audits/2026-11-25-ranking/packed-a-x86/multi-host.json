@@ -1,13 +1,78 @@
 {
   "all_fresh_field_thresholds_pass": false,
   "all_native_vendor_gates_pass": false,
-  "both_native_vendors_observed": false,
-  "cpu_model_count": 1,
+  "both_native_vendors_observed": true,
+  "cpu_model_count": 2,
   "distinct_native_vendors": [
+    "AuthenticAMD",
     "GenuineIntel"
   ],
   "interpretation": "Ordered by registered run, attempt and replica. Timings and seed blocks from one machine are dependent. Same-model replicas are reported separately.",
   "models": {
+    "AMD EPYC 9V45 96-Core Processor": {
+      "first_registered_replica": 1,
+      "first_registered_run": 45697897911,
+      "observations": [
+        {
+          "artifact_id": 15062556500,
+          "artifact_sha256": "e5f567d870962bf68b684b531484ee3a580745c24397569c9757d651a5da1fc9",
+          "attempt": 2,
+          "available": [
+            "aocl",
+            "blasfeo",
+            "frontier-incumbent",
+            "host-direct",
+            "host-pad8",
+            "libxsmm-dispatch",
+            "libxsmm-retained",
+            "mkl",
+            "mkl-jit",
+            "onednn-cached-plan",
+            "onednn-oneshot",
+            "openblas",
+            "stream-packed-a"
+          ],
+          "external_gates": {
+            "external_any": false,
+            "external_oneshot": false
+          },
+          "isa": "avx512",
+          "job_id": 139503993618,
+          "matched": {
+            "geomean": 0.9007496397955366,
+            "leave_one_layout_out_geomean_range": [
+              0.8943992788866706,
+              0.9063050012448128
+            ],
+            "leave_one_layout_out_geomeans": [
+              0.9013225153898077,
+              0.9026059083204792,
+              0.9063050012448128,
+              0.8943992788866706,
+              0.9012853527255582,
+              0.9014951522792166,
+              0.8997658261993356,
+              0.8988627121694895
+            ],
+            "maximum": 0.9464827305046313,
+            "minimum": 0.8628039825786911,
+            "observation_wins": 0,
+            "seed_geomeans": [
+              0.8999965942154509,
+              0.900571505330785
+            ],
+            "wins": 0
+          },
+          "model": "AMD EPYC 9V45 96-Core Processor",
+          "omitted": {},
+          "primary": false,
+          "replica": 1,
+          "run": 45697897911,
+          "vendor": "AuthenticAMD"
+        }
+      ],
+      "status": "all missed"
+    },
     "Intel(R) Xeon(R) 6975P-C": {
       "first_registered_replica": 1,
       "first_registered_run": 45697897911,

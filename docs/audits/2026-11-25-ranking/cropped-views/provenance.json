@@ -1,0 +1,132 @@
+{
+  "github_run": 45699142561,
+  "source_sha": "bce9e5367a2b1b414207460f635ac498663b213f",
+  "github_artifact_id": 15060489618,
+  "github_artifact_name": "cropped-views-45699142561-1",
+  "github_artifact_sha256": "5e9f6e1f46a4de199411bd9c9d8e08a95808a3ddf6f391e64180cf885e9e45d0",
+  "github_job": [
+    {
+      "completedAt": "2026-11-25T20:56:47Z",
+      "conclusion": "success",
+      "databaseId": 139504436457,
+      "name": "cropped-views",
+      "startedAt": "2026-11-25T20:53:08Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-25T20:53:11Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-25T20:53:08Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-25T20:53:16Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 2,
+          "startedAt": "2026-11-25T20:53:11Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-25T20:53:16Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 3,
+          "startedAt": "2026-11-25T20:53:16Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-25T20:56:05Z",
+          "conclusion": "success",
+          "name": "Rebuild the four independent release-acceptance peers",
+          "number": 4,
+          "startedAt": "2026-11-25T20:53:16Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-25T20:56:42Z",
+          "conclusion": "success",
+          "name": "Measure ordinary cropped submatrices and aligned companions",
+          "number": 5,
+          "startedAt": "2026-11-25T20:56:05Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-25T20:56:44Z",
+          "conclusion": "success",
+          "name": "Retain crop geometry, full verification, first calls and paired timings",
+          "number": 6,
+          "startedAt": "2026-11-25T20:56:42Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-25T20:56:44Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 11,
+          "startedAt": "2026-11-25T20:56:44Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-25T20:56:44Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+          "number": 12,
+          "startedAt": "2026-11-25T20:56:44Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-25T20:56:44Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 13,
+          "startedAt": "2026-11-25T20:56:44Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45699142561/job/139504436457"
+    }
+  ],
+  "all_original_sha256": {
+    "aocl-configuration.txt": "7aedba2dce28a1e7fee3feafa2cbb2660ebd031a06a6910dd5ca435e7c067928",
+    "aocl-dependencies.txt": "94726fd1b338e4f1d336007db7c5c1a9c5528551fd0a3f491ec8116eca86d76b",
+    "benchmark-sha256.txt": "e17d730d17657ad609d0dda9a8f271f6e9825b600e321f38d63be5b57fbf773d",
+    "binaries.csv": "7cfbe3f1cbd01bb42722dfc672af9f039bedcbbc7cc127680f7e6be65bf11db1",
+    "default-build.log": "e2a7ec033bcf9227051094927f9494d55029fa91318b402f7f477ce94d655664",
+    "default-configure.log": "7ce8cc555a58ed54e678a5f631a47406779dfc18d180e049a94484d4900209e7",
+    "default-flags.json": "b86ea303e4e968082ce94bc56a570f3544e7d9ea42c089dd53eb1f2d8513a4cc",
+    "default-install.log": "3ba7641ddb29c317332cd225948c0e88f5cad7f710a588ed974d6a4d0252023e",
+    "default-tests.log": "14521592b73b936f9871e2c3f95b0358f5265563413b18c9f34bfa8fcabddbee",
+    "frontier-sources.json": "7bc3c8455b1b8c170ce2a376f93232d4e9ab61f3ce031e7cca9b268446d11d1f",
+    "host.txt": "7e5988e14f5985f27f6aeddbabe106d12cdec74fadaf3384669301cf998289bf",
+    "isa.txt": "3f11ad6bbc7ecca0b2416b713dee77f1a635c00aaeaa946e14cde1c2bfae56d5",
+    "mkl-build.txt": "73211b9272289de0e4b839bbbd07129ddf014c6d8342ff40d8155dcb7a6470f8",
+    "mkl-dependencies.txt": "d6dddb1a70c6964b7f5db22ddd1b5dda89ad856bc93376d3af8f7ad155e045a4",
+    "mkl-jit-build.txt": "6f06f769f2b2ed648f54475694e6971f9d787d18b738d9383246043c5687a819",
+    "mkl-jit-dependencies.txt": "a806c8e42d44e05a9c121e3680e6fc87504b51b9526eb8f805bc02dd1ef5d88e",
+    "novelty.json": "ddc0d55e11692135baaa3da3a3325da589d28f1b524a9caf7811faf66273e8e0",
+    "openblas-dependencies.txt": "4378103b25bf74ca9c95277f375f1d0ddcc466a9151d3aeea9f2d84495644331",
+    "openblas-version.txt": "96dc7b2030f175dace0b2bf3be7de7f39acbbec8a0bdc76ac19a58945e8e58e5",
+    "packed-build.log": "3433a2a7f61dc08def5d9f799bceb94cf0d2eb2fe7158edd8e54d88881d52e09",
+    "packed-configure.log": "534205982000eef915c923798ce98afc267996fbaf8489996beec94b785bf696",
+    "packed-flags.json": "cef13c3574e46371aee6e18cceb27ecfad9759eec2ffdc8c5d5dc9b661ead254",
+    "packed-install.log": "08fe168466ab45be6b51432adc8bdbc060cd6406d42119ce24478e52b5057f1f",
+    "page-size.txt": "25ac87b7309b7946b51c32e824793ff48b56b735efa16875cf33e4ba67523d91",
+    "packed-tests.log": "418d7ee30d39b003a52e80271649ac7ab8c67911ee89d5480f83eb2223109009",
+    "panel.csv": "ab9115f17a698938d14e3fb0010f05e450b214eca8876d7fd6d59e2323b17c80",
+    "protocol.md": "b1ffa29625a8d3d121fdd20556c972e313b8ae52c618f6513696dd4316ae6e5f",
+    "raw.csv": "3731f7e5f07f4290049da9facd8f5481fb5cb39a5eb514c5a59322cbea273410",
+    "routes.csv": "b1e4b5fe09ca722cb9f507ef7d06872afafef5599e4016190a7a332b204cb78d",
+    "score.py": "746ecb002180ae7e62cc6ae7b0087ca05467caa1d932f70afb37f2be82896a1d",
+    "stream-build.log": "3433a2a7f61dc08def5d9f799bceb94cf0d2eb2fe7158edd8e54d88881d52e09",
+    "stream-configure.log": "abde68c85185343d711e4be6e798370de879a60d1f6973d1e861c86e5a80a2d8",
+    "stream-flags.json": "184d24322645ef5f61f5ae51fcc52c3bbcb6169ada36876aec198e21e62a0f6e",
+    "stream-install.log": "fbad587324f4cc0cc776f1f46902398aaea8079ca138e79bf76785ba1779888f",
+    "stream-tests.log": "cfdb6e734990bce38457edeee7d0baaaeca48c9ac5b85bdf0393fcf6ca24c39a",
+    "summary.csv": "5f15f32e9370c018e1a1098add832af1bb2521a59a283035d9ee693563fa015f",
+    "view-score.json": "55a77a9f95bb5119ea0c375d7aceb3c4a61bcbb6f19f407ff04de66fab22728b",
+    "worker.log": "d769eace985e9bdb5b0ea12e4d627c24f20a18e86413f9a12dc05a293b01d2e5"
+  }
+}

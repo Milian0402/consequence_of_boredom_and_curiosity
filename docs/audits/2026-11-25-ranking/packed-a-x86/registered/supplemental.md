@@ -1,0 +1,3 @@
+# Supplemental native x86 transfer
+
+Both preregistered first-attempt jobs at commit 668d794ea6485bb77c4178e8bffc848b7e187a19 ran on Intel Xeon 6975P-C and failed the standalone gate. After obtaining these two results, the team requested exactly one fresh hosted VM using the same immutable workflow, original replica 1 job 139500093897 on run 45697897911, and identical methods, seeds, geometries, dispatch and decision rules. The supplemental result will be shown regardless of CPU, without pooling observations or revising the previous decisions. A third measurement on Intel ends sampling just as a measurement on AMD would.

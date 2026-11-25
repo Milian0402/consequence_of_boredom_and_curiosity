@@ -16,7 +16,7 @@ independent implementation on each layout.
 | Apple M5 Max, nine wide rectangles with 24–55 rows | The installed Apple SME kernel averaged 4.807× the speed of its matched default. A clean rebuild still beat prior COB on all nine but missed the external performance floor on one layout. [Timings and accuracy](docs/audits/2026-11-25-ranking/m5-wide-release/README.md) |
 | Arm Neoverse N2, two odd large rectangles | Released COB with OpenBLAS leaves beat FastMMW in all twelve paired calls. |
 | Intel Xeon 6975P-C, the same two rectangles | Direct oneMKL beat every released build. At 2039 × 2969 × 3367 it took 221.63 ms versus 233.14 ms for COB. |
-| Intel Xeon 6975P-C and AMD EPYC 9V45, five wide rectangles | Streaming a panel of B improved standalone COB by 1.120× on each CPU. It beat the fastest independent library on two Intel layouts. AMD AOCL won all five on EPYC. |
+| Intel Xeon 6975P-C and AMD EPYC 9V45, five wide rectangles | Streaming a panel of B improved standalone COB by 1.120× on each CPU. It beat the fastest independent library on two Intel layouts. Both leads reversed on cropped views. AMD AOCL won all five on EPYC. |
 
 With `-DCOB_ENABLE_X86_STREAM_B=ON`, the installed x86-64 library was 1.328×
 as fast as the generic default and 1.128× as fast with both builds tuned to
