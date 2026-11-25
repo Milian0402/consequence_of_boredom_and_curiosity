@@ -1579,10 +1579,99 @@ cob_small_entry(int m,int n,int k,const float *a,int lda,const float *b,int ldb,
     return 1;
 }
 
+/* Keep three horizontal output tiles in ZA0..2. ZA3 transposes one
+   16x16 input panel, and four adjacent A columns leave ZA together. */
+__attribute__((always_inline)) static inline void
+cob_edge_a(int rows, int depth, const float *a, int lda)
+    __arm_streaming __arm_inout("za")
+{
+    svbool_t depth_mask = svwhilelt_b32_s32(0,depth);
+    int i = 0;
+    for (; i + 4 <= rows; i += 4) {
+        const float *r = a + (size_t)i * lda;
+        svfloat32x4_t x = svcreate4_f32(svld1_f32(depth_mask,r),
+            svld1_f32(depth_mask,r+lda), svld1_f32(depth_mask,r+2*(size_t)lda),
+            svld1_f32(depth_mask,r+3*(size_t)lda));
+        svwrite_hor_za32_f32_vg4(3,i,x);
+    }
+    for (; i < rows; ++i) svld1_hor_za32(3,i,depth_mask,a+(size_t)i*lda);
+}
+
+__attribute__((always_inline)) static inline void
+cob_edge_dot(int bands, int full_pair, svbool_t last, svfloat32_t left, const float *right)
+    __arm_streaming __arm_inout("za")
+{
+    const svbool_t all=svptrue_b32();
+    svfloat32_t r0,r1;
+    if (full_pair) {
+        svfloat32x2_t pair=svld1_f32_x2(svptrue_c32(),right);
+        r0=svget2_f32(pair,0); r1=svget2_f32(pair,1);
+    } else {
+        r0=svld1_f32(all,right); r1=svld1_f32(last,right+16);
+    }
+    svmopa_za32_f32_m(0,all,all,left,r0);
+    svmopa_za32_f32_m(1,all,full_pair?all:last,left,r1);
+    if (bands==3) svmopa_za32_f32_m(2,all,last,left,svld1_f32(last,right+32));
+}
+
+__attribute__((always_inline)) static inline void
+cob_edge_panel(int bands, int rows, int n, int k, const float *a, int lda,
+               const float *b,int ldb,float *c,int ldc)
+    __arm_streaming __arm_inout("za")
+{
+    const svbool_t all=svptrue_b32(),last=svwhilelt_b32_s32(0,n-16*(bands-1));
+    const int full_pair=(bands==3);
+    svzero_za();
+    for(int p=0;p<k;p+=16) {
+        int depth=k-p<16?k-p:16;
+        cob_edge_a(rows,depth,a+p,lda);
+        int j=0;
+        for(;j+4<=depth;j+=4) {
+            svfloat32x4_t x=svread_ver_za32_f32_vg4(3,j);
+            const float *r=b+(size_t)(p+j)*ldb;
+            cob_edge_dot(bands,full_pair,last,svget4_f32(x,0),r);
+            cob_edge_dot(bands,full_pair,last,svget4_f32(x,1),r+ldb);
+            cob_edge_dot(bands,full_pair,last,svget4_f32(x,2),r+2*(size_t)ldb);
+            cob_edge_dot(bands,full_pair,last,svget4_f32(x,3),r+3*(size_t)ldb);
+        }
+        for(;j<depth;++j) {
+            svfloat32_t x=svread_ver_za32_f32_m(svundef_f32(),all,3,j);
+            cob_edge_dot(bands,full_pair,last,x,b+(size_t)(p+j)*ldb);
+        }
+    }
+    for(int i=0;i<rows;++i) {
+        float *r=c+(size_t)i*ldc;
+        svst1_hor_za32(0,i,all,r);
+        svst1_hor_za32(1,i,full_pair?all:last,r+16);
+        if (bands==3) svst1_hor_za32(2,i,last,r+32);
+    }
+}
+
+__attribute__((always_inline)) static inline void
+cob_edge_shape(int bands,int m,int n,int k,const float *a,int lda,
+               const float *b,int ldb,float *c,int ldc)
+    __arm_streaming __arm_inout("za")
+{
+    for (int i=0;i<32;i+=16)
+        cob_edge_panel(bands,16,n,k,a+(size_t)i*lda,lda,b,ldb,c+(size_t)i*ldc,ldc);
+    cob_edge_panel(bands,m-32,n,k,a+32*(size_t)lda,lda,b,ldb,c+32*(size_t)ldc,ldc);
+}
+
+__arm_new("za") __arm_locally_streaming static int
+cob_edge_entry(int m,int n,int k,const float *a,int lda,const float *b,int ldb,float *c,int ldc)
+{
+    if (svcntsw()!=16) return 0;
+    if (n<=32) cob_edge_shape(2,m,n,k,a,lda,b,ldb,c,ldc);
+    else cob_edge_shape(3,m,n,k,a,lda,b,ldb,c,ldc);
+    return 1;
+}
+
 int cob_sgemm_sme_tiny(int m, int n, int k, const float *a, int lda, const float *b, int ldb,
                        float *c, int ldc)
 {
     /* The public entry checked pointers, strides, non-aliasing and 16..96 bounds. */
+    if (m>=33 && m<=48 && n>=17 && n<=48 && k>=16 && k<=48)
+        return cob_edge_entry(m,n,k,a,lda,b,ldb,c,ldc);
     if (m>16 && m<=32 && n>16 && n<=32 && k>=16 && k<=48)
         return cob_small_entry(m,n,k,a,lda,b,ldb,c,ldc);
     if (((m | n | k) & 15) == 0 && m > 16 && n == 16 && k >= 32)
