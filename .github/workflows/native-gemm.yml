@@ -79,7 +79,7 @@ jobs:
       contents: read
       actions: read
     needs: [phase, onednn]
-    if: ${{ !cancelled() && needs.phase.result == 'success' && needs.phase.outputs.label != 'packing-cost' && needs.phase.outputs.label != 'rank48-arm-confirm' }}
+    if: ${{ !cancelled() && needs.phase.result == 'success' && needs.phase.outputs.label != 'packing-cost' && needs.phase.outputs.label != 'rank48-arm-confirm' && needs.phase.outputs.label != 'stream-release' }}
     name: Frozen ranking on ${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -287,3 +287,43 @@ jobs:
           name: arm-rank48-confirm-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/rank48-result
           retention-days: 21
+
+  production-x86:
+    needs: phase
+    if: needs.phase.outputs.label == 'stream-release'
+    name: Accept public x86 stream-B release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Resolve registered production source
+        id: pin
+        run: |
+          revision=$(cat tools/world-rank/stream-release/release-revision.txt)
+          [[ $revision =~ ^[a-f0-9]{40}$ ]]
+          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ steps.pin.outputs.revision }}
+          path: production-source
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Prepare serial numerical comparators
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install --no-install-recommends -y cmake gcc make pkg-config libopenblas-pthread-dev unzip
+          bash tools/world-rank/vendors/build.sh "$RUNNER_TEMP/production-peers"
+          cpus=$(python3 -c 'import os; print(",".join(map(str,sorted(os.sched_getaffinity(0))[:2])))')
+          taskset -c "$cpus" bash tools/world-rank/aocl/build.sh "$RUNNER_TEMP/production-peers"
+      - name: Check ordinary production builds and measure complete calls
+        run: bash tools/world-rank/stream-release/run.sh "$PWD/production-source" "$RUNNER_TEMP/production-peers" "$RUNNER_TEMP/stream-release"
+      - name: Preserve acceptance measurements and source identities
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: stream-release-x86_${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/stream-release
+          retention-days: 30

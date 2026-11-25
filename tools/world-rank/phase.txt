@@ -1,1 +1,1 @@
-rank48-arm-confirm
+stream-release
