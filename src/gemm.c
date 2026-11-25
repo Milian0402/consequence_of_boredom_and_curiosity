@@ -2085,6 +2085,33 @@ static void cob_sgemm_8x8_neon_packed_b(
 }
 #endif
 
+#if !defined(COB_USE_NEON)
+/* Each column is an independent FP32 dot product. Keeping the eight
+   columns visible together lets the compiler use its native SIMD width. */
+static void cob_sgemm_4x8_packed_b(int k, const float* a, int lda,
+    const float* packed_b, float* c, int ldc)
+{
+    float c0[8] = {0}, c1[8] = {0}, c2[8] = {0}, c3[8] = {0};
+    const float* a1 = a + lda;
+    const float* a2 = a1 + lda;
+    const float* a3 = a2 + lda;
+    for (int p = 0; p < k; ++p) {
+        const float* bp = packed_b + (size_t)p * 8;
+        for (int j = 0; j < 8; ++j) {
+            const float b = bp[j];
+            c0[j] += a[p] * b;
+            c1[j] += a1[p] * b;
+            c2[j] += a2[p] * b;
+            c3[j] += a3[p] * b;
+        }
+    }
+    memcpy(c, c0, sizeof(c0));
+    memcpy(c + ldc, c1, sizeof(c1));
+    memcpy(c + (size_t)2 * ldc, c2, sizeof(c2));
+    memcpy(c + (size_t)3 * ldc, c3, sizeof(c3));
+}
+#endif
+
 static void cob_sgemm_rowmajor_packed_b_fallback(
     int m,
     int n,
@@ -2102,26 +2129,40 @@ static void cob_sgemm_rowmajor_packed_b_fallback(
     }
 
     const int packed_nr = packed_b->nr;
-    for (int jc = 0; jc < n; jc += packed_nr) {
-        const int nr = cob_min_i32(packed_nr, n - jc);
-        const int panel = jc / packed_nr;
-        const float* bp = packed_b->data +
-            (size_t)panel * (size_t)k * (size_t)packed_nr;
 
-        for (int ic = 0; ic < m; ic += COB_SGEMM_MR) {
-            const int mr = cob_min_i32(COB_SGEMM_MR, m - ic);
-            const float* at = a + (size_t)ic * (size_t)lda;
-            float* ct = c + (size_t)ic * (size_t)ldc + jc;
-
-#if defined(COB_USE_NEON)
-            if (packed_nr == COB_SGEMM_NR && mr == COB_SGEMM_MR && nr == COB_SGEMM_NR) {
-                cob_sgemm_8x8_neon_packed_b(k, at, lda, bp, ct, ldc);
-            } else
+    /* Keep a block of A rows in cache while traversing B's column panels. */
+#if defined(COB_USE_APPLE_AMX)
+    const int row_block = m;
+#else
+    const int row_block = 64;
 #endif
-            {
-                cob_sgemm_tile_scalar_packed_b(mr, nr, k, at, lda, bp, packed_nr, ct, ldc);
+    for (int row0 = 0; row0 < m;) {
+        const int row_end = row0 + cob_min_i32(row_block, m - row0);
+        for (int jc = 0; jc < n; jc += packed_nr) {
+            const int nr = cob_min_i32(packed_nr, n - jc);
+            const int panel = jc / packed_nr;
+            const float* bp = packed_b->data +
+                (size_t)panel * (size_t)k * (size_t)packed_nr;
+
+            for (int ic = row0; ic < row_end; ic += COB_SGEMM_MR) {
+                const int mr = cob_min_i32(COB_SGEMM_MR, row_end - ic);
+                const float* at = a + (size_t)ic * (size_t)lda;
+                float* ct = c + (size_t)ic * (size_t)ldc + jc;
+
+                if (packed_nr == COB_SGEMM_NR && mr == COB_SGEMM_MR && nr == COB_SGEMM_NR) {
+#if defined(COB_USE_NEON)
+                    cob_sgemm_8x8_neon_packed_b(k, at, lda, bp, ct, ldc);
+#else
+                    cob_sgemm_4x8_packed_b(k, at, lda, bp, ct, ldc);
+                    cob_sgemm_4x8_packed_b(k, at + (size_t)4 * lda, lda,
+                                         bp, ct + (size_t)4 * ldc, ldc);
+#endif
+                } else {
+                    cob_sgemm_tile_scalar_packed_b(mr, nr, k, at, lda, bp, packed_nr, ct, ldc);
+                }
             }
         }
+        row0 = row_end;
     }
 }
 

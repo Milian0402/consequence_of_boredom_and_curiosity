@@ -1,0 +1,43 @@
+name: Native single-thread GEMM measurements
+
+on:
+  push:
+    branches: [bench/native-linux-gemm]
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    name: Single-thread GEMM on ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: ubuntu-24.04, arch: x86_64 }
+          - { runner: ubuntu-24.04-arm, arch: aarch64 }
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install system OpenBLAS development library
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install --no-install-recommends -y gcc pkg-config libopenblas-pthread-dev
+      - name: Measure both fallback paths
+        env:
+          BENCH_ARCH: ${{ matrix.arch }}
+        run: |
+          sh tools/native-gemm/run.sh "$BENCH_ARCH" "$RUNNER_TEMP/native-gemm"
+          cat "$RUNNER_TEMP/native-gemm/summary.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload timing, accuracy and host evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: native-gemm-${{ matrix.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/native-gemm
+          if-no-files-found: warn
+          retention-days: 14
