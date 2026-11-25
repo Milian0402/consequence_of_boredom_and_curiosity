@@ -1740,15 +1740,47 @@ cob_wide_run(int m, int n, int k, const float *a, int lda, const float *b, int l
     return 1;
 }
 
+/* With only two A panels, reading compact B twice can cost less than creating
+   and consuming a packed copy. Keep each output tile live through the full K. */
+__arm_locally_streaming __arm_new("za") static int
+cob_wide_two_panels(int m, int n, int k, const float *a, const float *b,
+                    float *c, float *packed_a, size_t depth)
+{
+    if (svcntsw() != 16) return 0;
+    _Alignas(64) float stage[16 * 64];
+    pack_A_block(a, k, 0, m, 0, k, depth, packed_a, stage);
+
+    for (int col = 0; col < n; col += 64) {
+        const int width = n - col < 64 ? n - col : 64;
+        for (int row = 0; row < m; row += 16) {
+            const int height = m - row < 16 ? m - row : 16;
+            const float *left = packed_a + row * depth;
+            float *dst = c + (size_t)row * n + col;
+            svzero_za();
+            if (width == 64)
+                cob_sme_short_k_tile(k, left, b + col, n, svptrue_c32());
+            else
+                cob_sme_short_k_tile(k, left, b + col, n, svwhilelt_c32_u64(0, (unsigned)width, 4));
+            if (width == 64 && height == 16) store_za(dst, n);
+            else cob_sme_transfer_short_c(height, width, dst, n, 1);
+        }
+    }
+    return 1;
+}
+
 int cob_sgemm_sme_medium_wide(int m, int n, int k, const float *a, int lda,
                              const float *b, int ldb, float *c, int ldc)
 {
     const size_t depth = ((size_t)k + 63) & ~(size_t)63;
     const size_t rows = ((size_t)m + 15) & ~(size_t)15;
     const size_t a_size = rows * depth;
-    float *packed = aligned_alloc(64, (a_size + (size_t)k * 64) * sizeof(*packed));
+    const int direct_b = m <= 32 && lda == k && ldb == n && ldc == n;
+    const size_t b_size = direct_b ? 0 : (size_t)k * 64;
+    float *packed = aligned_alloc(64, (a_size + b_size) * sizeof(*packed));
     if (!packed) return 0;
-    const int done = cob_wide_run(m, n, k, a, lda, b, ldb, c, ldc, packed, depth, packed + a_size);
+    const int done = direct_b
+        ? cob_wide_two_panels(m, n, k, a, b, c, packed, depth)
+        : cob_wide_run(m, n, k, a, lda, b, ldb, c, ldc, packed, depth, packed + a_size);
     free(packed);
     return done;
 }

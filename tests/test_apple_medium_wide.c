@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static int run_case(int m, int n, int k, int pad)
+static int run_case(int m, int n, int k, int pad, int output_pad)
 {
-    const int lda = k + pad, ldb = n + pad, ldc = n + pad + 1;
+    const int lda = k + pad, ldb = n + pad, ldc = n + output_pad;
     const float guard = -8765.0f;
     float *a = malloc((size_t)m * lda * sizeof(*a));
     float *b = malloc((size_t)k * ldb * sizeof(*b));
@@ -39,9 +39,12 @@ static int run_case(int m, int n, int k, int pad)
 
 int main(void)
 {
-    const int cases[][4] = {{24, 1024, 96, 0}, {31, 1087, 127, 3}, {48, 1153, 193, 7},
-                            {55, 4096, 384, 1}, {23, 1089, 131, 5}, {56, 1217, 147, 0}};
+    const int cases[][5] = {{24, 1024, 96, 0, 0}, {25, 1089, 97, 0, 0},
+                            {31, 1087, 127, 3, 4}, {32, 1153, 139, 0, 0},
+                            {32, 1153, 139, 0, 1}, {33, 1153, 139, 0, 0},
+                            {48, 1153, 193, 7, 8}, {55, 4096, 384, 1, 2},
+                            {23, 1089, 131, 5, 6}, {56, 1217, 147, 0, 1}};
     for (size_t i = 0; i < sizeof(cases) / sizeof(*cases); ++i)
-        if (!run_case(cases[i][0], cases[i][1], cases[i][2], cases[i][3])) return EXIT_FAILURE;
+        if (!run_case(cases[i][0], cases[i][1], cases[i][2], cases[i][3], cases[i][4])) return EXIT_FAILURE;
     return EXIT_SUCCESS;
 }
