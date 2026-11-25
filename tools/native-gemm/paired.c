@@ -254,7 +254,9 @@ int main(int argc,char** argv)
     const int recursive=!strcmp(phase,"recursive"), bilinear=!strcmp(phase,"bilinear");
     const int confirm_recursive=!strcmp(phase,"recursive-confirm"), confirm_bilinear=!strcmp(phase,"bilinear-confirm");
     const int confirm_hybrid=!strcmp(phase,"hybrid-confirm");
-    if (!(discovery || confirm || recursive || bilinear || confirm_recursive || confirm_bilinear || confirm_hybrid)) return 2;
+    const int skinny_final=!strcmp(phase,"skinny-final");
+    if (!(discovery || confirm || recursive || bilinear || confirm_recursive || confirm_bilinear || confirm_hybrid || skinny_final)) return 2;
+    if (skinny_final && block==0) return 2;
     openblas_set_num_threads(1);
     if (openblas_get_num_threads()!=1 || !pin_cpu()) return 1;
     fprintf(stderr,"block=%d phase=%s mode=%s openblas_threads=1 configuration=%s core=%s\n",
@@ -270,6 +272,8 @@ int main(int argc,char** argv)
     const shape deep_holdout[]={{3584,3584,3584,0},{5120,5120,5120,0}};
     const shape rank40_holdout[]={{2688,5376,2688,0},{3072,6144,3072,0}};
     const shape hybrid_holdout[]={{2816,3840,2304,0},{3520,2112,3072,0},{2817,4033,2113,0},{2816,3840,2304,7}};
+    const shape skinny_holdout[]={{2,2053,1559,0},{4,2519,1473,0},{5,3001,1283,7},
+                                 {6,2689,2049,0},{7,3585,1793,0},{8,1793,2433,0},{8,1024,3072,0}};
     const shape cancellations[]={{2048,2048,2048,0},{1793,2049,1537,7}};
     const shape* cases=NULL;
     size_t n=0;
@@ -280,8 +284,9 @@ int main(int argc,char** argv)
     else if (bilinear)          { cases=rank40; n=sizeof rank40/sizeof *cases; }
     else if (confirm_recursive) { cases=deep_holdout; n=sizeof deep_holdout/sizeof *cases; }
     else if (confirm_bilinear)  { cases=rank40_holdout; n=sizeof rank40_holdout/sizeof *cases; }
-    else                        { cases=hybrid_holdout; n=sizeof hybrid_holdout/sizeof *cases; }
-    const int repeats=(confirm || confirm_recursive || confirm_bilinear || confirm_hybrid) ? 3 : 1;
+    else if (confirm_hybrid)    { cases=hybrid_holdout; n=sizeof hybrid_holdout/sizeof *cases; }
+    else                        { cases=skinny_holdout; n=sizeof skinny_holdout/sizeof *cases; }
+    const int repeats=(confirm || confirm_recursive || confirm_bilinear || confirm_hybrid || skinny_final) ? 3 : 1;
     int ok=1;
     for (size_t j=0;j<n;++j)
         if (!measure(cases[block==2 ? n-1-j : j],argv[1],phase,block,repeats)) ok=0;

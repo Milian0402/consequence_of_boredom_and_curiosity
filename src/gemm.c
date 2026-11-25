@@ -3555,6 +3555,11 @@ static void cob_strassen_merge_product(
     }
 }
 
+#if defined(COB_USE_PORTABLE_STRASSEN) && defined(__linux__) && defined(COB_ENABLE_OPENBLAS_LEAF) && COB_ENABLE_OPENBLAS_LEAF
+#define COB_USE_OPENBLAS_LEAF 1
+#include <cblas.h>
+#endif
+
 static int cob_strassen_leaf(int m, int n, int k, const float* a, int lda,
     const float* b, int ldb, float* c, int ldc)
 {
@@ -3563,6 +3568,13 @@ static int cob_strassen_leaf(int m, int n, int k, const float* a, int lda,
 #else
     /* Bypass the public dispatcher. The ordinary one-shot native kernel
        owns its packing, including the existing allocation fallback. */
+#if defined(COB_USE_OPENBLAS_LEAF)
+    if (openblas_get_num_threads() == 1) {
+        cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k,
+            1.0f, a, lda, b, ldb, 0.0f, c, ldc);
+        return 1;
+    }
+#endif
     cob_sgemm_rowmajor_fallback(m, n, k, a, lda, b, ldb, c, ldc);
     return 1;
 #endif
@@ -3974,6 +3986,12 @@ void cob_sgemm_rowmajor(
         a && b && c && lda >= k && ldb >= n && ldc >= n &&
 #if defined(COB_USE_X86_SIMD)
         __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma") &&
+        /* Let a complete row tile use the ordinary packed SIMD kernel. */
+#if !defined(COB_DISABLE_X86_AVX512)
+        (m < 6 || (m < 8 && __builtin_cpu_supports("avx512f"))) &&
+#else
+        m < 6 &&
+#endif
 #endif
         !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, a, (size_t)(m - 1) * lda + k) &&
         !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, b, (size_t)(k - 1) * ldb + n)) {

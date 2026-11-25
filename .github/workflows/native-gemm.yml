@@ -27,6 +27,14 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install --no-install-recommends -y gcc pkg-config libopenblas-pthread-dev
+      - name: Verify optional OpenBLAS build and runtime paths
+        run: |
+          if test "$(cat tools/native-gemm/phase.txt)" = skinny-final; then
+            mkdir -p "$RUNNER_TEMP/native-gemm"
+            log="$RUNNER_TEMP/native-gemm/build-verification.log"
+            python3 tools/native-gemm/verify_openblas.py > "$log" 2>&1 || { cat "$log"; exit 1; }
+            cat "$log"
+          fi
       - name: Measure selected benchmark phase
         env:
           BENCH_ARCH: ${{ matrix.arch }}

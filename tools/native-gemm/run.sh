@@ -13,7 +13,7 @@ export OPENBLAS_NUM_THREADS=1 OPENBLAS_DEFAULT_NUM_THREADS=1 OMP_NUM_THREADS=1 O
 export MKL_NUM_THREADS=1 MKL_DYNAMIC=FALSE BLIS_NUM_THREADS=1
 git show "$base:src/gemm.c" > "$stage/base.c"
 phase=$(cat tools/native-gemm/phase.txt)
-case "$phase" in discovery|confirm) ;; *) echo "Invalid phase: $phase" >&2; exit 2 ;; esac
+case "$phase" in discovery|confirm|skinny-final) ;; *) echo "Invalid phase: $phase" >&2; exit 2 ;; esac
 case "$expected_arch" in
     x86_64) tune=-march=native; native_path=native-x86-dispatch; native_flags= ;;
     aarch64) tune=-mcpu=native; native_path=native-arm-neon; native_flags=-DCOB_USE_NEON=1 ;;
@@ -88,12 +88,14 @@ run_variant() {
         tools/native-gemm/paired.c "$base_obj" "$stage/candidate.o" $(pkg-config --libs openblas) -lm -o "$stage/paired" || return 2
     ldd "$stage/paired" >> "$result_dir/host.txt"
     failed=0
-    for block in 1 2 cancel; do
+    blocks="1 2 cancel"
+    if [ "$job_phase" = skinny-final ]; then blocks="1 2"; fi
+    for block in $blocks; do
         "$stage/paired" "$native_path" "$job_phase" "$block" >> "$result_dir/pairs.csv" 2>> "$result_dir/accuracy-and-affinity.log" || failed=1
     done
     python3 tools/native-gemm/summary.py "$result_dir/pairs.csv" "$result_dir/accuracy-and-affinity.log" "$expected_arch" "$job_phase" > "$result_dir/summary.md" || failed=1
     manifest_files="host.txt pairs.csv accuracy-and-affinity.log summary.md"
-    if [ "$phase" = confirm ]; then
+    if [ "$phase" = confirm ] || [ "$phase" = skinny-final ]; then
         # Trace separately, after timing. Match the implementation, defines and matrix layouts.
         python3 tools/native-gemm/replay_routes.py --source "$candidate_src" --pairs "$result_dir/pairs.csv" --cc gcc \
             -- $FLAGS $native_flags $strassen_flag $extra -Iinclude -Isrc $replay_blas > "$result_dir/routes.csv" || failed=1
@@ -121,7 +123,7 @@ alternates=
 if [ "$phase" = discovery ]; then
     if [ -n "$recursive_flags" ]; then alternates=recursive; fi
     if [ -n "$bilinear_flags" ]; then alternates="$alternates bilinear"; fi
-else
+elif [ "$phase" = confirm ]; then
     alternates=$confirmed_alternates
 fi
 if [ -n "$alternates" ]; then

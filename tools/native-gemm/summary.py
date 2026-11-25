@@ -14,10 +14,12 @@ TARGETS = {
     "recursive-confirm": [(3584,3584,3584,0), (5120,5120,5120,0)],
     "bilinear-confirm": [(2688,5376,2688,0), (3072,6144,3072,0)],
     "hybrid-confirm": [(2816,3840,2304,0), (3520,2112,3072,0), (2817,4033,2113,0), (2816,3840,2304,7)],
+    "skinny-final": [],
 }
 SKINNY = {"discovery": [(3,2048,1536,0), (6,3072,2048,0)],
+          "skinny-final": [(2,2053,1559,0), (4,2519,1473,0), (5,3001,1283,7), (6,2689,2049,0), (7,3585,1793,0), (8,1793,2433,0)],
           "confirm": [(2,1537,2049,0), (5,4095,1025,0), (8,1024,3072,0)], "recursive": [], "bilinear": []}
-CONTROLS = {"discovery": [], "recursive": [], "bilinear": [], "confirm": [(1536,1536,1536,0), (320,960,768,0), (2240,4480,2240,7), (16,1536,1024,0)]}
+CONTROLS = {"discovery": [], "recursive": [], "bilinear": [], "skinny-final": [(8,1024,3072,0)], "confirm": [(1536,1536,1536,0), (320,960,768,0), (2240,4480,2240,7), (16,1536,1024,0)]}
 CANCELLATION = [(2048,2048,2048,0), (1793,2049,1537,7)]
 SCALED = (1536,2688,1664,0)
 EXTRA_SCALED = {"recursive": [(3072,3072,3072,0)], "bilinear": [(2304,4608,2304,0)]}
@@ -98,16 +100,20 @@ def main():
     targets = TARGETS[phase]
     skinny = SKINNY.get(phase, [])
     shapes = targets + skinny + CONTROLS.get(phase, [])
-    repeats = 3 if phase == "confirm" or phase in OPTIONAL_CONFIRM else 1
+    repeats = 3 if phase in ("confirm", "skinny-final") or phase in OPTIONAL_CONFIRM else 1
     groups = read_pairs(pairs_path, MODES[arch], phase, shapes, repeats)
     active_confirm = targets[:1] if phase in OPTIONAL_CONFIRM else []
-    scaled_shapes = [SCALED, *EXTRA_SCALED.get(phase, []), *active_confirm]
-    cancel_shapes = [*CANCELLATION, *active_confirm]
+    scaled_shapes = [] if phase == "skinny-final" else [SCALED, *EXTRA_SCALED.get(phase, []), *active_confirm]
+    cancel_shapes = [] if phase == "skinny-final" else [*CANCELLATION, *active_confirm]
     checks = read_accuracy(accuracy_path, shapes, scaled_shapes, cancel_shapes)
     gm = defaultdict(list)
     print(f"## Single-thread GEMM {phase} on {arch}\n")
-    print("Ratios use competitor time divided by candidate time. Both COB versions enable portable Strassen.")
-    print("The baseline is the preceding published COB revision." if phase in ("discovery", "confirm") else "The baseline is the primary candidate.")
+    if phase == "skinny-final":
+        print("Six skinny inputs cover two to eight rows. The seven-float stride padding exercises a noncontiguous layout. "
+              "The 8 × 1024 × 3072 guard is reported separately. Ratios use the COB baseline or one-thread OpenBLAS time divided by candidate time.")
+    else:
+        print("Ratios use competitor time divided by candidate time. Both COB versions enable portable Strassen.")
+        print("The baseline is the preceding published COB revision." if phase in ("discovery", "confirm") else "The baseline is the primary candidate.")
     if phase == "hybrid-confirm":
         print("The candidate uses a COB schedule with one-thread OpenBLAS leaves. The openblas-sgemm comparison uses one monolithic OpenBLAS call.")
     print()
@@ -133,7 +139,10 @@ def main():
         print(f"- {competitor} {geometric_mean(values):.4f}× over {len(values)} {role}s.")
     peak = max(v for key, v in checks.items() if key[2] == "candidate")
     nout = sum(key[3][0] * key[3][1] for key in checks if key[2] == "candidate")
-    print(f"\nChecked all {nout:,} candidate outputs across two random seeds per shape, {len(cancel_shapes)} cancellation cases and {len(scaled_shapes)} scaled inputs. "
+    tested_inputs = "two random seeds per shape"
+    if cancel_shapes or scaled_shapes:
+        tested_inputs += f", {len(cancel_shapes)} cancellation cases and {len(scaled_shapes)} scaled inputs"
+    print(f"\nChecked all {nout:,} candidate outputs across {tested_inputs}. "
           f"Peak absolute error was {peak:.7g}. All padding canaries passed.\n")
     for shape in cancel_shapes:
         error = checks["cancel", 0, "candidate", shape]

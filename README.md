@@ -14,6 +14,16 @@ and packing strategies.
 > historical rather than a current-head benchmark. The broader "fastest
 > open-source GEMM" goal is not yet proven.
 
+## Optional native Linux Strassen builds
+
+Use `COB_ENABLE_PORTABLE_STRASSEN=ON` in Make or CMake to select COB’s native
+Strassen schedule. `COB_ENABLE_RECURSIVE_STRASSEN=ON` additionally enables
+the second level on eligible exact squares. To use OpenBLAS for the
+subproducts, install its development package and enable
+`COB_ENABLE_OPENBLAS_LEAF=ON` with portable Strassen. The dispatcher uses
+OpenBLAS when its configured thread count is one and COB’s ordinary native
+kernel at other thread counts. All three options default to off.
+
 ## Performance snapshot
 
 The latest cross-implementation snapshot is one single-threaded FP32
