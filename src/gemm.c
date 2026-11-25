@@ -3794,7 +3794,8 @@ typedef int (*cob_product_fn)(int, int, int, const float*, int,
    seven output additions. Reuse S1/T1 as S2/T2 and then as S4/T4.
    The outer Strassen level owns these three quarter-matrix temporaries. */
 static int cob_winograd_product(int m, int n, int k, const float* a, int lda,
-    const float* b, int ldb, float* c, int ldc, float* scratch, cob_product_fn leaf)
+    const float* b, int ldb, float* c, int ldc, float* scratch, float* child_scratch,
+    cob_product_fn leaf)
 {
     if (!scratch) return leaf(m, n, k, a, lda, b, ldb, c, ldc);
     const int mr = m / 2, nc = n / 2, kr = k / 2;
@@ -3814,15 +3815,24 @@ static int cob_winograd_product(int m, int n, int k, const float* a, int lda,
     float* t = s + (size_t)mr * kr;
     float* p = t + (size_t)kr * nc;
 
+    /* A second level uses the same schedule and reuses one child workspace. */
+#if defined(COB_USE_OPENBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN)
+#define COB_WINOGRAD_LEAF(...) (child_scratch ? \
+    cob_winograd_product(__VA_ARGS__, child_scratch, NULL, leaf) : leaf(__VA_ARGS__))
+#else
+    (void)child_scratch;
+#define COB_WINOGRAD_LEAF leaf
+#endif
+
     /* P1 and P2 go to C quadrants directly. */
-    if (!leaf(mr, nc, kr, a11, lda, b11, ldb, c21, ldc) ||
-        !leaf(mr, nc, kr, a12, lda, b21, ldb, c11, ldc)) return 0;
+    if (!COB_WINOGRAD_LEAF(mr, nc, kr, a11, lda, b11, ldb, c21, ldc) ||
+        !COB_WINOGRAD_LEAF(mr, nc, kr, a12, lda, b21, ldb, c11, ldc)) return 0;
     cob_strassen_linear2(s, mr, kr, a21, lda, a22, lda, 1);
     cob_strassen_linear2(t, kr, nc, b12, ldb, b11, ldb, -1);
-    if (!leaf(mr, nc, kr, s, kr, t, nc, c22, ldc)) return 0;
+    if (!COB_WINOGRAD_LEAF(mr, nc, kr, s, kr, t, nc, c22, ldc)) return 0;
     cob_strassen_linear2(s, mr, kr, s, kr, a11, lda, -1);
     cob_strassen_linear2(t, kr, nc, b22, ldb, t, nc, -1);
-    if (!leaf(mr, nc, kr, s, kr, t, nc, c12, ldc)) return 0;
+    if (!COB_WINOGRAD_LEAF(mr, nc, kr, s, kr, t, nc, c12, ldc)) return 0;
 
     /* C contains P2, P6, P1, P5. Share U2=P1+P6 and U4=U2+P5. */
     for (int i = 0; i < mr; ++i) {
@@ -3838,14 +3848,14 @@ static int cob_winograd_product(int m, int n, int k, const float* a, int lda,
         }
     }
     cob_strassen_linear2(s, mr, kr, a12, lda, s, kr, -1);
-    if (!leaf(mr, nc, kr, s, kr, b22, ldb, p, nc)) return 0;
+    if (!COB_WINOGRAD_LEAF(mr, nc, kr, s, kr, b22, ldb, p, nc)) return 0;
     cob_strassen_merge_product(c12, ldc, p, mr, nc, 1);
     cob_strassen_linear2(t, kr, nc, t, nc, b21, ldb, -1);
-    if (!leaf(mr, nc, kr, a22, lda, t, nc, p, nc)) return 0;
+    if (!COB_WINOGRAD_LEAF(mr, nc, kr, a22, lda, t, nc, p, nc)) return 0;
     cob_strassen_merge_product(c21, ldc, p, mr, nc, -1);
     cob_strassen_linear2(s, mr, kr, a11, lda, a21, lda, -1);
     cob_strassen_linear2(t, kr, nc, b22, ldb, b12, ldb, -1);
-    if (!leaf(mr, nc, kr, s, kr, t, nc, p, nc)) return 0;
+    if (!COB_WINOGRAD_LEAF(mr, nc, kr, s, kr, t, nc, p, nc)) return 0;
     for (int i = 0; i < mr; ++i) {
         for (int j = 0; j < nc; ++j) {
             const float p7 = p[(size_t)i * nc + j];
@@ -3854,8 +3864,13 @@ static int cob_winograd_product(int m, int n, int k, const float* a, int lda,
             c22[z] += p7;
         }
     }
+#undef COB_WINOGRAD_LEAF
     return 1;
 }
+#if defined(COB_USE_OPENBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN)
+#include "cob_openblas_winograd.inc"
+#endif
+
 #endif
 
 #if defined(COB_USE_APPLE_AMX) && defined(COB_USE_APPLE_SME) && defined(COB_WITH_STRASSEN_SME_LEAF)
@@ -3945,7 +3960,7 @@ static int cob_sgemm_rowmajor_strassen1(
         workspace = cob_aligned_alloc(128, parent_values * sizeof(float));
     }
     float* child = workspace && child_values ? workspace + parent_values : NULL;
-#define COB_STRASSEN_CHILD(...) cob_winograd_product(__VA_ARGS__, child, cob_strassen_leaf)
+#define COB_STRASSEN_CHILD(...) cob_winograd_product(__VA_ARGS__, child, NULL, cob_strassen_leaf)
 #else
     float* workspace = cob_aligned_alloc(128, parent_values * sizeof(float));
 #define COB_STRASSEN_CHILD cob_strassen_leaf
@@ -4245,6 +4260,9 @@ void cob_sgemm_rowmajor_base(
     float* c,
     int ldc)
 {
+#if defined(COB_USE_OPENBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN) && defined(COB_USE_RECURSIVE_STRASSEN)
+    if (cob_openblas_winograd_try(m, n, k, a, lda, b, ldb, c, ldc, 2048)) return;
+#endif
 #ifdef COB_USE_N2_SMALL
     if (cob_n2_try_sgemm(m, n, k, a, lda, b, ldb, c, ldc)) return;
 #endif

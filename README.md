@@ -66,6 +66,16 @@ Enable portable Strassen as well and install the OpenBLAS development package
 with its `openblas.pc` file. Each subproduct uses OpenBLAS when its current
 thread count is one. Other thread counts select COB's native kernel.
 
+When all three options are on, the public row-major entry can use two
+Winograd levels on large rectangular products. Configure this build with
+`cmake -S . -B build -DCOB_ENABLE_PORTABLE_STRASSEN=ON -DCOB_ENABLE_RECURSIVE_STRASSEN=ON -DCOB_ENABLE_OPENBLAS_LEAF=ON`.
+Set `OPENBLAS_NUM_THREADS=1` for a threaded OpenBLAS installation. The
+rectangular route requires a shortest dimension of at least 1024, a harmonic
+mean of at least 2048 and a longest dimension no more than eight times the
+shortest. The core uses 49 BLAS calls. Fringes use up to two further calls.
+Workspace is allocated inside each multiplication and capped at 256 MiB.
+If HK15 is explicitly enabled, its existing eligible shapes take priority.
+
 ### Where the change applies
 
 One-level Strassen runs seven smaller products on eligible balanced matrices.
@@ -177,6 +187,11 @@ matrix shape, layout, and available hardware:
   kernel. Both paths skip packing.
 - Apple Silicon uses a `32x32` AMX kernel and hardware-assisted packing.
 - SME2.1 routes reduce packing work and reuse `B` data on selected shapes.
+  With 17–32 output rows and columns and a reduction depth of 16–48,
+  the 16-lane FP32 SME kernel keeps the first twelve depth slices of `A`
+  in registers. For 33–48 rows, 17–48 columns and the same depths, it
+  transposes the next panel of `A` alongside two or three output tiles.
+  Both routes accept independently padded row strides.
 - For wide outputs with a handful of rows, Arm NEON and x86 AVX2/FMA stream
   the right-hand matrix directly. The minimum width is 256 and the minimum
   inner dimension is 64. Apple SME2.1 selects it for two to three rows, Arm
