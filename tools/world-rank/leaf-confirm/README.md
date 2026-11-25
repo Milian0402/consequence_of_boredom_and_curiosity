@@ -1,0 +1,9 @@
+# Confirming large ragged FP32 matrix multiplication
+
+This branch schedules one native Linux x86-64 job and one native Linux AArch64 job for the seven registered matrix views. Each job records the actual CPU model and pins each complete public multiplication to one allowed logical CPU. The repeat, fresh and historical-anchor results are reported separately. The primary entrant is the standalone released ragged HK15. The field includes released vendor-backed Winograd, independent one-shot and retained methods, and two experimental vendor-backed HK15 variants. Admission requires an appropriate serial provider, passing numerical fixtures, intact parent matrices and verification of the actual execution path where registered. BLAS forwarding and retained plans have distinct labels.
+
+[Panel](panel.csv) · [Decision rules](protocol.md) · [Post-score accuracy and guard comparison](guard-supplement.md)
+
+The platform workflow installs pinned providers before running `bash tools/world-rank/leaf-confirm/run.sh PRODUCTION_CHECKOUT VENDOR_DIR OUTPUT_DIRECTORY`. The checkout must be release `f322a9ab58454762563b97323fdc5f29016cc39f`. The ordinary timed and diagnostic worker binaries are separate. Setup or allocation inside each registered public operation is included. Accuracy uses the same four cached serial DGEMM references for all methods on a given view. The second, non-ranking accuracy audit uses representable dyadic inputs and compares against an exact analytical answer on another view. A failure there qualifies the input range to which the random-input benchmark applies.
+
+To replay a downloaded native score, run `python3 -B tools/world-rank/leaf-confirm/score.py OUTPUT_DIRECTORY`. The output includes per-case warm medians, the six same-seed, same-round comparisons, leave-one-pair-out sensitivity, numerical errors and any excluded entries. The complete paired timing rows and held-out exact-input accuracy audit remain in the native archive.

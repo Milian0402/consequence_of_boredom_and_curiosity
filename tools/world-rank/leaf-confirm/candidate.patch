@@ -1,0 +1,106 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1cd0cb356e2c6c9eb064a1d25f10972de134e8dc..735875294686c4641586d5ab465c41eda8f7bf89 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -10,6 +10,7 @@ option(COB_BUILD_TESTS "Build correctness tests" ON)
+ option(COB_BUILD_BENCH "Build benchmark runner" ON)
+ option(COB_ENABLE_HK15 "Use one level of Hopcroft-Kerr on eligible 2-by-3-by-3 products" OFF)
+ option(COB_ENABLE_HK15_RAGGED "Enable HK15 with exact edge products on nondivisible shapes" OFF)
++option(COB_ENABLE_HK15_CBLAS_LEAF "Use a single serial provider SGEMM for each eligible HK15 child" OFF)
+ option(COB_ENABLE_APPLE_MEDIUM_WIDE "Use the SME2 medium-wide FP32 kernel on Apple arm64" OFF)
+ option(COB_ENABLE_N2_SMALL "Use the Neoverse N2 small-matrix kernel on Linux Arm64" OFF)
+ option(COB_ENABLE_X86_STREAM_B "Use runtime-dispatched packed B panels for medium-wide FP32 products on Linux x86-64" OFF)
+@@ -32,6 +33,11 @@ if(COB_ENABLE_OPENBLAS_LEAF)
+ endif()
+ 
+ function(cob_configure_blas_leaf)
++    if(COB_ENABLE_HK15_CBLAS_LEAF AND
++       (NOT (COB_ENABLE_HK15 OR COB_ENABLE_HK15_RAGGED) OR
++        NOT COB_ENABLE_PORTABLE_STRASSEN OR COB_BLAS_LEAF STREQUAL "NONE"))
++        message(FATAL_ERROR "HK15 CBLAS leaves require HK15, portable Strassen and an external BLAS leaf")
++    endif()
+     if(COB_ENABLE_ALIGNED_WINOGRAD AND (NOT COB_ENABLE_PORTABLE_STRASSEN OR
+        NOT COB_ENABLE_RECURSIVE_STRASSEN OR COB_BLAS_LEAF STREQUAL "NONE"))
+         message(FATAL_ERROR "COB_ENABLE_ALIGNED_WINOGRAD requires portable Strassen, recursive Strassen and an external BLAS leaf")
+@@ -298,6 +304,9 @@ foreach(target cob_matmul cob_matmul_strassen_test cob_matmul_strassen_square_te
+         if(COB_ENABLE_HK15 OR COB_ENABLE_HK15_RAGGED)
+             target_compile_definitions(${target} PRIVATE COB_ENABLE_HK15=1)
+         endif()
++        if(COB_ENABLE_HK15_CBLAS_LEAF)
++            target_compile_definitions(${target} PRIVATE COB_ENABLE_HK15_CBLAS_LEAF=1)
++        endif()
+         if(COB_ENABLE_HK15_RAGGED)
+             target_compile_definitions(${target} PRIVATE COB_ENABLE_HK15_RAGGED=1)
+             target_sources(${target} PRIVATE src/cob_hk15_ragged.c)
+diff --git a/Makefile b/Makefile
+index d63b56beea6dac1adace93a9b54abcf0ed7ccc84..c222cc75fac2699531aecd11c068865f0819c719 100644
+--- a/Makefile
++++ b/Makefile
+@@ -30,6 +30,7 @@ COB_BLAS_LEAF ?= NONE
+ COB_ENABLE_ALIGNED_WINOGRAD ?= OFF
+ COB_ENABLE_HK15 ?= OFF
+ COB_ENABLE_HK15_RAGGED ?= OFF
++COB_ENABLE_HK15_CBLAS_LEAF ?= OFF
+ COB_ENABLE_APPLE_MEDIUM_WIDE ?= OFF
+ COB_ENABLE_N2_SMALL ?= OFF
+ COB_ENABLE_X86_MEDIUM_ROUTE ?= OFF
+@@ -147,6 +148,17 @@ SME_DEFINE += -DCOB_ENABLE_HK15=1
+ else ifneq ($(COB_ENABLE_HK15),OFF)
+ $(error COB_ENABLE_HK15 must be ON or OFF)
+ endif
++ifeq ($(COB_ENABLE_HK15_CBLAS_LEAF),ON)
++ifeq ($(filter ON,$(COB_ENABLE_HK15) $(COB_ENABLE_HK15_RAGGED)),)
++$(error HK15 CBLAS leaves require HK15)
++endif
++ifeq ($(leaf_provider),NONE)
++$(error HK15 CBLAS leaves require an external BLAS leaf)
++endif
++SME_DEFINE += -DCOB_ENABLE_HK15_CBLAS_LEAF=1
++else ifneq ($(COB_ENABLE_HK15_CBLAS_LEAF),OFF)
++$(error COB_ENABLE_HK15_CBLAS_LEAF must be ON or OFF)
++endif
+ ifeq ($(COB_ENABLE_HK15_RAGGED),ON)
+ ifneq ($(COB_ENABLE_HK15),ON)
+ SME_DEFINE += -DCOB_ENABLE_HK15=1
+@@ -222,7 +234,7 @@ $(BUILD_DIR):
+ 
+ # Track each output separately so reconfiguring a partially built directory
+ # works even on versions of Make with one-second file timestamps.
+-SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN) recursive:$(COB_ENABLE_RECURSIVE_STRASSEN) blas:$(leaf_provider) aligned:$(COB_ENABLE_ALIGNED_WINOGRAD) blas-root:$(COB_BLAS_ROOT) apple-wide:$(COB_ENABLE_APPLE_MEDIUM_WIDE) n2small:$(COB_ENABLE_N2_SMALL) stream-b:$(COB_ENABLE_X86_STREAM_B) x86-medium:$(COB_ENABLE_X86_MEDIUM_ROUTE) hk15:$(COB_ENABLE_HK15) hk-ragged:$(COB_ENABLE_HK15_RAGGED)
++SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN) recursive:$(COB_ENABLE_RECURSIVE_STRASSEN) blas:$(leaf_provider) aligned:$(COB_ENABLE_ALIGNED_WINOGRAD) blas-root:$(COB_BLAS_ROOT) apple-wide:$(COB_ENABLE_APPLE_MEDIUM_WIDE) n2small:$(COB_ENABLE_N2_SMALL) stream-b:$(COB_ENABLE_X86_STREAM_B) x86-medium:$(COB_ENABLE_X86_MEDIUM_ROUTE) hk15:$(COB_ENABLE_HK15) hk-ragged:$(COB_ENABLE_HK15_RAGGED) hk-cblas:$(COB_ENABLE_HK15_CBLAS_LEAF)
+ SME_OUTPUTS := $(LIB_OBJ) $(STRASSEN_TEST_OBJ) $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) \
+                $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN) \
+                $(BENCH_BIN) $(CBLAS_BENCH_BIN) $(FORTRAN_BLAS_BENCH_BIN) $(BLAS_LEAF_TEST)
+diff --git a/src/cob_hk15.inc b/src/cob_hk15.inc
+index 0725077ee5aade34b573f32407ccc16635a7e026..f7d3cc2dd334d80ed4c7d185454e6c54df56185d 100644
+--- a/src/cob_hk15.inc
++++ b/src/cob_hk15.inc
+@@ -21,6 +21,17 @@ static void cob_hk15_fused_child(int m, int n, int k, const float* a, int lda,
+ }
+ #endif
+ 
++#if defined(COB_ENABLE_HK15_CBLAS_LEAF) && COB_ENABLE_HK15_CBLAS_LEAF
++#if !defined(COB_USE_CBLAS_LEAF) || !defined(COB_USE_PORTABLE_STRASSEN)
++#error "HK15 CBLAS leaves require the portable serial provider interface"
++#endif
++static void cob_hk15_cblas_child(int m, int n, int k, const float* a, int lda,
++    const float* b, int ldb, float* c, int ldc)
++{
++    (void)cob_strassen_leaf(m,n,k,a,lda,b,ldb,c,ldc);
++}
++#endif
++
+ static int cob_hk15_shape(int m, int n, int k)
+ {
+ #if !defined(COB_ENABLE_HK15_RAGGED) || !COB_ENABLE_HK15_RAGGED
+@@ -77,6 +88,10 @@ static int cob_hk15_try(int m, int n, int k, const float* aa, int lda,
+         volume < COB_FUSED_STRASSEN_MIN_HARMONIC_DIM*area)
+         cob_sgemm_rowmajor = cob_hk15_fused_child;
+ #endif
++#if defined(COB_ENABLE_HK15_CBLAS_LEAF) && COB_ENABLE_HK15_CBLAS_LEAF
++    if (cob_cblas_leaf_is_serial())
++        cob_sgemm_rowmajor = cob_hk15_cblas_child;
++#endif
+ #include "../third_party/fast-matmul/hk233.inc"
+ #if defined(COB_ENABLE_HK15_RAGGED) && COB_ENABLE_HK15_RAGGED
+     if (m%2 || n%3 || k%3)

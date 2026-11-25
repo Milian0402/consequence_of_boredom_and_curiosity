@@ -79,7 +79,7 @@ jobs:
       contents: read
       actions: read
     needs: [phase, onednn]
-    if: ${{ !cancelled() && needs.phase.result == 'success' && needs.phase.outputs.label != 'packing-cost' && needs.phase.outputs.label != 'rank48-arm-confirm' && needs.phase.outputs.label != 'stream-release' && needs.phase.outputs.label != 'cropped-views' && needs.phase.outputs.label != 'arm-layout' && needs.phase.outputs.label != 'arm-repeat' && needs.phase.outputs.label != 'arm-confirm' && needs.phase.outputs.label != 'prefix-eight' && needs.phase.outputs.label != 'explicit-handles' && needs.phase.outputs.label != 'ragged-hk' }}
+    if: ${{ !cancelled() && needs.phase.result == 'success' && needs.phase.outputs.label != 'packing-cost' && needs.phase.outputs.label != 'rank48-arm-confirm' && needs.phase.outputs.label != 'stream-release' && needs.phase.outputs.label != 'cropped-views' && needs.phase.outputs.label != 'arm-layout' && needs.phase.outputs.label != 'arm-repeat' && needs.phase.outputs.label != 'arm-confirm' && needs.phase.outputs.label != 'prefix-eight' && needs.phase.outputs.label != 'explicit-handles' && needs.phase.outputs.label != 'ragged-hk' && needs.phase.outputs.label != 'leaf-confirm' }}
     name: ${{ needs.phase.outputs.label == 'grouped-b-x86' && format('Grouped B ranking on x86-64, replica {0}', matrix.replica) || needs.phase.outputs.label == 'frontier-x86' && format('Frontier ranking on x86-64, replica {0}', matrix.replica) || format('Frozen ranking on {0}', matrix.arch) }}
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -536,6 +536,61 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: ragged-hk-${{ matrix.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.OUT_DIR }}
+          if-no-files-found: error
+          retention-days: 30
+
+  leaf-confirm:
+    needs: phase
+    if: needs.phase.outputs.label == 'leaf-confirm'
+    permissions:
+      actions: read
+      contents: read
+    name: Confirm released and vendor-backed HK15 on ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {runner: ubuntu-24.04, arch: x86_64}
+          - {runner: ubuntu-24.04-arm, arch: aarch64}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    env:
+      VENDOR_DIR: ${{ github.workspace }}/../leaf-confirm-vendors
+      OUT_DIR: ${{ github.workspace }}/leaf-confirm-output
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: f322a9ab58454762563b97323fdc5f29016cc39f
+          path: production-source
+          persist-credentials: false
+      - name: Prepare native compilers and the single-thread double-precision oracle
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install --no-install-recommends -y gcc g++ gfortran make cmake pkg-config unzip libssl-dev
+          mkdir -p "$VENDOR_DIR" "$OUT_DIR"
+          bash tools/world-rank/openblas/build.sh "$VENDOR_DIR" > "$OUT_DIR/openblas-install.log" 2>&1 || { tail -60 "$OUT_DIR/openblas-install.log"; exit 1; }
+      - name: Restore previously authenticated strict oneDNN implementations
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash tools/world-rank/ragged-hk/restore-onednn.sh "$VENDOR_DIR" "$OUT_DIR" > "$OUT_DIR/onednn-restore.log" 2>&1
+      - name: Build the platform field and both independent FastMMW cutoffs
+        run: |
+          status=0
+          bash tools/world-rank/release-replay/restore-peers.sh "$VENDOR_DIR" "$OUT_DIR" || status=$?
+          printf '%s\n' "$status" > "$OUT_DIR/restoration-status.txt"
+      - name: Run the frozen large-matrix panel on one logical CPU
+        run: bash tools/world-rank/leaf-confirm/run.sh "$PWD/production-source" "$VENDOR_DIR" "$OUT_DIR"
+      - name: Retain full-field timings, numerical errors, tests and evidence
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: ${{ !cancelled() }}
+        with:
+          name: leaf-confirm-${{ matrix.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ env.OUT_DIR }}
           if-no-files-found: error
           retention-days: 30

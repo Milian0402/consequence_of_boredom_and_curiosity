@@ -1,0 +1,8 @@
+family,layout,m,n,k,lda,ldb,ldc,ar,ac,br,bc,cr,cc
+repeat-depth-only,padded,2024,3081,3005,3014,3090,3090,0,0,0,0,0,0
+repeat-row-and-column,padded,2153,3007,3159,3164,3012,3012,0,0,0,0,0,0
+repeat-all-fringes,cropped,1949,3227,3023,3059,3281,3307,2,5,3,11,1,17
+anchor-weak-ragged,padded,2039,2969,3367,3378,2980,2980,0,0,0,0,0,0
+fresh-column-depth,cropped,2018,3094,2953,2981,3133,3167,2,3,1,9,3,5
+fresh-bottom-depth,cropped,2227,3213,3278,3311,3251,3277,1,7,4,9,2,17
+fresh-wide-boundary,cropped,1863,3488,2928,2979,3527,3541,3,5,2,7,4,13

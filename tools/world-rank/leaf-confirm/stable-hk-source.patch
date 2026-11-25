@@ -1,0 +1,119 @@
+diff --git a/src/cob_hk15.inc b/src/cob_hk15.inc
+index 0725077..c72a5fd 100644
+--- a/src/cob_hk15.inc
++++ b/src/cob_hk15.inc
+@@ -21,6 +21,86 @@ static void cob_hk15_fused_child(int m, int n, int k, const float* a, int lda,
+ }
+ #endif
+ 
++/* Under binary32, unsigned magnitude bits preserve numerical order, including
++   subnormals, independently of the current floating-point flush mode. */
++enum cob_hk15_policy { COB_HK15_REGULAR, COB_HK15_CLASSICAL, COB_HK15_WIDE };
++
++static enum cob_hk15_policy cob_hk15_axis_policy(int rows, int cols,
++    const float* input, int ld, uint32_t* columns)
++{
++    const uint32_t low = UINT32_C(0x27800000);  /* 2^-48 */
++    const uint32_t high = UINT32_C(0x57800000); /* 2^48 */
++    uint32_t largest = 0, smallest_line = UINT32_MAX, has_tiny = 0;
++    memset(columns, 0, (size_t)cols * sizeof(*columns));
++    for (int i = 0; i < rows; ++i) {
++        const float* row = input + (size_t)i * ld;
++        uint32_t row_max = 0;
++        for (int j = 0; j < cols; ++j) {
++            uint32_t bits;
++            memcpy(&bits, row + j, sizeof(bits));
++            const uint32_t mag = bits & UINT32_C(0x7fffffff);
++            has_tiny |= mag != 0 && mag < low;
++            row_max = mag > row_max ? mag : row_max;
++            columns[j] = mag > columns[j] ? mag : columns[j];
++        }
++        if (row_max > largest) largest = row_max;
++        if (row_max < smallest_line) smallest_line = row_max;
++    }
++    if (has_tiny || largest > high) return COB_HK15_WIDE;
++    for (int j = 0; j < cols; ++j)
++        if (columns[j] < smallest_line) smallest_line = columns[j];
++    /* Adding two to a normal binary32 exponent multiplies by four. */
++    if (smallest_line == 0 || largest > smallest_line + (UINT32_C(2) << 23))
++        return COB_HK15_CLASSICAL;
++    return COB_HK15_REGULAR;
++}
++
++static enum cob_hk15_policy cob_hk15_policy_for(int m, int n, int k,
++    const float* a, int lda, const float* b, int ldb)
++{
++    /* HK accepts at most 1280 columns per third plus two fringe columns.
++       Keep the scan allocation-free even when the arithmetic workspace fails. */
++    uint32_t columns[3 * 1280 + 2];
++    if ((size_t)n > sizeof(columns)/sizeof(*columns) ||
++        (size_t)k > sizeof(columns)/sizeof(*columns)) return COB_HK15_WIDE;
++    enum cob_hk15_policy left = cob_hk15_axis_policy(m, k, a, lda, columns);
++    if (left == COB_HK15_WIDE) return left;
++    enum cob_hk15_policy right = cob_hk15_axis_policy(k, n, b, ldb, columns);
++    return left > right ? left : right;
++}
++
++static void cob_hk15_classical(int m, int n, int k, const float* a, int lda,
++    const float* b, int ldb, float* c, int ldc)
++{
++#if defined(COB_WITH_STRASSEN_SME_LEAF) && defined(COB_USE_APPLE_SME) && defined(COB_USE_APPLE_AMX)
++    if (cob_sgemm_try_sme_classical(m, n, k, a, lda, b, ldb, c, ldc)) return;
++#endif
++    cob_sgemm_rowmajor_fallback(m, n, k, a, lda, b, ldb, c, ldc);
++}
++
++static void cob_hk15_wide(int m, int n, int k, const float* a, int lda,
++    const float* b, int ldb, float* c, int ldc)
++{
++    /* Finite binary32 products, including subnormal products, fit exactly
++       in binary64. Even k times the largest product fits its exponent range. */
++    enum { tile = 32 };
++    for (int i = 0; i < m; ++i) {
++        const float* row = a + (size_t)i * lda;
++        for (int j = 0; j < n; j += tile) {
++            const int width = cob_min_i32(n-j, tile);
++            double sum[tile] = {0};
++            for (int p = 0; p < k; ++p) {
++                const float* rhs = b + (size_t)p * ldb + j;
++                const double lhs = row[p];
++                for (int q = 0; q < width; ++q)
++                    sum[q] += lhs * (double)rhs[q];
++            }
++            for (int q = 0; q < width; ++q)
++                c[(size_t)i * ldc + j + q] = (float)sum[q];
++        }
++    }
++}
++
+ static int cob_hk15_shape(int m, int n, int k)
+ {
+ #if !defined(COB_ENABLE_HK15_RAGGED) || !COB_ENABLE_HK15_RAGGED
+@@ -47,16 +127,24 @@ static int cob_hk15_try(int m, int n, int k, const float* aa, int lda,
+         cob_f32_ranges_overlap(cc, (size_t)cs, aa, (size_t)as) ||
+         cob_f32_ranges_overlap(cc, (size_t)cs, bb, (size_t)bs)) return 0;
+ 
+-#if defined(COB_ENABLE_HK15_RAGGED) && COB_ENABLE_HK15_RAGGED
+     if (as*sizeof(float)-1 > UINTPTR_MAX-(uintptr_t)aa ||
+         bs*sizeof(float)-1 > UINTPTR_MAX-(uintptr_t)bb ||
+         cs*sizeof(float)-1 > UINTPTR_MAX-(uintptr_t)cc) return 0;
+-#endif
++
++    const enum cob_hk15_policy policy = cob_hk15_policy_for(m,n,k,aa,lda,bb,ldb);
++    if (policy != COB_HK15_REGULAR) {
++        if (policy == COB_HK15_WIDE) cob_hk15_wide(m,n,k,aa,lda,bb,ldb,cc,ldc);
++        else cob_hk15_classical(m,n,k,aa,lda,bb,ldb,cc,ldc);
++        return 1;
++    }
+     const int mh = m/2, nh = n/3, kh = k/3;
+     const size_t ac = (size_t)mh*kh, bc = (size_t)kh*nh, pc = (size_t)mh*nh;
+     /* All three block dimensions have a validated upper bound of 1280. */
+     float* workspace = cob_aligned_alloc(128, (ac+bc+pc)*sizeof(float));
+-    if (!workspace) return 0;
++    if (!workspace) {
++        cob_hk15_classical(m,n,k,aa,lda,bb,ldb,cc,ldc);
++        return 1;
++    }
+     float *x = workspace, *y = x+ac, *product = y+bc;
+     const float *a[6], *b[9];
+     float* c[6];
