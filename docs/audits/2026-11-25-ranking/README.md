@@ -17,6 +17,8 @@ The release history includes standalone kernels for small Apple matrices and lar
 
 A subsequent M5 Max experiment improved the 49 × 35 × 39 case from 393.9 ns to 325.7 ns. Cached LIBXSMM took 353.9 ns. One mixed-scale fixture exceeded the registered 0.002 absolute-error limit in both the candidate and its predecessor, with identical output bits. The experiment did not qualify for release. [Results, patch and failing fixture](m5-experiment/README.md)
 
+Checking the input magnitudes and switching to double accumulation fixed that failing value, from 0.00283442 to 0.00088130 absolute error. The successor passed all 350 stronger numerical fixtures. It improved on the released kernel by 1.175× across eight fresh ordinary layouts, but beat both the fastest independent public entry and a direct prepared LIBXSMM call on only four. The performance rule required six. [Follow-up results, numerical criteria and replay](m5-numerical/README.md)
+
 ## Medium rectangular products
 
 A standalone candidate packed A across output rows and read B in place. It lost all five fresh warm-call comparisons against the release on each of Intel Xeon Platinum 8573C and Arm Neoverse N2. Its geometric-mean speed relative to the release was 0.775× on Intel and 0.980× on Arm. All 576 full-output validations passed. On the Intel 49 × 2861 × 157 layout with eleven floats of row padding, the released implementation reached 0.679× oneMKL's speed. [Timings, checks and offline verifier](linux-medium/README.md) · [Native run](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45686443679)
