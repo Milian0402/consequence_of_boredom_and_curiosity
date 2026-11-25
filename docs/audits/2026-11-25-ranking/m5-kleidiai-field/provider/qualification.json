@@ -1,0 +1,69 @@
+{
+  "compiler": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+  "upstream_revision": "ab3f4b24a75f0667a1af9ebfe27e94efa7ce97e1",
+  "upstream_tree": "9075c8248e92f1437a913ddcfbe75fdf535e729c",
+  "macos": "27.2.1",
+  "build": "26B131",
+  "receipt": {
+    "fixed": {
+      "metrics": {
+        "cases": "39",
+        "fp64_cells": "122382",
+        "c_guard_cells": "111090",
+        "max_abs_error": "1.36831585e-06",
+        "svl_bytes": "64",
+        "svcr_after": "0",
+        "threads_before_after": "1"
+      },
+      "ordinary_c_objects": [
+        {
+          "object": "adapter.o",
+          "instructions": 143
+        },
+        {
+          "object": "kai_lhs_pack_f32p2vlx1_f32_sme.o",
+          "instructions": 432
+        },
+        {
+          "object": "kai_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa.o",
+          "instructions": 179
+        },
+        {
+          "object": "kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.o",
+          "instructions": 319
+        }
+      ],
+      "library_sha256": "d6d9f6b8c86ad524cfe78444f662ead45c3b79b79c34cce54f38c081e38df8ab"
+    },
+    "elastic": {
+      "metrics": {
+        "cases": "39",
+        "fp64_cells": "122382",
+        "c_guard_cells": "111090",
+        "max_abs_error": "2.48945896e-05",
+        "svl_bytes": "64",
+        "svcr_after": "0",
+        "threads_before_after": "1"
+      },
+      "ordinary_c_objects": [
+        {
+          "object": "adapter.o",
+          "instructions": 167
+        },
+        {
+          "object": "kai_matmul_clamp_f32_f32p4vsx1_f32p4vsx1bf32_8vsx8vs_sme2_mopa.o",
+          "instructions": 575
+        },
+        {
+          "object": "kai_matmul_pack_lhs_mxk_x32p4vsx1_x32_sme.o",
+          "instructions": 230
+        },
+        {
+          "object": "kai_matmul_pack_rhs_kxn_x32p4vsx1bx32_x32_x32_sme.o",
+          "instructions": 191
+        }
+      ],
+      "library_sha256": "297a46e46210c2ba5f4e99bff377bb2e0d2d75234fb6afb2903c5c59b2aa4fdc"
+    }
+  }
+}

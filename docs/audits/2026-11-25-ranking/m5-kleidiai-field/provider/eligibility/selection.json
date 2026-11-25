@@ -1,0 +1,176 @@
+{
+  "release": "v1.33.0",
+  "commit": "ab3f4b24a75f0667a1af9ebfe27e94efa7ce97e1",
+  "rc2": "9b65dd111ab5cc8a6c0d3c9c0883b69ad97eeab5",
+  "all_41_full_f32_matmul_file_blobs_equal": true,
+  "files": [
+    {
+      "path": "kai/kai_common.h",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "e9623ee77e6c546cdd258db56f29f40ce7528bd1",
+      "sha256": "624af2f63cde730330147587342d4ab22ae11384256a399d52b12dea4c1f61a1"
+    },
+    {
+      "path": "kai/kai_common_sme_asm.S",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "3b1451e04828248ca527c9201a426ee5a17184fa",
+      "sha256": "89537cbb0adcb6202da495ae3ab01fca5160ca31ff424ede20645984cfef21b4"
+    },
+    {
+      "path": "kai/ukernels/matmul/kai_matmul.h",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "47e90822bc1bdeb5e31ee90bf2295bbf4f68447f",
+      "sha256": "e4ab27b2d34edb171c9d3d0625ff2d9496c9b41c7ba6aee15f4c523f7f4bbfc5"
+    },
+    {
+      "path": "kai/ukernels/matmul/kai_matmul_pack_lhs.h",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "ed5c707cf978b0111d524fb72de135a05834743a",
+      "sha256": "54d512b4242787c9a66af6bccf4edbdd9a3827aea0f65d7c46e7cd474d263be8"
+    },
+    {
+      "path": "kai/ukernels/matmul/kai_matmul_pack_rhs.h",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "8e521a7dea49cad82b7d064147290019fa1336c5",
+      "sha256": "3103cffb236d0d274ce32ffe28cfede0c1fb5c8b2747d84682077c66b9e7f080"
+    },
+    {
+      "path": "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p2vlx1_f32p2vlx1b_2vlx2vl_sme_mopa.c",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "a7fd590c9c3424dc435f5d8a49474691384d508a",
+      "sha256": "9a497cccccbfa5b42ac8d4759831823f92b0c33c799552a82f343a649aba5a59"
+    },
+    {
+      "path": "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p2vlx1_f32p2vlx1b_2vlx2vl_sme_mopa.h",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "e8e023ff37098680cbc0c58b61fef5807137099a",
+      "sha256": "5844955c2adbc14e59c7e6af1f25709e8df8ac6a3d3df2fbbff5cb6f21b645c9"
+    },
+    {
+      "path": "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p2vlx1_f32p2vlx1b_2vlx2vl_sme_mopa_asm.S",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "e39b91734c58dcc81ee2240e59b298cda1da6286",
+      "sha256": "8f29d4a9a30bb47cc477738051efcc2f2d46024d964bb2788e2ad2c1b6c2503d"
+    },
+    {
+      "path": "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa.c",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "9d218774233022dc8919bb7d3a2cec6157ab4874",
+      "sha256": "0a5084928760ec479b99246276fcfce4cb8152e7248f28862cb46b1ceaed0fb0"
+    },
+    {
+      "path": "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa.h",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "35d0965b7b2415df8e2abe0224576ec220ecd7cb",
+      "sha256": "965c528ae237d43a0687ef80aac36318f78a0abf8a1b4e37e6655cbc33c30b85"
+    },
+    {
+      "path": "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa_asm.S",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "e6b419c2890ecf11f2c4e108210c28abdaf79f74",
+      "sha256": "235db1b969e1b78916d7af0c43baf0e5ce7dfd054fd4380f88e1e5553334b65c"
+    },
+    {
+      "path": "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p4vsx1_f32p4vsx1bf32_16vsx4vs_sme2_mopa_asm.S",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "77acc6c933c1138b9cb8f4554ab0d9b95e9ef666",
+      "sha256": "94f055bf51b27691e13d883a392ffc692b95c73a08a0bcf19128d63a049413ed"
+    },
+    {
+      "path": "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p4vsx1_f32p4vsx1bf32_4vsx16vs_sme2_mopa_asm.S",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "cb79a8fc76e2b2e5240dd8ec42943c9825f84642",
+      "sha256": "151580fc7c31655fde69ddf67d0d712fe4efd717c567ffc4504ced8fe8db6a53"
+    },
+    {
+      "path": "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p4vsx1_f32p4vsx1bf32_4vsx4vs_sme2_mopa_asm.S",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "098c61b9238a913e0ad5c119974005be4ecfdc8c",
+      "sha256": "6180acff436621182b16955144fde8db39aeafbb5362f92595886623872be74f"
+    },
+    {
+      "path": "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p4vsx1_f32p4vsx1bf32_4vsx8vs_sme2_mopa_asm.S",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "47234661d5f4dd8d2e9aba9e8e122cf984d30fd9",
+      "sha256": "489a6181229c30db34008ca51a1b0ee3a0c0078530e096fad41368932accd563"
+    },
+    {
+      "path": "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p4vsx1_f32p4vsx1bf32_8vsx4vs_sme2_mopa_asm.S",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "b04e9f7ac805cca95f46bb73dc705c85fce4f5d6",
+      "sha256": "7df571f733639c84feb767e426451d67bb022f3aca5add8f8092715647b1c561"
+    },
+    {
+      "path": "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p4vsx1_f32p4vsx1bf32_8vsx8vs_sme2_mopa.c",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "114d725e78e4d7455e9ad49a866cfa40706554ba",
+      "sha256": "60638d4abe5f467d1b2021dcd9b237cd1e93da94c1dc663b0216d52ffe7b4051"
+    },
+    {
+      "path": "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p4vsx1_f32p4vsx1bf32_8vsx8vs_sme2_mopa_asm.S",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "ee55d2975f439d612e4965590aec2b09c6fd01da",
+      "sha256": "053679a10655b4f63b66f7baadfcc5c5b40752d25c71bd88d246f57576efcc1f"
+    },
+    {
+      "path": "kai/ukernels/matmul/pack/kai_lhs_pack_f32p2vlx1_f32_sme.c",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "5a2c6617e8cce29817c6729f0961bbbb57671c69",
+      "sha256": "87ceadf997863a7cd19b4682cb94306ac971593c01a722dab1283bbe84a0c81b"
+    },
+    {
+      "path": "kai/ukernels/matmul/pack/kai_lhs_pack_f32p2vlx1_f32_sme.h",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "cd2d7066b55a35f82d873839cc4472c1b46b1152",
+      "sha256": "4c725640876caffca0c738dc2767c58b07fe96ef5a66907687de5f3df0f05eb7"
+    },
+    {
+      "path": "kai/ukernels/matmul/pack/kai_lhs_pack_f32p2vlx1_f32_sme_asm.S",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "09e6b72b87c27ba1694e5dd494011c4ff97f56a9",
+      "sha256": "638480ed14459ba4b23f745ae5c1ee8c86c73c059b2a825a4e8b69fc6a2e56d4"
+    },
+    {
+      "path": "kai/ukernels/matmul/pack/kai_matmul_pack_lhs_mxk_x32p4vsx1_x32_sme.c",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "0315116b52a570c6cf40e615966915f806657f5e",
+      "sha256": "c63e96c0f0797fedc4b78057329eab48ee3c7c852175882d5fa565ac45bbbf57"
+    },
+    {
+      "path": "kai/ukernels/matmul/pack/kai_matmul_pack_lhs_mxk_x32p4vsx1_x32_sme_asm.S",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "735acf29c507587bb4a1c4ea847b0c147a8da56d",
+      "sha256": "657e13b053cdab507ff5fd7f3a0f2e57629a3cf2cac06bab3c86b2f342c779d6"
+    },
+    {
+      "path": "kai/ukernels/matmul/pack/kai_matmul_pack_rhs_kxn_x32p4vsx1bx32_x32_x32_sme.c",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "cf49c67ae04d284cecac7d9b947a69880fb0f4c6",
+      "sha256": "1aae0def2c5871d00a7422df4fbfbe089d8b1a3f2918302c518bdc8fd3a87f26"
+    },
+    {
+      "path": "kai/ukernels/matmul/pack/kai_matmul_pack_rhs_kxn_x32p4vsx1bx32_x32_x32_sme_asm.S",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "eaf68b52f3a78942be07315e13ab7129d5b76cca",
+      "sha256": "c4bbbdf0d300ddb72e681f99e61f01580c7fd27ac203b6c04fe3826d7bca3544"
+    },
+    {
+      "path": "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.c",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "b794393c25c487cb120302e35e8900b2155e1dc1",
+      "sha256": "22a19892f4d785798149f85000e6bc9520a3bda396081b17be1f677e47c12f6b"
+    },
+    {
+      "path": "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.h",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "1c5b50730a6bea42cc9a7527c39461b0232e8bcd",
+      "sha256": "42ba6d072a6b56f675f2cf8e52d0b5d225aa310bc4758bc4d04a894a884ab5f6"
+    },
+    {
+      "path": "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme_asm.S",
+      "license": "Apache-2.0",
+      "git_blob_sha1": "72b45f1a54817358713031719eac2eadc9dd8ace",
+      "sha256": "3fb10f25441548d7b07aee957f1dd5cc1231ac9ebb4d7098b49f86db5969ee52"
+    }
+  ]
+}

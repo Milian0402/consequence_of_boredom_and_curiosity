@@ -1,0 +1,2 @@
+mopa: fp32_fmopa=executed svl_bytes=64; exit=0
+mop4: instruction=SIGILL; exit=77

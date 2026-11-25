@@ -1,0 +1,32 @@
+{
+  "gm": {
+    "incumbent": 1.043819927515645,
+    "field": 1.0527996632801357,
+    "previous_field": 1.0527996632801357,
+    "warm_fixed": 1.7489486307208335,
+    "warm_elastic": 1.7836165936897057,
+    "cold_field": 0.921509001797153,
+    "cold_fixed": 3.1957801972066506,
+    "cold_elastic": 3.238913636356373
+  },
+  "wins": {
+    "field": 6,
+    "previous_field": 6,
+    "warm_fixed": 8,
+    "warm_elastic": 8
+  },
+  "wins_1pct": 6,
+  "fastest_changes": 0,
+  "AA_range": [
+    1.0,
+    1.0158384460033032
+  ],
+  "warm_obs": 11616,
+  "first_obs": 160,
+  "cells": 98134032,
+  "max_abs": 2.18563576091e-05,
+  "max_by_kleidi": {
+    "KleidiAI-fixed": 2.18563576091e-05,
+    "KleidiAI-elastic": 2.18563576091e-05
+  }
+}

@@ -1,0 +1,9 @@
+hw.optional.arm.FEAT_SME=1
+hw.optional.arm.FEAT_SME2=1
+hw.optional.arm.FEAT_SME2p1=1
+hw.optional.arm.SME_F32F32=1
+hw.optional.arm.FEAT_SME_MOP4=unavailable (No such file or directory)
+hw.optional.arm.FEAT_SME2p2=unavailable (No such file or directory)
+hw.optional.arm.FEAT_SME2p3=unavailable (No such file or directory)
+hw.optional.arm.FEAT_SME3=unavailable (No such file or directory)
+hw.optional.arm.sme_max_svl_b=64

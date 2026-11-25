@@ -1,0 +1,42 @@
+{
+  "revision": "ab3f4b24a75f0667a1af9ebfe27e94efa7ce97e1",
+  "tree": "9075c8248e92f1437a913ddcfbe75fdf535e729c",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+  "inputs": {
+    "kai/kai_common_sme_asm.S": "89537cbb0adcb6202da495ae3ab01fca5160ca31ff424ede20645984cfef21b4",
+    "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa.c": "0a5084928760ec479b99246276fcfce4cb8152e7248f28862cb46b1ceaed0fb0",
+    "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p2vlx1_f32p2vlx1biasf32_sme2_mopa_asm.S": "235db1b969e1b78916d7af0c43baf0e5ce7dfd054fd4380f88e1e5553334b65c",
+    "kai/ukernels/matmul/pack/kai_lhs_pack_f32p2vlx1_f32_sme.c": "87ceadf997863a7cd19b4682cb94306ac971593c01a722dab1283bbe84a0c81b",
+    "kai/ukernels/matmul/pack/kai_lhs_pack_f32p2vlx1_f32_sme_asm.S": "638480ed14459ba4b23f745ae5c1ee8c86c73c059b2a825a4e8b69fc6a2e56d4",
+    "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme.c": "22a19892f4d785798149f85000e6bc9520a3bda396081b17be1f677e47c12f6b",
+    "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p2vlx1biasf32_f32_f32_sme_asm.S": "3fb10f25441548d7b07aee957f1dd5cc1231ac9ebb4d7098b49f86db5969ee52",
+    "adapter.c": "dcd61550bd008f928b3f7c19e237e2d16bf963541220d46d7618a1a33a92e323",
+    "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p4vsx1_f32p4vsx1bf32_8vsx8vs_sme2_mopa.c": "60638d4abe5f467d1b2021dcd9b237cd1e93da94c1dc663b0216d52ffe7b4051",
+    "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p4vsx1_f32p4vsx1bf32_4vsx4vs_sme2_mopa_asm.S": "6180acff436621182b16955144fde8db39aeafbb5362f92595886623872be74f",
+    "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p4vsx1_f32p4vsx1bf32_4vsx8vs_sme2_mopa_asm.S": "489a6181229c30db34008ca51a1b0ee3a0c0078530e096fad41368932accd563",
+    "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p4vsx1_f32p4vsx1bf32_4vsx16vs_sme2_mopa_asm.S": "151580fc7c31655fde69ddf67d0d712fe4efd717c567ffc4504ced8fe8db6a53",
+    "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p4vsx1_f32p4vsx1bf32_8vsx4vs_sme2_mopa_asm.S": "7df571f733639c84feb767e426451d67bb022f3aca5add8f8092715647b1c561",
+    "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p4vsx1_f32p4vsx1bf32_8vsx8vs_sme2_mopa_asm.S": "053679a10655b4f63b66f7baadfcc5c5b40752d25c71bd88d246f57576efcc1f",
+    "kai/ukernels/matmul/matmul_clamp_f32_f32p_f32p/kai_matmul_clamp_f32_f32p4vsx1_f32p4vsx1bf32_16vsx4vs_sme2_mopa_asm.S": "94f055bf51b27691e13d883a392ffc692b95c73a08a0bcf19128d63a049413ed",
+    "kai/ukernels/matmul/pack/kai_matmul_pack_lhs_mxk_x32p4vsx1_x32_sme.c": "c63e96c0f0797fedc4b78057329eab48ee3c7c852175882d5fa565ac45bbbf57",
+    "kai/ukernels/matmul/pack/kai_matmul_pack_lhs_mxk_x32p4vsx1_x32_sme_asm.S": "657e13b053cdab507ff5fd7f3a0f2e57629a3cf2cac06bab3c86b2f342c779d6",
+    "kai/ukernels/matmul/pack/kai_matmul_pack_rhs_kxn_x32p4vsx1bx32_x32_x32_sme.c": "1aae0def2c5871d00a7422df4fbfbe089d8b1a3f2918302c518bdc8fd3a87f26",
+    "kai/ukernels/matmul/pack/kai_matmul_pack_rhs_kxn_x32p4vsx1bx32_x32_x32_sme_asm.S": "c4bbbdf0d300ddb72e681f99e61f01580c7fd27ac203b6c04fe3826d7bca3544"
+  },
+  "products": {
+    "fixed": {
+      "sha256": "d6d9f6b8c86ad524cfe78444f662ead45c3b79b79c34cce54f38c081e38df8ab",
+      "dependencies": [
+        "\t@rpath/kleidiai-fixed.dylib (compatibility version 0.0.0, current version 0.0.0)",
+        "\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.40.3)"
+      ]
+    },
+    "elastic": {
+      "sha256": "297a46e46210c2ba5f4e99bff377bb2e0d2d75234fb6afb2903c5c59b2aa4fdc",
+      "dependencies": [
+        "\t@rpath/kleidiai-elastic.dylib (compatibility version 0.0.0, current version 0.0.0)",
+        "\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.40.3)"
+      ]
+    }
+  }
+}
