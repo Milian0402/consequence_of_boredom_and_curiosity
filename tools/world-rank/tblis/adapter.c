@@ -10,6 +10,8 @@
 #error Choose one or two AB Strassen levels
 #endif
 
+extern const tblis_config* rank_tblis_config(void);
+
 static tblis_matrix matrix(float scale, const float *data, int rows, int cols, int stride)
 {
     tblis_matrix view = {
@@ -25,7 +27,7 @@ static void ordinary(int m, int n, int k, const float *a, int lda,
     tblis_matrix left = matrix(1, a, m, k, lda);
     tblis_matrix right = matrix(1, b, k, n, ldb);
     tblis_matrix out = matrix(beta, c, m, n, ldc);
-    tblis_matrix_mult(tblis_single, NULL, &left, &right, &out);
+    tblis_matrix_mult(tblis_single, rank_tblis_config(), &left, &right, &out);
 }
 
 int rank_vendor_init(void)
@@ -59,9 +61,9 @@ void rank_vendor_sgemm(int m, int n, int k, const float *a, int lda,
     tblis_matrix right = matrix(1, b, depth, cols, ldb);
     tblis_matrix out = matrix(1, c, rows, cols, ldc);
 #if TBLIS_AB_LEVEL == 1
-    stra_tblis_matrix_mult_ab(tblis_single, NULL, &left, &right, &out);
+    stra_tblis_matrix_mult_ab(tblis_single, rank_tblis_config(), &left, &right, &out);
 #else
-    stra_tblis_matrix_mult_2level_ab(tblis_single, NULL, &left, &right, &out);
+    stra_tblis_matrix_mult_2level_ab(tblis_single, rank_tblis_config(), &left, &right, &out);
 #endif
     if (depth != k)
         ordinary(rows, cols, k - depth, a + depth, lda, b + (size_t)depth * ldb,

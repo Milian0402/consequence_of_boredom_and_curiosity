@@ -8,10 +8,10 @@
 
 extern "C" int rank_tblis_haswell()
 {
-    const auto& cfg = tblis::get_default_config();
-    const bool matched = std::strcmp(cfg.name, "haswell_d6x8") == 0 &&
-        cfg.gemm_ukr._ukr[0] == reinterpret_cast<void(*)()>(bli_sgemm_asm_6x16);
-    std::fprintf(stderr, "tblis_backend=%s haswell_fp32_6x16=%d tci_threads=none\n",
+    const auto& cfg = tblis::haswell_d8x6_config::instance();
+    const bool matched = tblis::haswell_check() > 0 && std::strcmp(cfg.name, "haswell_d8x6") == 0 &&
+        cfg.gemm_ukr._ukr[0] == reinterpret_cast<void(*)()>(bli_sgemm_asm_16x6);
+    std::fprintf(stderr, "tblis_backend=%s haswell_fp32_16x6=%d tci_threads=none\n",
                  cfg.name, int(matched));
     return matched;
 }
@@ -19,14 +19,20 @@ extern "C" int rank_tblis_haswell()
 #ifdef TBLIS_TRACE
 static unsigned long long tiles;
 extern "C" unsigned long long rank_tblis_tiles() { return tiles; }
-extern "C" void __real_bli_sgemm_asm_6x16(tblis::stride_type, const float*, const float*,
+extern "C" void __real_bli_sgemm_asm_16x6(tblis::stride_type, const float*, const float*,
     const float*, const float*, float*, tblis::stride_type, tblis::stride_type);
 
-extern "C" void __wrap_bli_sgemm_asm_6x16(tblis::stride_type k, const float* alpha,
+extern "C" void __wrap_bli_sgemm_asm_16x6(tblis::stride_type k, const float* alpha,
     const float* a, const float* b, const float* beta, float* c,
     tblis::stride_type rs, tblis::stride_type cs)
 {
     ++tiles;
-    __real_bli_sgemm_asm_6x16(k,alpha,a,b,beta,c,rs,cs);
+    __real_bli_sgemm_asm_16x6(k,alpha,a,b,beta,c,rs,cs);
 }
 #endif
+
+extern "C" const tblis::tblis_config* rank_tblis_config(void)
+{
+    // Upstream AB stores each block product in a column-major temporary.
+    return reinterpret_cast<const tblis::tblis_config*>(&tblis::haswell_d8x6_config::instance());
+}

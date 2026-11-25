@@ -75,6 +75,9 @@ jobs:
           path: ${{ runner.temp }}/onednn-artifact
           retention-days: 14
   benchmark:
+    permissions:
+      contents: read
+      actions: read
     needs: [phase, onednn]
     if: ${{ !cancelled() && needs.phase.result == 'success' && needs.phase.outputs.label != 'packing-cost' }}
     name: Frozen ranking on ${{ matrix.arch }}
@@ -106,9 +109,31 @@ jobs:
         with:
           name: onednn-${{ matrix.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/onednn-input
+      - name: Fetch the pinned oneDNN artifact from the aligned-core run
+        continue-on-error: true
+        if: needs.phase.outputs.label == 'hk-forms'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARCH: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+          case "$ARCH" in
+            aarch64) id=15050168540; digest=320291dc07053789ccc0ef0c91a5dd2df6d5558021aac83ebb8df2aaccf7f227 ;;
+            x86_64) id=15049984729; digest=df9673efd4ab4cf3b382e9392a0c17bdb324a018ef13aaba14df242ff8a0ae8d ;;
+          esac
+          dest="$RUNNER_TEMP/onednn-input"
+          proof="$RUNNER_TEMP/rank-result/onednn/source"
+          mkdir -p "$dest" "$proof"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$id" > "$proof/github.json"
+          jq -e --arg digest "sha256:$digest" --arg name "onednn-$ARCH-45672997916-1" \
+            '.name==$name and .digest==$digest and .workflow_run.id==45672997916 and
+             .workflow_run.head_sha=="29f5817ed45a728bc012f332fa378dc95c6e7ef5"' "$proof/github.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$id/zip" > "$RUNNER_TEMP/onednn-hosted.zip"
+          printf '%s  %s\n' "$digest" "$RUNNER_TEMP/onednn-hosted.zip" | sha256sum --check | tee "$proof/verified.txt"
+          unzip -q "$RUNNER_TEMP/onednn-hosted.zip" -d "$dest"
       - name: Qualify oneDNN on the CPU that will be measured
         id: onednn
-        if: needs.phase.outputs.label == 'aligned-core'
+        if: needs.phase.outputs.label == 'aligned-core' || needs.phase.outputs.label == 'hk-forms'
         continue-on-error: true
         run: |
           cd "$RUNNER_TEMP/onednn-input"
@@ -130,15 +155,23 @@ jobs:
           cc -O3 -std=c11 -Iinclude "${flags[@]}" tests/test_fused_strassen.c -lm -o "$RUNNER_TEMP/test-fused"
           "$RUNNER_TEMP/test-fused" | tee "$RUNNER_TEMP/rank-result/fused-validation.txt"
       - name: Verify packed operand layout, fallbacks and whole-call bit identity
+        id: forms_preflight
+        continue-on-error: true
         if: needs.phase.outputs.label == 'hk-forms'
         run: |
           set -o pipefail
           cpu=$(python3 -c 'import os; print(min(os.sched_getaffinity(0)))')
           mkdir -p "$RUNNER_TEMP/rank-result/hk-forms"
+          failed=0
           for level in tiny panel; do
-            taskset -c "$cpu" python3 tools/world-rank/hk-forms/run.py "$PWD" "$PWD" "$level" |
-              tee "$RUNNER_TEMP/rank-result/hk-forms/$level-validation.txt"
+            validation="$RUNNER_TEMP/rank-result/hk-forms/$level-validation"
+            if taskset -c "$cpu" python3 tools/world-rank/hk-forms/run.py "$PWD" "$PWD" "$level" 2>&1 | tee "$validation.txt"; then
+              touch "$validation.ok"
+            else
+              failed=1
+            fi
           done
+          exit "$failed"
       - name: Build pinned OpenBLAS
         id: openblas
         continue-on-error: true
@@ -201,6 +234,9 @@ jobs:
         run: |
           echo "At least one requested vendor build was unavailable." > "$RUNNER_TEMP/rank-result/missing-vendor.txt"
           exit 1
+      - name: Record a failed packed-forms correctness gate
+        if: ${{ !cancelled() && steps.forms_preflight.outcome == 'failure' }}
+        run: exit 1
       - name: Preserve raw measurements and accuracy
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9

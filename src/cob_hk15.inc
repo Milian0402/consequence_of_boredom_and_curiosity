@@ -63,8 +63,13 @@ static void cob_hk15_trace_base(int m, int n, int k, const float* a, int lda,
 static int cob_hk15_packed_form(int m,int n,int k,const float* a,int lda,
     cob_hk_b_form form,int ldb,float* c,int ldc,double volume,double area)
 {
-    if (volume>=960*area) {
-        const int cutoff=volume<COB_FUSED_STRASSEN_MIN_HARMONIC_DIM*area ? 960 : COB_FUSED_STRASSEN_MIN_HARMONIC_DIM;
+    const int scoped = volume<COB_FUSED_STRASSEN_MIN_HARMONIC_DIM*area;
+    /* Below the ordinary cutoff the HK parent selects fused Strassen
+       directly. At/above it the ordinary dispatcher gives small kernels
+       priority. A packed child may never supersede such an earlier entry. */
+    const int after_small_dispatch = m>128 && n>128 && k>128;
+    if (volume>=960*area && (scoped || after_small_dispatch)) {
+        const int cutoff=scoped ? 960 : COB_FUSED_STRASSEN_MIN_HARMONIC_DIM;
         if (cob_sgemm_strassen_fused_core(m,n,k,a,lda,form.first,ldb,c,ldc,cutoff,0,&form)) {
 #ifdef COB_TRACE_HK_PACK_B
             ++cob_hk_pack_hits;

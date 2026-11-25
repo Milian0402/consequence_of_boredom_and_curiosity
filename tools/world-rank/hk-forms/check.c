@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
             "unsupported dimensions or seed");
     int full = strcmp(argv[13], "full") == 0;
     require(full || strcmp(argv[13], "repeat") == 0, "invalid reference basis");
-    require(!full || (m <= 300 && n <= 300), "use the repeated reference basis for the full-size check");
+    require(!full || (m <= 512 && n <= 512), "use the repeated reference basis for the full-size check");
     int rows = full || m < 17 ? m : 17, cols = full || n < 19 ? n : 19;
     matrix a = make(m,k,pad), b = make(k,n,pad), result[3];
     float *ar = malloc((size_t)rows*k*sizeof(*ar)), *br = malloc((size_t)k*cols*sizeof(*br));

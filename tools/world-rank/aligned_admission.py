@@ -28,6 +28,8 @@ def qualified_layouts(args, cases, entries, results, seeds):
                 routes[key] = row["passed"] == "1"
     first, second = seeds
     required = {("random",1,first),("random",2,second),("cancel",0,first),("scaled",0,first)}
+    preflight_ok = args.phase != "hk-forms" or all(
+        (args.out/f"{level}-validation.ok").exists() for level in ("tiny","panel"))
     result = set()
     with (args.out / "case-eligibility.csv").open("w",newline="") as f:
         writer=csv.writer(f)
@@ -50,7 +52,9 @@ def qualified_layouts(args, cases, entries, results, seeds):
                         gate.add((r["mode"],int(r["block"]),int(r["seed"])))
                 observed=results.get((index,name),{})
                 reason = "all_checks_passed"
-                if (name.startswith(("cob-","fastmmw-")) or name == "hk-packed-forms") and not routes.get((name,geometry),False):
+                if name == "hk-packed-forms" and not preflight_ok:
+                    reason="whole_call_preflight_failed"
+                elif (name.startswith(("cob-","fastmmw-")) or name == "hk-packed-forms") and not routes.get((name,geometry),False):
                     reason="route_unqualified"
                 elif gate!=required or len(inspected)!=4:
                     reason="incomplete_or_failed_full_fp64"

@@ -103,9 +103,13 @@ def main():
             check(1926,3375,2823,5,"random",(4,28,0),basis="repeat")
             return
         subprocess.run([compile_entry(candidate,"pack-test",[flag],checker=True)],check=True)
-        for m,n,k,pad in ((66,105,99,5),(72,108,108,0),(64,96,96,3),(96,144,144,3)):
+        for m,n,k,pad in ((66,105,99,5),(72,108,108,0),(64,96,96,3),(260,396,405,3)):
             for mode in ("random","cancel","zeros"):
                 check(m,n,k,pad,mode,(4,28,0))
+        # Small children at the ordinary cutoff retain the dispatcher's
+        # earlier native small route. The same inputs still require bit parity.
+        for mode in ("random","cancel","zeros"):
+            check(96,144,144,3,mode,(0,0,4))
         check(30,45,45,1,"random",(0,0,4))
         check(67,105,99,5,"random",(0,0,0))
         # Fail exactly one nominated prepacking allocation, or every one. Original scratch remains available.

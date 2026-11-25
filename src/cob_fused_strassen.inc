@@ -305,9 +305,12 @@ static int cob_sgemm_strassen_fused_core(int m, int n, int k, const float* a, in
 #ifdef COB_USE_HK_PACK_B
     const int form_n = (nh+kernel.nr-1)/kernel.nr*kernel.nr;
     const size_t pitch = (size_t)kh*form_n;
+    /* The existing SIMD B panels start on a 64-byte boundary. The output
+       slab preceding the retained panels can have any number of floats. */
+    const size_t aligned_offset = (ordinary+15u) & ~(size_t)15;
     if (form) {
         if (m>1280 || n>1280 || k>1280 || rows!=mh || cols!=nh) return 0;
-        slots += 7*pitch;
+        slots = aligned_offset+7*pitch;
     }
 #endif
     float* work = cob_aligned_alloc(64, slots*sizeof(float));
@@ -315,7 +318,7 @@ static int cob_sgemm_strassen_fused_core(int m, int n, int k, const float* a, in
     float* product = work+pack_b_size+pack_a_size;
     cob_fused_slab slab = {kernel, 0, 0, kh, lda, ldb, work+pack_b_size, work,
 #ifdef COB_USE_HK_PACK_B
-                           form ? work+ordinary : NULL, pitch, form_n,
+                           form ? work+aligned_offset : NULL, pitch, form_n,
 #endif
 #if defined(COB_USE_HK_X86_K288)
                            kc,
@@ -330,7 +333,7 @@ static int cob_sgemm_strassen_fused_core(int m, int n, int k, const float* a, in
     if (slab.x86_child) { ++cob_hk_x86_children; cob_hk_x86_nr = kernel.nr; }
 #endif
 #ifdef COB_USE_HK_PACK_B
-    if (form) cob_hk_pack_seven_b(*form,ldb,kh,nh,kernel.nr,form_n,COB_FUSED_KC,work+ordinary);
+    if (form) cob_hk_pack_seven_b(*form,ldb,kh,nh,kernel.nr,form_n,COB_FUSED_KC,work+aligned_offset);
 #endif
     for (int jc = 0; jc < nh;) {
         slab.cols = cob_min_i32(cols,nh-jc);

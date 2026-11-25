@@ -16,7 +16,7 @@ int main(void)
     for (int i=0;i<m*n;++i) if (c[i]!=2*k) return 2;
     const unsigned long long calls=rank_tblis_tiles();
     const unsigned long long expected=TBLIS_AB_LEVEL==1 ? 7*2*2 : 49;
-    printf("level=%d m=%d n=%d k=%d haswell_6x16_tiles=%llu expected=%llu\n",
+    printf("level=%d m=%d n=%d k=%d haswell_16x6_tiles=%llu expected=%llu\n",
         TBLIS_AB_LEVEL,m,n,k,calls,expected);
     return calls!=expected;
 }

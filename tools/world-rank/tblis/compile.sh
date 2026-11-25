@@ -36,14 +36,14 @@ if "$src/probe" > "$proof/selected-backend.txt" 2>&1; then
 else
     code=$?
     if [[ $code == 3 ]]; then
-        echo 'skipped: upstream selected a backend other than Haswell FP32 6x16' | tee "$out/tblis-status.txt"
+        echo 'skipped: upstream selected a backend other than Haswell FP32 16x6' | tee "$out/tblis-status.txt"
         exit 0
     fi
     exit "$code"
 fi
 for variant in timed trace; do
     flags=()
-    if [[ $variant == trace ]]; then flags=(-DTBLIS_TRACE=1 -Wl,--wrap=bli_sgemm_asm_6x16); fi
+    if [[ $variant == trace ]]; then flags=(-DTBLIS_TRACE=1 -Wl,--wrap=bli_sgemm_asm_16x6); fi
     g++ -std=gnu++11 -include limits "${opts[@]}" "${incs[@]}" "${flags[@]}" -c "$here/backend.cpp" -o "$src/backend.o"
     for level in 1 2; do
         name="tblis-ab-$level"
@@ -70,4 +70,4 @@ for level in 1 2; do
     cp "$src/tblis-ab-$level-timed.so" "$out/tblis-ab-$level.so"
 done
 sha256sum "$out/tblis-ab-1.so" "$out/tblis-ab-2.so" > "$proof/binaries.sha256"
-echo 'qualified: native Intel haswell_d6x8, FP32 6x16 assembly, serial AB levels 1 and 2' | tee "$out/tblis-status.txt"
+echo 'qualified: native Intel haswell_d8x6, FP32 16x6 assembly, serial AB levels 1 and 2' | tee "$out/tblis-status.txt"
