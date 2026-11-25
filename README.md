@@ -26,6 +26,23 @@ The [November 25 audit](docs/audits/2026-11-25-strassen-sme.md) gives the dimens
 
 COB selects AVX-512 or AVX2/FMA at runtime on supported x86-64 CPUs. On Arm64, the NEON path handles ragged output tiles and one-row products directly. On an Intel Xeon 6975P-C, the vector kernel improved on COB's preceding C kernel by 32–36× across five medium shapes. On an Arm Neoverse-N2, the ragged 383 × 385 × 389 product improved by 1.26×. The [native Linux audit](docs/audits/2026-11-25-linux-native.md) includes the comparisons against single-thread OpenBLAS.
 
+Enable one Hopcroft–Kerr level with `COB_ENABLE_HK15=ON` in Make or CMake.
+The optional route splits the output rows in two, the columns in three and
+the inner dimension in three. All divisions must be exact. Each resulting
+dimension must be between 768 and 1280 inclusive, and the largest may be at
+most 1.25 times the smallest. The fifteen subproducts each use the configured
+COB dispatcher. The required coefficient notice and exact integer verifier
+are in [third_party/fast-matmul](third_party/fast-matmul). Run
+`python3 tests/check_hk15.py` to test routing, fallback and FP64 accuracy.
+
+The Linux [paired benchmark](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45657809673)
+enabled both `COB_ENABLE_PORTABLE_STRASSEN` and `COB_ENABLE_RECURSIVE_STRASSEN`
+for the subproducts. On the padded 2432 × 3648 × 3648 case, the fifteen-product
+schedule ran 1.114× as fast as single-threaded OpenBLAS on an AMD EPYC 9V74
+and 1.225× as fast on a Neoverse N2. OpenBLAS was the fastest independent
+library in both comparisons. The M5 Max's existing route was faster on both
+tested Apple rectangles. The Hopcroft–Kerr option defaults to off.
+
 For large products on native Linux x86-64 or Arm64, enable the one-level Strassen path with `make COB_ENABLE_PORTABLE_STRASSEN=ON` or configure CMake with `-DCOB_ENABLE_PORTABLE_STRASSEN=ON`. It uses the native single-thread kernels for each subproduct. Contiguous balanced products use the original 1536 crossover. For rectangular or strided inputs, the dispatcher also weighs the number of products saved against the workspace needed for the three temporary matrices.
 
 Linux builds can also select a second Winograd level by enabling

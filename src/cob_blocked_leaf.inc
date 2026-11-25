@@ -240,8 +240,12 @@ static int cob_blocked_select_kernel(cob_blocked_kernel* kernel)
     return 1;
 }
 
-static void cob_blocked_apply_panel(cob_blocked_kernel kernel, int m, int n, int k,
-    const float* pack_a, const float* pack_b, float* c, int ldc, int resume)
+#if defined(COB_USE_SCOPED_X86_MEDIUM)
+#include "cob_x86_cache_edge.inc"
+#endif
+
+static inline void cob_blocked_apply_panel_impl(cob_blocked_kernel kernel, int m, int n, int k,
+    const float* pack_a, const float* pack_b, float* c, int ldc, int resume, int allow_cache_edge)
 {
     for (int j = 0; j < n; j += kernel.nr) {
         const float* bp = pack_b + (size_t)j*k;
@@ -251,10 +255,26 @@ static void cob_blocked_apply_panel(cob_blocked_kernel kernel, int m, int n, int
             float* cp = c + (size_t)i*ldc + j;
             const int rows = cob_min_i32(kernel.mr, m-i);
             if (rows == kernel.mr && cols == kernel.nr) kernel.tile(k, ap, bp, cp, ldc, resume);
-            else cob_blocked_edge(kernel.tile, k, ap, bp, cp, ldc, rows, cols, kernel.nr, resume);
+            else {
+#if defined(COB_USE_SCOPED_X86_MEDIUM)
+                if (allow_cache_edge &&
+                    cob_x86_cache_edge(kernel,k,ap,bp,cp,ldc,rows,cols,resume)) continue;
+#else
+                (void)allow_cache_edge;
+#endif
+                cob_blocked_edge(kernel.tile,k,ap,bp,cp,ldc,rows,cols,kernel.nr,resume);
+            }
         }
     }
 }
+
+#if defined(COB_USE_NATIVE_PANELS)
+static void cob_blocked_apply_panel(cob_blocked_kernel kernel, int m, int n, int k,
+    const float* pack_a, const float* pack_b, float* c, int ldc, int resume)
+{
+    cob_blocked_apply_panel_impl(kernel,m,n,k,pack_a,pack_b,c,ldc,resume,0);
+}
+#endif
 
 #if defined(COB_USE_SCOPED_X86_MEDIUM)
 /* Pack a bounded slab of A once, then consume consecutive small slabs of B.
@@ -281,7 +301,7 @@ static int cob_sgemm_x86_medium_panel(int m, int n, int k,
         for (int j = 0; j < n;) {
             const int nb = cob_min_i32(cols, n - j);
             cob_blocked_pack_b(packed_b, b + (size_t)p * ldb + j, ldb, kb, nb, nr);
-            cob_blocked_apply_panel(kernel, m, nb, kb, packed_a, packed_b, c + j, ldc, p != 0);
+            cob_blocked_apply_panel_impl(kernel, m, nb, kb, packed_a, packed_b, c + j, ldc, p != 0, 1);
             j += nb;
         }
         p += kb;
