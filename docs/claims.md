@@ -5,25 +5,11 @@ evidence needed to re-audit it.
 
 ## Current Claim Status
 
-The November 25 production comparison qualified all five linked builds on
-Intel Xeon 6975P-C and Arm Neoverse N2. The best released build won both
-registered odd holdouts on Arm. Direct oneMKL beat every released build on
-both Intel holdouts. COB's claim is specific to the operation, host, shapes,
-build and competitors in each comparison. [Public benchmark record](audits/2026-11-25-ranking/README.md)
+COB has measured single-threaded FP32 wins on individual Apple, AMD and Arm workloads. Other tested implementations win on other valid inputs. Each performance claim identifies its CPU, build, dimensions, strides, input distribution, timing convention and comparison field. [Latest results and archived evidence](audits/2026-11-25-ranking/README.md)
 
-The November 25 M5 Max comparison covers six prespecified large balanced shapes. COB led the tested single-threaded implementations on each target median, and MaxMulSK led the 4096-square control. [Results and scope](audits/2026-11-25-strassen-sme.md)
+On M5 Max, `COB_ENABLE_HK15_RAGGED` produced every exact answer on the 44 scale-stress matrices after the numerical fix. It ran 1.20–1.30× as fast as the original opt-in on eight biased-input comparisons and 0.916× as fast across four ordinary signed layouts. These are comparisons to earlier COB. The reports provide the separate comparisons against independent libraries. [Numerical results and timing controls](audits/2026-11-25-ranking/hk15-stability/README.md)
 
-Native Linux runs also compared COB with OpenBLAS on an Intel Xeon 6975P-C and an Arm Neoverse-N2. One-level Strassen improved over classical COB on both CPUs. Rankings against OpenBLAS depend on the processor and matrix shape. [Linux results](audits/2026-11-25-linux-native.md)
-
-The previous broad claim is suspended. COB has verified wins on selected routed
-shapes, including huge balanced inputs, but a July 2026 current-head re-audit
-found losses to current OpenBLAS and MIT-licensed MpGEMM. Do not describe the
-repo as the fastest open-source implementation until a fresh portfolio audit
-shows that result.
-
-This is not a universal matrix-multiplication claim. It does not cover
-multi-threaded GEMM, non-FP32 types, transposed operands, arbitrary
-`alpha`/`beta`, GPU kernels, or shapes outside the routed ranges.
+In the expanded Linux comparison the original standalone ragged HK15 build reached 0.989× of the fastest competing method across three fresh Neoverse N2 shapes and 0.799× across the same three Xeon 6975P-C shapes. A vendor-backed COB build led two fresh Arm shapes. [Seven-layout confirmation and exact-input stress results](audits/2026-11-25-ranking/leaf-confirmation/README.md)
 
 ## Contract
 
@@ -163,7 +149,7 @@ make all
 git diff --check
 ```
 
-## Current Evidence Summary
+## Historical Apple evidence
 
 - The July 2026 current-head re-audit supersedes the May claim for current
   publication. It confirmed an OpenBLAS win at `64^3`, found several Accelerate

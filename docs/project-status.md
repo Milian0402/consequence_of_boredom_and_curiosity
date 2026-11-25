@@ -1,37 +1,20 @@
 # Project Status
 
-Updated November 25, 2026.
+Updated November 26, 2026.
 
 ## Goal
 
-The project aims to deliver the fastest single-threaded CPU implementation
-of the FP32 operation below. Benchmarks include proprietary vendor libraries.
+The project aims to lead single-threaded CPU multiplication of row-major FP32 matrices, `C = A × B`. The public one-shot call includes packing and allocation. Packed inputs have a separate benchmark contract. COB has verified wins on specific Apple, AMD and Arm workloads. Other implementations lead on other tested shapes. [Results by CPU, input and layout](audits/2026-11-25-ranking/README.md)
 
-The chosen scope is intentionally narrow:
+## November measurements
 
-- CPU-only, single-threaded execution.
-- FP32 GEMM.
-- Row-major `A`, `B`, and `C`.
-- No transposes.
-- `C = A * B`, equivalent to `alpha = 1` and `beta = 0`.
-- Apple Silicon first, with AMX and SME2.1 paths when available.
+The released HK15 kernel matched all 266,354,000 exactly representable outputs in the M5 Max stress suite. On eight cropped layouts all 469,839,504 additional outputs met the project's absolute tolerance. The fix improved throughput on biased inputs and cost throughput on ordinary signed inputs. Both HK15 options remain off by default. [Numerical and timing evidence](audits/2026-11-25-ranking/hk15-stability/README.md)
 
-## November benchmark
-
-COB won both registered large odd rectangles on Arm Neoverse N2 using
-sequential OpenBLAS for its subproducts. Direct oneMKL was faster than every
-released build on both Intel Xeon holdouts. The linked evidence includes
-the single-thread timing records, numerical checks and earlier Apple and
-AMD measurements. [Results and reproduction](audits/2026-11-25-ranking/README.md)
+The ranking index records the full competitor fields, including Intel oneMKL, ArmPL, AMD AOCL and Apple Accelerate. Ranking depends on the operation, build, test values, hardware and input reuse. [Measured scope and independent replays](audits/2026-11-25-ranking/README.md)
 
 ## July benchmark
 
-The implementation is elite on selected routed shapes, but the previous broad
-fastest claim is suspended. A July current-head re-audit found a confirmed
-OpenBLAS loss at `64^3`, several proprietary Accelerate wins, and multiple
-noisy but material gaps to current MIT-licensed MpGEMM on its stock `m = 64`
-portfolio. The May claim audit remains useful historical evidence, not current
-publication support.
+The July re-audit found that OpenBLAS led at `64³`, Accelerate won several layouts and MpGEMM was faster on multiple `m = 64` stock shapes. Those observations superseded the broader May claim. [Claim audit and history](claims.md)
 
 ## What Shipped
 
@@ -42,7 +25,7 @@ publication support.
 - Apple Silicon AMX kernels and route-specific packing paths.
 - Apple Silicon SME2.1 direct-`B`, packed-`B`, and skinny/reuse routes.
 - ARM64 NEON and scalar fallback paths.
-- Correctness coverage for 657 GEMM test shapes, including test-only lowered
+- Correctness coverage on the M5 Max for 667 GEMM test shapes, including test-only lowered
   Strassen crossover and a cancellation-heavy quadrant pattern.
 - A May 10 clean rebuild and claim-audit snapshot for the scoped routed suites.
 - Route-aware benchmarks, grid sweeps, gap reports, and heatmap generation.
@@ -107,10 +90,8 @@ The most important performance wins came from:
   the multi-threaded consumer to avoid duplicate external B reads. The SME
   capability cache is now race-free for concurrent first use.
 
-## Current Limits
+## Earlier Apple-specific limits
 
-- The full "fastest fastest" goal is not proven.
-- The narrower licensed/open-source claim is also not currently proven.
 - MpGEMM is now MIT licensed and must be included in future open-source audits.
 - A bounded hardware-guided search over 11 `16x64` and six native-layout
   `32x32` SME schedules found no stable winner on the exercised packed-B reuse
@@ -179,7 +160,7 @@ The most important performance wins came from:
   similar CPU pipeline ratios, so this does not look like a simple
   front-end/codegen cleanup.
 
-## Future Work
+## Follow-ups from the July audit
 
 1. Re-audit the m64 large-`K` grid against licensed/open-source baselines and
    any newly source-inspectable Apple Silicon packages before publishing a
