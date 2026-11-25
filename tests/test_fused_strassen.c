@@ -72,22 +72,39 @@ static int check(int m, int n, int k, int pad, int pattern)
     allocations = 0;
     if (cob_sgemm_strassen_fused(m,n,k,a,lda,b,ldb,c,ldc) || allocations != 1) return 1;
     for (size_t i=0; i<(size_t)m*ldc+2; ++i) if (guard[i] != poison) return 2;
-    allocations = 0;
-    cob_sgemm_rowmajor(m,n,k,a,lda,b,ldb,c,ldc);
-    count_allocations = 0;
-    if (allocations != 1 || workspace_bytes > 256*1024) return 3;
-    for (int i=0; i<m; ++i) {
-        for (int j=0; j<n; ++j) {
-            double ref = 0;
-            for (int p=0; p<k; ++p) ref += (double)a[(size_t)i*lda+p]*b[(size_t)p*ldb+j];
-            double err = fabs(ref-c[(size_t)i*ldc+j]);
-            if (!isfinite(err) || err>0.002) return 4;
-            if (err>worst_error) worst_error = err;
-            ++checked;
+    /* The native small x86 route precedes the forced fused crossover. Check
+       both complete products when the public entry uses that earlier route. */
+    int small_public = 0;
+#if defined(COB_USE_SMALL_X86)
+    small_public = m >= 8 && m <= 128 && n >= 8 && n <= 128 && k >= 8 && k <= 128;
+#endif
+    for (int force_strassen = 0; force_strassen <= small_public; ++force_strassen) {
+        for (size_t i=0; i<(size_t)m*ldc+2; ++i) guard[i] = poison;
+        allocations = 0;
+        if (!force_strassen) {
+            cob_sgemm_rowmajor(m,n,k,a,lda,b,ldb,c,ldc);
+        } else if (!cob_sgemm_strassen_fused(m,n,k,a,lda,b,ldb,c,ldc)) {
+            return 3;
         }
-        for (int j=n; j<ldc; ++j) if (c[(size_t)i*ldc+j] != poison) return 5;
+        if (!force_strassen && small_public) {
+            if (allocations != 0) return 3;
+        } else if (allocations != 1 || workspace_bytes > 256*1024) {
+            return 3;
+        }
+        for (int i=0; i<m; ++i) {
+            for (int j=0; j<n; ++j) {
+                double ref = 0;
+                for (int p=0; p<k; ++p) ref += (double)a[(size_t)i*lda+p]*b[(size_t)p*ldb+j];
+                double err = fabs(ref-c[(size_t)i*ldc+j]);
+                if (!isfinite(err) || err>0.002) return 4;
+                if (err>worst_error) worst_error = err;
+                ++checked;
+            }
+            for (int j=n; j<ldc; ++j) if (c[(size_t)i*ldc+j] != poison) return 5;
+        }
+        if (guard[0] != poison || guard[(size_t)m*ldc+1] != poison) return 6;
     }
-    if (guard[0] != poison || guard[(size_t)m*ldc+1] != poison) return 6;
+    count_allocations = 0;
     if (cob_sgemm_strassen_fused(m,n,k,a,lda,b,ldb,a+1,ldc) ||
         cob_sgemm_strassen_fused(m,n,k,a,lda,b,ldb,b+1,ldc) ||
         cob_sgemm_strassen_fused(m,n,k,a,k-1,b,ldb,c,ldc) ||

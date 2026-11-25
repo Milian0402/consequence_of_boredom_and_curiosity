@@ -75,33 +75,52 @@ static int check_full(int m, int n, int k, int lda, int ldb, int ldc,
         fprintf(stderr,"route/allocations %d/%d expected %d for %d %d %d\n",route,allocations,expected_route,m,n,k);
         return 1;
     }
-    for (size_t i=0;i<cc;++i) c[i]=canary;
-    allocations=0;fail_allocation=fail;fail_from=after;
-    cob_sgemm_rowmajor(m,n,k,a,lda,b,ldb,c,ldc);
-    fail_allocation=fail_from=0;
-    if (recursive && fail == 1) {
-        size_t half = (size_t)m / 2;
-        size_t parent_bytes = 3 * half * half * sizeof(float);
-        if (allocations != 9 || first_requests[0] != parent_bytes + parent_bytes / 4 ||
-            first_requests[1] != parent_bytes) {
-            fprintf(stderr, "failed to retry the single-level workspace for %d square\n", m);
-            return 2;
+    /* At small sizes the native x86 public entry precedes the forced crossover.
+       Exercise its zero-allocation result and the injected Strassen failures. */
+    int small_public = 0;
+#if defined(COB_USE_SMALL_X86)
+    small_public = m >= 8 && m <= 128 && n >= 8 && n <= 128 && k >= 8 && k <= 128;
+#endif
+    for (int force_strassen = 0; force_strassen <= small_public; ++force_strassen) {
+        for (size_t i=0;i<cc;++i) c[i]=canary;
+        allocations=0;fail_allocation=fail;fail_from=after;
+        if (!force_strassen) {
+            cob_sgemm_rowmajor(m,n,k,a,lda,b,ldb,c,ldc);
+        } else if (!cob_sgemm_rowmajor_strassen1(m,n,k,a,lda,b,ldb,c,ldc)) {
+            cob_sgemm_rowmajor_fallback(m,n,k,a,lda,b,ldb,c,ldc);
         }
-    } else if (!expected_route || fail==1) {
-        cob_sgemm_rowmajor_fallback(m,n,k,a,lda,b,ldb,old,ldc);
-        if (memcmp(c,old,cc*sizeof(float))) return 2;
-    }
-    for (int i=0;i<m;++i) {
-        for (int j=0;j<n;++j) {
-            double sum=0;
-            for (int p=0;p<k;++p) sum+=(double)a[(size_t)i*lda+p]*b[(size_t)p*ldb+j];
-            double err=fabs(c[(size_t)i*ldc+j]-sum);
-            if (!isfinite(err) || err>0.002) return 3;
-            if (err>worst_error) worst_error=err;
+        fail_allocation=fail_from=0;
+        if (!force_strassen && small_public) {
+            if (allocations != 0) {
+                fprintf(stderr, "small x86 public route made %d allocations for %d x %d x %d\n",
+                        allocations, m, n, k);
+                return 2;
+            }
+        } else if (recursive && fail == 1) {
+            size_t half = (size_t)m / 2;
+            size_t parent_bytes = 3 * half * half * sizeof(float);
+            if (allocations != 9 || first_requests[0] != parent_bytes + parent_bytes / 4 ||
+                first_requests[1] != parent_bytes) {
+                fprintf(stderr, "workspace retry for %d square made %d allocations, initial sizes %zu and %zu\n",
+                        m, allocations, first_requests[0], first_requests[1]);
+                return 2;
+            }
+        } else if (!expected_route || fail==1) {
+            cob_sgemm_rowmajor_fallback(m,n,k,a,lda,b,ldb,old,ldc);
+            if (memcmp(c,old,cc*sizeof(float))) return 2;
         }
-        for (int j=n;j<ldc;++j) if (c[(size_t)i*ldc+j]!=canary) return 4;
+        for (int i=0;i<m;++i) {
+            for (int j=0;j<n;++j) {
+                double sum=0;
+                for (int p=0;p<k;++p) sum+=(double)a[(size_t)i*lda+p]*b[(size_t)p*ldb+j];
+                double err=fabs(c[(size_t)i*ldc+j]-sum);
+                if (!isfinite(err) || err>0.002) return 3;
+                if (err>worst_error) worst_error=err;
+            }
+            for (int j=n;j<ldc;++j) if (c[(size_t)i*ldc+j]!=canary) return 4;
+        }
+        if (guarded[0] != canary || guarded[cc+1] != canary) return 4;
     }
-    if (guarded[0] != canary || guarded[cc+1] != canary) return 4;
     ++cases;free(old);free(guarded);free(b);free(a);return 0;
 }
 
@@ -126,6 +145,9 @@ int main(void)
     const int shapes[][10] = {
         {128,128,128,128,128,128,1,0,0,0}, {192,256,192,192,256,263,1,1,0,0},
         {128,128,128,128,128,135,1,0,1,0}, {128,128,128,128,128,135,1,0,2,0},
+        /* These public calls are above the small x86 route on every build. */
+        {256,256,256,256,256,263,1,0,1,0}, {256,256,256,256,256,263,1,0,2,0},
+        {256,256,256,256,256,263,1,0,0,2},
         {128,128,128,128,128,135,1,0,0,2}, {64,128,128,128,128,128,0,0,0,0},
         {128,129,128,128,129,131,0,0,0,0}, {128,128,192,192,128,128,0,0,0,0},
         {128,128,128,131,128,128,0,0,0,0}, {128,128,128,128,133,128,0,0,0,0},
