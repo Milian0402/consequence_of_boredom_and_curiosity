@@ -3161,10 +3161,19 @@ static int cob_sgemm_one_shot_x86(int m, int n, int k, const float* a, int lda,
 
 #endif
 
+#if defined(__linux__) && defined(COB_USE_X86_SIMD) && \
+    defined(COB_ENABLE_X86_MEDIUM_ROUTE) && COB_ENABLE_X86_MEDIUM_ROUTE
+#define COB_USE_SCOPED_X86_MEDIUM 1
+#endif
+
 #if defined(COB_USE_PORTABLE_STRASSEN) && defined(__linux__) && \
     (defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && defined(__aarch64__)))
 #define COB_USE_NATIVE_PANELS 1
+#endif
+#if defined(COB_USE_NATIVE_PANELS) || defined(COB_USE_SCOPED_X86_MEDIUM)
 #include "cob_blocked_leaf.inc"
+#endif
+#if defined(COB_USE_NATIVE_PANELS)
 #include "cob_short_axes.inc"
 #include "cob_few_row_panel.inc"
 #if defined(COB_USE_X86_SIMD) && ((defined(__AVX2__) && defined(__FMA__)) || \
@@ -4334,6 +4343,14 @@ void cob_sgemm_rowmajor(
         cob_sgemm_rowmajor_strassen1(m, n, k, a, lda, b, ldb, c, ldc)) {
         return;
     }
+#endif
+
+#if defined(COB_USE_SCOPED_X86_MEDIUM)
+    if (m >= 64 && m <= 256 && n >= 128 && n <= 4096 && k >= 128 && k <= 1024 &&
+        n >= m && (2 * n >= 3 * m || 2 * k >= 3 * m) &&
+        !(m <= 128 && n == 128 && k == 128) &&
+        a && b && c && lda >= k && ldb >= n && ldc >= n &&
+        cob_sgemm_x86_medium_panel(m, n, k, a, lda, b, ldb, c, ldc)) return;
 #endif
 
     cob_sgemm_rowmajor_fallback(m, n, k, a, lda, b, ldb, c, ldc);

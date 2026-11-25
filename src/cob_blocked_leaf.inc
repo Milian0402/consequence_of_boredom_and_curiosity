@@ -256,6 +256,42 @@ static void cob_blocked_apply_panel(cob_blocked_kernel kernel, int m, int n, int
     }
 }
 
+#if defined(COB_USE_SCOPED_X86_MEDIUM)
+/* Pack a bounded slab of A once, then consume consecutive small slabs of B.
+   Short-wide products reuse the same packed A for the full output width. */
+static int cob_sgemm_x86_medium_panel(int m, int n, int k,
+    const float* a, int lda, const float* b, int ldb, float* c, int ldc)
+{
+    size_t c_count = (size_t)(m - 1) * ldc + n;
+    if (cob_f32_ranges_overlap(c, c_count, a, (size_t)(m - 1) * lda + k) ||
+        cob_f32_ranges_overlap(c, c_count, b, (size_t)(k - 1) * ldb + n)) return 0;
+    cob_blocked_kernel kernel;
+    if (!cob_blocked_select_kernel(&kernel)) return 0;
+    const int mr = kernel.mr, nr = kernel.nr;
+    const int depth = cob_min_i32(256, k);
+    const int cols = cob_min_i32(8 * nr, n);
+    const int packed_cols = (cols + nr - 1) / nr * nr;
+    const int packed_rows = (m + mr - 1) / mr * mr;
+    float* packed_b = cob_aligned_alloc(64, (size_t)(packed_cols + packed_rows) * depth * sizeof(float));
+    if (!packed_b) return 0;
+    float* packed_a = packed_b + (size_t)packed_cols * depth;
+    for (int p = 0; p < k;) {
+        const int kb = cob_min_i32(depth, k - p);
+        cob_blocked_pack_a(packed_a, a + p, lda, m, kb, mr);
+        for (int j = 0; j < n;) {
+            const int nb = cob_min_i32(cols, n - j);
+            cob_blocked_pack_b(packed_b, b + (size_t)p * ldb + j, ldb, kb, nb, nr);
+            cob_blocked_apply_panel(kernel, m, nb, kb, packed_a, packed_b, c + j, ldc, p != 0);
+            j += nb;
+        }
+        p += kb;
+    }
+    free(packed_b);
+    return 1;
+}
+#endif
+
+#if defined(COB_USE_NATIVE_PANELS)
 static int cob_sgemm_one_shot_blocked(int m, int n, int k, const float* a, int lda,
     const float* b, int ldb, float* c, int ldc)
 {
@@ -291,3 +327,4 @@ static int cob_sgemm_one_shot_blocked(int m, int n, int k, const float* a, int l
     free(pack_b);
     return 1;
 }
+#endif
