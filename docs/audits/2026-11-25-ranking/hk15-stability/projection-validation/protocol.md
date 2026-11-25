@@ -1,0 +1,3 @@
+# Independent projection check
+
+Freeze candidate SHA-256 and two more cropped layouts prior to execution. Test (m,n,k)=(1877,2957,2903) with seed 218140063 and (2317,3457,3379) with seed 441085729. Nine input families include weak signed bias and a two-profile depth signal in addition to the first seven. The second profile can defeat a single-direction projection; include all outcomes in the report. Check every output against a full serial FP64 GEMM, verify direct scalar dots, and check all input elements and C padding. Compare the production candidate, the unprojected v2 guard and direct OpenBLAS. Do not retune the candidate to this panel or present these shapes as blind again.

@@ -1,0 +1,387 @@
+{
+  "continuous": {
+    "biased": {
+      "accelerate": {
+        "cells": 95974214,
+        "max_abs": 0.00357456543327,
+        "nonfinite": 0,
+        "over_0_002": 109258
+      },
+      "center": {
+        "cells": 95974214,
+        "max_abs": 0.000984670062053,
+        "nonfinite": 0,
+        "over_0_002": 0
+      },
+      "classical": {
+        "cells": 95974214,
+        "max_abs": 0.00108278143682,
+        "nonfinite": 0,
+        "over_0_002": 0
+      },
+      "coherence": {
+        "cells": 95974214,
+        "max_abs": 0.00108278143682,
+        "nonfinite": 0,
+        "over_0_002": 0
+      },
+      "old": {
+        "cells": 95974214,
+        "max_abs": 0.00428658015358,
+        "nonfinite": 0,
+        "over_0_002": 16865
+      },
+      "openblas": {
+        "cells": 95974214,
+        "max_abs": 0.000918624344081,
+        "nonfinite": 0,
+        "over_0_002": 0
+      },
+      "support": {
+        "cells": 95974214,
+        "max_abs": 0.00428658015358,
+        "nonfinite": 0,
+        "over_0_002": 16105
+      }
+    },
+    "coherence-validation": {
+      "coherence": {
+        "cells": 158055480,
+        "max_abs": 0.00110518549411,
+        "nonfinite": 0,
+        "over_0_002": 0
+      },
+      "openblas": {
+        "cells": 158055480,
+        "max_abs": 0.00106104912106,
+        "nonfinite": 0,
+        "over_0_002": 0
+      },
+      "support": {
+        "cells": 158055480,
+        "max_abs": 0.00405857246164,
+        "nonfinite": 0,
+        "over_0_002": 14169
+      }
+    },
+    "fresh": {
+      "center": {
+        "cells": 93768388,
+        "max_abs": 0.00109213854319,
+        "nonfinite": 0,
+        "over_0_002": 0
+      },
+      "coherence": {
+        "cells": 93768388,
+        "max_abs": 0.00109213854319,
+        "nonfinite": 0,
+        "over_0_002": 0
+      },
+      "guarded": {
+        "cells": 93768388,
+        "max_abs": 0.00339527263293,
+        "nonfinite": 0,
+        "over_0_002": 115336
+      },
+      "old": {
+        "cells": 93768388,
+        "max_abs": 0.00339527263293,
+        "nonfinite": 0,
+        "over_0_002": 115336
+      },
+      "openblas": {
+        "cells": 93768388,
+        "max_abs": 0.00102805145661,
+        "nonfinite": 0,
+        "over_0_002": 0
+      },
+      "support": {
+        "cells": 93768388,
+        "max_abs": 0.00245663412534,
+        "nonfinite": 0,
+        "over_0_002": 43
+      }
+    },
+    "projection-validation": {
+      "center": {
+        "cells": 122041422,
+        "max_abs": 0.00274790214462,
+        "nonfinite": 0,
+        "over_0_002": 42
+      },
+      "coherence": {
+        "cells": 122041422,
+        "max_abs": 0.00113215427677,
+        "nonfinite": 0,
+        "over_0_002": 0
+      },
+      "openblas": {
+        "cells": 122041422,
+        "max_abs": 0.00107340509692,
+        "nonfinite": 0,
+        "over_0_002": 0
+      },
+      "support": {
+        "cells": 122041422,
+        "max_abs": 0.00387815246893,
+        "nonfinite": 0,
+        "over_0_002": 12739
+      }
+    }
+  },
+  "exact": {
+    "center": {
+      "cells": 266354000,
+      "incorrect": 0,
+      "nonfinite": 0,
+      "over_0_002": 0
+    },
+    "coherence": {
+      "cells": 266354000,
+      "incorrect": 0,
+      "nonfinite": 0,
+      "over_0_002": 0
+    },
+    "guarded": {
+      "cells": 266354000,
+      "incorrect": 15445134,
+      "nonfinite": 0,
+      "over_0_002": 11288051
+    },
+    "issued": {
+      "cells": 266354000,
+      "incorrect": 91050004,
+      "nonfinite": 8061956,
+      "over_0_002": 45335829
+    },
+    "openblas": {
+      "cells": 266354000,
+      "incorrect": 0,
+      "nonfinite": 0,
+      "over_0_002": 0
+    },
+    "support": {
+      "cells": 266354000,
+      "incorrect": 0,
+      "nonfinite": 0,
+      "over_0_002": 0
+    }
+  },
+  "normal_data_overhead": {
+    "coherence": {
+      "geomean": 0.9161429688136188,
+      "identical_function_ratios": {
+        "0": 0.9868340629495762,
+        "1": 0.9985198346605211,
+        "2": 1.0009708712841214,
+        "3": 0.9978264993134072
+      },
+      "speed_ratios": {
+        "0": 0.9206763692489831,
+        "1": 0.9154824128554199,
+        "2": 0.9077830654927119,
+        "3": 0.920691073718678
+      }
+    },
+    "guard": {
+      "geomean": 1.0094552696658394,
+      "identical_function_ratios": {
+        "0": 1.0631122710333856,
+        "1": 1.0683066122708857,
+        "2": 0.9925730113566387,
+        "3": 1.0429087944404194
+      },
+      "speed_ratios": {
+        "0": 1.0998194286149219,
+        "1": 1.0488004288801365,
+        "2": 0.981834207480478,
+        "3": 0.9168449885249993
+      }
+    },
+    "support": {
+      "geomean": 0.9183159598871902,
+      "identical_function_ratios": {
+        "0": 0.9946939611413859,
+        "1": 0.9970629237853932,
+        "2": 0.9877276914503369,
+        "3": 0.9963992178691208
+      },
+      "speed_ratios": {
+        "0": 0.9081286789526135,
+        "1": 0.9183562409494515,
+        "2": 0.9273185391959777,
+        "3": 0.9195619947660696
+      }
+    }
+  },
+  "whole_call_seconds": {
+    "dispatch-2083-biased-signed": {
+      "accelerate": 0.02509400004,
+      "classical": 0.023798000064999998,
+      "coherence": 0.02650899999,
+      "old": 0.03450200008
+    },
+    "dispatch-2083-centered": {
+      "accelerate": 0.027012999985,
+      "classical": 0.027335499995,
+      "coherence": 0.036862500015,
+      "old": 0.037471999995000005
+    },
+    "dispatch-2083-depth-signs": {
+      "accelerate": 0.027830500155,
+      "classical": 0.028615999965,
+      "coherence": 0.03105249989,
+      "old": 0.037942999975
+    },
+    "dispatch-2083-one-sided": {
+      "accelerate": 0.024119499955,
+      "classical": 0.022882999969999998,
+      "coherence": 0.034482000045,
+      "old": 0.03132050007
+    },
+    "dispatch-2083-partial-bias": {
+      "accelerate": 0.024558999924999998,
+      "classical": 0.023135000024999998,
+      "coherence": 0.025283999975,
+      "old": 0.031878500010000005
+    },
+    "dispatch-2083-positive": {
+      "accelerate": 0.026584500094999998,
+      "classical": 0.024694000025000003,
+      "coherence": 0.027945999985,
+      "old": 0.034717999985
+    },
+    "dispatch-2083-row-col-signs": {
+      "accelerate": 0.02568449988,
+      "classical": 0.02487499989,
+      "coherence": 0.02790949994,
+      "old": 0.034103500075
+    },
+    "dispatch-2233-biased-signed": {
+      "accelerate": 0.031939000009999996,
+      "classical": 0.02837449999,
+      "coherence": 0.03285399999,
+      "old": 0.039418499915
+    },
+    "dispatch-2233-centered": {
+      "accelerate": 0.027953500045,
+      "classical": 0.02671450004,
+      "coherence": 0.040498499874999996,
+      "old": 0.037143499940000005
+    },
+    "dispatch-2233-depth-signs": {
+      "accelerate": 0.030409500005,
+      "classical": 0.029349499964999998,
+      "coherence": 0.032113000055,
+      "old": 0.040996499945
+    },
+    "dispatch-2233-one-sided": {
+      "accelerate": 0.029524000010000002,
+      "classical": 0.028662000085,
+      "coherence": 0.04302299989,
+      "old": 0.03972699982
+    },
+    "dispatch-2233-partial-bias": {
+      "accelerate": 0.029014000084999998,
+      "classical": 0.02686450002,
+      "coherence": 0.028459000050000002,
+      "old": 0.03736850014
+    },
+    "dispatch-2233-positive": {
+      "accelerate": 0.02860600001,
+      "classical": 0.027363999979999998,
+      "coherence": 0.03058249992,
+      "old": 0.038078500075
+    },
+    "dispatch-2233-row-col-signs": {
+      "accelerate": 0.027852499975,
+      "classical": 0.02683850005,
+      "coherence": 0.03001249989,
+      "old": 0.037111500044999995
+    },
+    "timing-2083-biased-signed": {
+      "center": 0.046090499965000004,
+      "classical": 0.029152500095,
+      "openblas": 0.41264599999999996,
+      "support": 0.045698
+    },
+    "timing-2083-centered": {
+      "center": 0.046721499995,
+      "classical": 0.02770800004,
+      "openblas": 0.4234894998,
+      "support": 0.042264499935
+    },
+    "timing-2083-depth-signs": {
+      "center": 0.06910199998,
+      "classical": 0.03789649997,
+      "openblas": 0.47791100005,
+      "support": 0.046548999965000004
+    },
+    "timing-2083-one-sided": {
+      "center": 0.051666500044999994,
+      "classical": 0.035712500105,
+      "openblas": 0.41943499995,
+      "support": 0.052355500055000004
+    },
+    "timing-2083-partial-bias": {
+      "center": 0.029270000060000002,
+      "classical": 0.037006000055,
+      "openblas": 0.432849,
+      "support": 0.032576000199999997
+    },
+    "timing-2083-positive": {
+      "center": 0.05024250003,
+      "classical": 0.032317999985,
+      "openblas": 0.42895249999999996,
+      "support": 0.04606099997
+    },
+    "timing-2083-row-col-signs": {
+      "center": 0.06729150016,
+      "classical": 0.030468999990000002,
+      "openblas": 0.4145259999,
+      "support": 0.046955499915000004
+    },
+    "timing-2233-biased-signed": {
+      "center": 0.05783599999,
+      "classical": 0.031324999875,
+      "openblas": 0.47408299995000003,
+      "support": 0.05040900002
+    },
+    "timing-2233-centered": {
+      "center": 0.04961049999,
+      "classical": 0.037791999990000005,
+      "openblas": 0.5017494999000001,
+      "support": 0.04757149995
+    },
+    "timing-2233-depth-signs": {
+      "center": 0.05140700005,
+      "classical": 0.031051500005,
+      "openblas": 0.4597895,
+      "support": 0.047074000000000005
+    },
+    "timing-2233-one-sided": {
+      "center": 0.048250499880000006,
+      "classical": 0.03037149995,
+      "openblas": 0.46771999995,
+      "support": 0.047059999894999996
+    },
+    "timing-2233-partial-bias": {
+      "center": 0.04434549995,
+      "classical": 0.036127,
+      "openblas": 0.49187400005000004,
+      "support": 0.048985500005
+    },
+    "timing-2233-positive": {
+      "center": 0.05244700005,
+      "classical": 0.029218000010000002,
+      "openblas": 0.462223,
+      "support": 0.047840500015
+    },
+    "timing-2233-row-col-signs": {
+      "center": 0.051690999885,
+      "classical": 0.030393499999999997,
+      "openblas": 0.4584669999,
+      "support": 0.04582400003
+    }
+  }
+}

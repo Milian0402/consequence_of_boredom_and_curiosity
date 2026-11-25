@@ -1,0 +1,3 @@
+12 production geometry checks; 60 FP64-checked public calls; 121280 FP64 cells; max error 7.9172882e-06
+Uniform fixtures on eligible geometries: 5 used 15 leaves and 3 used the fallback.
+Verified 15 counted base leaves per accepted call, one public entry, forced-allocation fallback, null/stride/alias guards and untouched padding.

@@ -1,0 +1,113 @@
+diff --git a/src/cob_hk15.inc b/src/cob_hk15.inc
+index b827133..b76ab59 100644
+--- a/src/cob_hk15.inc
++++ b/src/cob_hk15.inc
+@@ -233,6 +233,66 @@ static int cob_hk15_shape(int m, int n, int k)
+     return 4*mh <= 5*lo && 4*nh <= 5*lo && 4*kh <= 5*lo;
+ }
+ 
++/* A coherent sign along the reduction axis can put a large common offset in
++   many products. Look for that offset in B in two candidate directions: the
++   constant vector, or the signs of one row of A. This sample selects a
++   numerical strategy only; both strategies compute the full product. */
++enum cob_hk15_projection { COB_HK15_NONE, COB_HK15_CONSTANT, COB_HK15_SIGNED };
++
++static enum cob_hk15_projection cob_hk15_projection_for(int n, int k,
++    const float* a, const float* b, int ldb)
++{
++    enum { depths = 64, columns = 32 };
++    if (k < depths || n < columns) return COB_HK15_NONE;
++    int flat[columns] = {0}, signed_sum[columns] = {0};
++    for (int q = 0; q < depths; ++q) {
++        const int p = (2*q+1)*k/(2*depths);
++        const int sign = a[p] < 0.f ? -1 : 1;
++        for (int t = 0; t < columns; ++t) {
++            const int j = (2*t+1)*n/(2*columns);
++            const float value = b[(size_t)p*ldb+j];
++            const int bsign = (value > 0.f) - (value < 0.f);
++            flat[t] += bsign;
++            signed_sum[t] += sign * bsign;
++        }
++    }
++    int flat_score = 0, signed_score = 0;
++    for (int t = 0; t < columns; ++t) {
++        flat_score += abs(flat[t]);
++        signed_score += abs(signed_sum[t]);
++    }
++    if (flat_score <= depths*columns/2 && signed_score <= depths*columns/2)
++        return COB_HK15_NONE;
++    return flat_score >= signed_score ? COB_HK15_CONSTANT : COB_HK15_SIGNED;
++}
++
++/* Write A = residual + u*s^T for a sign vector s of squared norm k. This
++   keeps the existing fifteen leaf products and adds back u*(s^T B) once.
++   Means and corrections use binary64. The single residual rounding and
++   ordinary leaf rounding still apply. No caller-owned storage is changed. */
++static void cob_hk15_project_a(int m, int n, int k, const float* a, int lda,
++    const float* b, int ldb, enum cob_hk15_projection direction,
++    float* residual, float* signs, double* means, double* columns)
++{
++    for (int p = 0; p < k; ++p)
++        signs[p] = direction == COB_HK15_SIGNED && a[p] < 0.f ? -1.f : 1.f;
++    for (int i = 0; i < m; ++i) {
++        const float* row = a + (size_t)i*lda;
++        double sum = 0.;
++        for (int p = 0; p < k; ++p) sum += (double)row[p] * signs[p];
++        const float mean = (float)(sum / k);
++        means[i] = mean;
++        for (int p = 0; p < k; ++p)
++            residual[(size_t)i*k+p] = row[p] - mean*signs[p];
++    }
++    memset(columns, 0, (size_t)n*sizeof(*columns));
++    for (int p = 0; p < k; ++p) {
++        const float* row = b + (size_t)p*ldb;
++        const double sign = signs[p];
++        for (int j = 0; j < n; ++j) columns[j] += sign*(double)row[j];
++    }
++}
++
+ static int cob_hk15_try(int m, int n, int k, const float* aa, int lda,
+     const float* bb, int ldb, float* cc, int ldc)
+ {
+@@ -266,6 +326,26 @@ static int cob_hk15_try(int m, int n, int k, const float* aa, int lda,
+         cob_hk15_classical(m,n,k,aa,lda,bb,ldb,cc,ldc);
+         return 1;
+     }
++    const enum cob_hk15_projection direction = cob_hk15_projection_for(n,k,aa,bb,ldb);
++    float* residual = NULL;
++    double *means = NULL, *columns = NULL;
++    if (direction != COB_HK15_NONE) {
++        /* Place double vectors first so all slices are naturally aligned. */
++        const size_t vectors = ((size_t)m+n)*sizeof(double);
++        const size_t floats = ((size_t)m*k+k)*sizeof(float);
++        means = cob_aligned_alloc(128, vectors + floats);
++        if (!means) {
++            free(workspace);
++            cob_hk15_classical(m,n,k,aa,lda,bb,ldb,cc,ldc);
++            return 1;
++        }
++        columns = means+m;
++        residual = (float*)(columns+n);
++        cob_hk15_project_a(m,n,k,aa,lda,bb,ldb,direction,residual,
++            residual+(size_t)m*k,means,columns);
++        aa = residual;
++        lda = k;
++    }
+     float *x = workspace, *y = x+ac, *product = y+bc;
+     const float *a[6], *b[9];
+     float* c[6];
+@@ -291,6 +371,14 @@ static int cob_hk15_try(int m, int n, int k, const float* aa, int lda,
+     if (m%2 || n%3 || k%3)
+         cob_hk15_ragged_finish(m,n,k,aa,lda,bb,ldb,cc,ldc,workspace,cob_sgemm_rowmajor_base);
+ #endif
++    if (means) {
++        for (int i = 0; i < m; ++i) {
++            float* row = cc + (size_t)i*ldc;
++            for (int j = 0; j < n; ++j)
++                row[j] = (float)((double)row[j] + means[i]*columns[j]);
++        }
++        free(means);
++    }
+     free(workspace);
+     return 1;
+ }

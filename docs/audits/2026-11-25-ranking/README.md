@@ -4,6 +4,8 @@ The optional ragged Hopcroft–Kerr kernel made its largest verified gain on Arm
 
 Separate accuracy checks on M5 Max found large errors on scaled positive matrices with exactly representable answers. For inputs containing only 1 and 1/256, one result was 0.01979065 instead of 0.04396057. The performance measurements above apply to their registered fixtures. [Full-output scale and cancellation checks](hk15-input-scale/README.md)
 
+The revised kernel corrected all 266,354,000 exact outputs and all 469,839,504 additional outputs met the 0.002 absolute tolerance on M5 Max. It improved throughput by 1.24× across eight biased-input comparisons with the original kernel. On four ordinary signed shapes the added checks reduced throughput to 0.916×. [Numerical fixtures, complete-call timing and rank-one experiment](hk15-stability/README.md)
+
 ## Earlier large odd rectangles
 
 COB's regular public entry with sequential OpenBLAS subproducts won both registered odd layouts on an Arm Neoverse N2. Direct oneMKL beat every released build on both Intel Xeon 6975P-C holdouts. The same library can win on one CPU and lose on another for identical matrices.
