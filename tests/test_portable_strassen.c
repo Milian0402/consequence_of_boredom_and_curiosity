@@ -75,10 +75,10 @@ static int check_full(int m, int n, int k, int lda, int ldb, int ldc,
         fprintf(stderr,"route/allocations %d/%d expected %d for %d %d %d\n",route,allocations,expected_route,m,n,k);
         return 1;
     }
-    /* At small sizes the native x86 public entry precedes the forced crossover.
+    /* At small sizes the native small-matrix entry precedes the forced crossover.
        Exercise its zero-allocation result and the injected Strassen failures. */
     int small_public = 0;
-#if defined(COB_USE_SMALL_X86)
+#if defined(COB_USE_SMALL_X86) || defined(COB_USE_N2_SMALL)
     small_public = m >= 8 && m <= 128 && n >= 8 && n <= 128 && k >= 8 && k <= 128;
 #endif
     for (int force_strassen = 0; force_strassen <= small_public; ++force_strassen) {
