@@ -69,7 +69,7 @@ def save_csv(path,records,fields):
 
 panel_sha='5e470c40de6e63b6debbb96afd146eda58de83e50ef3da1e2f19186a8990b4c4'
 check(digest(ROOT/'panel.csv')==panel_sha,'panel fingerprint')
-check(digest(ROOT/'protocol.md')=='9e173faf888debe5a124549fd77dde62f82a7202fb234d917a704d03a7bb0d13','protocol fingerprint')
+check(digest(ROOT/'protocol.md')=='8224aa65eeaed83d9f0a4facbb49ca86e29b4a36ea9c2d218271f25671f6d494','protocol fingerprint')
 identity=json.loads((ROOT/'source.json').read_text())
 check(identity['release']=='a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6' and
       identity['patch_sha256']=='71e1c7a3ff3c3b807c0d76b89f2c067fdbd9d96261309b7e390110dcfa3f42be' and

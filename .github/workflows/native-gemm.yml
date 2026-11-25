@@ -79,7 +79,7 @@ jobs:
       contents: read
       actions: read
     needs: [phase, onednn]
-    if: ${{ !cancelled() && needs.phase.result == 'success' && needs.phase.outputs.label != 'packing-cost' && needs.phase.outputs.label != 'rank48-arm-confirm' && needs.phase.outputs.label != 'stream-release' && needs.phase.outputs.label != 'cropped-views' && needs.phase.outputs.label != 'arm-layout' }}
+    if: ${{ !cancelled() && needs.phase.result == 'success' && needs.phase.outputs.label != 'packing-cost' && needs.phase.outputs.label != 'rank48-arm-confirm' && needs.phase.outputs.label != 'stream-release' && needs.phase.outputs.label != 'cropped-views' && needs.phase.outputs.label != 'arm-layout' && needs.phase.outputs.label != 'arm-repeat' }}
     name: ${{ needs.phase.outputs.label == 'grouped-b-x86' && format('Grouped B ranking on x86-64, replica {0}', matrix.replica) || needs.phase.outputs.label == 'frontier-x86' && format('Frontier ranking on x86-64, replica {0}', matrix.replica) || format('Frozen ranking on {0}', matrix.arch) }}
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -406,7 +406,7 @@ jobs:
 
   arm-wide:
     needs: phase
-    if: needs.phase.outputs.label == 'arm-layout'
+    if: needs.phase.outputs.label == 'arm-layout' || needs.phase.outputs.label == 'arm-repeat'
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 75
     permissions:
