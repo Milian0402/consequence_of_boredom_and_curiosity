@@ -10,7 +10,7 @@ phase=$(cat "$dir/phase.txt")
 arch=$(uname -m)
 cc=${CC:-cc}
 previous=b83033d199137b370c03a5a3d63365f1025162b7
-case "$phase" in tile-screen|tile-confirm|tile-replay|tile-child|tile-parent|leaf-wave|aligned-core) ;; *) exit 2 ;; esac
+case "$phase" in tile-screen|tile-confirm|tile-replay|tile-child|tile-parent|leaf-wave|aligned-core|hk-forms) ;; *) exit 2 ;; esac
 [[ $(uname -s) == Linux ]]
 common=(-std=c11 -O3 -fPIC -shared -DCOB_ENABLE_PORTABLE_STRASSEN=1 -DCOB_ENABLE_RECURSIVE_STRASSEN=1)
 case "$arch" in
@@ -26,8 +26,8 @@ case "$arch" in
 esac
 if [[ $phase == tile-replay ]]; then panel="$dir/entry-replay.csv"; fi
 if [[ $phase == tile-child ]]; then panel="$dir/hk-child.csv"; fi
-if [[ $phase == aligned-core ]]; then
-    panel="$dir/aligned-core/panel.csv"
+if [[ $phase == hk-forms || $phase == aligned-core ]]; then
+    panel="$dir/$phase/panel.csv"
     if [[ $arch == aarch64 ]]; then names=(openblas armpl blasfeo); fi
 fi
 if [[ $phase == leaf-wave ]]; then panel="$dir/leaf-wave.csv"; fi
@@ -35,7 +35,7 @@ if [[ $phase == tile-parent ]]; then panel="$dir/hk-parent.csv"; fi
 export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 OMP_THREAD_LIMIT=1 MKL_NUM_THREADS=1 MKL_DYNAMIC=FALSE BLIS_NUM_THREADS=1 GOTO_NUM_THREADS=1
 peers=()
 for name in "${names[@]}"; do
-    if [[ $phase == aligned-core && $name != openblas ]]; then continue; fi
+    if [[ ( $phase == aligned-core || $phase == hk-forms ) && $name != openblas ]]; then continue; fi
     [[ -r "$vendor/$name.so" ]] || { echo "Required benchmark library $name missing" >&2; exit 1; }
     if [[ $name != openblas ]]; then peers+=(--vendor "$name=$vendor/$name.so"); fi
 done
@@ -84,6 +84,11 @@ tile_candidate() {
     printf 'variant_flags[%s]=%s\n' "$name" "$*" >> "$out/tile-build.txt"
     tile_plugin "$name" "$build/$name.so"
 }
+if [[ $phase == hk-forms ]]; then
+    source "$dir/hk-forms-study.inc"
+    run_hk_forms
+    exit $?
+fi
 if [[ $phase == aligned-core ]]; then
     source "$dir/aligned-core/study.inc"
     run_aligned_core

@@ -59,6 +59,31 @@ static void cob_hk15_trace_base(int m, int n, int k, const float* a, int lda,
 #endif
 #endif
 
+#ifdef COB_USE_HK_PACK_B
+static int cob_hk15_packed_form(int m,int n,int k,const float* a,int lda,
+    cob_hk_b_form form,int ldb,float* c,int ldc,double volume,double area)
+{
+    if (volume>=960*area) {
+        const int cutoff=volume<COB_FUSED_STRASSEN_MIN_HARMONIC_DIM*area ? 960 : COB_FUSED_STRASSEN_MIN_HARMONIC_DIM;
+        if (cob_sgemm_strassen_fused_core(m,n,k,a,lda,form.first,ldb,c,ldc,cutoff,0,&form)) {
+#ifdef COB_TRACE_HK_PACK_B
+            ++cob_hk_pack_hits;
+#endif
+#ifdef COB_TRACE_HK15_CHILD
+            ++cob_hk15_children;
+            ++cob_hk15_child_fused;
+            if (cutoff==960) ++cob_hk15_lower_children;
+#endif
+            return 1;
+        }
+    }
+#ifdef COB_TRACE_HK_PACK_B
+    ++cob_hk_pack_fallbacks;
+#endif
+    return 0;
+}
+#endif
+
 static int cob_hk15_shape(int m, int n, int k)
 {
     if (m < 2*768 || m > 2*1280 || n < 3*768 || n > 3*1280 ||
@@ -122,7 +147,12 @@ static int cob_hk15_try(int m, int n, int k, const float* aa, int lda,
     void (*const cob_sgemm_rowmajor)(int,int,int,const float*,int,
         const float*,int,float*,int) = cob_sgemm_rowmajor_base;
 #endif
+#ifdef COB_USE_HK_PACK_B
+#define COB_HK_PACK_RIGHT(A,B0,B1,B2,S1,S2,C,LDC) cob_hk15_packed_form(mh,nh,kh, \
+    (A),lda,(cob_hk_b_form){(B0),(B1),(B2),(S1),(S2)},ldb,(C),(LDC),volume,area)
+#endif
 #include "../tools/world-rank/finite/hk233.inc"
+#undef COB_HK_PACK_RIGHT
     free(workspace);
     return 1;
 }

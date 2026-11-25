@@ -2,7 +2,7 @@
 import csv
 import math
 
-def qualified_layouts(args, cases, entries, results):
+def qualified_layouts(args, cases, entries, results, seeds):
     with (args.out / "accuracy.csv").open() as f:
         checks = list(csv.DictReader(f))
     fields = ("m", "n", "k", "pad")
@@ -16,14 +16,17 @@ def qualified_layouts(args, cases, entries, results):
     def shape(row):
         return tuple(int(row[key]) for key in fields)
     routes = {}
-    for filename in ("routes.csv", "fastmmw-routes.csv", "aligned-routes.csv"):
+    route_files = ["routes.csv", "fastmmw-routes.csv"]
+    if args.phase == "aligned-core":
+        route_files.append("aligned-routes.csv")
+    for filename in route_files:
         with (args.out / filename).open() as stream:
             for row in csv.DictReader(stream):
                 key = row["implementation"], shape(row)
                 if key in routes:
                     raise ValueError(f"Duplicate actual route {key}")
                 routes[key] = row["passed"] == "1"
-    first, second = 48236471, 85109381
+    first, second = seeds
     required = {("random",1,first),("random",2,second),("cancel",0,first),("scaled",0,first)}
     result = set()
     with (args.out / "case-eligibility.csv").open("w",newline="") as f:
@@ -47,7 +50,7 @@ def qualified_layouts(args, cases, entries, results):
                         gate.add((r["mode"],int(r["block"]),int(r["seed"])))
                 observed=results.get((index,name),{})
                 reason = "all_checks_passed"
-                if name.startswith(("cob-","fastmmw-")) and not routes.get((name,geometry),False):
+                if (name.startswith(("cob-","fastmmw-")) or name == "hk-packed-forms") and not routes.get((name,geometry),False):
                     reason="route_unqualified"
                 elif gate!=required or len(inspected)!=4:
                     reason="incomplete_or_failed_full_fp64"

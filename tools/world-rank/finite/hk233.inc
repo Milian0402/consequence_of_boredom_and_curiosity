@@ -1,14 +1,19 @@
 /* Generated from Sandia's BSD-2-licensed Hopcroft-Kerr table.
  * Copyright (c) 2014, Sandia Corporation. See LICENSE.fast-matmul. */
     /* Product 1 of 15. */
-    for (int i = 0; i < kh; ++i) {
-        const float *b0 = b[0] + (size_t)i * ldb;
-        const float *b2 = b[2] + (size_t)i * ldb;
-        const float *b3 = b[3] + (size_t)i * ldb;
-        float *dst = y + (size_t)i * nh;
-        for (int j = 0; j < nh; ++j) dst[j] = b0[j] + b2[j] - b3[j];
+#ifdef COB_HK_PACK_RIGHT
+    if (!COB_HK_PACK_RIGHT(a[3], b[0], b[2], b[3], 1, 0, c[0], ldc))
+#endif
+    {
+        for (int i = 0; i < kh; ++i) {
+            const float *b0 = b[0] + (size_t)i * ldb;
+            const float *b2 = b[2] + (size_t)i * ldb;
+            const float *b3 = b[3] + (size_t)i * ldb;
+            float *dst = y + (size_t)i * nh;
+            for (int j = 0; j < nh; ++j) dst[j] = b0[j] + b2[j] - b3[j];
+        }
+        cob_sgemm_rowmajor(mh, nh, kh, a[3], lda, y, nh, c[0], ldc);
     }
-    cob_sgemm_rowmajor(mh, nh, kh, a[3], lda, y, nh, c[0], ldc);
     for (int i = 0; i < mh; ++i) {
         const float *src = c[0] + (size_t)i * ldc;
         float *c3 = c[3] + (size_t)i * ldc;
@@ -39,14 +44,19 @@
         }
     }
     /* Product 3 of 15. */
-    for (int i = 0; i < kh; ++i) {
-        const float *b1 = b[1] + (size_t)i * ldb;
-        const float *b4 = b[4] + (size_t)i * ldb;
-        const float *b5 = b[5] + (size_t)i * ldb;
-        float *dst = y + (size_t)i * nh;
-        for (int j = 0; j < nh; ++j) dst[j] = b1[j] - b4[j] - b5[j];
+#ifdef COB_HK_PACK_RIGHT
+    if (!COB_HK_PACK_RIGHT(a[1], b[1], b[4], b[5], 0, 0, product, nh))
+#endif
+    {
+        for (int i = 0; i < kh; ++i) {
+            const float *b1 = b[1] + (size_t)i * ldb;
+            const float *b4 = b[4] + (size_t)i * ldb;
+            const float *b5 = b[5] + (size_t)i * ldb;
+            float *dst = y + (size_t)i * nh;
+            for (int j = 0; j < nh; ++j) dst[j] = b1[j] - b4[j] - b5[j];
+        }
+        cob_sgemm_rowmajor(mh, nh, kh, a[1], lda, y, nh, product, nh);
     }
-    cob_sgemm_rowmajor(mh, nh, kh, a[1], lda, y, nh, product, nh);
     for (int i = 0; i < mh; ++i) {
         const float *src = product + (size_t)i * nh;
         float *c1 = c[1] + (size_t)i * ldc;
@@ -116,14 +126,19 @@
         }
     }
     /* Product 7 of 15. */
-    for (int i = 0; i < kh; ++i) {
-        const float *b2 = b[2] + (size_t)i * ldb;
-        const float *b7 = b[7] + (size_t)i * ldb;
-        const float *b8 = b[8] + (size_t)i * ldb;
-        float *dst = y + (size_t)i * nh;
-        for (int j = 0; j < nh; ++j) dst[j] = b2[j] + b7[j] + b8[j];
+#ifdef COB_HK_PACK_RIGHT
+    if (!COB_HK_PACK_RIGHT(a[2], b[2], b[7], b[8], 1, 1, product, nh))
+#endif
+    {
+        for (int i = 0; i < kh; ++i) {
+            const float *b2 = b[2] + (size_t)i * ldb;
+            const float *b7 = b[7] + (size_t)i * ldb;
+            const float *b8 = b[8] + (size_t)i * ldb;
+            float *dst = y + (size_t)i * nh;
+            for (int j = 0; j < nh; ++j) dst[j] = b2[j] + b7[j] + b8[j];
+        }
+        cob_sgemm_rowmajor(mh, nh, kh, a[2], lda, y, nh, product, nh);
     }
-    cob_sgemm_rowmajor(mh, nh, kh, a[2], lda, y, nh, product, nh);
     for (int i = 0; i < mh; ++i) {
         const float *src = product + (size_t)i * nh;
         float *c2 = c[2] + (size_t)i * ldc;
@@ -218,14 +233,19 @@
         }
     }
     /* Product 12 of 15. */
-    for (int i = 0; i < kh; ++i) {
-        const float *b5 = b[5] + (size_t)i * ldb;
-        const float *b6 = b[6] + (size_t)i * ldb;
-        const float *b8 = b[8] + (size_t)i * ldb;
-        float *dst = y + (size_t)i * nh;
-        for (int j = 0; j < nh; ++j) dst[j] = b5[j] + b6[j] + b8[j];
+#ifdef COB_HK_PACK_RIGHT
+    if (!COB_HK_PACK_RIGHT(a[5], b[5], b[6], b[8], 1, 1, product, nh))
+#endif
+    {
+        for (int i = 0; i < kh; ++i) {
+            const float *b5 = b[5] + (size_t)i * ldb;
+            const float *b6 = b[6] + (size_t)i * ldb;
+            const float *b8 = b[8] + (size_t)i * ldb;
+            float *dst = y + (size_t)i * nh;
+            for (int j = 0; j < nh; ++j) dst[j] = b5[j] + b6[j] + b8[j];
+        }
+        cob_sgemm_rowmajor(mh, nh, kh, a[5], lda, y, nh, product, nh);
     }
-    cob_sgemm_rowmajor(mh, nh, kh, a[5], lda, y, nh, product, nh);
     for (int i = 0; i < mh; ++i) {
         const float *src = product + (size_t)i * nh;
         float *c5 = c[5] + (size_t)i * ldc;

@@ -72,8 +72,18 @@ def generate():
         out = [(i, s * s1 * s2) for i, s in terms(w, r)]
         direct = next((i for i, s in out if i not in initialized and s == 1), None)
         target, ld = ("product", "nh") if direct is None else (f"c[{direct}]", "ldc")
-        code.extend([f"    /* Product {r + 1} of 15. */", *aa, *bb,
-                     f"    cob_sgemm_rowmajor(mh, nh, kh, {left}, {right}, {target}, {ld});"])
+        code.append(f"    /* Product {r + 1} of 15. */")
+        rhs = [(i, s*s2) for i,s in terms(v,r)]
+        lazy = not aa and len(rhs) == 3
+        if lazy:
+            pointers = ", ".join(f"b[{i}]" for i,_ in rhs)
+            flags = ", ".join(str(int(s>0)) for _,s in rhs[1:])
+            left_pointer = left.split(",")[0]
+            code.extend(["#ifdef COB_HK_PACK_RIGHT", f"    if (!COB_HK_PACK_RIGHT({left_pointer}, {pointers}, {flags}, {target}, {ld}))", "#endif", "    {"])
+        body = [*aa,*bb,f"    cob_sgemm_rowmajor(mh, nh, kh, {left}, {right}, {target}, {ld});"]
+        code.extend(("    "+line if lazy else line) for line in body)
+        if lazy:
+            code.append("    }")
         rest = [(i, s) for i, s in out if i != direct]
         if rest:
             code.append("    for (int i = 0; i < mh; ++i) {")

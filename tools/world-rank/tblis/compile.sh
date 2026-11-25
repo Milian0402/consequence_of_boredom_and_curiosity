@@ -19,7 +19,7 @@ incs=(-iquote . -Isrc -iquote src/util -Isrc/external/tci -Isrc/external/tci/tci
 objects='src/iface/3m/mult.lo src/internal/3m/mult.lo src/internal/1m/add.lo src/internal/1m/scale.lo src/internal/1m/set.lo src/stra_internal/3m/stra_mult.lo src/stra_internal/3m/stra_mult_2level.lo src/stra_iface/3m/stra_mult.lo src/stra_iface/3m/stra_mult_2level.lo src/configs/configs.lo src/util/cpuid.lo src/util/thread.lo'
 (
     ./configure --enable-config=haswell --enable-thread-model=none --disable-shared --with-pic --with-blas=no \
-        CC=gcc CXX=g++ CFLAGS="${opts[*]}" CXXFLAGS="${opts[*]} -std=gnu++11" ac_cv_header_hwloc_h=no \
+        CC=gcc CXX=g++ CFLAGS="${opts[*]}" CXXFLAGS="${opts[*]} -std=gnu++11 -include limits" ac_cv_header_hwloc_h=no \
         'ac_cv_f77_mangling=lower case, underscore, no extra underscore' &&
     make -s -j3 -C src/external/tci &&
     make -s -j3 DEFAULT_INCLUDES= AM_CPPFLAGS="${incs[*]}" \
@@ -29,7 +29,7 @@ archives=(lib/.libs/libtblis.a src/external/tci/lib/.libs/libtci.a)
 shared=(-shared -Wl,-z,defs,-Bsymbolic-functions,--gc-sections,--exclude-libs,ALL)
 printf 'extern int rank_tblis_haswell(void); int main(void){return rank_tblis_haswell()?0:3;}\n' |
     gcc -x c -c - -o "$src/probe.o"
-g++ -std=gnu++11 "${opts[@]}" "${incs[@]}" -c "$here/backend.cpp" -o "$src/backend.o"
+g++ -std=gnu++11 -include limits "${opts[@]}" "${incs[@]}" -c "$here/backend.cpp" -o "$src/backend.o"
 g++ "$src/probe.o" "$src/backend.o" "${archives[@]}" -lpthread -lm -o "$src/probe"
 if "$src/probe" > "$proof/selected-backend.txt" 2>&1; then
     cat "$proof/selected-backend.txt"
@@ -44,7 +44,7 @@ fi
 for variant in timed trace; do
     flags=()
     if [[ $variant == trace ]]; then flags=(-DTBLIS_TRACE=1 -Wl,--wrap=bli_sgemm_asm_6x16); fi
-    g++ -std=gnu++11 "${opts[@]}" "${incs[@]}" "${flags[@]}" -c "$here/backend.cpp" -o "$src/backend.o"
+    g++ -std=gnu++11 -include limits "${opts[@]}" "${incs[@]}" "${flags[@]}" -c "$here/backend.cpp" -o "$src/backend.o"
     for level in 1 2; do
         name="tblis-ab-$level"
         gcc -std=gnu11 "${opts[@]}" "${incs[@]}" -DTBLIS_AB_LEVEL="$level" -c "$here/adapter.c" -o "$src/adapter.o"

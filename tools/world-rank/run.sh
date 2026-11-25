@@ -6,7 +6,7 @@ vendors=$(cd "${2:?missing vendor directory}" && pwd)
 build=$(mktemp -d "${RUNNER_TEMP:-/tmp}/gemm-rank.XXXXXX")
 phase=$(cat "$rank_dir/phase.txt")
 case "$phase" in
-    tile-screen|tile-confirm|tile-replay|tile-child|tile-parent|leaf-wave|aligned-core) exec bash "$rank_dir/tile-study.sh" "$out" "$vendors" ;;
+    tile-screen|tile-confirm|tile-replay|tile-child|tile-parent|leaf-wave|aligned-core|hk-forms) exec bash "$rank_dir/tile-study.sh" "$out" "$vendors" ;;
     pilot|heldout) exec bash "$rank_dir/run-kernels.sh" "$out" "$vendors" ;;
     discovery|confirm|replicate|short) ;;
     *) exit 2 ;;

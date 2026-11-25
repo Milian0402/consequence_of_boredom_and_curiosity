@@ -1,0 +1,5 @@
+family,m,n,k,pad
+prior-deep,2048,2880,3264,3
+fresh-odd,2034,3189,2997,11
+fresh-mixed,1964,2895,3162,5
+off-route-transpose,3189,2034,2997,11

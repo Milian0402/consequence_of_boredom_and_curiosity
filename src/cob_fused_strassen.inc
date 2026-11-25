@@ -43,6 +43,13 @@ static int cob_hk_x86_k288_limit(cob_blocked_kernel kernel, int depth)
 #error "Fused slab dimensions exceed workspace bounds"
 #endif
 
+#if defined(COB_ENABLE_HK_PACK_B_FORMS) && COB_ENABLE_HK_PACK_B_FORMS && \
+    defined(COB_USE_HK15) && defined(COB_ENABLE_HK15_PARENT_960) && COB_ENABLE_HK15_PARENT_960 && \
+    !defined(COB_USE_HK_X86_LEAF) && !(defined(COB_ENABLE_OPENBLAS_LEAF) && COB_ENABLE_OPENBLAS_LEAF) && !defined(COB_USE_APPLE_AMX)
+#define COB_USE_HK_PACK_B 1
+#include "cob_hk_pack_b.inc"
+#endif
+
 typedef struct {
     const float* first;
     const float* second;
@@ -141,6 +148,11 @@ typedef struct {
     int rows, cols, depth, lda, ldb;
     float* pack_a;
     float* pack_b;
+#ifdef COB_USE_HK_PACK_B
+    const float* prepacked_b;
+    size_t pitch_b;
+    int packed_n;
+#endif
 #if defined(COB_USE_HK_X86_K288)
     int kc;
 #endif
@@ -155,8 +167,13 @@ typedef struct {
 typedef struct cob_final_output cob_final_output;
 #endif
 
+#ifdef COB_USE_HK_PACK_B
+#define COB_HK_B_ARG(x) , x
+#else
+#define COB_HK_B_ARG(x)
+#endif
 static void cob_fused_product(const cob_fused_slab* s, cob_fused_operand a,
-    cob_fused_operand b, float* c, int ldc, const cob_final_output* output)
+    cob_fused_operand b, float* c, int ldc, const cob_final_output* output COB_HK_B_ARG(enum cob_hk_b_slot b_slot))
 {
 #if !defined(COB_ENABLE_FUSED_FINAL_PANEL) || !COB_ENABLE_FUSED_FINAL_PANEL
     (void)output;
@@ -164,34 +181,49 @@ static void cob_fused_product(const cob_fused_slab* s, cob_fused_operand a,
 #ifdef COB_TRACE_HK_X86_LEAF
     if (s->x86_child) ++cob_hk_x86_products;
 #endif
+#ifdef COB_USE_HK_PACK_B
+    const float* prepared = s->prepacked_b ? s->prepacked_b+(size_t)b_slot*s->pitch_b : NULL;
+#ifdef COB_TRACE_HK_PACK_B
+    if (prepared) ++cob_hk_panel_uses;
+#endif
+#endif
     for (int pc = 0; pc < s->depth;) {
 #if defined(COB_USE_HK_X86_K288)
         const int kb = cob_min_i32(s->kc, s->depth-pc);
 #else
         const int kb = cob_min_i32(COB_FUSED_KC, s->depth-pc);
 #endif
-        cob_fused_pack_b(s->pack_b, b, (size_t)pc*s->ldb, s->ldb, kb, s->cols, s->kernel.nr);
+#ifdef COB_USE_HK_PACK_B
+        const float* packed_b = s->pack_b;
+        if (prepared)
+            packed_b = prepared+(size_t)pc*s->packed_n;
+        else
+#else
+#define packed_b (s->pack_b)
+#endif
+            cob_fused_pack_b(s->pack_b, b, (size_t)pc*s->ldb, s->ldb, kb, s->cols, s->kernel.nr);
         for (int ic = 0; ic < s->rows;) {
             const int mb = cob_min_i32(s->kernel.mc, s->rows-ic);
             cob_fused_pack_a(s->pack_a, a, (size_t)ic*s->lda+pc, s->lda, mb, kb, s->kernel.mr);
 #if defined(COB_ENABLE_FUSED_FINAL_PANEL) && COB_ENABLE_FUSED_FINAL_PANEL
             if (output && kb == s->depth-pc)
-                cob_final_panel(&s->kernel,mb,s->cols,kb,s->pack_a,s->pack_b,
+                cob_final_panel(&s->kernel,mb,s->cols,kb,s->pack_a,packed_b,
                     c+(size_t)ic*ldc,ldc,pc!=0,output,ic);
             else
 #endif
 #ifdef COB_USE_HK_REGISTER
             if (s->x86_child)
-                cob_hk_reg_apply(s->kernel, mb, s->cols, kb, s->pack_a, s->pack_b,
+                cob_hk_reg_apply(s->kernel, mb, s->cols, kb, s->pack_a, packed_b,
                     c+(size_t)ic*ldc, ldc, pc != 0);
             else
 #endif
-                cob_blocked_apply_panel(s->kernel, mb, s->cols, kb, s->pack_a, s->pack_b,
+                cob_blocked_apply_panel(s->kernel, mb, s->cols, kb, s->pack_a, packed_b,
                     c+(size_t)ic*ldc, ldc, pc != 0);
             ic += mb;
         }
         pc += kb;
     }
+#undef packed_b
 }
 
 /* Compute the three one-element fringes directly. In the right column,
@@ -234,8 +266,12 @@ static void cob_fused_finish_edges(int m, int n, int k, const float* a, int lda,
     }
 }
 
-static int cob_sgemm_strassen_fused_impl(int m, int n, int k, const float* a, int lda,
-    const float* b, int ldb, float* c, int ldc, int min_harmonic, int hk_child)
+static int cob_sgemm_strassen_fused_core(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc, int min_harmonic, int hk_child
+#ifdef COB_USE_HK_PACK_B
+    , const cob_hk_b_form *form
+#endif
+    )
 {
 #ifndef COB_USE_HK_X86_LEAF
     (void)hk_child;
@@ -264,10 +300,23 @@ static int cob_sgemm_strassen_fused_impl(int m, int n, int k, const float* a, in
     const int packed_m = (cob_min_i32(rows,kernel.mc)+kernel.mr-1)/kernel.mr*kernel.mr;
     const int packed_n = (cols+kernel.nr-1)/kernel.nr*kernel.nr;
     const size_t pack_a_size = (size_t)packed_m*kb, pack_b_size = (size_t)packed_n*kb;
-    float* work = cob_aligned_alloc(64, (pack_b_size+pack_a_size+(size_t)rows*cols)*sizeof(float));
+    const size_t ordinary = pack_b_size+pack_a_size+(size_t)rows*cols;
+    size_t slots = ordinary;
+#ifdef COB_USE_HK_PACK_B
+    const int form_n = (nh+kernel.nr-1)/kernel.nr*kernel.nr;
+    const size_t pitch = (size_t)kh*form_n;
+    if (form) {
+        if (m>1280 || n>1280 || k>1280 || rows!=mh || cols!=nh) return 0;
+        slots += 7*pitch;
+    }
+#endif
+    float* work = cob_aligned_alloc(64, slots*sizeof(float));
     if (!work) return 0;
     float* product = work+pack_b_size+pack_a_size;
     cob_fused_slab slab = {kernel, 0, 0, kh, lda, ldb, work+pack_b_size, work,
+#ifdef COB_USE_HK_PACK_B
+                           form ? work+ordinary : NULL, pitch, form_n,
+#endif
 #if defined(COB_USE_HK_X86_K288)
                            kc,
 #endif
@@ -279,6 +328,9 @@ static int cob_sgemm_strassen_fused_impl(int m, int n, int k, const float* a, in
     };
 #ifdef COB_TRACE_HK_X86_LEAF
     if (slab.x86_child) { ++cob_hk_x86_children; cob_hk_x86_nr = kernel.nr; }
+#endif
+#ifdef COB_USE_HK_PACK_B
+    if (form) cob_hk_pack_seven_b(*form,ldb,kh,nh,kernel.nr,form_n,COB_FUSED_KC,work+ordinary);
 #endif
     for (int jc = 0; jc < nh;) {
         slab.cols = cob_min_i32(cols,nh-jc);
@@ -306,25 +358,26 @@ static int cob_sgemm_strassen_fused_impl(int m, int n, int k, const float* a, in
 #else
 #define COB_FINAL_OUT(op) NULL
 #endif
-            cob_fused_product(&slab, COB_FUSED_ADD(a21,a22), COB_FUSED_ONE(b11), c21, ldc, NULL);
-            cob_fused_product(&slab, COB_FUSED_ONE(a11), COB_FUSED_SUB(b12,b22), c12, ldc, NULL);
-            cob_fused_product(&slab, COB_FUSED_ONE(a22), COB_FUSED_SUB(b21,b11), c11, ldc, NULL);
-            cob_fused_product(&slab, COB_FUSED_ADD(a11,a22), COB_FUSED_ADD(b11,b22), product, slab.cols, COB_FINAL_OUT(COB_FINAL_M1));
+            cob_fused_product(&slab, COB_FUSED_ADD(a21,a22), COB_FUSED_ONE(b11), c21, ldc, NULL COB_HK_B_ARG(COB_B_M2));
+            cob_fused_product(&slab, COB_FUSED_ONE(a11), COB_FUSED_SUB(b12,b22), c12, ldc, NULL COB_HK_B_ARG(COB_B_M3));
+            cob_fused_product(&slab, COB_FUSED_ONE(a22), COB_FUSED_SUB(b21,b11), c11, ldc, NULL COB_HK_B_ARG(COB_B_M4));
+            cob_fused_product(&slab, COB_FUSED_ADD(a11,a22), COB_FUSED_ADD(b11,b22), product, slab.cols, COB_FINAL_OUT(COB_FINAL_M1) COB_HK_B_ARG(COB_B_M1));
 #if !defined(COB_ENABLE_FUSED_FINAL_PANEL) || !COB_ENABLE_FUSED_FINAL_PANEL
             cob_strassen_merge_m1(c11, c12, c21, c22, ldc, product, slab.rows, slab.cols);
 #endif
-            cob_fused_product(&slab, COB_FUSED_ADD(a11,a12), COB_FUSED_ONE(b22), product, slab.cols, COB_FINAL_OUT(COB_FINAL_M5));
+            cob_fused_product(&slab, COB_FUSED_ADD(a11,a12), COB_FUSED_ONE(b22), product, slab.cols, COB_FINAL_OUT(COB_FINAL_M5) COB_HK_B_ARG(COB_B_M5));
 #if !defined(COB_ENABLE_FUSED_FINAL_PANEL) || !COB_ENABLE_FUSED_FINAL_PANEL
             cob_strassen_merge_m5(c11, c12, ldc, product, slab.rows, slab.cols);
 #endif
-            cob_fused_product(&slab, COB_FUSED_SUB(a21,a11), COB_FUSED_ADD(b11,b12), product, slab.cols, COB_FINAL_OUT(COB_FINAL_M6));
+            cob_fused_product(&slab, COB_FUSED_SUB(a21,a11), COB_FUSED_ADD(b11,b12), product, slab.cols, COB_FINAL_OUT(COB_FINAL_M6) COB_HK_B_ARG(COB_B_M6));
 #if !defined(COB_ENABLE_FUSED_FINAL_PANEL) || !COB_ENABLE_FUSED_FINAL_PANEL
             cob_strassen_merge_product(c22, ldc, product, slab.rows, slab.cols, 1);
 #endif
-            cob_fused_product(&slab, COB_FUSED_SUB(a12,a22), COB_FUSED_ADD(b21,b22), product, slab.cols, COB_FINAL_OUT(COB_FINAL_M7));
+            cob_fused_product(&slab, COB_FUSED_SUB(a12,a22), COB_FUSED_ADD(b21,b22), product, slab.cols, COB_FINAL_OUT(COB_FINAL_M7) COB_HK_B_ARG(COB_B_M7));
 #if !defined(COB_ENABLE_FUSED_FINAL_PANEL) || !COB_ENABLE_FUSED_FINAL_PANEL
             cob_strassen_merge_product(c11, ldc, product, slab.rows, slab.cols, 1);
 #endif
+#undef COB_HK_B_ARG
 #undef COB_FINAL_OUT
 #undef COB_FUSED_ONE
 #undef COB_FUSED_ADD
@@ -334,8 +387,22 @@ static int cob_sgemm_strassen_fused_impl(int m, int n, int k, const float* a, in
         jc += slab.cols;
     }
     free(work);
-    cob_fused_finish_edges(m, n, k, a, lda, b, ldb, c, ldc);
+#ifdef COB_USE_HK_PACK_B
+    if (form) cob_hk_b_edges(m,n,k,a,lda,*form,ldb,c,ldc);
+    else
+#endif
+        cob_fused_finish_edges(m, n, k, a, lda, b, ldb, c, ldc);
     return 1;
+}
+
+static int cob_sgemm_strassen_fused_impl(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc, int min_harmonic, int hk_child)
+{
+    return cob_sgemm_strassen_fused_core(m,n,k,a,lda,b,ldb,c,ldc,min_harmonic,hk_child
+#ifdef COB_USE_HK_PACK_B
+        , NULL
+#endif
+        );
 }
 
 static int cob_sgemm_strassen_fused_at(int m, int n, int k, const float* a, int lda,

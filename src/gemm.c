@@ -4262,6 +4262,9 @@ void cob_sgemm_rowmajor(int m, int n, int k, const float* a, int lda,
 #ifdef COB_TRACE_HK_X86_LEAF
     cob_hk_x86_children = cob_hk_x86_products = cob_hk_x86_nr = 0;
 #endif
+#ifdef COB_TRACE_HK_PACK_B
+    cob_hk_pack_hits = cob_hk_panel_uses = cob_hk_pack_fallbacks = 0;
+#endif
     if (cob_hk15_try(m, n, k, a, lda, b, ldb, c, ldc)) return;
     cob_sgemm_rowmajor_base(m, n, k, a, lda, b, ldb, c, ldc);
 }
