@@ -26,6 +26,7 @@ COB_STRASSEN_SME ?= AUTO
 COB_ENABLE_PORTABLE_STRASSEN ?= OFF
 COB_ENABLE_RECURSIVE_STRASSEN ?= OFF
 COB_ENABLE_OPENBLAS_LEAF ?= OFF
+COB_ENABLE_N2_SMALL ?= OFF
 COB_SME_CC ?= $(CC)
 SME_SRC := third_party/maxmulsk/strassen_leaf.c
 SME_FLAGS := -mcpu=apple-m4 -march=armv8.7-a+sme+sme2
@@ -74,7 +75,13 @@ else ifneq ($(COB_ENABLE_OPENBLAS_LEAF),OFF)
 $(error COB_ENABLE_OPENBLAS_LEAF must be ON or OFF)
 endif
 
-NATIVE_KERNEL_HEADERS := src/cob_blocked_leaf.inc src/cob_short_axes.inc src/cob_fused_strassen.inc src/cob_small_x86.inc src/cob_few_row_panel.inc
+ifeq ($(COB_ENABLE_N2_SMALL),ON)
+SME_DEFINE += -DCOB_ENABLE_N2_SMALL=1
+else ifneq ($(COB_ENABLE_N2_SMALL),OFF)
+$(error COB_ENABLE_N2_SMALL must be ON or OFF)
+endif
+
+NATIVE_KERNEL_HEADERS := src/cob_n2_small.inc src/cob_blocked_leaf.inc src/cob_short_axes.inc src/cob_fused_strassen.inc src/cob_small_x86.inc src/cob_few_row_panel.inc
 LIB_OBJ := $(BUILD_DIR)/gemm.o
 TEST_BIN := $(BUILD_DIR)/cob_gemm_test
 STRASSEN_TEST_OBJ := $(BUILD_DIR)/gemm_strassen_test.o
@@ -104,7 +111,7 @@ $(BUILD_DIR):
 
 # Track each output separately so reconfiguring a partially built directory
 # works even on versions of Make with one-second file timestamps.
-SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN) recursive:$(COB_ENABLE_RECURSIVE_STRASSEN) openblas:$(COB_ENABLE_OPENBLAS_LEAF)
+SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN) recursive:$(COB_ENABLE_RECURSIVE_STRASSEN) openblas:$(COB_ENABLE_OPENBLAS_LEAF) n2small:$(COB_ENABLE_N2_SMALL)
 SME_OUTPUTS := $(LIB_OBJ) $(STRASSEN_TEST_OBJ) $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) \
                $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN) \
                $(BENCH_BIN) $(CBLAS_BENCH_BIN) $(FORTRAN_BLAS_BENCH_BIN)

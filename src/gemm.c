@@ -4208,6 +4208,12 @@ extern int cob_sgemm_sme_tiny(int m, int n, int k, const float* a, int lda,
     const float* b, int ldb, float* c, int ldc);
 #endif
 
+#if defined(COB_ENABLE_N2_SMALL) && COB_ENABLE_N2_SMALL && defined(__linux__) && \
+    defined(__aarch64__) && defined(COB_USE_NEON) && defined(__ARM_NEON)
+#define COB_USE_N2_SMALL 1
+#include "cob_n2_small.inc"
+#endif
+
 void cob_sgemm_rowmajor(
     int m,
     int n,
@@ -4219,6 +4225,9 @@ void cob_sgemm_rowmajor(
     float* c,
     int ldc)
 {
+#ifdef COB_USE_N2_SMALL
+    if (cob_n2_try_sgemm(m, n, k, a, lda, b, ldb, c, ldc)) return;
+#endif
 #if defined(COB_WITH_STRASSEN_SME_LEAF) && defined(COB_USE_APPLE_SME) && defined(COB_USE_APPLE_AMX)
     if (m >= 16 && m <= 96 && n >= 16 && n <= 96 && k >= 16 && k <= 96 &&
         a && b && c && lda >= k && ldb >= n && ldc >= n && cob_apple_sme2p1_available() &&
