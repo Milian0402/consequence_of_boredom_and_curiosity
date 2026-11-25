@@ -58,7 +58,12 @@ int main(int argc,char **argv)
     if (argc!=17) fatal("usage: plugin-or-public distribution seed calls M N K lda ldb ldc ar ac br bc cr cc");
     if (!pin_cpu()) fatal("pin or initialization thread");
     rank_sgemm_fn product=cob_sgemm_rowmajor;
+#ifdef RANK_VIEW_RECORD_LD
+    void *trace_lib=NULL;
+    if (strcmp(argv[1],"public")) { trace_lib=plugin(argv[1]); product=selected_sgemm; }
+#else
     if (strcmp(argv[1],"public")) { plugin(argv[1]); product=selected_sgemm; }
+#endif
     const char *mode=argv[2]; uint32_t seed=number(argv[3]);
     const int calls=number(argv[4]),m=number(argv[5]),n=number(argv[6]),k=number(argv[7]);
     if (m<=0 || m>4096 || n<=0 || n>8192 || k<=0 || k>2048 || calls>1024) fatal("invalid dimensions");
@@ -87,8 +92,36 @@ int main(int argc,char **argv)
     if (!single_task()) fatal("thread count after batch");
     size_t guards;
     double error=verify(a,b,c,&guards);
-    printf("VIEW,%zu,%zu,%u,%u,%u,%d,1,%.12g,%.12g,%.12g\n",(size_t)m*n,guards,
+    printf("VIEW,%zu,%zu,%u,%u,%u,%d,1,%.12g,%.12g,%.12g",(size_t)m*n,guards,
            (unsigned)((uintptr_t)a.data%64),(unsigned)((uintptr_t)b.data%64),(unsigned)((uintptr_t)c.data%64),
            sched_getcpu(),error,first,calls ? elapsed/calls : 0);
+#ifdef RANK_VIEW_RECORD_LD
+    printf(",%d,%d,%d",a.ld,b.ld,c.ld);
+#endif
+    putchar('\n');
+#ifdef RANK_VIEW_RECORD_LD
+    if (trace_lib) {
+        const char *(*implementation)(void)=NULL;
+        void *ptr=dlsym(trace_lib,"rank_onednn_implementation");
+        memcpy(&implementation,&ptr,sizeof implementation);
+        if (implementation) {
+            unsigned long (*plans)(void)=NULL;
+            int (*cached)(void)=NULL;
+            ptr=symbol(trace_lib,"rank_onednn_plans"); memcpy(&plans,&ptr,sizeof plans);
+            ptr=symbol(trace_lib,"rank_onednn_cached_plan"); memcpy(&cached,&ptr,sizeof cached);
+            const char *kind=implementation();
+            if (!kind || !*kind || !plans()) fatal("oneDNN did not execute a measured primitive");
+            printf("DNN,%s,%lu,%d\n",kind,plans(),cached());
+        }
+    }
+    const char *dump=getenv("RANK_VIEW_DIGEST_PATH");
+    if (dump && *dump) {
+        FILE *f=fopen(dump,"wbx");
+        if (!f) fatal("cannot create unique view result");
+        for(int i=0;i<m;++i)
+            if(fwrite(c.data+(size_t)i*c.ld,sizeof(float),(size_t)n,f)!=(size_t)n) fatal("view result write");
+        if(fclose(f)) fatal("view result close");
+    }
+#endif
     return 0;
 }

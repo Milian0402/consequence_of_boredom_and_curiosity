@@ -1,0 +1,162 @@
+diff --git a/src/cob_stream_b_dispatch.inc b/src/cob_stream_b_dispatch.inc
+index b8ca6a5..658a994 100644
+--- a/src/cob_stream_b_dispatch.inc
++++ b/src/cob_stream_b_dispatch.inc
+@@ -4,6 +4,14 @@ void cob_stream_b_kernel_avx2(int m, int n, int k, const float* a, int lda,
+ void cob_stream_b_kernel_avx512(int m, int n, int k, const float* a, int lda,
+     const float* b, int ldb, float* c, int ldc, float* panel);
+ 
++#if defined(COB_ENABLE_X86_GROUPED_B) && COB_ENABLE_X86_GROUPED_B
++#include "cob_stream_b_group.h"
++void cob_stream_b_grouped_avx2(int m, int n, int k, const float* a, int lda,
++    const float* b, int ldb, float* c, int ldc, float* panel);
++void cob_stream_b_grouped_avx512(int m, int n, int k, const float* a, int lda,
++    const float* b, int ldb, float* c, int ldc, float* panel);
++#endif
++
+ #ifndef COB_STREAM_B_SUPPORTS
+ #define COB_STREAM_B_SUPPORTS(feature) __builtin_cpu_supports(feature)
+ #endif
+@@ -31,13 +39,24 @@ static int cob_try_stream_b(int m, int n, int k, const float* a, int lda,
+         cob_f32_ranges_overlap(c, output_size, b, (size_t)(k-1)*ldb+n)) return 0;
+     const int width = cob_stream_b_tile_width();
+     if (!width) return 0;
+-    float* panel = cob_aligned_alloc(64, (size_t)k*width*sizeof(float));
++    size_t workspace = (size_t)k*width*sizeof(float);
++#if defined(COB_ENABLE_X86_GROUPED_B) && COB_ENABLE_X86_GROUPED_B
++    workspace *= COB_STREAM_B_GROUP_PANELS;
++#endif
++    float* panel = cob_aligned_alloc(64, workspace);
+     if (!panel) return 0;
+     COB_STREAM_B_OBSERVE(width);
++#if defined(COB_ENABLE_X86_GROUPED_B) && COB_ENABLE_X86_GROUPED_B
++    if (width == 64)
++        cob_stream_b_grouped_avx512(m, n, k, a, lda, b, ldb, c, ldc, panel);
++    else
++        cob_stream_b_grouped_avx2(m, n, k, a, lda, b, ldb, c, ldc, panel);
++#else
+     if (width == 64)
+         cob_stream_b_kernel_avx512(m, n, k, a, lda, b, ldb, c, ldc, panel);
+     else
+         cob_stream_b_kernel_avx2(m, n, k, a, lda, b, ldb, c, ldc, panel);
++#endif
+     free(panel);
+     return 1;
+ }
+diff --git a/src/cob_stream_b_group.h b/src/cob_stream_b_group.h
+new file mode 100644
+index 0000000..63e724c
+--- /dev/null
++++ b/src/cob_stream_b_group.h
+@@ -0,0 +1,2 @@
++/* This many K-by-NR panels share one pass over consecutive B columns. */
++#define COB_STREAM_B_GROUP_PANELS 4
+diff --git a/src/cob_stream_b_kernel.c b/src/cob_stream_b_kernel.c
+index d59cc8e..5dc6155 100644
+--- a/src/cob_stream_b_kernel.c
++++ b/src/cob_stream_b_kernel.c
+@@ -119,6 +119,30 @@ __attribute__((noinline)) static void cob_sb_full(int k, const float* a, int lda
+ #endif
+ }
+ 
++static inline void cob_sb_compute_panel(int m, int k, const float* a, int lda,
++    const float* panel, float* c, int ldc)
++{
++    int i = 0;
++    for (; i + cob_sb_rows <= m; i += cob_sb_rows) {
++        cob_sb_full(k, a+(size_t)i*lda, lda, panel, c+(size_t)i*ldc, ldc);
++    }
++    if (i < m) {
++        const float* tail_a = a+(size_t)i*lda;
++        float* tail_c = c+(size_t)i*ldc;
++#define COB_SB_TAIL(rows) case rows: cob_sb_tile(rows, k, tail_a, lda, panel, tail_c, ldc); break
++        switch (m-i) {
++            COB_SB_TAIL(1);
++            COB_SB_TAIL(2);
++#if COB_STREAM_B_AVX512
++            COB_SB_TAIL(3);
++            COB_SB_TAIL(4);
++            COB_SB_TAIL(5);
++#endif
++        }
++#undef COB_SB_TAIL
++    }
++}
++
+ void COB_STREAM_B_KERNEL(int m, int n, int k, const float* a, int lda,
+     const float* b, int ldb, float* c, int ldc, float* panel)
+ {
+@@ -128,27 +152,58 @@ void COB_STREAM_B_KERNEL(int m, int n, int k, const float* a, int lda,
+         const int col = (j < n-cob_sb_cols) ? j : n-cob_sb_cols;
+         for (int p = 0; p < k; ++p)
+             memcpy(panel+(size_t)p*cob_sb_cols, b+(size_t)p*ldb+col, cob_sb_cols*sizeof(float));
+-        int i = 0;
+-        for (; i + cob_sb_rows <= m; i += cob_sb_rows) {
+-            cob_sb_full(k, a+(size_t)i*lda, lda, panel, c+(size_t)i*ldc+col, ldc);
+-        }
+-        if (i < m) {
+-            const float* tail_a = a+(size_t)i*lda;
+-            float* tail_c = c+(size_t)i*ldc+col;
+-#define COB_SB_TAIL(rows) case rows: cob_sb_tile(rows, k, tail_a, lda, panel, tail_c, ldc); break
+-            switch (m-i) {
+-                COB_SB_TAIL(1);
+-                COB_SB_TAIL(2);
++        cob_sb_compute_panel(m, k, a, lda, panel, c+col, ldc);
++    }
++}
++#if defined(COB_ENABLE_X86_GROUPED_B) && COB_ENABLE_X86_GROUPED_B
++#include "cob_stream_b_group.h"
+ #if COB_STREAM_B_AVX512
+-                COB_SB_TAIL(3);
+-                COB_SB_TAIL(4);
+-                COB_SB_TAIL(5);
++#define COB_SB_GROUPED cob_stream_b_grouped_avx512
++#else
++#define COB_SB_GROUPED cob_stream_b_grouped_avx2
+ #endif
++
++/* A source row supplies four adjacent micro-panels before moving to the next
++   B row. The packed panels stay separately contiguous along K for the exact
++   same arithmetic kernels used by the single-panel implementation. */
++void COB_SB_GROUPED(int m, int n, int k, const float* a, int lda,
++    const float* b, int ldb, float* c, int ldc, float* panels)
++{
++    const int group_width = COB_STREAM_B_GROUP_PANELS*cob_sb_cols;
++    const size_t panel_size = (size_t)k*cob_sb_cols;
++    const size_t row_bytes = cob_sb_cols*sizeof(float);
++    for (int j = 0; j < n; j += group_width) {
++        int count = COB_STREAM_B_GROUP_PANELS;
++        int col[COB_STREAM_B_GROUP_PANELS];
++        if (n-j >= group_width) {
++            for (int t = 0; t < count; ++t) col[t] = j+t*cob_sb_cols;
++            for (int p = 0; p < k; ++p) {
++                const float* row = b+(size_t)p*ldb+j;
++                float* dst = panels+(size_t)p*cob_sb_cols;
++                for (int t = 0; t < COB_STREAM_B_GROUP_PANELS; ++t)
++                    memcpy(dst+(size_t)t*panel_size,row+t*cob_sb_cols,row_bytes);
++            }
++        } else {
++            /* Preserve the incumbent's last full-width tile: its first column
++               may overlap a predecessor, including one in the previous group. */
++            count = (n-j+cob_sb_cols-1)/cob_sb_cols;
++            for (int t = 0; t < count; ++t) {
++                const int first = j+t*cob_sb_cols;
++                col[t] = first < n-cob_sb_cols ? first : n-cob_sb_cols;
++            }
++            for (int p = 0; p < k; ++p) {
++                const float* row = b+(size_t)p*ldb;
++                float* dst = panels+(size_t)p*cob_sb_cols;
++                for (int t = 0; t < count; ++t)
++                    memcpy(dst+(size_t)t*panel_size,row+col[t],row_bytes);
+             }
+-#undef COB_SB_TAIL
+         }
++        for (int t = 0; t < count; ++t)
++            cob_sb_compute_panel(m,k,a,lda,panels+(size_t)t*panel_size,c+col[t],ldc);
+     }
+ }
++#undef COB_SB_GROUPED
++#endif
+ #undef COB_SB_ZERO
+ #undef COB_SB_SPLAT
+ #undef COB_SB_FMA

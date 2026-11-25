@@ -80,12 +80,12 @@ jobs:
       actions: read
     needs: [phase, onednn]
     if: ${{ !cancelled() && needs.phase.result == 'success' && needs.phase.outputs.label != 'packing-cost' && needs.phase.outputs.label != 'rank48-arm-confirm' && needs.phase.outputs.label != 'stream-release' && needs.phase.outputs.label != 'cropped-views' }}
-    name: ${{ needs.phase.outputs.label == 'frontier-x86' && format('Frontier ranking on x86-64, replica {0}', matrix.replica) || format('Frozen ranking on {0}', matrix.arch) }}
+    name: ${{ needs.phase.outputs.label == 'grouped-b-x86' && format('Grouped B ranking on x86-64, replica {0}', matrix.replica) || needs.phase.outputs.label == 'frontier-x86' && format('Frontier ranking on x86-64, replica {0}', matrix.replica) || format('Frozen ranking on {0}', matrix.arch) }}
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON(needs.phase.outputs.label == 'frontier-x86' && '[{"runner":"ubuntu-24.04","arch":"x86_64","replica":1},{"runner":"ubuntu-24.04","arch":"x86_64","replica":2}]' || needs.phase.outputs.label == 'stream-b' && '[{"runner":"ubuntu-24.04","arch":"x86_64"}]' || '[{"runner":"ubuntu-24.04","arch":"x86_64"},{"runner":"ubuntu-24.04-arm","arch":"aarch64"}]') }}
+        include: ${{ fromJSON((needs.phase.outputs.label == 'frontier-x86' || needs.phase.outputs.label == 'grouped-b-x86') && '[{"runner":"ubuntu-24.04","arch":"x86_64","replica":1},{"runner":"ubuntu-24.04","arch":"x86_64","replica":2}]' || needs.phase.outputs.label == 'stream-b' && '[{"runner":"ubuntu-24.04","arch":"x86_64"}]' || '[{"runner":"ubuntu-24.04","arch":"x86_64"},{"runner":"ubuntu-24.04-arm","arch":"aarch64"}]') }}
     timeout-minutes: 90
     env:
       FRONTIER_REPLICA: ${{ matrix.replica }}
@@ -96,7 +96,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        if: needs.phase.outputs.label == 'frontier-x86'
+        if: needs.phase.outputs.label == 'frontier-x86' || needs.phase.outputs.label == 'grouped-b-x86'
         with:
           ref: a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6
           path: production-source
@@ -117,7 +117,7 @@ jobs:
           path: ${{ runner.temp }}/onednn-input
       - name: Fetch the pinned oneDNN artifact from the aligned-core run
         continue-on-error: true
-        if: needs.phase.outputs.label == 'hk-forms' || needs.phase.outputs.label == 'release-replay' || needs.phase.outputs.label == 'medium-transfer' || needs.phase.outputs.label == 'stream-b' || needs.phase.outputs.label == 'frontier-x86' || needs.phase.outputs.label == 'signed-leaves'
+        if: needs.phase.outputs.label == 'hk-forms' || needs.phase.outputs.label == 'release-replay' || needs.phase.outputs.label == 'medium-transfer' || needs.phase.outputs.label == 'stream-b' || needs.phase.outputs.label == 'frontier-x86' || needs.phase.outputs.label == 'grouped-b-x86' || needs.phase.outputs.label == 'signed-leaves'
         env:
           GH_TOKEN: ${{ github.token }}
           ARCH: ${{ matrix.arch }}
@@ -139,7 +139,7 @@ jobs:
           unzip -q "$RUNNER_TEMP/onednn-hosted.zip" -d "$dest"
       - name: Qualify oneDNN on the CPU that will be measured
         id: onednn
-        if: needs.phase.outputs.label == 'aligned-core' || needs.phase.outputs.label == 'hk-forms' || needs.phase.outputs.label == 'release-replay' || needs.phase.outputs.label == 'medium-transfer' || needs.phase.outputs.label == 'stream-b' || needs.phase.outputs.label == 'frontier-x86' || needs.phase.outputs.label == 'signed-leaves'
+        if: needs.phase.outputs.label == 'aligned-core' || needs.phase.outputs.label == 'hk-forms' || needs.phase.outputs.label == 'release-replay' || needs.phase.outputs.label == 'medium-transfer' || needs.phase.outputs.label == 'stream-b' || needs.phase.outputs.label == 'frontier-x86' || needs.phase.outputs.label == 'grouped-b-x86' || needs.phase.outputs.label == 'signed-leaves'
         continue-on-error: true
         run: |
           cd "$RUNNER_TEMP/onednn-input"
@@ -152,7 +152,7 @@ jobs:
           cp ./*.txt ./*.log ./runtime.tgz.sha256 "$RUNNER_TEMP/rank-result/onednn/build/"
           touch "$VENDOR_DIR/onednn/qualified"
       - name: Restore the pinned strict oneDNN peers when artifact reuse fails
-        if: needs.phase.outputs.label == 'frontier-x86' && steps.onednn.outcome != 'success'
+        if: (needs.phase.outputs.label == 'frontier-x86' || needs.phase.outputs.label == 'grouped-b-x86') && steps.onednn.outcome != 'success'
         run: |
           bash tools/world-rank/onednn/build.sh "$VENDOR_DIR/onednn"
           mkdir -p "$RUNNER_TEMP/rank-result/onednn"
@@ -208,7 +208,7 @@ jobs:
       - name: Build LIBXSMM small-shape JIT kernels
         id: libxsmm
         env:
-          RANK_FRONTIER_LIBXSMM: ${{ needs.phase.outputs.label == 'frontier-x86' && '1' || '0' }}
+          RANK_FRONTIER_LIBXSMM: ${{ (needs.phase.outputs.label == 'frontier-x86' || needs.phase.outputs.label == 'grouped-b-x86') && '1' || '0' }}
         if: needs.phase.outputs.label != 'aligned-core' && needs.phase.outputs.label != 'hk-forms' && needs.phase.outputs.label != 'release-replay' && needs.phase.outputs.label != 'medium-transfer' && needs.phase.outputs.label != 'stream-b' && needs.phase.outputs.label != 'signed-leaves'
         continue-on-error: true
         run: bash tools/world-rank/libxsmm/build.sh "$VENDOR_DIR"
@@ -217,7 +217,7 @@ jobs:
         if: success()
         continue-on-error: true
         run: |
-          if [[ $(cat tools/world-rank/phase.txt) =~ ^(heldout|tile-screen|tile-confirm|tile-replay|tile-child|tile-parent|leaf-wave|aligned-core|hk-forms|release-replay|medium-transfer|signed-leaves|stream-b|frontier-x86)$ ]]; then
+          if [[ $(cat tools/world-rank/phase.txt) =~ ^(heldout|tile-screen|tile-confirm|tile-replay|tile-child|tile-parent|leaf-wave|aligned-core|hk-forms|release-replay|medium-transfer|signed-leaves|stream-b|frontier-x86|grouped-b-x86)$ ]]; then
             bash tools/world-rank/blasfeo/build.sh "$VENDOR_DIR"
           fi
           if [[ $(cat tools/world-rank/phase.txt) == tile-replay && $(uname -m) == x86_64 ]]; then
@@ -253,7 +253,7 @@ jobs:
           fi
       - name: Record incomplete installation as a failed comparison
         if: >-
-          ${{ !cancelled() && ((needs.phase.outputs.label != 'release-replay' && needs.phase.outputs.label != 'signed-leaves' && needs.phase.outputs.label != 'frontier-x86' && (steps.openblas.outcome == 'failure' ||
+          ${{ !cancelled() && ((needs.phase.outputs.label != 'release-replay' && needs.phase.outputs.label != 'signed-leaves' && needs.phase.outputs.label != 'frontier-x86' && needs.phase.outputs.label != 'grouped-b-x86' && (steps.openblas.outcome == 'failure' ||
           steps.aocl.outcome == 'failure' || steps.vendor.outcome == 'failure' ||
           steps.libxsmm.outcome == 'failure' || steps.blasfeo.outcome == 'failure' ||
           steps.fastmmw.outcome == 'failure' || steps.onednn.outcome == 'failure')) || steps.restore_release.outcome == 'failure') }}
@@ -267,7 +267,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: ${{ needs.phase.outputs.label == 'frontier-x86' && format('frontier-x86-{0}-{1}-{2}', github.run_id, github.run_attempt, matrix.replica) || format('world-rank-{0}-{1}-{2}', matrix.arch, github.run_id, github.run_attempt) }}
+          name: ${{ needs.phase.outputs.label == 'grouped-b-x86' && format('grouped-b-x86-{0}-{1}-{2}', github.run_id, github.run_attempt, matrix.replica) || needs.phase.outputs.label == 'frontier-x86' && format('frontier-x86-{0}-{1}-{2}', github.run_id, github.run_attempt, matrix.replica) || format('world-rank-{0}-{1}-{2}', matrix.arch, github.run_id, github.run_attempt) }}
           path: ${{ runner.temp }}/rank-result
           if-no-files-found: warn
           retention-days: 14
