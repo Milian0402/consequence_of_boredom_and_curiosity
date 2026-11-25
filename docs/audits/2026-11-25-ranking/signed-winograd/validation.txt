@@ -1,0 +1,6 @@
+provider=OpenBLAS 0.3.26 NO_LAPACKE DYNAMIC_ARCH NO_AFFINITY neoversen1 SINGLE_THREADED threads=1
+Rectangular CBLAS Winograd passed FP64, depth-edge, stride, alias and allocation checks.
+provider=OpenBLAS 0.3.26 NO_LAPACKE DYNAMIC_ARCH NO_AFFINITY neoversen1 SINGLE_THREADED threads=1
+Rectangular CBLAS Winograd passed FP64, depth-edge, stride, alias and allocation checks.
+ordinary separately linked public API signed=0 checked=4202499 guards_and_inputs=1 exact=1
+ordinary separately linked public API signed=1 checked=4202499 guards_and_inputs=1 exact=1
