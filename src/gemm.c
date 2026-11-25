@@ -187,6 +187,19 @@ enum {
 #error "COB_SGEMM_STRASSEN1 must be 0 or 1"
 #endif
 
+/* Experimental one-level schedule for native 64-bit x86 and Arm kernels. */
+#if defined(COB_ENABLE_PORTABLE_STRASSEN) && COB_ENABLE_PORTABLE_STRASSEN && \
+    !defined(COB_USE_APPLE_AMX) && (defined(COB_USE_X86_SIMD) || \
+    (defined(COB_USE_NEON) && defined(__aarch64__)))
+#define COB_USE_PORTABLE_STRASSEN 1
+#ifndef COB_PORTABLE_STRASSEN_MIN_DIM
+#define COB_PORTABLE_STRASSEN_MIN_DIM 1536
+#endif
+#if COB_PORTABLE_STRASSEN_MIN_DIM <= 0
+#error "COB_PORTABLE_STRASSEN_MIN_DIM must be positive"
+#endif
+#endif
+
 #ifndef COB_SGEMM_STRASSEN1_MIN_DIM
 #define COB_SGEMM_STRASSEN1_MIN_DIM 6144
 #define COB_SGEMM_STRASSEN1_MIN_DIM_DEFAULTED 1
@@ -2973,16 +2986,71 @@ static void cob_sgemm_x86_pack_a(float* dst, const float* a, int lda,
     }
 }
 
+/* One row needs no panel packing. Four B rows are streamed while each
+   output vector stays in a register, in increasing K order. */
+__attribute__((target("avx2,fma")))
+static void cob_sgemm_row_avx2(int n, int k, const float* a, const float* b,
+    int ldb, float* restrict c)
+{
+    memset(c, 0, (size_t)n * sizeof(float));
+    int p = 0;
+    for (; k - p >= 4; p += 4) {
+        const float* b0 = b + (size_t)p * ldb;
+        const float* b1 = b0 + ldb;
+        const float* b2 = b1 + ldb;
+        const float* b3 = b2 + ldb;
+        const __m256 a0 = _mm256_set1_ps(a[p]);
+        const __m256 a1 = _mm256_set1_ps(a[p + 1]);
+        const __m256 a2 = _mm256_set1_ps(a[p + 2]);
+        const __m256 a3 = _mm256_set1_ps(a[p + 3]);
+        int j = 0;
+#pragma GCC unroll 4
+        for (; n - j >= 8; j += 8) {
+            __m256 acc = _mm256_loadu_ps(c + j);
+            acc = _mm256_fmadd_ps(a0, _mm256_loadu_ps(b0 + j), acc);
+            acc = _mm256_fmadd_ps(a1, _mm256_loadu_ps(b1 + j), acc);
+            acc = _mm256_fmadd_ps(a2, _mm256_loadu_ps(b2 + j), acc);
+            acc = _mm256_fmadd_ps(a3, _mm256_loadu_ps(b3 + j), acc);
+            _mm256_storeu_ps(c + j, acc);
+        }
+        for (; j < n; ++j) {
+            float acc = __builtin_fmaf(a[p], b0[j], c[j]);
+            acc = __builtin_fmaf(a[p + 1], b1[j], acc);
+            acc = __builtin_fmaf(a[p + 2], b2[j], acc);
+            c[j] = __builtin_fmaf(a[p + 3], b3[j], acc);
+        }
+    }
+    for (; p < k; ++p) {
+        const float* row = b + (size_t)p * ldb;
+        const __m256 av = _mm256_set1_ps(a[p]);
+        int j = 0;
+        for (; n - j >= 8; j += 8) {
+            const __m256 acc = _mm256_fmadd_ps(av, _mm256_loadu_ps(row + j), _mm256_loadu_ps(c + j));
+            _mm256_storeu_ps(c + j, acc);
+        }
+        for (; j < n; ++j) {
+            c[j] = __builtin_fmaf(a[p], row[j], c[j]);
+        }
+    }
+}
+
 static int cob_sgemm_one_shot_x86(int m, int n, int k, const float* a, int lda,
     const float* b, int ldb, float* c, int ldc)
 {
-    if (m < 6 || n < 16 || k < 16 || !__builtin_cpu_supports("fma")) {
+    if ((m != 1 && m < 6) || n < 16 || k < 16 || !__builtin_cpu_supports("fma")) {
         return 0;
     }
     const size_t c_count = (size_t)(m - 1) * ldc + n;
     if (cob_f32_ranges_overlap(c, c_count, a, (size_t)(m - 1) * lda + k) ||
         cob_f32_ranges_overlap(c, c_count, b, (size_t)(k - 1) * ldb + n)) {
         return 0;
+    }
+    if (m == 1) {
+        if (!__builtin_cpu_supports("avx2")) {
+            return 0;
+        }
+        cob_sgemm_row_avx2(n, k, a, b, ldb, c);
+        return 1;
     }
     int mr, nr, mc;
     cob_sgemm_x86_tile tile;
@@ -3310,7 +3378,9 @@ static int cob_sgemm_rowmajor_amx(
     return 1;
 }
 
-#if COB_SGEMM_STRASSEN1
+#endif /* COB_USE_APPLE_AMX */
+
+#if COB_SGEMM_STRASSEN1 && (defined(COB_USE_APPLE_AMX) || defined(COB_USE_PORTABLE_STRASSEN))
 static void cob_strassen_linear2(
     float* dst,
     int rows,
@@ -3450,6 +3520,19 @@ static void cob_strassen_merge_product(
     }
 }
 
+static int cob_strassen_leaf(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+#if defined(COB_USE_APPLE_AMX)
+    return cob_sgemm_rowmajor_amx(m, n, k, a, lda, b, ldb, c, ldc);
+#else
+    /* Bypass the public dispatcher. The ordinary one-shot native kernel
+       owns its packing, including the existing allocation fallback. */
+    cob_sgemm_rowmajor_fallback(m, n, k, a, lda, b, ldb, c, ldc);
+    return 1;
+#endif
+}
+
 static int cob_sgemm_rowmajor_strassen1(
     int m,
     int n,
@@ -3463,14 +3546,31 @@ static int cob_sgemm_rowmajor_strassen1(
 {
     const int min_dim = cob_min_i32(cob_min_i32(m, n), k);
     const int max_dim = m > n ? (m > k ? m : k) : (n > k ? n : k);
+#if defined(COB_USE_PORTABLE_STRASSEN)
+    if (min_dim < COB_PORTABLE_STRASSEN_MIN_DIM) {
+        return 0;
+    }
+#else
     const int use_lower_square_crossover =
         m == n && n == k && min_dim >= COB_SGEMM_STRASSEN1_SQUARE_MIN_DIM;
-    if ((!use_lower_square_crossover && min_dim < COB_SGEMM_STRASSEN1_MIN_DIM) ||
-        3 * (int64_t)max_dim > 4 * (int64_t)min_dim ||
+    if (!use_lower_square_crossover && min_dim < COB_SGEMM_STRASSEN1_MIN_DIM) {
+        return 0;
+    }
+#endif
+    if (3 * (int64_t)max_dim > 4 * (int64_t)min_dim ||
         lda != k || ldb != n || (m % 64) != 0 || (n % 64) != 0 ||
         (k % 64) != 0) {
         return 0;
     }
+
+#if defined(COB_USE_PORTABLE_STRASSEN)
+    /* Direct writes to C quadrants must not change a later product's input. */
+    const size_t c_span = (size_t)(m - 1) * ldc + n;
+    if (cob_f32_ranges_overlap(c, c_span, a, (size_t)m * k) ||
+        cob_f32_ranges_overlap(c, c_span, b, (size_t)k * n)) {
+        return 0;
+    }
+#endif
 
     const int mh = m / 2;
     const int nh = n / 2;
@@ -3501,41 +3601,40 @@ static int cob_sgemm_rowmajor_strassen1(
     float* c21 = c + (size_t)mh * (size_t)ldc;
     float* c22 = c21 + nh;
 
-    /* One level reduces eight half-size products to seven. The existing AMX
-       scheduler handles each product; three reusable half-matrix buffers keep
-       the extra memory traffic bounded. M2, M3, and M4 are written straight
+    /* One level reduces eight half-size products to seven. The native
+       scheduler handles each product with three reusable half-matrix buffers. M2, M3, and M4 are written straight
        into their first destination quadrant instead of the product buffer,
        and the remaining recombination is fused so each product buffer pass
        is read once. Every quadrant keeps the previous schedule's
        floating-point evaluation order, so results stay bit-identical. */
     cob_strassen_linear2(x, mh, kh, a21, lda, a22, lda, 1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, b11, ldb, c21, ldc)) {
+    if (!cob_strassen_leaf(mh, nh, kh, x, kh, b11, ldb, c21, ldc)) {
         free(workspace);
         return 0;
     }
 
     cob_strassen_linear2(y, kh, nh, b12, ldb, b22, ldb, -1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, a11, lda, y, nh, c12, ldc)) {
+    if (!cob_strassen_leaf(mh, nh, kh, a11, lda, y, nh, c12, ldc)) {
         free(workspace);
         return 0;
     }
 
     cob_strassen_linear2(y, kh, nh, b21, ldb, b11, ldb, -1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, a22, lda, y, nh, c11, ldc)) {
+    if (!cob_strassen_leaf(mh, nh, kh, a22, lda, y, nh, c11, ldc)) {
         free(workspace);
         return 0;
     }
 
     cob_strassen_linear2(x, mh, kh, a11, lda, a22, lda, 1);
     cob_strassen_linear2(y, kh, nh, b11, ldb, b22, ldb, 1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, y, nh, p, nh)) {
+    if (!cob_strassen_leaf(mh, nh, kh, x, kh, y, nh, p, nh)) {
         free(workspace);
         return 0;
     }
     cob_strassen_merge_m1(c11, c12, c21, c22, ldc, p, mh, nh);
 
     cob_strassen_linear2(x, mh, kh, a11, lda, a12, lda, 1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, b22, ldb, p, nh)) {
+    if (!cob_strassen_leaf(mh, nh, kh, x, kh, b22, ldb, p, nh)) {
         free(workspace);
         return 0;
     }
@@ -3543,7 +3642,7 @@ static int cob_sgemm_rowmajor_strassen1(
 
     cob_strassen_linear2(x, mh, kh, a21, lda, a11, lda, -1);
     cob_strassen_linear2(y, kh, nh, b11, ldb, b12, ldb, 1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, y, nh, p, nh)) {
+    if (!cob_strassen_leaf(mh, nh, kh, x, kh, y, nh, p, nh)) {
         free(workspace);
         return 0;
     }
@@ -3551,7 +3650,7 @@ static int cob_sgemm_rowmajor_strassen1(
 
     cob_strassen_linear2(x, mh, kh, a12, lda, a22, lda, -1);
     cob_strassen_linear2(y, kh, nh, b21, ldb, b22, ldb, 1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, y, nh, p, nh)) {
+    if (!cob_strassen_leaf(mh, nh, kh, x, kh, y, nh, p, nh)) {
         free(workspace);
         return 0;
     }
@@ -3561,7 +3660,6 @@ static int cob_sgemm_rowmajor_strassen1(
     return 1;
 }
 
-#endif
 #endif
 
 void cob_sgemm_rowmajor(
@@ -3596,6 +3694,13 @@ void cob_sgemm_rowmajor(
         !cob_f32_ranges_overlap(c, (size_t)n, a, (size_t)k) &&
         !cob_f32_ranges_overlap(c, (size_t)n, b, (size_t)(k - 1) * ldb + n)) {
         cob_sgemm_vector_matrix(n, k, a, b, ldb, c);
+        return;
+    }
+#endif
+
+#if COB_SGEMM_STRASSEN1 && defined(COB_USE_PORTABLE_STRASSEN)
+    if (m > 0 && n > 0 && k > 0 && a != NULL && b != NULL && c != NULL && ldc >= n &&
+        cob_sgemm_rowmajor_strassen1(m, n, k, a, lda, b, ldb, c, ldc)) {
         return;
     }
 #endif

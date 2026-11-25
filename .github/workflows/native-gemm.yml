@@ -1,4 +1,4 @@
-name: Native single-thread GEMM holdouts
+name: Native one-level FP32 Strassen comparison
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
           - { runner: ubuntu-24.04, arch: x86_64 }
           - { runner: ubuntu-24.04-arm, arch: aarch64 }
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 25
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -27,12 +27,17 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install --no-install-recommends -y gcc pkg-config libopenblas-pthread-dev
-      - name: Measure native and plain-C holdouts
+      - name: Measure optional native Strassen holdouts
         env:
           BENCH_ARCH: ${{ matrix.arch }}
         run: |
           sh tools/native-gemm/run.sh "$BENCH_ARCH" "$RUNNER_TEMP/native-gemm"
-          cat "$RUNNER_TEMP/native-gemm/summary.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Summarize verified cases
+        if: ${{ !cancelled() }}
+        run: |
+          if test -f "$RUNNER_TEMP/native-gemm/summary.md"; then
+            cat "$RUNNER_TEMP/native-gemm/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
       - name: Upload timing, accuracy and host evidence
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
