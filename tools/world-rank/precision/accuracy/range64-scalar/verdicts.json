@@ -1,0 +1,244 @@
+{
+  "fp32-control": {
+    "complete": true,
+    "normal_envelope": true,
+    "hk_exact": true,
+    "zero_overwrite": false,
+    "range_classes": false,
+    "exceptional_classes": true,
+    "accuracy_gate": false,
+    "direct_quality": true,
+    "direct_quality_breaches": [],
+    "matched_direct_accuracy": false,
+    "ordinary_route_counts": {
+      "direct-fp32": 18
+    },
+    "ordinary_component_route": null
+  },
+  "1": {
+    "complete": true,
+    "normal_envelope": false,
+    "hk_exact": true,
+    "zero_overwrite": true,
+    "range_classes": false,
+    "exceptional_classes": true,
+    "accuracy_gate": false,
+    "direct_quality": false,
+    "direct_quality_breaches": [
+      {
+        "case": "signed-full-mantissa",
+        "seed": 1373217915,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "signed-full-mantissa",
+        "seed": 2742815085,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "positive-correlated",
+        "seed": 1373217915,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "positive-correlated",
+        "seed": 2742815085,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "positive-correlated-scale12",
+        "seed": 1373217915,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "positive-correlated-scale12",
+        "seed": 2742815085,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "bf16-rounding-boundaries",
+        "seed": 1373217915,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "bf16-rounding-boundaries",
+        "seed": 2742815085,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "same-sign-ulp-residue",
+        "seed": 1373217915,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "same-sign-ulp-residue",
+        "seed": 2742815085,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "omitted-component-products",
+        "seed": 1373217915,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "omitted-component-products",
+        "seed": 2742815085,
+        "max": false,
+        "rms": false
+      }
+    ],
+    "matched_direct_accuracy": false,
+    "ordinary_route_counts": {
+      "1": 18
+    },
+    "ordinary_component_route": true
+  },
+  "3": {
+    "complete": true,
+    "normal_envelope": false,
+    "hk_exact": true,
+    "zero_overwrite": true,
+    "range_classes": true,
+    "exceptional_classes": true,
+    "accuracy_gate": false,
+    "direct_quality": false,
+    "direct_quality_breaches": [
+      {
+        "case": "signed-full-mantissa",
+        "seed": 1373217915,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "signed-full-mantissa",
+        "seed": 2742815085,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "positive-correlated",
+        "seed": 1373217915,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "positive-correlated",
+        "seed": 2742815085,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "positive-correlated-scale12",
+        "seed": 1373217915,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "positive-correlated-scale12",
+        "seed": 2742815085,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "bf16-rounding-boundaries",
+        "seed": 1373217915,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "bf16-rounding-boundaries",
+        "seed": 2742815085,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "same-sign-ulp-residue",
+        "seed": 1373217915,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "same-sign-ulp-residue",
+        "seed": 2742815085,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "omitted-component-products",
+        "seed": 1373217915,
+        "max": false,
+        "rms": false
+      },
+      {
+        "case": "omitted-component-products",
+        "seed": 2742815085,
+        "max": false,
+        "rms": false
+      }
+    ],
+    "matched_direct_accuracy": false,
+    "ordinary_route_counts": {
+      "1": 18
+    },
+    "ordinary_component_route": true
+  },
+  "6": {
+    "complete": true,
+    "normal_envelope": true,
+    "hk_exact": true,
+    "zero_overwrite": true,
+    "range_classes": true,
+    "exceptional_classes": true,
+    "accuracy_gate": true,
+    "direct_quality": true,
+    "direct_quality_breaches": [],
+    "matched_direct_accuracy": true,
+    "ordinary_route_counts": {
+      "1": 18
+    },
+    "ordinary_component_route": true
+  },
+  "9": {
+    "complete": true,
+    "normal_envelope": true,
+    "hk_exact": true,
+    "zero_overwrite": true,
+    "range_classes": true,
+    "exceptional_classes": true,
+    "accuracy_gate": true,
+    "direct_quality": true,
+    "direct_quality_breaches": [],
+    "matched_direct_accuracy": true,
+    "ordinary_route_counts": {
+      "1": 18
+    },
+    "ordinary_component_route": true
+  },
+  "16": {
+    "complete": true,
+    "normal_envelope": true,
+    "hk_exact": true,
+    "zero_overwrite": true,
+    "range_classes": true,
+    "exceptional_classes": true,
+    "accuracy_gate": true,
+    "direct_quality": true,
+    "direct_quality_breaches": [],
+    "matched_direct_accuracy": true,
+    "ordinary_route_counts": {
+      "1": 18
+    },
+    "ordinary_component_route": true
+  }
+}

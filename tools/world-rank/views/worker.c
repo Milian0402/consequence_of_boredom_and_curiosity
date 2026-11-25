@@ -25,7 +25,11 @@ static struct view parent(int rows,int cols,int ld,int row,int col,uint32_t bits
 }
 
 #ifdef RANK_VIEW_REFERENCE
+#ifdef RANK_VIEW_PRECISION
+#include "../precision/reference.h"
+#else
 #include "../ragged-hk/golden.h"
+#endif
 #else
 static double verify(struct view a,struct view b,struct view c,size_t *guards)
 {
@@ -76,7 +80,11 @@ int main(int argc,char **argv)
     const char *mode=argv[2]; uint32_t seed=number(argv[3]);
     const int calls=number(argv[4]),m=number(argv[5]),n=number(argv[6]),k=number(argv[7]);
 #ifdef RANK_VIEW_REFERENCE
+    #ifdef RANK_VIEW_PRECISION
+    const int k_limit=4096;
+#else
     const int k_limit=3840;
+#endif
 #else
     const int k_limit=2048;
 #endif
@@ -129,6 +137,12 @@ int main(int argc,char **argv)
     const int first_status=handle_status ? handle_status() : -1;
 #endif
     if (!single_task()) fatal("thread count after first call");
+#ifdef RANK_VIEW_PRECISION
+    report_precision_route(trace_lib, "FIRST");
+    if(calls) {
+        for(int i=0;i<m;++i) for(int j=0;j<n;++j) c.data[(size_t)i*c.ld+j]=NAN;
+    }
+#endif
 #ifdef RANK_VIEW_REFERENCE
     cpu_start=thread_clock();
 #endif
@@ -147,6 +161,9 @@ int main(int argc,char **argv)
             fatal("explicit SGEMM status disagreement");
         printf("HANDLE,%d,%d,%d,%.12g\n",first_status,final_status,prepared_status,prepare_seconds);
     }
+#endif
+    #ifdef RANK_VIEW_PRECISION
+    if(calls) report_precision_route(trace_lib,"WARM");
 #endif
     size_t guards;
     double error=verify(a,b,c,&guards);
