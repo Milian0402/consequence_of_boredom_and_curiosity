@@ -1,0 +1,154 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 45e7790..c6c320b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -10,6 +10,7 @@ option(COB_BUILD_TESTS "Build correctness tests" ON)
+ option(COB_BUILD_BENCH "Build benchmark runner" ON)
+ option(COB_ENABLE_HK15 "Use one level of Hopcroft-Kerr on eligible 2-by-3-by-3 products" OFF)
+ option(COB_ENABLE_N2_SMALL "Use the Neoverse N2 small-matrix kernel on Linux Arm64" OFF)
++option(COB_ENABLE_VENDOR_WIDE "Use matched single-thread OpenBLAS or oneMKL for medium-wide Linux x86-64 products" OFF)
+ option(COB_ENABLE_X86_MEDIUM_ROUTE "Reuse packed left panels for medium row-wide products on Linux x86-64" OFF)
+ option(COB_ENABLE_PORTABLE_STRASSEN "Use one-level Strassen on eligible large native x86-64 and Arm64 products" OFF)
+ option(COB_ENABLE_RECURSIVE_STRASSEN "Use a second Winograd level on eligible native Linux products" OFF)
+@@ -29,6 +30,12 @@ if(COB_ENABLE_OPENBLAS_LEAF)
+ endif()
+
+ function(cob_configure_blas_leaf)
++    if(COB_ENABLE_VENDOR_WIDE AND
++       (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
++        NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)$" OR
++        NOT COB_BLAS_LEAF MATCHES "^(OPENBLAS|MKL)$"))
++        message(FATAL_ERROR "COB_ENABLE_VENDOR_WIDE requires native Linux x86-64 and COB_BLAS_LEAF=OPENBLAS or MKL")
++    endif()
+     if(COB_ENABLE_ALIGNED_WINOGRAD AND (NOT COB_ENABLE_PORTABLE_STRASSEN OR
+        NOT COB_ENABLE_RECURSIVE_STRASSEN OR COB_BLAS_LEAF STREQUAL "NONE"))
+         message(FATAL_ERROR "COB_ENABLE_ALIGNED_WINOGRAD requires portable Strassen, recursive Strassen and an external BLAS leaf")
+@@ -41,6 +48,10 @@ function(cob_configure_blas_leaf)
+         message(FATAL_ERROR "An external leaf requires native Linux x86-64 or Arm64 and COB_ENABLE_PORTABLE_STRASSEN=ON")
+     endif()
+     add_library(cob_blas_leaf INTERFACE)
++    if(COB_ENABLE_VENDOR_WIDE)
++        target_compile_definitions(cob_blas_leaf INTERFACE COB_ENABLE_VENDOR_WIDE=1)
++        target_link_libraries(cob_blas_leaf INTERFACE ${CMAKE_DL_LIBS})
++    endif()
+     if(COB_ENABLE_ALIGNED_WINOGRAD)
+         target_compile_definitions(cob_blas_leaf INTERFACE COB_ENABLE_ALIGNED_WINOGRAD=1)
+     endif()
+diff --git a/src/gemm.c b/src/gemm.c
+index 25c3686..b5985b3 100644
+--- a/src/gemm.c
++++ b/src/gemm.c
+@@ -1,4 +1,5 @@
+-#if defined(__linux__) && ((defined(COB_ENABLE_MKL_SEQUENTIAL_LEAF) && COB_ENABLE_MKL_SEQUENTIAL_LEAF) || \
++#if defined(__linux__) && ((defined(COB_ENABLE_VENDOR_WIDE) && COB_ENABLE_VENDOR_WIDE) || \
++    (defined(COB_ENABLE_MKL_SEQUENTIAL_LEAF) && COB_ENABLE_MKL_SEQUENTIAL_LEAF) || \
+     (defined(COB_ENABLE_ARMPL_SEQUENTIAL_LEAF) && COB_ENABLE_ARMPL_SEQUENTIAL_LEAF))
+ #ifndef _GNU_SOURCE
+ #define _GNU_SOURCE
+@@ -3685,6 +3686,44 @@ static void cob_strassen_merge_product(
+ #include "cob_cblas_leaf.inc"
+ #endif
+
++#if defined(COB_ENABLE_VENDOR_WIDE) && COB_ENABLE_VENDOR_WIDE
++#if !defined(__linux__) || !defined(COB_USE_X86_SIMD) || !defined(COB_USE_CBLAS_LEAF) || \
++    !(COB_ENABLE_OPENBLAS_LEAF || COB_ENABLE_MKL_SEQUENTIAL_LEAF)
++#error "COB_ENABLE_VENDOR_WIDE requires a selected native Linux x86-64 OpenBLAS or oneMKL leaf."
++#endif
++#define COB_USE_VENDOR_WIDE 1
++#if COB_ENABLE_OPENBLAS_LEAF
++#include <dlfcn.h>
++/* Other BLAS libraries may coexist in this process. Resolve CBLAS, Fortran
++   SGEMM and the runtime configuration against the same loaded image. */
++static int cob_vendor_wide_openblas_matches(void)
++{
++    static atomic_int cached;
++    int state = atomic_load_explicit(&cached, memory_order_relaxed);
++    if (state != 0) return state > 0;
++    const char *names[] = {"cblas_sgemm", "sgemm_", "openblas_get_num_threads", "openblas_get_config"};
++    void *base = NULL;
++    int valid = 1;
++    for (size_t i = 0; i < sizeof(names) / sizeof(names[0]); ++i) {
++        Dl_info owner;
++        void *symbol = dlsym(RTLD_DEFAULT, names[i]);
++        if (!symbol || !dladdr(symbol, &owner) || !owner.dli_fbase ||
++            (base && base != owner.dli_fbase)) {
++            valid = 0;
++            break;
++        }
++        base = owner.dli_fbase;
++    }
++    if (valid) {
++        const char *config = openblas_get_config();
++        valid = config && strncmp(config, "OpenBLAS ", 9) == 0 && !strstr(config, "USE64BITINT");
++    }
++    atomic_store_explicit(&cached, valid ? 1 : -1, memory_order_relaxed);
++    return valid;
++}
++#endif
++#endif
++
+ /* Explicit crossover or external-leaf configurations keep their selected schedule. */
+ #if defined(COB_USE_NATIVE_PANELS) && COB_ENABLE_RECTANGULAR_STRASSEN && \
+     defined(COB_PORTABLE_STRASSEN_MIN_DIM_DEFAULTED) && !defined(COB_RECTANGULAR_MIN_HARMONIC_DIM) && \
+@@ -4187,6 +4226,13 @@ COB_THIN_TARGET static void cob_sgemm_few_rows(int m, int n, int k,
+                 float* cp = c + (size_t)i * ldc + j;
+                 const int remain = m - i;
+                 /* Split five as three plus two to avoid a single-row tail. */
++#if defined(COB_USE_VENDOR_WIDE)
++                if (remain == 1) {
++                    cob_thin_tile(1, kb, ap, lda, bp, ldb, cp, ldc, p == 0);
++                    ++i;
++                    continue;
++                }
++#endif
+                 if (remain == 2) {
+                     cob_thin_tile(2, kb, ap, lda, bp, ldb, cp, ldc, p == 0);
+                     i += 2;
+@@ -4251,6 +4297,37 @@ extern int cob_sgemm_sme_tiny(int m, int n, int k, const float* a, int lda,
+ #include "cob_n2_small.inc"
+ #endif
+
++#if defined(COB_USE_VENDOR_WIDE)
++static int cob_try_vendor_wide(int m, int n, int k, const float *a, int lda,
++                               const float *b, int ldb, float *c, int ldc)
++{
++    if (m < 48 || m > 256 || n < 512 || n > 4096 || n < 4 * m ||
++        k < 96 || k > 768 || m * k > 98304 ||
++        !a || !b || !c || lda < k || ldb < n || ldc < n) return 0;
++    size_t output_span = (size_t)(m - 1) * ldc + n;
++    if (cob_f32_ranges_overlap(c, output_span, a, (size_t)(m - 1) * lda + k) ||
++        cob_f32_ranges_overlap(c, output_span, b, (size_t)(k - 1) * ldb + n) ||
++        !cob_cblas_leaf_is_serial()) return 0;
++#if COB_ENABLE_OPENBLAS_LEAF
++    if (!cob_vendor_wide_openblas_matches()) return 0;
++#endif
++    int tail = 0;
++#if defined(COB_USE_SKINNY_GEMM) && !defined(COB_VENDOR_WIDE_FULL_ONLY)
++    int rows = m % 16;
++    if (rows >= 1 && rows <= 4 && rows <= COB_SKINNY_GEMM_MAX_ROWS &&
++        __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma")) tail = rows;
++#endif
++    const int main_rows = m - tail;
++    cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, main_rows, n, k,
++                1.0f, a, lda, b, ldb, 0.0f, c, ldc);
++#if defined(COB_USE_SKINNY_GEMM)
++    if (tail) cob_sgemm_few_rows(tail, n, k, a + (size_t)main_rows * lda, lda, b, ldb,
++                                  c + (size_t)main_rows * ldc, ldc);
++#endif
++    return 1;
++}
++#endif
++
+ #ifdef COB_USE_HK15
+ static
+ #endif
+@@ -4265,6 +4342,9 @@ void cob_sgemm_rowmajor_base(
+     float* c,
+     int ldc)
+ {
++#if defined(COB_USE_VENDOR_WIDE)
++    if (cob_try_vendor_wide(m, n, k, a, lda, b, ldb, c, ldc)) return;
++#endif
+ #if defined(COB_USE_CBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN) && defined(COB_USE_RECURSIVE_STRASSEN)
+     if (cob_cblas_winograd_try(m, n, k, a, lda, b, ldb, c, ldc, 2048)) return;
+ #endif

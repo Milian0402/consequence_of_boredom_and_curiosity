@@ -1,0 +1,2 @@
+# Preserve the upstream license and published straight-line programs byte-for-byte.
+* -text whitespace=-trailing-space

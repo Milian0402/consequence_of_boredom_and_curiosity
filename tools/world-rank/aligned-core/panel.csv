@@ -1,0 +1,7 @@
+family,m,n,k,pad
+prior-holdout-wide,1926,3375,2823,5
+prior-holdout-deep,2138,2829,3333,7
+prior-swapped,3375,1926,2823,5
+fresh-deep-odd,2093,3211,3127,9
+fresh-wide-odd,1879,3437,3041,3
+fresh-divisible-control,2176,3136,3072,0

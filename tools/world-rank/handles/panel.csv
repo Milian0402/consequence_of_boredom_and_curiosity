@@ -1,0 +1,12 @@
+family,layout,m,n,k,lda,ldb,ldc,ar,ac,br,bc,cr,cc
+repeat-deeper,origin,108,1728,320,324,1732,1732,0,0,0,0,0,0
+repeat-ragged,origin,137,2179,347,354,2186,2186,0,0,0,0,0,0
+repeat-short,origin,43,2291,137,140,2294,2294,0,0,0,0,0,0
+fresh-thin,aligned-b,29,1229,103,131,1264,1287,2,9,1,16,1,13
+fresh-odd,aligned-b,44,1897,151,179,1935,1973,3,13,3,3,4,19
+fresh-exact,compact,68,2176,244,244,2176,2176,0,0,0,0,0,0
+fresh-long,aligned-b,83,3067,271,307,3101,3157,1,17,1,3,2,7
+fresh-high-depth,aligned-b,112,3581,337,375,3665,3711,2,11,2,14,3,17
+fresh-upper,aligned-b,151,2529,311,347,2595,2609,4,19,3,7,1,27
+control-cropped-deeper,cropped,108,1728,320,359,1799,1821,1,26,2,25,3,22
+control-cropped-short,cropped,43,2291,137,182,2368,2390,4,25,1,23,2,18

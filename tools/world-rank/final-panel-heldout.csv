@@ -1,0 +1,4 @@
+family,m,n,k,pad
+large-square,2304,2304,2304,0
+large-balanced,2880,3072,2752,0
+large-odd,3169,3073,2881,5

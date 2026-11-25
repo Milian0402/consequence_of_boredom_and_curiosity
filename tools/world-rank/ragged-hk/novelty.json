@@ -1,0 +1,31 @@
+{
+  "unique_dimension_tables": 856,
+  "geometry_rows": 280599,
+  "inventory_sha256": "e606a2adca54717cfbc0933f56d8d78b09edaa6039b888161382dd009df683b5",
+  "matches": {
+    "repeat-divisible-winner": {
+      "ordered": 59,
+      "any_permutation": 59
+    },
+    "repeat-weak-ragged": {
+      "ordered": 76,
+      "any_permutation": 76
+    },
+    "fresh-depth-only": {
+      "ordered": 0,
+      "any_permutation": 0
+    },
+    "fresh-row-and-column": {
+      "ordered": 0,
+      "any_permutation": 0
+    },
+    "fresh-all-fringes": {
+      "ordered": 0,
+      "any_permutation": 0
+    }
+  },
+  "repeat_examples": {
+    "repeat-divisible-winner": "work/cob-linux-public/tools/world-rank/entry-replay.csv",
+    "repeat-weak-ragged": "work/cob-linux-public/tools/world-rank/rank48/panel.csv"
+  }
+}

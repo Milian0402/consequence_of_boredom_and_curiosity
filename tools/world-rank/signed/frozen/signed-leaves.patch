@@ -1,0 +1,83 @@
+--- a/src/gemm.c
++++ b/src/gemm.c
+@@ -3795,12 +3795,29 @@
+ typedef int (*cob_product_fn)(int, int, int, const float*, int,
+     const float*, int, float*, int);
+ 
++/* Only the terminal P3 and P4 of the rectangular vendor schedule have one
++   live destination. Recheck the provider before each signed update, just as
++   the ordinary overwrite leaf does. */
++#if defined(COB_ENABLE_SIGNED_WINOGRAD_LEAVES) && COB_ENABLE_SIGNED_WINOGRAD_LEAVES && \
++    defined(COB_USE_CBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN)
++static int cob_winograd_try_accumulate(int enabled, float sign, int m, int n, int k,
++    const float* a, int lda, const float* b, int ldb, float* c, int ldc)
++{
++    if (!enabled || !cob_cblas_leaf_is_serial()) return 0;
++    cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k,
++        sign, a, lda, b, ldb, 1.0f, c, ldc);
++    return 1;
++}
++#else
++#define cob_winograd_try_accumulate(enabled, ...) ((void)(enabled), 0)
++#endif
++
+ /* Winograd's seven-product identity uses eight operand additions and
+    seven output additions. Reuse S1/T1 as S2/T2 and then as S4/T4.
+    The outer Strassen level owns these three quarter-matrix temporaries. */
+ static int cob_winograd_product(int m, int n, int k, const float* a, int lda,
+     const float* b, int ldb, float* c, int ldc, float* scratch, float* child_scratch,
+-    cob_product_fn leaf)
++    cob_product_fn leaf, int rectangular_vendor)
+ {
+     if (!scratch) return leaf(m, n, k, a, lda, b, ldb, c, ldc);
+     const int mr = m / 2, nc = n / 2, kr = k / 2;
+@@ -3823,7 +3840,7 @@
+     /* A second level uses the same schedule and reuses one child workspace. */
+ #if defined(COB_USE_CBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN)
+ #define COB_WINOGRAD_LEAF(...) (child_scratch ? \
+-    cob_winograd_product(__VA_ARGS__, child_scratch, NULL, leaf) : leaf(__VA_ARGS__))
++    cob_winograd_product(__VA_ARGS__, child_scratch, NULL, leaf, rectangular_vendor) : leaf(__VA_ARGS__))
+ #else
+     (void)child_scratch;
+ #define COB_WINOGRAD_LEAF leaf
+@@ -3853,11 +3870,16 @@
+         }
+     }
+     cob_strassen_linear2(s, mr, kr, a12, lda, s, kr, -1);
+-    if (!COB_WINOGRAD_LEAF(mr, nc, kr, s, kr, b22, ldb, p, nc)) return 0;
+-    cob_strassen_merge_product(c12, ldc, p, mr, nc, 1);
++    const int terminal_vendor = rectangular_vendor && !child_scratch;
++    if (!cob_winograd_try_accumulate(terminal_vendor, 1.0f, mr, nc, kr, s, kr, b22, ldb, c12, ldc)) {
++        if (!COB_WINOGRAD_LEAF(mr, nc, kr, s, kr, b22, ldb, p, nc)) return 0;
++        cob_strassen_merge_product(c12, ldc, p, mr, nc, 1);
++    }
+     cob_strassen_linear2(t, kr, nc, t, nc, b21, ldb, -1);
+-    if (!COB_WINOGRAD_LEAF(mr, nc, kr, a22, lda, t, nc, p, nc)) return 0;
+-    cob_strassen_merge_product(c21, ldc, p, mr, nc, -1);
++    if (!cob_winograd_try_accumulate(terminal_vendor, -1.0f, mr, nc, kr, a22, lda, t, nc, c21, ldc)) {
++        if (!COB_WINOGRAD_LEAF(mr, nc, kr, a22, lda, t, nc, p, nc)) return 0;
++        cob_strassen_merge_product(c21, ldc, p, mr, nc, -1);
++    }
+     cob_strassen_linear2(s, mr, kr, a11, lda, a21, lda, -1);
+     cob_strassen_linear2(t, kr, nc, b22, ldb, b12, ldb, -1);
+     if (!COB_WINOGRAD_LEAF(mr, nc, kr, s, kr, t, nc, p, nc)) return 0;
+@@ -3965,7 +3987,7 @@
+         workspace = cob_aligned_alloc(128, parent_values * sizeof(float));
+     }
+     float* child = workspace && child_values ? workspace + parent_values : NULL;
+-#define COB_STRASSEN_CHILD(...) cob_winograd_product(__VA_ARGS__, child, NULL, cob_strassen_leaf)
++#define COB_STRASSEN_CHILD(...) cob_winograd_product(__VA_ARGS__, child, NULL, cob_strassen_leaf, 0)
+ #else
+     float* workspace = cob_aligned_alloc(128, parent_values * sizeof(float));
+ #define COB_STRASSEN_CHILD cob_strassen_leaf
+--- a/src/cob_openblas_winograd.inc
++++ b/src/cob_openblas_winograd.inc
+@@ -54,7 +54,7 @@
+     if (!work) return 0;
+ 
+     cob_winograd_product(core_m, core_n, core_k, a, lda, b, ldb, c, ldc,
+-        work, work+parent, cob_strassen_leaf);
++        work, work+parent, cob_strassen_leaf, 1);
+     free(work);
+ 
+     /* The omitted depth terms update the core. The two outer strips use full K. */

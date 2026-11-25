@@ -1,0 +1,184 @@
+diff --git a/src/cob_stream_b_dispatch.inc b/src/cob_stream_b_dispatch.inc
+index b8ca6a5..9a97fdf 100644
+--- a/src/cob_stream_b_dispatch.inc
++++ b/src/cob_stream_b_dispatch.inc
+@@ -4,6 +4,11 @@ void cob_stream_b_kernel_avx2(int m, int n, int k, const float* a, int lda,
+ void cob_stream_b_kernel_avx512(int m, int n, int k, const float* a, int lda,
+     const float* b, int ldb, float* c, int ldc, float* panel);
+ 
++#if defined(COB_ENABLE_X86_PACKED_A_FRONTIER) && COB_ENABLE_X86_PACKED_A_FRONTIER
++void cob_stream_b_packed_avx2(int m,int n,int k,const float* a,int lda,const float* b,int ldb,float* c,int ldc,float* panel);
++void cob_stream_b_packed_avx512(int m,int n,int k,const float* a,int lda,const float* b,int ldb,float* c,int ldc,float* panel);
++#endif
++
+ #ifndef COB_STREAM_B_SUPPORTS
+ #define COB_STREAM_B_SUPPORTS(feature) __builtin_cpu_supports(feature)
+ #endif
+@@ -31,9 +36,22 @@ static int cob_try_stream_b(int m, int n, int k, const float* a, int lda,
+         cob_f32_ranges_overlap(c, output_size, b, (size_t)(k-1)*ldb+n)) return 0;
+     const int width = cob_stream_b_tile_width();
+     if (!width) return 0;
+-    float* panel = cob_aligned_alloc(64, (size_t)k*width*sizeof(float));
++    int panel_width = width;
++#if defined(COB_ENABLE_X86_PACKED_A_FRONTIER) && COB_ENABLE_X86_PACKED_A_FRONTIER
++    if (m <= 96) {
++        const int mr = width==64 ? 15 : 6, stride = width==64 ? 16 : 8;
++        panel_width = width/2 + ((m+mr-1)/mr)*stride;
++    }
++#endif
++    float* panel = cob_aligned_alloc(64, (size_t)k*panel_width*sizeof(float));
+     if (!panel) return 0;
+     COB_STREAM_B_OBSERVE(width);
++#if defined(COB_ENABLE_X86_PACKED_A_FRONTIER) && COB_ENABLE_X86_PACKED_A_FRONTIER
++    if (m <= 96) {
++        if (width == 64) cob_stream_b_packed_avx512(m,n,k,a,lda,b,ldb,c,ldc,panel);
++        else cob_stream_b_packed_avx2(m,n,k,a,lda,b,ldb,c,ldc,panel);
++    } else
++#endif
+     if (width == 64)
+         cob_stream_b_kernel_avx512(m, n, k, a, lda, b, ldb, c, ldc, panel);
+     else
+diff --git a/src/cob_stream_b_kernel.c b/src/cob_stream_b_kernel.c
+index d59cc8e..c494cd6 100644
+--- a/src/cob_stream_b_kernel.c
++++ b/src/cob_stream_b_kernel.c
+@@ -154,3 +154,7 @@ void COB_STREAM_B_KERNEL(int m, int n, int k, const float* a, int lda,
+ #undef COB_SB_FMA
+ #undef COB_SB_LOAD
+ #undef COB_SB_STORE
++
++#if defined(COB_ENABLE_X86_PACKED_A_FRONTIER) && COB_ENABLE_X86_PACKED_A_FRONTIER
++#include "cob_stream_packed_a.inc"
++#endif
+diff --git a/src/cob_stream_packed_a.inc b/src/cob_stream_packed_a.inc
+new file mode 100644
+index 0000000..d06fbe1
+--- /dev/null
++++ b/src/cob_stream_packed_a.inc
+@@ -0,0 +1,126 @@
++/* Pack the complete reduction for a group of rows. Adjacent elements of
++   packed A then supply broadcast operands for consecutive output rows.
++   This file is included in the two separately ISA-targeted kernel objects. */
++#if COB_STREAM_B_AVX512
++enum { pa_mr=15, pa_stride=16, pa_width=16 };
++#define PA_ENTRY cob_stream_b_packed_avx512
++#define PA_LOAD _mm512_load_ps
++#define PA_STORE _mm512_storeu_ps
++#define PA_SPLAT _mm512_set1_ps
++#define PA_ZERO _mm512_setzero_ps
++#define PA_FMA _mm512_fmadd_ps
++typedef __m512 pa_vec;
++typedef __mmask16 pa_mask;
++static inline pa_mask pa_lanes(int n) { return (pa_mask)((1u<<n)-1u); }
++static inline void pa_mask_store(float* c, pa_mask mask, pa_vec v) { _mm512_mask_storeu_ps(c,mask,v); }
++#define PA_ROWS(F) F(0) F(1) F(2) F(3) F(4) F(5) F(6) F(7) F(8) F(9) F(10) F(11) F(12) F(13) F(14)
++#else
++enum { pa_mr=6, pa_stride=8, pa_width=8 };
++#define PA_ENTRY cob_stream_b_packed_avx2
++#define PA_LOAD _mm256_load_ps
++#define PA_STORE _mm256_storeu_ps
++#define PA_SPLAT _mm256_set1_ps
++#define PA_ZERO _mm256_setzero_ps
++#define PA_FMA _mm256_fmadd_ps
++typedef __m256 pa_vec;
++typedef __m256i pa_mask;
++static inline pa_mask pa_lanes(int n) { return _mm256_cmpgt_epi32(_mm256_set1_epi32(n),_mm256_setr_epi32(0,1,2,3,4,5,6,7)); }
++static inline void pa_mask_store(float* c, pa_mask mask, pa_vec v) { _mm256_maskstore_ps(c,mask,v); }
++#define PA_ROWS(F) F(0) F(1) F(2) F(3) F(4) F(5)
++#endif
++enum { pa_nr=2*pa_width };
++
++static inline void pa_store_tail(float* c, int cols, pa_mask mask, pa_vec low, pa_vec high)
++{
++    if (cols<=pa_width) pa_mask_store(c,mask,low);
++    else { PA_STORE(c,low); pa_mask_store(c+pa_width,mask,high); }
++}
++
++/* Named accumulators keep the entire hot tile in registers on GCC and Clang.
++   AVX-512 has 30 accumulators and two contiguous B vectors. The EVEX memory
++   broadcast supplies each A scalar without allocating a broadcast register. */
++__attribute__((noinline)) static void pa_full(int k,const float* a,const float* b,float* c,int ldc,int cols)
++{
++#define PA_INIT(r) pa_vec l##r=PA_ZERO(),h##r=PA_ZERO();
++    PA_ROWS(PA_INIT)
++#undef PA_INIT
++    for (int p=0;p<k;++p) {
++        const pa_vec low=PA_LOAD(b), high=PA_LOAD(b+pa_width);
++#if COB_STREAM_B_AVX512
++#define PA_STEP(r) __asm__("vfmadd231ps {%4%{1to16%}, %2, %0|%0, %2, %4%{1to16%}}\n\t" \
++                            "vfmadd231ps {%4%{1to16%}, %3, %1|%1, %3, %4%{1to16%}}" \
++                    : "+&v"(l##r), "+&v"(h##r) : "v"(low), "v"(high), "m"(a[r]));
++#else
++#define PA_STEP(r) do { pa_vec scale; \
++    __asm__("vbroadcastss {%5, %2|%2, %5}\n\t" "vfmadd231ps {%3, %2, %0|%0, %2, %3}\n\t" "vfmadd231ps {%4, %2, %1|%1, %2, %4}" \
++        : "+&x"(l##r), "+&x"(h##r), "=&x"(scale) : "x"(low), "x"(high), "m"(a[r])); } while(0);
++#endif
++        PA_ROWS(PA_STEP)
++#undef PA_STEP
++        a+=pa_stride; b+=pa_nr;
++    }
++    if (cols==pa_nr) {
++#define PA_FULL_STORE(r) PA_STORE(c+(size_t)(r)*ldc,l##r); PA_STORE(c+(size_t)(r)*ldc+pa_width,h##r);
++        PA_ROWS(PA_FULL_STORE)
++#undef PA_FULL_STORE
++    } else {
++        const pa_mask mask=pa_lanes(cols<=pa_width?cols:cols-pa_width);
++#define PA_TAIL_STORE(r) pa_store_tail(c+(size_t)(r)*ldc,cols,mask,l##r,h##r);
++        PA_ROWS(PA_TAIL_STORE)
++#undef PA_TAIL_STORE
++    }
++}
++
++/* Each small residual row group is fully specialized at its call site. */
++__attribute__((always_inline)) static inline void pa_tail(int rows,int cols,int k,const float* a,const float* b,float* c,int ldc)
++{
++    pa_vec low[4],high[4];
++    for (int i=0;i<rows;++i) { low[i]=PA_ZERO(); high[i]=PA_ZERO(); }
++    for (int p=0;p<k;++p) {
++        const float* ap=a+(size_t)p*pa_stride;
++        const pa_vec x=PA_LOAD(b),y=PA_LOAD(b+pa_width);
++        for (int i=0;i<rows;++i) {
++            const pa_vec scale=PA_SPLAT(ap[i]); low[i]=PA_FMA(x,scale,low[i]); high[i]=PA_FMA(y,scale,high[i]);
++        }
++        b+=pa_nr;
++    }
++    if (cols==pa_nr) {
++        for (int i=0;i<rows;++i) { PA_STORE(c+(size_t)i*ldc,low[i]); PA_STORE(c+(size_t)i*ldc+pa_width,high[i]); }
++    } else {
++        const pa_mask mask=pa_lanes(cols<=pa_width?cols:cols-pa_width);
++        for (int i=0;i<rows;++i) pa_store_tail(c+(size_t)i*ldc,cols,mask,low[i],high[i]);
++    }
++}
++
++void PA_ENTRY(int m,int n,int k,const float* a,int lda,const float* b,int ldb,float* c,int ldc,float* panel)
++{
++    float* const packed_a=panel+(size_t)k*pa_nr;
++    for (int i=0;i<m;i+=pa_mr) {
++        const int rows=m-i<pa_mr?m-i:pa_mr;
++        float* tile=packed_a+(size_t)(i/pa_mr)*k*pa_stride;
++        for (int p0=0;p0<k;p0+=16) {
++            const int end=k-p0<16?k:p0+16;
++            for (int row=0;row<rows;++row)
++                for (int p=p0;p<end;++p) tile[(size_t)p*pa_stride+row]=a[(size_t)(i+row)*lda+p];
++        }
++    }
++    for (int j=0;j<n;j+=pa_nr) {
++        const int cols=n-j<pa_nr?n-j:pa_nr;
++        if (cols==pa_nr) {
++            for (int p=0;p<k;++p) memcpy(panel+(size_t)p*pa_nr,b+(size_t)p*ldb+j,pa_nr*sizeof(float));
++        } else {
++            for (int p=0;p<k;++p) {
++                float* dst=panel+(size_t)p*pa_nr;
++                memcpy(dst,b+(size_t)p*ldb+j,cols*sizeof(float)); memset(dst+cols,0,(pa_nr-cols)*sizeof(float));
++            }
++        }
++        int i=0; const float* tile=packed_a;
++        for (;i+pa_mr<=m;i+=pa_mr,tile+=(size_t)k*pa_stride) pa_full(k,tile,panel,c+(size_t)i*ldc+j,ldc,cols);
++        for (;i+4<=m;i+=4,tile+=4) pa_tail(4,cols,k,tile,panel,c+(size_t)i*ldc+j,ldc);
++        switch (m-i) {
++        case 3: pa_tail(3,cols,k,tile,panel,c+(size_t)i*ldc+j,ldc);break;
++        case 2: pa_tail(2,cols,k,tile,panel,c+(size_t)i*ldc+j,ldc);break;
++        case 1: pa_tail(1,cols,k,tile,panel,c+(size_t)i*ldc+j,ldc);break;
++        }
++    }
++}

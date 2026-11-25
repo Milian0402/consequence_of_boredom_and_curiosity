@@ -1,0 +1,1 @@
+Exact M,N,K triple inventory before replay. Read 1250 workspace CSVs and 445 CSVs in published ZIPs with numeric M,N,K columns. Unique triples: 26013. Repeat found: (1879, 3437, 3041). Three new triples present in earlier inventory: 0.

@@ -1,0 +1,30 @@
+{
+  "phase": "stream-b",
+  "seeds": [
+    348271759,
+    710438957
+  ],
+  "production_revision": "b218beff1eaf8fd606d0934405cdc1e28ecdfe15",
+  "files": {
+    "stream-b.patch": "3fd0a13fc41d9f04441fb2f58981f49354e51c2856e2512972f3883778420d43",
+    "panel.csv": "466c2b51ee6df5fd737f3f4b1977c5b4ad75cdb7ae61bbaec7bc5919530f18fd",
+    "protocol.md": "694e4ab5b18602ff460209d13e0ef827e7442278d33100f661ced75dec299eb8",
+    "check.c": "c053e534b4759042eb0dd334df0abb85219a8e0a510d4bfd5c71b2054c71b9c3"
+  },
+  "native": [
+    "stream-incumbent",
+    "stream-native"
+  ],
+  "isa_pairs": {
+    "avx2": [
+      "stream-avx2-incumbent",
+      "stream-avx2"
+    ],
+    "avx512": [
+      "stream-avx512-incumbent",
+      "stream-avx512"
+    ]
+  },
+  "target": "Linux x86-64; one pinned process thread",
+  "qualification": "All four finite full-output FP64 fixtures, absolute error at most 0.002, intact inputs and guards and actual layout route before ranking. AVX2 and AVX512 variants run only if the hardware and OS can execute the complete chosen ISA."
+}

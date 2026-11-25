@@ -1,0 +1,19 @@
+{
+  "test_commit": "b218beff1eaf8fd606d0934405cdc1e28ecdfe15",
+  "test_git_parent": "518e7d77ea3d82d029f31dc10a3a705b42a7638b",
+  "applicable_original_sources": [
+    "3222dddb42944630f45c6864150cfaff54df257a",
+    "518e7d77ea3d82d029f31dc10a3a705b42a7638b"
+  ],
+  "files": {
+    "tests/test_fused_strassen.c": {
+      "before": "d3ba3cdf9457b60e1cce9bba42c329e1cba34b1e9a1e605aaaef0b117a6e2c94",
+      "after": "b4db6bd8efca43dc16a244800678ecdd7afc05a709e69d9d699cf7fc34fdb410"
+    },
+    "tests/test_portable_strassen.c": {
+      "before": "0ee1a941a3718b690ab4dd54559aad3ebf692305e46ed228ad8a53eef9a1a3ac",
+      "after": "00dc174bcdac64006896d9cced4e4137023ed5d2cb24908e5d8a6cc727ef42ef"
+    }
+  },
+  "patch_sha256": "a7e2d301272ed8ee582ddcb9659c236f6609fec24dc3366eea866399b48d364a"
+}

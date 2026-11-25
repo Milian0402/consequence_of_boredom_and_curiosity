@@ -1,0 +1,275 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 41198af..1cd0cb3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,6 +9,7 @@ set(CMAKE_C_EXTENSIONS OFF)
+ option(COB_BUILD_TESTS "Build correctness tests" ON)
+ option(COB_BUILD_BENCH "Build benchmark runner" ON)
+ option(COB_ENABLE_HK15 "Use one level of Hopcroft-Kerr on eligible 2-by-3-by-3 products" OFF)
++option(COB_ENABLE_HK15_RAGGED "Enable HK15 with exact edge products on nondivisible shapes" OFF)
+ option(COB_ENABLE_APPLE_MEDIUM_WIDE "Use the SME2 medium-wide FP32 kernel on Apple arm64" OFF)
+ option(COB_ENABLE_N2_SMALL "Use the Neoverse N2 small-matrix kernel on Linux Arm64" OFF)
+ option(COB_ENABLE_X86_STREAM_B "Use runtime-dispatched packed B panels for medium-wide FP32 products on Linux x86-64" OFF)
+@@ -294,9 +295,13 @@ endif()
+ 
+ foreach(target cob_matmul cob_matmul_strassen_test cob_matmul_strassen_square_test)
+     if(TARGET ${target})
+-        if(COB_ENABLE_HK15)
++        if(COB_ENABLE_HK15 OR COB_ENABLE_HK15_RAGGED)
+             target_compile_definitions(${target} PRIVATE COB_ENABLE_HK15=1)
+         endif()
++        if(COB_ENABLE_HK15_RAGGED)
++            target_compile_definitions(${target} PRIVATE COB_ENABLE_HK15_RAGGED=1)
++            target_sources(${target} PRIVATE src/cob_hk15_ragged.c)
++        endif()
+         if(COB_ENABLE_APPLE_MEDIUM_WIDE AND TARGET cob_strassen_sme_leaf)
+             target_compile_definitions(${target} PRIVATE COB_ENABLE_APPLE_MEDIUM_WIDE=1)
+         endif()
+diff --git a/Makefile b/Makefile
+index d031189..d63b56b 100644
+--- a/Makefile
++++ b/Makefile
+@@ -29,6 +29,7 @@ COB_ENABLE_OPENBLAS_LEAF ?= OFF
+ COB_BLAS_LEAF ?= NONE
+ COB_ENABLE_ALIGNED_WINOGRAD ?= OFF
+ COB_ENABLE_HK15 ?= OFF
++COB_ENABLE_HK15_RAGGED ?= OFF
+ COB_ENABLE_APPLE_MEDIUM_WIDE ?= OFF
+ COB_ENABLE_N2_SMALL ?= OFF
+ COB_ENABLE_X86_MEDIUM_ROUTE ?= OFF
+@@ -146,6 +147,15 @@ SME_DEFINE += -DCOB_ENABLE_HK15=1
+ else ifneq ($(COB_ENABLE_HK15),OFF)
+ $(error COB_ENABLE_HK15 must be ON or OFF)
+ endif
++ifeq ($(COB_ENABLE_HK15_RAGGED),ON)
++ifneq ($(COB_ENABLE_HK15),ON)
++SME_DEFINE += -DCOB_ENABLE_HK15=1
++endif
++SME_DEFINE += -DCOB_ENABLE_HK15_RAGGED=1
++HK_RAGGED_OBJ := $(BUILD_DIR)/cob_hk15_ragged.o
++else ifneq ($(COB_ENABLE_HK15_RAGGED),OFF)
++$(error COB_ENABLE_HK15_RAGGED must be ON or OFF)
++endif
+ 
+ ifeq ($(COB_ENABLE_APPLE_MEDIUM_WIDE),ON)
+ ifneq ($(SME_OBJ),)
+@@ -181,7 +191,8 @@ else ifneq ($(COB_ENABLE_X86_STREAM_B),OFF)
+ $(error COB_ENABLE_X86_STREAM_B must be ON or OFF)
+ endif
+ 
+-NATIVE_KERNEL_HEADERS := src/cob_stream_b_dispatch.inc src/cob_cblas_leaf.inc src/cob_openblas_winograd.inc src/cob_hk15.inc third_party/fast-matmul/hk233.inc src/cob_n2_small.inc src/cob_blocked_leaf.inc src/cob_x86_cache_edge.inc src/cob_short_axes.inc src/cob_fused_strassen.inc src/cob_small_x86.inc src/cob_few_row_panel.inc
++COB_AUX_OBJS = $(STREAM_B_OBJS) $(HK_RAGGED_OBJ)
++NATIVE_KERNEL_HEADERS := src/cob_stream_b_dispatch.inc src/cob_cblas_leaf.inc src/cob_openblas_winograd.inc src/cob_hk15.inc src/cob_hk15_ragged.h third_party/fast-matmul/hk233.inc src/cob_n2_small.inc src/cob_blocked_leaf.inc src/cob_x86_cache_edge.inc src/cob_short_axes.inc src/cob_fused_strassen.inc src/cob_small_x86.inc src/cob_few_row_panel.inc
+ LIB_OBJ := $(BUILD_DIR)/gemm.o
+ TEST_BIN := $(BUILD_DIR)/cob_gemm_test
+ STRASSEN_TEST_OBJ := $(BUILD_DIR)/gemm_strassen_test.o
+@@ -211,7 +222,7 @@ $(BUILD_DIR):
+ 
+ # Track each output separately so reconfiguring a partially built directory
+ # works even on versions of Make with one-second file timestamps.
+-SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN) recursive:$(COB_ENABLE_RECURSIVE_STRASSEN) blas:$(leaf_provider) aligned:$(COB_ENABLE_ALIGNED_WINOGRAD) blas-root:$(COB_BLAS_ROOT) apple-wide:$(COB_ENABLE_APPLE_MEDIUM_WIDE) n2small:$(COB_ENABLE_N2_SMALL) stream-b:$(COB_ENABLE_X86_STREAM_B) x86-medium:$(COB_ENABLE_X86_MEDIUM_ROUTE) hk15:$(COB_ENABLE_HK15)
++SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN) recursive:$(COB_ENABLE_RECURSIVE_STRASSEN) blas:$(leaf_provider) aligned:$(COB_ENABLE_ALIGNED_WINOGRAD) blas-root:$(COB_BLAS_ROOT) apple-wide:$(COB_ENABLE_APPLE_MEDIUM_WIDE) n2small:$(COB_ENABLE_N2_SMALL) stream-b:$(COB_ENABLE_X86_STREAM_B) x86-medium:$(COB_ENABLE_X86_MEDIUM_ROUTE) hk15:$(COB_ENABLE_HK15) hk-ragged:$(COB_ENABLE_HK15_RAGGED)
+ SME_OUTPUTS := $(LIB_OBJ) $(STRASSEN_TEST_OBJ) $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) \
+                $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN) \
+                $(BENCH_BIN) $(CBLAS_BENCH_BIN) $(FORTRAN_BLAS_BENCH_BIN) $(BLAS_LEAF_TEST)
+@@ -238,51 +249,54 @@ $(STREAM_B_TEST): tests/test_stream_b.c src/gemm.c include/cob_gemm.h $(NATIVE_K
+ 	$(CC) $(CFLAGS) -DCOB_ENABLE_X86_STREAM_B=1 $< $(STREAM_B_OBJS) -lm -o $@
+ endif
+ 
++$(BUILD_DIR)/cob_hk15_ragged.o: src/cob_hk15_ragged.c src/cob_hk15_ragged.h | $(BUILD_DIR)
++	$(CC) $(CFLAGS) -c $< -o $@
++
+ $(LIB_OBJ): src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) | $(BUILD_DIR)
+ 	$(CC) $(CFLAGS) $(SME_DEFINE) -c src/gemm.c -o $@
+ 	$(save_sme_config)
+ 
+-$(TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) | $(BUILD_DIR)
+-	$(CC) $(CFLAGS) tests/test_gemm.c $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) $(BLAS_LEAF_LIBS) -o $@
++$(TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) | $(BUILD_DIR)
++	$(CC) $(CFLAGS) tests/test_gemm.c $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) $(BLAS_LEAF_LIBS) -o $@
+ 	$(save_sme_config)
+ 
+ $(STRASSEN_TEST_OBJ): src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) | $(BUILD_DIR)
+ 	$(CC) $(CFLAGS) $(SME_DEFINE) -DCOB_SGEMM_STRASSEN1_MIN_DIM=1024 -c src/gemm.c -o $@
+ 	$(save_sme_config)
+ 
+-$(STRASSEN_TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(STRASSEN_TEST_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) | $(BUILD_DIR)
+-	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_TEST_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) $(BLAS_LEAF_LIBS) -o $@
++$(STRASSEN_TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(STRASSEN_TEST_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) | $(BUILD_DIR)
++	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_TEST_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) $(BLAS_LEAF_LIBS) -o $@
+ 	$(save_sme_config)
+ 
+ $(STRASSEN_SQUARE_TEST_OBJ): src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) | $(BUILD_DIR)
+ 	$(CC) $(CFLAGS) $(SME_DEFINE) -DCOB_SGEMM_STRASSEN1_MIN_DIM=8192 -DCOB_SGEMM_STRASSEN1_SQUARE_MIN_DIM=128 -c src/gemm.c -o $@
+ 	$(save_sme_config)
+ 
+-$(STRASSEN_SQUARE_TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) | $(BUILD_DIR)
+-	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) $(BLAS_LEAF_LIBS) -o $@
++$(STRASSEN_SQUARE_TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) | $(BUILD_DIR)
++	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) $(BLAS_LEAF_LIBS) -o $@
+ 	$(save_sme_config)
+ 
+-$(BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) | $(BUILD_DIR)
+-	$(CC) $(CFLAGS) $(BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) $(BENCH_LDFLAGS) $(BLAS_LEAF_LIBS) -o $@
++$(BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) | $(BUILD_DIR)
++	$(CC) $(CFLAGS) $(BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) $(BENCH_LDFLAGS) $(BLAS_LEAF_LIBS) -o $@
+ 	$(save_sme_config)
+ 
+-$(CBLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) FORCE | $(BUILD_DIR)
+-	$(CC) $(CFLAGS) $(CBLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) $(CBLAS_LDFLAGS) $(BLAS_LEAF_LIBS) -o $@
++$(CBLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) FORCE | $(BUILD_DIR)
++	$(CC) $(CFLAGS) $(CBLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) $(CBLAS_LDFLAGS) $(BLAS_LEAF_LIBS) -o $@
+ 	$(save_sme_config)
+ 
+-$(FORTRAN_BLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) FORCE | $(BUILD_DIR)
+-	$(CC) $(CFLAGS) $(FORTRAN_BLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) $(FORTRAN_BLAS_LDFLAGS) $(BLAS_LEAF_LIBS) -o $@
++$(FORTRAN_BLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) FORCE | $(BUILD_DIR)
++	$(CC) $(CFLAGS) $(FORTRAN_BLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) $(FORTRAN_BLAS_LDFLAGS) $(BLAS_LEAF_LIBS) -o $@
+ 	$(save_sme_config)
+ 
+ ifneq ($(BLAS_LEAF_TEST),)
+-$(BLAS_LEAF_TEST): tests/test_openblas_winograd.c src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) $(STREAM_B_OBJS) | $(BUILD_DIR)
+-	$(CC) $(CFLAGS) $(SME_DEFINE) $< $(STREAM_B_OBJS) $(BLAS_LEAF_LIBS) -lm -o $@
++$(BLAS_LEAF_TEST): tests/test_openblas_winograd.c src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) $(COB_AUX_OBJS) | $(BUILD_DIR)
++	$(CC) $(CFLAGS) $(SME_DEFINE) $< $(COB_AUX_OBJS) $(BLAS_LEAF_LIBS) -lm -o $@
+ 	$(save_sme_config)
+ endif
+ 
+ ifneq ($(APPLE_WIDE_TEST),)
+-$(APPLE_WIDE_TEST): tests/test_apple_medium_wide.c $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) | $(BUILD_DIR)
+-	$(CC) $(CFLAGS) $< $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) $(BLAS_LEAF_LIBS) -o $@
++$(APPLE_WIDE_TEST): tests/test_apple_medium_wide.c $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) | $(BUILD_DIR)
++	$(CC) $(CFLAGS) $< $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) $(BLAS_LEAF_LIBS) -o $@
+ endif
+ 
+ test: $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN) $(BLAS_LEAF_TEST) $(STREAM_B_TEST) $(APPLE_WIDE_TEST)
+diff --git a/src/cob_hk15.inc b/src/cob_hk15.inc
+index 4a1c137..0725077 100644
+--- a/src/cob_hk15.inc
++++ b/src/cob_hk15.inc
+@@ -23,9 +23,12 @@ static void cob_hk15_fused_child(int m, int n, int k, const float* a, int lda,
+ 
+ static int cob_hk15_shape(int m, int n, int k)
+ {
+-    if (m < 2*768 || m > 2*1280 || n < 3*768 || n > 3*1280 ||
+-        k < 3*768 || k > 3*1280 || m%2 || n%3 || k%3) return 0;
++#if !defined(COB_ENABLE_HK15_RAGGED) || !COB_ENABLE_HK15_RAGGED
++    if (m%2 || n%3 || k%3) return 0;
++#endif
+     const int mh = m/2, nh = n/3, kh = k/3;
++    if (mh < 768 || mh > 1280 || nh < 768 || nh > 1280 || kh < 768 || kh > 1280)
++        return 0;
+     const int lo = cob_min_i32(mh, cob_min_i32(nh, kh));
+     return 4*mh <= 5*lo && 4*nh <= 5*lo && 4*kh <= 5*lo;
+ }
+@@ -44,6 +47,11 @@ static int cob_hk15_try(int m, int n, int k, const float* aa, int lda,
+         cob_f32_ranges_overlap(cc, (size_t)cs, aa, (size_t)as) ||
+         cob_f32_ranges_overlap(cc, (size_t)cs, bb, (size_t)bs)) return 0;
+ 
++#if defined(COB_ENABLE_HK15_RAGGED) && COB_ENABLE_HK15_RAGGED
++    if (as*sizeof(float)-1 > UINTPTR_MAX-(uintptr_t)aa ||
++        bs*sizeof(float)-1 > UINTPTR_MAX-(uintptr_t)bb ||
++        cs*sizeof(float)-1 > UINTPTR_MAX-(uintptr_t)cc) return 0;
++#endif
+     const int mh = m/2, nh = n/3, kh = k/3;
+     const size_t ac = (size_t)mh*kh, bc = (size_t)kh*nh, pc = (size_t)mh*nh;
+     /* All three block dimensions have a validated upper bound of 1280. */
+@@ -70,6 +78,10 @@ static int cob_hk15_try(int m, int n, int k, const float* aa, int lda,
+         cob_sgemm_rowmajor = cob_hk15_fused_child;
+ #endif
+ #include "../third_party/fast-matmul/hk233.inc"
++#if defined(COB_ENABLE_HK15_RAGGED) && COB_ENABLE_HK15_RAGGED
++    if (m%2 || n%3 || k%3)
++        cob_hk15_ragged_finish(m,n,k,aa,lda,bb,ldb,cc,ldc,workspace,cob_sgemm_rowmajor_base);
++#endif
+     free(workspace);
+     return 1;
+ }
+diff --git a/src/cob_hk15_ragged.c b/src/cob_hk15_ragged.c
+new file mode 100644
+index 0000000..0519db7
+--- /dev/null
++++ b/src/cob_hk15_ragged.c
+@@ -0,0 +1,52 @@
++#include "cob_hk15_ragged.h"
++#include <math.h>
++#include <stddef.h>
++
++/* Match the target's ordinary multiply-add convention and visit K in order. */
++static inline float cob_hk15_madd(float a, float b, float c)
++{
++#if defined(__FMA__) || defined(__ARM_FEATURE_FMA)
++    return fmaf(a, b, c);
++#else
++    return c + a*b;
++#endif
++}
++
++/* The validated parent has already computed C[0:mc,0:nc] through kc.
++   Its HK scratch is no longer live and has room for the k-by-(n%3) strip. */
++void cob_hk15_ragged_finish(int m, int n, int k, const float* a, int lda,
++    const float* b, int ldb, float* c, int ldc, float* workspace, cob_hk15_base_fn base)
++{
++    const int mc = m-m%2, nc = n-n%3, kc = k-k%3;
++    if (kc < k) {
++        const float* b0 = b+(size_t)kc*ldb;
++        for (int i = 0; i < mc; ++i) {
++            const float* ai = a+(size_t)i*lda+kc;
++            float* ci = c+(size_t)i*ldc;
++            if (k-kc == 1) {
++                for (int j = 0; j < nc; ++j)
++                    ci[j] = cob_hk15_madd(ai[0],b0[j],ci[j]);
++            } else {
++                const float* b1 = b0+ldb;
++                for (int j = 0; j < nc; ++j) {
++                    float first = cob_hk15_madd(ai[0],b0[j],ci[j]);
++                    ci[j] = cob_hk15_madd(ai[1],b1[j],first);
++                }
++            }
++        }
++    }
++    if (nc < n) {
++        /* Keep one or two adjacent columns compact throughout the full-K
++           right-strip product. A single pass reads them from the caller. */
++        const int width = n-nc;
++        for (int p = 0; p < k; ++p) {
++            float* packed = workspace+(size_t)p*width;
++            const float* row = b+(size_t)p*ldb+nc;
++            packed[0] = row[0];
++            if (width == 2) packed[1] = row[1];
++        }
++        base(mc,width,k,a,lda,workspace,width,c+nc,ldc);
++    }
++    if (mc < m)
++        base(1,n,k,a+(size_t)mc*lda,lda,b,ldb,c+(size_t)mc*ldc,ldc);
++}
+diff --git a/src/cob_hk15_ragged.h b/src/cob_hk15_ragged.h
+new file mode 100644
+index 0000000..7ce0f04
+--- /dev/null
++++ b/src/cob_hk15_ragged.h
+@@ -0,0 +1,10 @@
++#ifndef COB_HK15_RAGGED_H
++#define COB_HK15_RAGGED_H
++
++typedef void (*cob_hk15_base_fn)(int, int, int, const float*, int,
++    const float*, int, float*, int);
++
++void cob_hk15_ragged_finish(int m, int n, int k, const float* a, int lda,
++    const float* b, int ldb, float* c, int ldc, float* workspace, cob_hk15_base_fn base);
++
++#endif
+diff --git a/src/gemm.c b/src/gemm.c
+index 7a3f8e6..eb82ee9 100644
+--- a/src/gemm.c
++++ b/src/gemm.c
+@@ -4410,6 +4410,9 @@ void cob_sgemm_rowmajor_base(
+ }
+ 
+ #ifdef COB_USE_HK15
++#if defined(COB_ENABLE_HK15_RAGGED) && COB_ENABLE_HK15_RAGGED
++#include "cob_hk15_ragged.h"
++#endif
+ #include "cob_hk15.inc"
+ 
+ void cob_sgemm_rowmajor(int m, int n, int k, const float* a, int lda,

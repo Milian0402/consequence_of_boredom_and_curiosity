@@ -1,0 +1,6 @@
+family,layout,m,n,k,lda,ldb,ldc,ar,ac,br,bc,cr,cc
+repeat-divisible-winner,compact,1920,2880,2880,2880,2880,2880,0,0,0,0,0,0
+repeat-weak-ragged,padded,2039,2969,3367,3378,2980,2980,0,0,0,0,0,0
+fresh-depth-only,padded,2024,3081,3005,3014,3090,3090,0,0,0,0,0,0
+fresh-row-and-column,padded,2153,3007,3159,3164,3012,3012,0,0,0,0,0,0
+fresh-all-fringes,cropped,1949,3227,3023,3059,3281,3307,2,5,3,11,1,17

@@ -1,0 +1,3 @@
+324 exact integer tensor coefficients passed, 15 vs 18 products, direct schedule additions A/B/C=17/15/26; nonzero coefficients=94
+materialized input forms A/B=[11, 9], others are direct quadrant pointers
+18 remainder triples, 5670 distinct scalar reduction terms across all cases, no overlaps or gaps.

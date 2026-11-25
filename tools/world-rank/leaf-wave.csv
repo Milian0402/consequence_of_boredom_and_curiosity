@@ -1,0 +1,6 @@
+family,m,n,k,pad
+anchor-square-child,1920,2880,2880,0
+anchor-deep-child,2048,2880,3264,3
+holdout-wide,1926,3375,2823,5
+holdout-deep,2138,2829,3333,7
+holdout-transposed-layout,3375,1926,2823,5

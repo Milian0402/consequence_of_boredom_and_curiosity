@@ -1,0 +1,204 @@
+diff --git a/src/cob_medium_transposed.inc b/src/cob_medium_transposed.inc
+new file mode 100644
+index 0000000..a91a740
+--- /dev/null
++++ b/src/cob_medium_transposed.inc
+@@ -0,0 +1,170 @@
++/* Transpose A into blocks of two row-vectors. B stays in its caller's layout.
++   A tile owns one output column per accumulator pair throughout its K slab. */
++#if defined(__AVX512F__) && !defined(COB_DISABLE_X86_AVX512)
++typedef __m512 cob_medium_vector;
++enum { cob_medium_lanes = 16, cob_medium_columns = 12 };
++#define COB_MT_ZERO() _mm512_setzero_ps()
++#define COB_MT_LOAD(p) _mm512_loadu_ps(p)
++#define COB_MT_STORE(p,v) _mm512_storeu_ps(p,v)
++#define COB_MT_BCAST(v) _mm512_set1_ps(v)
++#define COB_MT_MADD(a,b,c) _mm512_fmadd_ps(a,b,c)
++#elif defined(__AVX2__) && defined(__FMA__)
++typedef __m256 cob_medium_vector;
++enum { cob_medium_lanes = 8, cob_medium_columns = 6 };
++#define COB_MT_ZERO() _mm256_setzero_ps()
++#define COB_MT_LOAD(p) _mm256_loadu_ps(p)
++#define COB_MT_STORE(p,v) _mm256_storeu_ps(p,v)
++#define COB_MT_BCAST(v) _mm256_set1_ps(v)
++#define COB_MT_MADD(a,b,c) _mm256_fmadd_ps(a,b,c)
++#else
++typedef float32x4_t cob_medium_vector;
++enum { cob_medium_lanes = 4, cob_medium_columns = 12 };
++#define COB_MT_ZERO() vdupq_n_f32(0)
++#define COB_MT_LOAD(p) vld1q_f32(p)
++#define COB_MT_STORE(p,v) vst1q_f32(p,v)
++#endif
++
++enum { cob_medium_rows = 2*cob_medium_lanes, cob_medium_depth = 96,
++       cob_medium_column_tiles = 8, cob_medium_area = cob_medium_rows*cob_medium_columns };
++
++#ifdef COB_MEDIUM_TRANSPOSE_TRACE
++static _Thread_local int cob_medium_trace[6];
++int cob_medium_transpose_count(int key)
++{
++    return key >= 0 && key < 6 ? cob_medium_trace[key] : 0;
++}
++#endif
++
++#define COB_MT_SIX(F) F(0) F(1) F(2) F(3) F(4) F(5)
++#if defined(__AVX2__) && defined(__FMA__) && (!defined(__AVX512F__) || defined(COB_DISABLE_X86_AVX512))
++#define COB_MT_COLUMNS(F) COB_MT_SIX(F)
++#else
++#define COB_MT_COLUMNS(F) COB_MT_SIX(F) F(6) F(7) F(8) F(9) F(10) F(11)
++#endif
++
++static void cob_medium_accumulate(int kb, const float* packed_a, const float* b,
++    int ldb, float* tile, int resume)
++{
++#define COB_MT_INIT(j) \
++    cob_medium_vector lo##j = resume ? COB_MT_LOAD(tile+(j)*cob_medium_rows) : COB_MT_ZERO(); \
++    cob_medium_vector hi##j = resume ? COB_MT_LOAD(tile+(j)*cob_medium_rows+cob_medium_lanes) : COB_MT_ZERO();
++    COB_MT_COLUMNS(COB_MT_INIT)
++#undef COB_MT_INIT
++    for (int p=0; p<kb; ++p) {
++        const cob_medium_vector a0=COB_MT_LOAD(packed_a), a1=COB_MT_LOAD(packed_a+cob_medium_lanes);
++#if defined(__aarch64__)
++        const float* bp = b+(size_t)p*ldb;
++        const float32x4_t b0 = vld1q_f32(bp), b1 = vld1q_f32(bp+4), b2 = vld1q_f32(bp+8);
++#define COB_MT_LANE(j,vec,lane) \
++        lo##j=vfmaq_laneq_f32(lo##j,a0,vec,lane); hi##j=vfmaq_laneq_f32(hi##j,a1,vec,lane);
++        COB_MT_LANE(0,b0,0) COB_MT_LANE(1,b0,1) COB_MT_LANE(2,b0,2) COB_MT_LANE(3,b0,3)
++        COB_MT_LANE(4,b1,0) COB_MT_LANE(5,b1,1) COB_MT_LANE(6,b1,2) COB_MT_LANE(7,b1,3)
++        COB_MT_LANE(8,b2,0) COB_MT_LANE(9,b2,1) COB_MT_LANE(10,b2,2) COB_MT_LANE(11,b2,3)
++#undef COB_MT_LANE
++#else
++#define COB_MT_UPDATE(j) do { const cob_medium_vector bcol=COB_MT_BCAST(b[(size_t)p*ldb+(j)]); \
++        lo##j=COB_MT_MADD(a0,bcol,lo##j); hi##j=COB_MT_MADD(a1,bcol,hi##j); } while(0);
++        COB_MT_COLUMNS(COB_MT_UPDATE)
++#undef COB_MT_UPDATE
++#endif
++        packed_a+=cob_medium_rows;
++    }
++#define COB_MT_SAVE(j) COB_MT_STORE(tile+(j)*cob_medium_rows,lo##j); \
++    COB_MT_STORE(tile+(j)*cob_medium_rows+cob_medium_lanes,hi##j);
++    COB_MT_COLUMNS(COB_MT_SAVE)
++#undef COB_MT_SAVE
++}
++
++static void cob_medium_transpose_output(const float* tile, int rows, float* c, int ldc)
++{
++    int j=0;
++    for (; j+4<=cob_medium_columns; j+=4) {
++        int i=0;
++        for (; i+4<=rows; i+=4) {
++            const float* t=tile+(size_t)j*cob_medium_rows+i;
++            float* out=c+(size_t)i*ldc+j;
++#if defined(__aarch64__)
++            float32x4x4_t group={{vld1q_f32(t),vld1q_f32(t+cob_medium_rows),
++                vld1q_f32(t+2*cob_medium_rows),vld1q_f32(t+3*cob_medium_rows)}};
++            float32x4_t p0=vzip1q_f32(group.val[0],group.val[1]), p1=vzip2q_f32(group.val[0],group.val[1]);
++            float32x4_t p2=vzip1q_f32(group.val[2],group.val[3]), p3=vzip2q_f32(group.val[2],group.val[3]);
++            vst1q_f32(out, vcombine_f32(vget_low_f32(p0),vget_low_f32(p2)));
++            vst1q_f32(out+ldc, vcombine_f32(vget_high_f32(p0),vget_high_f32(p2)));
++            vst1q_f32(out+2*(size_t)ldc, vcombine_f32(vget_low_f32(p1),vget_low_f32(p3)));
++            vst1q_f32(out+3*(size_t)ldc, vcombine_f32(vget_high_f32(p1),vget_high_f32(p3)));
++#else
++            __m128 a=_mm_loadu_ps(t), b=_mm_loadu_ps(t+cob_medium_rows);
++            __m128 d=_mm_loadu_ps(t+2*cob_medium_rows), e=_mm_loadu_ps(t+3*cob_medium_rows);
++            _MM_TRANSPOSE4_PS(a,b,d,e);
++            _mm_storeu_ps(out,a); _mm_storeu_ps(out+ldc,b);
++            _mm_storeu_ps(out+2*(size_t)ldc,d); _mm_storeu_ps(out+3*(size_t)ldc,e);
++#endif
++        }
++        for (; i<rows; ++i) for (int q=j; q<j+4; ++q)
++            c[(size_t)i*ldc+q]=tile[(size_t)q*cob_medium_rows+i];
++    }
++    for (; j<cob_medium_columns; ++j) for (int i=0; i<rows; ++i)
++        c[(size_t)i*ldc+j]=tile[(size_t)j*cob_medium_rows+i];
++}
++
++static int cob_try_medium_transposed(int m,int n,int k,const float* a,int lda,
++    const float* b,int ldb,float* c,int ldc)
++{
++#ifdef COB_MEDIUM_TRANSPOSE_TRACE
++    memset(cob_medium_trace,0,sizeof(cob_medium_trace));
++#endif
++    if (m<48 || m>256 || n<512 || n>4096 || k<96 || k>768 || n<4*m ||
++        m*k>98304 || a==NULL || b==NULL || c==NULL || lda<k || ldb<n || ldc<n) return 0;
++    const size_t c_count=(size_t)(m-1)*ldc+n;
++    if (cob_f32_ranges_overlap(c,c_count,a,(size_t)(m-1)*lda+k) ||
++        cob_f32_ranges_overlap(c,c_count,b,(size_t)(k-1)*ldb+n)) return 0;
++
++    const int row_tiles=(m+cob_medium_rows-1)/cob_medium_rows;
++    const int column_tiles=(n+cob_medium_columns-1)/cob_medium_columns;
++    const size_t a_size=(size_t)row_tiles*cob_medium_rows*k;
++    const size_t c_size=(size_t)cob_medium_column_tiles*row_tiles*cob_medium_area;
++    float* work=(float*)cob_aligned_alloc(64,(a_size+c_size)*sizeof(float));
++    if (!work) return 0;
++    for (int ir=0; ir<row_tiles; ++ir) {
++        int first=ir*cob_medium_rows, rows=cob_min_i32(m-first,cob_medium_rows);
++        float* base=work+(size_t)ir*cob_medium_rows*k;
++        for (int p=0; p<k; ++p) {
++            float* dst=base+(size_t)p*cob_medium_rows;
++            for (int r=0; r<rows; ++r) dst[r]=a[(size_t)(first+r)*lda+p];
++            for (int r=rows; r<cob_medium_rows; ++r) dst[r]=0;
++        }
++    }
++    float* accum=work+a_size;
++    for (int block=0; block<column_tiles; block+=cob_medium_column_tiles) {
++        int ct=cob_min_i32(cob_medium_column_tiles,column_tiles-block);
++        for (int p=0; p<k; p+=cob_medium_depth) {
++            int kb=cob_min_i32(k-p,cob_medium_depth);
++            for (int col=0; col<ct; ++col) {
++                /* Overlap the final full-width tile to avoid reading B's padding. */
++                int j=cob_min_i32((block+col)*cob_medium_columns,n-cob_medium_columns);
++                for (int row=0; row<row_tiles; ++row) {
++                    int i=row*cob_medium_rows;
++                    float* tile=accum+((size_t)col*row_tiles+row)*cob_medium_area;
++                    cob_medium_accumulate(kb,work+((size_t)row*k+p)*cob_medium_rows,
++                        b+(size_t)p*ldb+j,ldb,tile,p!=0);
++                    if (p+kb==k) cob_medium_transpose_output(tile,cob_min_i32(m-i,cob_medium_rows),c+(size_t)i*ldc+j,ldc);
++                }
++            }
++        }
++    }
++#ifdef COB_MEDIUM_TRANSPOSE_TRACE
++    cob_medium_trace[0]=1; cob_medium_trace[1]=cob_medium_rows; cob_medium_trace[2]=cob_medium_columns;
++    cob_medium_trace[3]=row_tiles; cob_medium_trace[4]=column_tiles;
++    cob_medium_trace[5]=(k+cob_medium_depth-1)/cob_medium_depth;
++#endif
++    free(work);
++    return 1;
++}
++
++#undef COB_MT_ZERO
++#undef COB_MT_LOAD
++#undef COB_MT_STORE
++#undef COB_MT_SIX
++#undef COB_MT_COLUMNS
++#undef COB_MT_BCAST
++#undef COB_MT_MADD
+diff --git a/src/gemm.c b/src/gemm.c
+index 25c3686..6c24ee2 100644
+--- a/src/gemm.c
++++ b/src/gemm.c
+@@ -3184,6 +3184,13 @@ static int cob_sgemm_one_shot_x86(int m, int n, int k, const float* a, int lda,
+     (defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && defined(__aarch64__)))
+ #define COB_USE_NATIVE_PANELS 1
+ #endif
++#if defined(COB_ENABLE_MEDIUM_TRANSPOSED_TILE) && COB_ENABLE_MEDIUM_TRANSPOSED_TILE && \
++    ((defined(COB_USE_X86_SIMD) && defined(__AVX2__) && defined(__FMA__)) || \
++     (defined(__aarch64__) && defined(COB_USE_NEON)))
++#define COB_USE_MEDIUM_TRANSPOSED_TILE 1
++#include "cob_medium_transposed.inc"
++#endif
++
+ #if defined(COB_USE_NATIVE_PANELS) || defined(COB_USE_SCOPED_X86_MEDIUM)
+ #include "cob_blocked_leaf.inc"
+ #endif
+@@ -4280,6 +4287,9 @@ void cob_sgemm_rowmajor_base(
+         return;
+     }
+ #endif
++#if defined(COB_USE_MEDIUM_TRANSPOSED_TILE)
++    if (cob_try_medium_transposed(m,n,k,a,lda,b,ldb,c,ldc)) return;
++#endif
+ #if defined(COB_USE_NATIVE_PANELS)
+     if (cob_try_panel_few_rows(m, n, k, a, lda, b, ldb, c, ldc)) return;
+ #if defined(COB_USE_SMALL_X86)

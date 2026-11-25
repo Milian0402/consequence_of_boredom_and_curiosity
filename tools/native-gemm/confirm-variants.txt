@@ -1,0 +1,5 @@
+# One architecture and optional holdout implementation per line.
+x86_64 hybrid
+aarch64 hybrid
+x86_64 recursive
+aarch64 recursive
