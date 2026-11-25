@@ -120,7 +120,13 @@ static int cob_try_panel_few_rows(int m, int n, int k, const float *a, int lda,
                     const float *b, int ldb, float *c, int ldc)
 {
 #ifdef SHORT_HAVE_SIMD
-    if (m < 9 || m > 15 || n < 128 || n >= 1024 || k < 64 || k >= 1024 ||
+#if defined(__aarch64__)
+    /* A single NEON row tile covers twelve rows. Split tiles lost to the packed kernel. */
+    const int max_rows = 12;
+#else
+    const int max_rows = 15;
+#endif
+    if (m < 9 || m > max_rows || n < 128 || n >= 1024 || k < 64 || k >= 1024 ||
         (n <= 128 && k <= 128) ||
         !a || !b || !c || lda < k || ldb < n || ldc < n) return 0;
     size_t count = (size_t)(m - 1) * ldc + n;

@@ -35,7 +35,7 @@ if [[ $(cat "$rank_dir/phase.txt") == discovery ]]; then
     "$cc" "${flags[@]}" "${extra[@]}" -UCOB_ENABLE_FUSED_STRASSEN -DCOB_ENABLE_FUSED_STRASSEN=0 -fPIC -shared "$repo/src/gemm.c" "$rank_dir/cob_adapter.c" -o "$build/unfused.so"
 fi
 "$cc" "${flags[@]}" "${extra[@]}" -fPIC -shared "$repo/src/gemm.c" "$rank_dir/cob_adapter.c" -o "$build/challenger.so"
-if [[ $(cat "$rank_dir/phase.txt") == replicate ]]; then
+if [[ $(cat "$rank_dir/phase.txt") =~ ^(replicate|short)$ ]]; then
     previous=3cd1efc303b0de0318b75f6b04487951ff06a739
     mkdir -p "$build/previous"
     git -C "$repo" archive "$previous" src include | tar -x -C "$build/previous"

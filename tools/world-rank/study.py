@@ -15,7 +15,7 @@ import tempfile
 from contextlib import ExitStack, contextmanager
 
 SEEDS = {"discovery": (19473017, 37292229), "confirm": (6191231, 89743091),
-         "small": (40762813, 92862107), "replicate": (59147207, 81729353)}
+         "small": (40762813, 92862107), "replicate": (59147207, 81729353), "short": (61734017, 39142873)}
 SHAPE_KEYS = ("family", "m", "n", "k", "pad", "mode")
 SMALL_VENDOR_MAX_MNK = 64 ** 3
 
@@ -50,7 +50,7 @@ def implementations(args):
         peers.append((name, lib))
     for name, lib in peers:
         variants = [("direct", name)]
-        if args.phase not in ("small", "replicate"):
+        if args.phase not in ("small", "replicate", "short"):
             variants.append(("hybrid", f"cob-{name}"))
         for variant, label in variants:
             if label in entries:

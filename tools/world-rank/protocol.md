@@ -25,3 +25,7 @@ The small kernel challenger is scored independently on its own nine-layout panel
 ## Follow-up replication
 
 On the 13 previously confirmed layouts, compare the frozen 3cd1efc standalone entry to the revised candidate and to the independent libraries on new seeds 59147207 and 81729353. Seven additional layouts test the changed entry for small inputs and for nine to fifteen output rows: 40³, 72³, 29×61×43/3, 57×85×37/5, 9×397×293/1, 13×743×479/5, 15×953×613/3. Distinguish the repeated cases from these seven in the ranking. Retain the original 13-case confirmation scores and CPU model. Use pure standalone candidates here; initial hybrid results remain available in the first confirmation artifacts.
+
+## Short-row dispatch verification
+
+At 13 and 15 output rows a split NEON row tile regressed against the packed incumbent. The final Arm dispatch caps the new path at one 12-row tile. The x86 panel stays enabled through 15 rows after all four tested heights beat the incumbent on AMD. Test all six registered 9–15-row layouts in short.csv with new inputs and both timing orders against current independent libraries and the original frozen entry. Keep this follow-up separate from the preceding 20-shape replication, which used the full 15-row range on both CPUs.
