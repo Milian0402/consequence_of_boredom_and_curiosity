@@ -1,3 +1,25 @@
+/* Add omitted depth terms after the core is complete. A threaded BLAS
+   installation can change its thread setting between subproducts. */
+static void cob_cblas_add_depth(int m, int n, int depth, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+#if defined(COB_ENABLE_ALIGNED_WINOGRAD) && COB_ENABLE_ALIGNED_WINOGRAD
+    if (cob_cblas_leaf_is_serial()) {
+        cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, depth,
+            1.0f, a, lda, b, ldb, 1.0f, c, ldc);
+        return;
+    }
+#endif
+    for (int i = 0; i < m; ++i) {
+        float* row = c + (size_t)i*ldc;
+        for (int p = 0; p < depth; ++p) {
+            const float left = a[(size_t)i*lda+p];
+            const float* right = b + (size_t)p*ldb;
+            for (int j = 0; j < n; ++j) row[j] += left*right[j];
+        }
+    }
+}
+
 /* Two Winograd levels for large rectangular products with serial CBLAS leaves.
    Each level shares three temporary blocks across its seven products. */
 static int cob_cblas_winograd_try(int m, int n, int k, const float* a, int lda,
@@ -36,21 +58,9 @@ static int cob_cblas_winograd_try(int m, int n, int k, const float* a, int lda,
     free(work);
 
     /* The omitted depth terms update the core. The two outer strips use full K. */
-    if (k != core_k) {
-#if defined(COB_ENABLE_ALIGNED_WINOGRAD) && COB_ENABLE_ALIGNED_WINOGRAD
-        cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, core_m, core_n, k-core_k,
-            1.0f, a+core_k, lda, b+(size_t)core_k*ldb, ldb, 1.0f, c, ldc);
-#else
-        for (int i = 0; i < core_m; ++i) {
-            float* row = c + (size_t)i*ldc;
-            for (int p = core_k; p < k; ++p) {
-                const float left = a[(size_t)i*lda+p];
-                const float* right = b + (size_t)p*ldb;
-                for (int j = 0; j < core_n; ++j) row[j] += left*right[j];
-            }
-        }
-#endif
-    }
+    if (k != core_k)
+        cob_cblas_add_depth(core_m, core_n, k-core_k, a+core_k, lda,
+            b+(size_t)core_k*ldb, ldb, c, ldc);
     if (n != core_n)
         cob_strassen_leaf(core_m, n-core_n, k, a, lda, b+core_n, ldb, c+core_n, ldc);
     if (m != core_m)

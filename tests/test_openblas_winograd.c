@@ -5,6 +5,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(COB_ENABLE_OPENBLAS_LEAF) && COB_ENABLE_OPENBLAS_LEAF && \
+    defined(COB_ENABLE_ALIGNED_WINOGRAD) && COB_ENABLE_ALIGNED_WINOGRAD
+#include <cblas.h>
+#define COB_TEST_THREAD_TRANSITION 1
+static int simulate_thread_change;
+static unsigned simulated_calls;
+#define openblas_get_num_threads() \
+    (simulate_thread_change && simulated_calls >= 49 ? 2 : openblas_get_num_threads())
+#define cblas_sgemm(...) ((void)(simulate_thread_change && ++simulated_calls), cblas_sgemm(__VA_ARGS__))
+#endif
+
 static int fail_workspace;
 static unsigned workspace_calls;
 static int test_memalign(void** ptr, size_t align, size_t size)
@@ -15,38 +26,40 @@ static int test_memalign(void** ptr, size_t align, size_t size)
 #define posix_memalign test_memalign
 #include "../src/gemm.c"
 #undef posix_memalign
+#if defined(COB_TEST_THREAD_TRANSITION)
+#undef openblas_get_num_threads
+#undef cblas_sgemm
+#endif
 
 /* Toggle every combination of bottom, right, and depth tails. The first and
    last depth terms make both beta=0 and beta=1 errors visible. */
-static int check_edges(void)
+static int check_edge(unsigned mask)
 {
     enum { max_m = 129, max_n = 65, max_k = 97, lda = max_k+3,
            ldb = max_n+5, ldc = max_n+7 };
     float a[max_m*lda], b[max_k*ldb], c[max_m*ldc];
-    for (unsigned mask=0; mask<8; ++mask) {
-        const int m=128+(int)(mask&1u), n=64+(int)((mask>>1)&1u), k=96+(int)((mask>>2)&1u);
-        for (int i=0; i<m; ++i) {
-            for (int p=0; p<lda; ++p) a[i*lda+p] = p<k ? 0.0f : NAN;
-            a[i*lda] = (float)(1+i%5);
-            a[i*lda+k-1] = (float)(3+i%3);
-            for (int j=0; j<ldc; ++j) c[i*ldc+j] = j<n ? NAN : 531.0f;
+    const int m=128+(int)(mask&1u), n=64+(int)((mask>>1)&1u), k=96+(int)((mask>>2)&1u);
+    for (int i=0; i<m; ++i) {
+        for (int p=0; p<lda; ++p) a[i*lda+p] = p<k ? 0.0f : NAN;
+        a[i*lda] = (float)(1+i%5);
+        a[i*lda+k-1] = (float)(3+i%3);
+        for (int j=0; j<ldc; ++j) c[i*ldc+j] = j<n ? NAN : 531.0f;
+    }
+    for (int p=0; p<k; ++p) {
+        for (int j=0; j<ldb; ++j) {
+            float value = 0.0f;
+            if (p==0) value = (float)(1+j%7);
+            if (p==k-1) value = (float)(-1-j%4);
+            b[p*ldb+j] = j<n ? value : NAN;
         }
-        for (int p=0; p<k; ++p) {
-            for (int j=0; j<ldb; ++j) {
-                float value = 0.0f;
-                if (p==0) value = (float)(1+j%7);
-                if (p==k-1) value = (float)(-1-j%4);
-                b[p*ldb+j] = j<n ? value : NAN;
-            }
+    }
+    if (!cob_cblas_winograd_try(m,n,k,a,lda,b,ldb,c,ldc,64)) return 0;
+    for (int i=0; i<m; ++i) {
+        for (int j=0; j<n; ++j) {
+            float expected = a[i*lda]*b[j] + a[i*lda+k-1]*b[(k-1)*ldb+j];
+            if (c[i*ldc+j] != expected) return 0;
         }
-        if (!cob_cblas_winograd_try(m,n,k,a,lda,b,ldb,c,ldc,64)) return 0;
-        for (int i=0; i<m; ++i) {
-            for (int j=0; j<n; ++j) {
-                float expected = a[i*lda]*b[j] + a[i*lda+k-1]*b[(k-1)*ldb+j];
-                if (c[i*ldc+j] != expected) return 0;
-            }
-            for (int j=n; j<ldc; ++j) if (c[i*ldc+j] != 531.0f) return 0;
-        }
+        for (int j=n; j<ldc; ++j) if (c[i*ldc+j] != 531.0f) return 0;
     }
     return 1;
 }
@@ -99,7 +112,14 @@ int main(void)
         }
         for (int j=n; j<ldc; ++j) if (c[i*ldc+j] != 531.0f) return 1;
     }
-    if (!check_edges() || workspace_calls != 11) return 1;
+    for (unsigned mask=0; mask<8; ++mask) if (!check_edge(mask)) return 1;
+    if (workspace_calls != 11) return 1;
+#if defined(COB_TEST_THREAD_TRANSITION)
+    /* Switch the simulated setting immediately after the last core product.
+       Mask 4 has a depth remainder and no bottom or right strip. */
+    simulate_thread_change = 1;
+    if (!check_edge(4) || simulated_calls != 49) return 1;
+#endif
     puts("Rectangular CBLAS Winograd passed FP64, depth-edge, stride, alias and allocation checks.");
     return 0;
 }
