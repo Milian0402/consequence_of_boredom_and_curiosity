@@ -10,7 +10,7 @@ phase=$(cat "$dir/phase.txt")
 arch=$(uname -m)
 cc=${CC:-cc}
 previous=b83033d199137b370c03a5a3d63365f1025162b7
-case "$phase" in tile-screen|tile-confirm) ;; *) exit 2 ;; esac
+case "$phase" in tile-screen|tile-confirm|tile-replay) ;; *) exit 2 ;; esac
 [[ $(uname -s) == Linux ]]
 common=(-std=c11 -O3 -fPIC -shared -DCOB_ENABLE_PORTABLE_STRASSEN=1 -DCOB_ENABLE_RECURSIVE_STRASSEN=1)
 case "$arch" in
@@ -24,6 +24,7 @@ case "$arch" in
         panel="$dir/n2-tiles-${phase#tile-}.csv" ;;
     *) echo "Unsupported tile-study architecture $arch" >&2; exit 2 ;;
 esac
+if [[ $phase == tile-replay ]]; then panel="$dir/entry-replay.csv"; fi
 export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 OMP_THREAD_LIMIT=1 MKL_NUM_THREADS=1 MKL_DYNAMIC=FALSE BLIS_NUM_THREADS=1 GOTO_NUM_THREADS=1
 peers=()
 for name in "${names[@]}"; do
@@ -77,6 +78,11 @@ tile_candidate() {
 }
 compile_entry "$build/previous" "$build/incumbent.so"
 tile_plugin cob-incumbent "$build/incumbent.so"
+if [[ $phase == tile-replay ]]; then
+    source "$dir/entry-replay.inc"
+    run_entry_replay
+    exit $?
+fi
 # shellcheck source=/dev/null
 source "$dir/tile-variants.inc"
 register_tile_variants "$arch" "$phase"

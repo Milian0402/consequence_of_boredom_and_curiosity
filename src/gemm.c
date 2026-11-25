@@ -256,6 +256,14 @@ enum {
 #error "COB_SGEMM_STRASSEN1_SQUARE_MIN_DIM must be positive"
 #endif
 
+#if defined(COB_ENABLE_HK15) && COB_ENABLE_HK15
+#define COB_USE_HK15 1
+static void cob_sgemm_rowmajor_base(int, int, int, const float*, int,
+    const float*, int, float*, int);
+#else
+#define cob_sgemm_rowmajor_base cob_sgemm_rowmajor
+#endif
+
 static int cob_min_i32(int a, int b)
 {
     return a < b ? a : b;
@@ -2062,7 +2070,7 @@ static void cob_sgemm_tile_scalar_packed_b(
     }
 }
 
-#if defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && !defined(COB_USE_APPLE_AMX))
+#if defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && !defined(COB_USE_APPLE_AMX)) || defined(COB_USE_HK15)
 static int cob_f32_ranges_overlap(const float* x, size_t nx, const float* y, size_t ny)
 {
     const uintptr_t px = (uintptr_t)x;
@@ -3646,11 +3654,11 @@ static void cob_strassen_complete_edges(int m, int n, int k,
     /* Both edges use the complete K. Their narrow dimensions preclude
        redispatch to this seven-product decomposition. */
     if (n != core_n) {
-        cob_sgemm_rowmajor(core_m, n - core_n, k, a, lda, b + core_n, ldb,
+        cob_sgemm_rowmajor_base(core_m, n - core_n, k, a, lda, b + core_n, ldb,
             c + core_n, ldc);
     }
     if (m != core_m) {
-        cob_sgemm_rowmajor(1, n, k, a + (size_t)core_m * lda, lda, b, ldb,
+        cob_sgemm_rowmajor_base(1, n, k, a + (size_t)core_m * lda, lda, b, ldb,
             c + (size_t)core_m * ldc, ldc);
     }
 }
@@ -4022,7 +4030,10 @@ COB_THIN_TARGET static void cob_sgemm_few_rows(int m, int n, int k,
 #include "cob_n2_small.inc"
 #endif
 
-void cob_sgemm_rowmajor(
+#ifdef COB_USE_HK15
+static
+#endif
+void cob_sgemm_rowmajor_base(
     int m,
     int n,
     int k,
@@ -4125,3 +4136,14 @@ void cob_sgemm_rowmajor(
 
     cob_sgemm_rowmajor_fallback(m, n, k, a, lda, b, ldb, c, ldc);
 }
+
+#ifdef COB_USE_HK15
+#include "cob_hk15.inc"
+
+void cob_sgemm_rowmajor(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+    if (cob_hk15_try(m, n, k, a, lda, b, ldb, c, ldc)) return;
+    cob_sgemm_rowmajor_base(m, n, k, a, lda, b, ldb, c, ldc);
+}
+#endif

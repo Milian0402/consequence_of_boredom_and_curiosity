@@ -35,34 +35,39 @@ case $(uname -m) in
     aarch64) target=ARMV8A_ARM_CORTEX_A76 ;;
     *) echo "Unsupported BLASFEO host: $(uname -m)" >&2; exit 2 ;;
 esac
+case ${RANK_BLASFEO_ROW_SLAB:-0} in
+    0) row_slab=0; name=blasfeo ;;
+    48) row_slab=48; name=blasfeo-row48 ;;
+    *) echo 'RANK_BLASFEO_ROW_SLAB must be 0 or 48' >&2; exit 2 ;;
+esac
 cc=${CC:-cc}
 make -C "$src" -j"${BLASFEO_BUILD_JOBS:-$(nproc)}" static_library \
     CC="$cc" TARGET="$target" LA=HIGH_PERFORMANCE SP_ROUTINES=1 DP_ROUTINES=0 \
     BLAS_API=1 FORTRAN_BLAS_API=0 EXTERNAL_BLAS=0 FALLBACK_TO_EXTERNAL_BLAS=0 \
-    > "$out/blasfeo-compile.log" 2>&1 || { tail -80 "$out/blasfeo-compile.log" >&2; exit 1; }
+    > "$out/$name-compile.log" 2>&1 || { tail -80 "$out/$name-compile.log" >&2; exit 1; }
 link_plugin() {
     "$cc" -O3 -std=c11 -Wall -Wextra -Werror -fPIC -shared -I"$src/include" \
-        "-DRANK_BLASFEO_TARGET=\"$target\"" "-DRANK_CLEAR_OUTPUT=$1" \
+        "-DRANK_BLASFEO_TARGET=\"$target\"" "-DRANK_CLEAR_OUTPUT=$1" "-DRANK_ROW_SLAB=$row_slab" \
         "$here/adapter.c" "$src/lib/libblasfeo.a" -Wl,--exclude-libs,ALL \
         -Wl,-Bsymbolic-functions -Wl,-z,defs -lm -o "$scratch/blasfeo.so"
 }
 {
     printf 'source=https://github.com/giaf/blasfeo revision=%s tar_sha256=%s target=%s\n' "$revision" "$digest" "$target"
     "$cc" --version
-} > "$out/blasfeo-build.txt"
+} > "$out/$name-build.txt"
 link_plugin 0
-if python3 "$here/smoke.py" "$scratch/blasfeo.so" >> "$out/blasfeo-build.txt" 2>&1; then
-    echo 'Stock native beta-zero path passed.' >> "$out/blasfeo-build.txt"
+if python3 "$here/smoke.py" "$scratch/blasfeo.so" >> "$out/$name-build.txt" 2>&1; then
+    echo 'Stock native beta-zero path passed.' >> "$out/$name-build.txt"
 else
     status=$?
-    if [[ $status != 3 ]]; then cat "$out/blasfeo-build.txt" >&2; exit "$status"; fi
-    echo 'Stock kernel retained NaN old C. Retesting with a timed logical output clear.' >> "$out/blasfeo-build.txt"
+    if [[ $status != 3 ]]; then cat "$out/$name-build.txt" >&2; exit "$status"; fi
+    echo 'Stock kernel retained NaN old C. Retesting with a timed logical output clear.' >> "$out/$name-build.txt"
     link_plugin 1
-    python3 "$here/smoke.py" "$scratch/blasfeo.so" >> "$out/blasfeo-build.txt" 2>&1 || {
-        cat "$out/blasfeo-build.txt" >&2
+    python3 "$here/smoke.py" "$scratch/blasfeo.so" >> "$out/$name-build.txt" 2>&1 || {
+        cat "$out/$name-build.txt" >&2
         exit 1
     }
 fi
-sha256sum "$scratch/blasfeo.so" >> "$out/blasfeo-build.txt"
-cat "$out/blasfeo-build.txt"
-mv "$scratch/blasfeo.so" "$out/blasfeo.so"
+sha256sum "$scratch/blasfeo.so" >> "$out/$name-build.txt"
+cat "$out/$name-build.txt"
+mv "$scratch/blasfeo.so" "$out/$name.so"

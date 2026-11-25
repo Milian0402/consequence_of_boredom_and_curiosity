@@ -17,8 +17,9 @@ from contextlib import ExitStack, contextmanager
 SEEDS = {"discovery": (19473017, 37292229), "confirm": (6191231, 89743091),
          "small": (40762813, 92862107), "replicate": (59147207, 81729353), "short": (61734017, 39142873),
          "pilot": (72413951, 86537761), "heldout": (15741487, 84927113),
-         "tile-screen": (43891307, 96537493), "tile-confirm": (53719481, 94173107)}
-TILE_PHASES = ("tile-screen", "tile-confirm")
+         "tile-screen": (43891307, 96537493), "tile-confirm": (53719481, 94173107),
+         "tile-replay": (61003441, 74271079)}
+TILE_PHASES = ("tile-screen", "tile-confirm", "tile-replay")
 SHAPE_KEYS = ("family", "m", "n", "k", "pad", "mode")
 SMALL_VENDOR_MAX_MNK = 64 ** 3
 

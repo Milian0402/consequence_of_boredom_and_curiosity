@@ -88,8 +88,11 @@ jobs:
         if: success()
         continue-on-error: true
         run: |
-          if [[ $(cat tools/world-rank/phase.txt) =~ ^(heldout|tile-screen|tile-confirm)$ ]]; then
+          if [[ $(cat tools/world-rank/phase.txt) =~ ^(heldout|tile-screen|tile-confirm|tile-replay)$ ]]; then
             bash tools/world-rank/blasfeo/build.sh "$VENDOR_DIR"
+          fi
+          if [[ $(cat tools/world-rank/phase.txt) == tile-replay && $(uname -m) == x86_64 ]]; then
+            RANK_BLASFEO_ROW_SLAB=48 bash tools/world-rank/blasfeo/build.sh "$VENDOR_DIR"
           fi
       - name: Compare installed candidates against an independent FP64 product
         run: bash tools/world-rank/run.sh "$RUNNER_TEMP/rank-result" "$VENDOR_DIR"
