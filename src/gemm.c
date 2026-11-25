@@ -4410,6 +4410,9 @@ void cob_sgemm_rowmajor_base(
 }
 
 #ifdef COB_USE_HK15
+#if defined(COB_ENABLE_HK15_RAGGED) && COB_ENABLE_HK15_RAGGED
+#include "cob_hk15_ragged.h"
+#endif
 #include "cob_hk15.inc"
 
 void cob_sgemm_rowmajor(int m, int n, int k, const float* a, int lda,

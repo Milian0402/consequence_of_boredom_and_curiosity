@@ -67,6 +67,19 @@ COB dispatcher. The required coefficient notice and exact integer verifier
 are in [third_party/fast-matmul](third_party/fast-matmul). Run
 `python3 tests/check_hk15.py` to test routing, fallback and FP64 accuracy.
 
+The experimental `COB_ENABLE_HK15_RAGGED=ON` option in CMake and Make also
+accepts remainders. It enables HK15, computes the largest divisible core and
+finishes the missing rows, columns and reduction terms. The same child size
+and aspect limits apply. To reproduce the standalone build tested on Linux,
+also enable portable and recursive Strassen with native CPU compiler flags.
+On three fresh large rectangles, including a cropped view, it averaged 1.108×
+the previous standalone kernel on Neoverse N2 and 1.004× on Xeon 6975P-C.
+FastMMW led the tested independent Arm field and lost all 18 paired calls to
+the candidate. The comparison omitted four BLAS-backed COB modes on Arm.
+The new option defaults to off. Run `python3 tests/check_hk15_ragged.py` to
+exercise all 18 combinations of remainders, output guards and allocation
+failure. [Native comparison](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45709409988)
+
 The Linux [paired benchmark](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45657809673)
 enabled both `COB_ENABLE_PORTABLE_STRASSEN` and `COB_ENABLE_RECURSIVE_STRASSEN`
 for the subproducts. On the padded 2432 × 3648 × 3648 case, the fifteen-product

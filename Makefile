@@ -29,6 +29,7 @@ COB_ENABLE_OPENBLAS_LEAF ?= OFF
 COB_BLAS_LEAF ?= NONE
 COB_ENABLE_ALIGNED_WINOGRAD ?= OFF
 COB_ENABLE_HK15 ?= OFF
+COB_ENABLE_HK15_RAGGED ?= OFF
 COB_ENABLE_APPLE_MEDIUM_WIDE ?= OFF
 COB_ENABLE_N2_SMALL ?= OFF
 COB_ENABLE_X86_MEDIUM_ROUTE ?= OFF
@@ -146,6 +147,15 @@ SME_DEFINE += -DCOB_ENABLE_HK15=1
 else ifneq ($(COB_ENABLE_HK15),OFF)
 $(error COB_ENABLE_HK15 must be ON or OFF)
 endif
+ifeq ($(COB_ENABLE_HK15_RAGGED),ON)
+ifneq ($(COB_ENABLE_HK15),ON)
+SME_DEFINE += -DCOB_ENABLE_HK15=1
+endif
+SME_DEFINE += -DCOB_ENABLE_HK15_RAGGED=1
+HK_RAGGED_OBJ := $(BUILD_DIR)/cob_hk15_ragged.o
+else ifneq ($(COB_ENABLE_HK15_RAGGED),OFF)
+$(error COB_ENABLE_HK15_RAGGED must be ON or OFF)
+endif
 
 ifeq ($(COB_ENABLE_APPLE_MEDIUM_WIDE),ON)
 ifneq ($(SME_OBJ),)
@@ -181,7 +191,8 @@ else ifneq ($(COB_ENABLE_X86_STREAM_B),OFF)
 $(error COB_ENABLE_X86_STREAM_B must be ON or OFF)
 endif
 
-NATIVE_KERNEL_HEADERS := src/cob_stream_b_dispatch.inc src/cob_cblas_leaf.inc src/cob_openblas_winograd.inc src/cob_hk15.inc third_party/fast-matmul/hk233.inc src/cob_n2_small.inc src/cob_blocked_leaf.inc src/cob_x86_cache_edge.inc src/cob_short_axes.inc src/cob_fused_strassen.inc src/cob_small_x86.inc src/cob_few_row_panel.inc
+COB_AUX_OBJS = $(STREAM_B_OBJS) $(HK_RAGGED_OBJ)
+NATIVE_KERNEL_HEADERS := src/cob_stream_b_dispatch.inc src/cob_cblas_leaf.inc src/cob_openblas_winograd.inc src/cob_hk15.inc src/cob_hk15_ragged.h third_party/fast-matmul/hk233.inc src/cob_n2_small.inc src/cob_blocked_leaf.inc src/cob_x86_cache_edge.inc src/cob_short_axes.inc src/cob_fused_strassen.inc src/cob_small_x86.inc src/cob_few_row_panel.inc
 LIB_OBJ := $(BUILD_DIR)/gemm.o
 TEST_BIN := $(BUILD_DIR)/cob_gemm_test
 STRASSEN_TEST_OBJ := $(BUILD_DIR)/gemm_strassen_test.o
@@ -211,7 +222,7 @@ $(BUILD_DIR):
 
 # Track each output separately so reconfiguring a partially built directory
 # works even on versions of Make with one-second file timestamps.
-SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN) recursive:$(COB_ENABLE_RECURSIVE_STRASSEN) blas:$(leaf_provider) aligned:$(COB_ENABLE_ALIGNED_WINOGRAD) blas-root:$(COB_BLAS_ROOT) apple-wide:$(COB_ENABLE_APPLE_MEDIUM_WIDE) n2small:$(COB_ENABLE_N2_SMALL) stream-b:$(COB_ENABLE_X86_STREAM_B) x86-medium:$(COB_ENABLE_X86_MEDIUM_ROUTE) hk15:$(COB_ENABLE_HK15)
+SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN) recursive:$(COB_ENABLE_RECURSIVE_STRASSEN) blas:$(leaf_provider) aligned:$(COB_ENABLE_ALIGNED_WINOGRAD) blas-root:$(COB_BLAS_ROOT) apple-wide:$(COB_ENABLE_APPLE_MEDIUM_WIDE) n2small:$(COB_ENABLE_N2_SMALL) stream-b:$(COB_ENABLE_X86_STREAM_B) x86-medium:$(COB_ENABLE_X86_MEDIUM_ROUTE) hk15:$(COB_ENABLE_HK15) hk-ragged:$(COB_ENABLE_HK15_RAGGED)
 SME_OUTPUTS := $(LIB_OBJ) $(STRASSEN_TEST_OBJ) $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) \
                $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN) \
                $(BENCH_BIN) $(CBLAS_BENCH_BIN) $(FORTRAN_BLAS_BENCH_BIN) $(BLAS_LEAF_TEST)
@@ -238,51 +249,54 @@ $(STREAM_B_TEST): tests/test_stream_b.c src/gemm.c include/cob_gemm.h $(NATIVE_K
 	$(CC) $(CFLAGS) -DCOB_ENABLE_X86_STREAM_B=1 $< $(STREAM_B_OBJS) -lm -o $@
 endif
 
+$(BUILD_DIR)/cob_hk15_ragged.o: src/cob_hk15_ragged.c src/cob_hk15_ragged.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 $(LIB_OBJ): src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(SME_DEFINE) -c src/gemm.c -o $@
 	$(save_sme_config)
 
-$(TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) tests/test_gemm.c $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) $(BLAS_LEAF_LIBS) -o $@
+$(TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) tests/test_gemm.c $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) $(BLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
 $(STRASSEN_TEST_OBJ): src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(SME_DEFINE) -DCOB_SGEMM_STRASSEN1_MIN_DIM=1024 -c src/gemm.c -o $@
 	$(save_sme_config)
 
-$(STRASSEN_TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(STRASSEN_TEST_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_TEST_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) $(BLAS_LEAF_LIBS) -o $@
+$(STRASSEN_TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(STRASSEN_TEST_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_TEST_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) $(BLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
 $(STRASSEN_SQUARE_TEST_OBJ): src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(SME_DEFINE) -DCOB_SGEMM_STRASSEN1_MIN_DIM=8192 -DCOB_SGEMM_STRASSEN1_SQUARE_MIN_DIM=128 -c src/gemm.c -o $@
 	$(save_sme_config)
 
-$(STRASSEN_SQUARE_TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) $(BLAS_LEAF_LIBS) -o $@
+$(STRASSEN_SQUARE_TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) $(BLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
-$(BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) $(BENCH_LDFLAGS) $(BLAS_LEAF_LIBS) -o $@
+$(BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) $(BENCH_LDFLAGS) $(BLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
-$(CBLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) FORCE | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(CBLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) $(CBLAS_LDFLAGS) $(BLAS_LEAF_LIBS) -o $@
+$(CBLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) FORCE | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(CBLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) $(CBLAS_LDFLAGS) $(BLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
-$(FORTRAN_BLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) FORCE | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(FORTRAN_BLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) $(FORTRAN_BLAS_LDFLAGS) $(BLAS_LEAF_LIBS) -o $@
+$(FORTRAN_BLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) FORCE | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(FORTRAN_BLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) $(FORTRAN_BLAS_LDFLAGS) $(BLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
 ifneq ($(BLAS_LEAF_TEST),)
-$(BLAS_LEAF_TEST): tests/test_openblas_winograd.c src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) $(STREAM_B_OBJS) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(SME_DEFINE) $< $(STREAM_B_OBJS) $(BLAS_LEAF_LIBS) -lm -o $@
+$(BLAS_LEAF_TEST): tests/test_openblas_winograd.c src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) $(COB_AUX_OBJS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(SME_DEFINE) $< $(COB_AUX_OBJS) $(BLAS_LEAF_LIBS) -lm -o $@
 	$(save_sme_config)
 endif
 
 ifneq ($(APPLE_WIDE_TEST),)
-$(APPLE_WIDE_TEST): tests/test_apple_medium_wide.c $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $< $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) $(BLAS_LEAF_LIBS) -o $@
+$(APPLE_WIDE_TEST): tests/test_apple_medium_wide.c $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $< $(LIB_OBJ) $(SME_OBJ) $(COB_AUX_OBJS) $(BLAS_LEAF_LIBS) -o $@
 endif
 
 test: $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN) $(BLAS_LEAF_TEST) $(STREAM_B_TEST) $(APPLE_WIDE_TEST)

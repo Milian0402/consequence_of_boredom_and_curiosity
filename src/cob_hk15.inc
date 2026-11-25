@@ -23,9 +23,12 @@ static void cob_hk15_fused_child(int m, int n, int k, const float* a, int lda,
 
 static int cob_hk15_shape(int m, int n, int k)
 {
-    if (m < 2*768 || m > 2*1280 || n < 3*768 || n > 3*1280 ||
-        k < 3*768 || k > 3*1280 || m%2 || n%3 || k%3) return 0;
+#if !defined(COB_ENABLE_HK15_RAGGED) || !COB_ENABLE_HK15_RAGGED
+    if (m%2 || n%3 || k%3) return 0;
+#endif
     const int mh = m/2, nh = n/3, kh = k/3;
+    if (mh < 768 || mh > 1280 || nh < 768 || nh > 1280 || kh < 768 || kh > 1280)
+        return 0;
     const int lo = cob_min_i32(mh, cob_min_i32(nh, kh));
     return 4*mh <= 5*lo && 4*nh <= 5*lo && 4*kh <= 5*lo;
 }
@@ -44,6 +47,11 @@ static int cob_hk15_try(int m, int n, int k, const float* aa, int lda,
         cob_f32_ranges_overlap(cc, (size_t)cs, aa, (size_t)as) ||
         cob_f32_ranges_overlap(cc, (size_t)cs, bb, (size_t)bs)) return 0;
 
+#if defined(COB_ENABLE_HK15_RAGGED) && COB_ENABLE_HK15_RAGGED
+    if (as*sizeof(float)-1 > UINTPTR_MAX-(uintptr_t)aa ||
+        bs*sizeof(float)-1 > UINTPTR_MAX-(uintptr_t)bb ||
+        cs*sizeof(float)-1 > UINTPTR_MAX-(uintptr_t)cc) return 0;
+#endif
     const int mh = m/2, nh = n/3, kh = k/3;
     const size_t ac = (size_t)mh*kh, bc = (size_t)kh*nh, pc = (size_t)mh*nh;
     /* All three block dimensions have a validated upper bound of 1280. */
@@ -70,6 +78,10 @@ static int cob_hk15_try(int m, int n, int k, const float* aa, int lda,
         cob_sgemm_rowmajor = cob_hk15_fused_child;
 #endif
 #include "../third_party/fast-matmul/hk233.inc"
+#if defined(COB_ENABLE_HK15_RAGGED) && COB_ENABLE_HK15_RAGGED
+    if (m%2 || n%3 || k%3)
+        cob_hk15_ragged_finish(m,n,k,aa,lda,bb,ldb,cc,ldc,workspace,cob_sgemm_rowmajor_base);
+#endif
     free(workspace);
     return 1;
 }
