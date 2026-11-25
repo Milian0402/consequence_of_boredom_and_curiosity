@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-base=a000ec080bd84faf6e093020780df02bbb831788
+base=d2a59e8d2785961a4365e6f9ac982f19e3c28f61
 expected_arch=${1:?supply expected uname -m}
 out=${2:?supply output directory}
 test "$(uname -s)" = Linux
@@ -14,7 +14,7 @@ export MKL_NUM_THREADS=1 MKL_DYNAMIC=FALSE BLIS_NUM_THREADS=1
 git show "$base:src/gemm.c" > "$stage/base.c"
 test -n "$(git diff "$base" HEAD -- src/gemm.c)"
 case "$expected_arch" in
-    x86_64) tune=-march=native; native_path=native-x86-c-autovec; native_flags= ;;
+    x86_64) tune=-march=native; native_path=native-x86-dispatch; native_flags= ;;
     aarch64) tune=-mcpu=native; native_path=native-arm-neon; native_flags=-DCOB_USE_NEON=1 ;;
     *) exit 2 ;;
 esac
@@ -41,9 +41,29 @@ renames=""
 for fn in sgemm_rowmajor sgemm_ref_rowmajor sgemm_pack_a sgemm_free_packed_a sgemm_pack_b sgemm_free_packed_b sgemm_rowmajor_packed_b sgemm_rowmajor_packed_ab; do
     renames="$renames -Dcob_$fn=baseline_$fn"
 done
-for mode in "$native_path" plain-c-autovec; do
+modes="$native_path plain-c-autovec"
+if [ "$expected_arch" = x86_64 ]; then
+    cat > "$stage/isa.c" <<'ISA'
+#include <stdio.h>
+int main(void) {
+    int fma=!!__builtin_cpu_supports("fma"), avx2=!!__builtin_cpu_supports("avx2");
+    printf("runtime_fma=%d runtime_avx2=%d runtime_avx512f=%d\n", fma, avx2, !!__builtin_cpu_supports("avx512f"));
+    return fma && avx2 ? 0 : 1;
+}
+ISA
+    gcc -O2 "$stage/isa.c" -o "$stage/isa"
+    if "$stage/isa" >> "$out/host.txt"; then modes="$modes forced-avx2-smoke"; fi
+fi
+for mode in $modes; do
     feature=
-    if [ "$mode" = "$native_path" ]; then feature=$native_flags; fi
+    case "$mode" in
+        "$native_path") feature=$native_flags ;;
+        plain-c-autovec) feature=-DCOB_DISABLE_X86_SIMD=1 ;;
+        forced-avx2-smoke)
+            grep -q 'COB_DISABLE_X86_AVX512' src/gemm.c || { echo "AVX2-only switch missing"; exit 1; }
+            feature="-DCOB_DISABLE_X86_AVX512=1 -mno-avx512f"
+            ;;
+    esac
     # shellcheck disable=SC2086
     gcc $FLAGS $feature -Iinclude $renames -c "$stage/base.c" -o "$stage/base.o"
     # shellcheck disable=SC2086
@@ -51,8 +71,12 @@ for mode in "$native_path" plain-c-autovec; do
     # shellcheck disable=SC2046
     gcc -O2 -std=c11 -Wall -Wextra -Wpedantic -Iinclude $(pkg-config --cflags openblas) \
         tools/native-gemm/paired.c "$stage/base.o" "$stage/candidate.o" $(pkg-config --libs openblas) -lm -o "$stage/paired"
-    printf 'mode=%s feature=%s flags=%s\n' "$mode" "$feature" "$FLAGS" >> "$out/host.txt"
+    printf 'mode=%s feature=%s flags=%s compiled_candidate_blob=%s\n' "$mode" "$feature" "$FLAGS" "$(git hash-object src/gemm.c)" >> "$out/host.txt"
     ldd "$stage/paired" >> "$out/host.txt"
+    if [ "$mode" = forced-avx2-smoke ]; then
+        "$stage/paired" "$mode" 1 >> "$out/pairs.csv" 2>> "$out/accuracy-and-affinity.log"
+        continue
+    fi
     for block in 1 2; do
         "$stage/paired" "$mode" "$block" >> "$out/pairs.csv" 2>> "$out/accuracy-and-affinity.log"
     done

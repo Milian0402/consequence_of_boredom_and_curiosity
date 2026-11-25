@@ -1,4 +1,4 @@
-name: Native single-thread GEMM measurements
+name: Native single-thread GEMM holdouts
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install --no-install-recommends -y gcc pkg-config libopenblas-pthread-dev
-      - name: Measure both fallback paths
+      - name: Measure native and plain-C holdouts
         env:
           BENCH_ARCH: ${{ matrix.arch }}
         run: |

@@ -100,13 +100,48 @@ static int finite_fp64_check(shape s, const float* a, const float* b, float** ou
             if (!isfinite(diff)) { ok=0; max_abs=INFINITY; break; }
             max_abs=fmax(max_abs,diff); checksum+=out[impl][i];
         }
-        fprintf(stderr,"accuracy,%s,%d,%d,%d,%zu,%.9g,%.12g\n",names[impl],s.m,s.n,s.k,cc,max_abs,checksum);
+        fprintf(stderr,"accuracy_full,%s,%d,%d,%d,%zu,%.9g,%.12g\n",names[impl],s.m,s.n,s.k,cc,max_abs,checksum);
         if (max_abs>0.002) ok=0;
     }
     free(cd); return ok;
 }
 
-static int measure(shape s, const char* mode, int block, int calls)
+/* Check all FP32 results for finiteness and compare the two outputs in
+   full. Independently recompute 256 stratified output cells in FP64. */
+static int sampled_fp64_check(shape s,const float* a,const float* b,float** out)
+{
+    const size_t count=(size_t)s.m*s.n;
+    enum { checks=256 };
+    double sum[3]={0}, max_abs[3]={0}, max_diff=0;
+    int ok=1;
+    for (size_t cell=0;cell<count;++cell) {
+        for (int impl=1;impl<=2;++impl) {
+            if (!isfinite(out[impl][cell])) ok=0;
+            sum[impl]+=out[impl][cell];
+        }
+        max_diff=fmax(max_diff,fabs((double)out[1][cell]-out[2][cell]));
+    }
+    uint32_t sample_seed=0x50cb7c1u;
+    for (size_t j=0;j<checks;++j) {
+        const size_t lo=count*j/checks, hi=count*(j+1)/checks;
+        size_t cell=lo + random_bits(&sample_seed)%(hi-lo);
+        if (j==0) cell=0;
+        if (j+1==checks) cell=count-1;
+        const float* row=a+(cell/(size_t)s.n)*s.k;
+        const float* col=b+(cell%(size_t)s.n);
+        double dot=0;
+        for (int k=0;k<s.k;++k) dot+=(double)row[k]*col[(size_t)k*s.n];
+        for (int impl=1;impl<=2;++impl) max_abs[impl]=fmax(max_abs[impl],fabs(out[impl][cell]-dot));
+    }
+    for (int impl=1;impl<=2;++impl) {
+        fprintf(stderr,"accuracy_sample,%s,%d,%d,%d,%d,%.9g,%.12g,finite_scan=%zu,full_fp32_max_diff=%.9g\n",
+            impl==1?"candidate":"openblas",s.m,s.n,s.k,checks,max_abs[impl],sum[impl],count,max_diff);
+        if (max_abs[impl]>0.002) ok=0;
+    }
+    return ok && max_diff<=0.002;
+}
+
+static int measure(shape s, const char* mode, int block, int calls, int large, int accuracy_only)
 {
     static const gemm implementations[]={baseline_sgemm_rowmajor,cob_sgemm_rowmajor,blas_sgemm};
     static const char* names[]={"baseline","candidate","openblas"};
@@ -114,19 +149,20 @@ static int measure(shape s, const char* mode, int block, int calls)
     size_t ac=(size_t)s.m*s.k, bc=(size_t)s.k*s.n, cc=(size_t)s.m*s.n;
     uint32_t seed=0x12345678u;
     float* a=matrix(s.m,s.k), *b=matrix(s.k,s.n);
-    float* out[]={matrix(s.m,s.n),matrix(s.m,s.n),matrix(s.m,s.n)};
-    int ok=a && b && out[0] && out[1] && out[2];
+    float* out[]={large ? NULL : matrix(s.m,s.n),matrix(s.m,s.n),matrix(s.m,s.n)};
+    int ok=a && b && (large || out[0]) && out[1] && out[2];
     if (!ok) { perror("FP32 matrix"); goto cleanup; }
     fill(a,ac,&seed); fill(b,bc,&seed);
-    for (int impl=0;impl<3;++impl) {
+    for (int impl=large ? 1 : 0;impl<3;++impl) {
         for (size_t i=0;i<cc;++i) out[impl][i]=NAN;
         implementations[impl](s.m,s.n,s.k,a,s.k,b,s.n,out[impl],s.n);
     }
-    ok=finite_fp64_check(s,a,b,out) && single_task();
-    for (int c=0;c<2 && ok;++c) {
+    ok=(large ? sampled_fp64_check(s,a,b,out) : finite_fp64_check(s,a,b,out)) && single_task();
+    if (accuracy_only) goto cleanup;
+    for (int c=0;c<(large ? 1 : 2) && ok;++c) {
         /* Reverse competitor ordering and which implementation goes first in block two. */
-        int competitor=competitors[block==1 ? c : 1-c];
-        for (int pair=0; pair<5 && ok; ++pair) {
+        int competitor=large ? 2 : competitors[block==1 ? c : 1-c];
+        for (int pair=0; pair<(large ? 3 : 5) && ok; ++pair) {
             double times[3]={0};
             int candidate_first=(pair+block-1)&1;
             for (int slot=0;slot<2;++slot) {
@@ -156,14 +192,23 @@ int main(int argc,char** argv)
     if(openblas_get_num_threads()!=1 || !pin_cpu()) return 1;
     fprintf(stderr,"block=%d mode=%s openblas_threads=1 config=%s core=%s seed=0x12345678\n",
         block,argv[1],openblas_get_config(),openblas_get_corename());
-    /* Holdouts fixed during the portable experiment; the final two are controls. */
-    const shape shapes[]={{192,192,192},{383,385,389},{768,768,768},{256,1024,640},
-                          {1024,192,768},{7,11,13},{1,1536,1024}};
-    const int count=(int)(sizeof(shapes)/sizeof(shapes[0]));
-    for (int j=0;j<count;++j) {
-        int i=block==1 ? j : count-1-j;
-        int calls=i==5 ? 2000 : i==6 ? 8 : 1;
-        if (!measure(shapes[i],argv[1],block,calls)) return 1;
+
+    if (!strcmp(argv[1],"forced-avx2-smoke")) {
+        /* One full SIMD tile, ragged output edges, and more than one K panel. */
+        return measure((shape){17,37,273},argv[1],block,1,0,1) ? 0 : 1;
+    }
+    const shape medium[]={{192,192,192},{383,385,389},{768,768,768},{256,1024,640},
+                          {1024,192,768},{7,11,13},{1,1536,1024},{1,2049,1025},{256,256,256}};
+    const shape large[]={{1024,1024,1024},{1536,1536,1536},{2048,2048,2048},
+                         {2049,2112,1984},{4096,4096,4096}};
+    const int nmed=(int)(sizeof(medium)/sizeof(medium[0]));
+    const int nlarge=!strcmp(argv[1],"plain-c-autovec") ? 0 : (int)(sizeof(large)/sizeof(large[0]));
+    for (int j=0;j<nmed+nlarge;++j) {
+        const int i=block==1 ? j : nmed+nlarge-1-j;
+        const int is_large=i>=nmed;
+        const shape s=is_large ? large[i-nmed] : medium[i];
+        const int calls=s.m==7 ? 2000 : s.m==1 ? 8 : 1;
+        if (!measure(s,argv[1],block,calls,is_large,0)) return 1;
     }
     return 0;
 }

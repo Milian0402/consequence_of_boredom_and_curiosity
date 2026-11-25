@@ -9,6 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(__x86_64__) && (defined(__GNUC__) || defined(__clang__)) && !defined(COB_DISABLE_X86_SIMD)
+#include <immintrin.h>
+#define COB_USE_X86_SIMD 1
+#endif
+
+
 #if defined(COB_USE_NEON)
 #include <arm_neon.h>
 #endif
@@ -2008,7 +2014,48 @@ static void cob_sgemm_tile_scalar_packed_b(
     }
 }
 
+#if defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && !defined(COB_USE_APPLE_AMX))
+static int cob_f32_ranges_overlap(const float* x, size_t nx, const float* y, size_t ny)
+{
+    const uintptr_t px = (uintptr_t)x;
+    const uintptr_t py = (uintptr_t)y;
+    return px <= py ? py - px < nx * sizeof(float) : px - py < ny * sizeof(float);
+}
+#endif
+
 #if defined(COB_USE_NEON)
+#if !defined(COB_USE_APPLE_AMX)
+/* Fuse four consecutive K updates while streaming each B row in order. */
+static void cob_sgemm_vector_matrix(
+    int n, int k, const float* a, const float* b, int ldb, float* restrict c)
+{
+    memset(c, 0, (size_t)n * sizeof(float));
+    int p = 0;
+    for (; k - p >= 4; p += 4) {
+        const float* b0 = b + (size_t)p * ldb;
+        const float* b1 = b0 + ldb;
+        const float* b2 = b1 + ldb;
+        const float* b3 = b2 + ldb;
+        const float a0 = a[p], a1 = a[p + 1], a2 = a[p + 2], a3 = a[p + 3];
+        for (int j = 0; j < n; ++j) {
+            float sum = c[j];
+            sum += a0 * b0[j];
+            sum += a1 * b1[j];
+            sum += a2 * b2[j];
+            sum += a3 * b3[j];
+            c[j] = sum;
+        }
+    }
+    for (; p < k; ++p) {
+        const float* bp = b + (size_t)p * ldb;
+        for (int j = 0; j < n; ++j) {
+            c[j] += a[p] * bp[j];
+        }
+    }
+}
+
+#endif
+
 static void cob_sgemm_8x8_neon_packed_b(
     int k,
     const float* a,
@@ -2165,6 +2212,71 @@ static void cob_sgemm_rowmajor_packed_b_fallback(
         row0 = row_end;
     }
 }
+
+#if defined(COB_USE_NEON) && !defined(COB_USE_APPLE_AMX)
+/* B is already zero-padded to eight columns. Reuse both NEON vectors for
+   each group of up to four real input rows, then copy only valid columns. */
+static void cob_sgemm_neon_bottom_tile(int rows, int cols, int k,
+    const float* a, int lda, const float* packed_b, float* c, int ldc)
+{
+    for (int row = 0; row < rows; row += 4) {
+        const int active = cob_min_i32(4, rows - row);
+        const float* a0 = a + (size_t)row * lda;
+        const float* a1 = active >= 2 ? a0 + lda : a0;
+        const float* a2 = active >= 3 ? a1 + lda : a0;
+        const float* a3 = active == 4 ? a2 + lda : a0;
+        float32x4_t lo0 = vdupq_n_f32(0), hi0 = vdupq_n_f32(0);
+        float32x4_t lo1 = vdupq_n_f32(0), hi1 = vdupq_n_f32(0);
+        float32x4_t lo2 = vdupq_n_f32(0), hi2 = vdupq_n_f32(0);
+        float32x4_t lo3 = vdupq_n_f32(0), hi3 = vdupq_n_f32(0);
+        for (int p = 0; p < k; ++p) {
+            const float* b = packed_b + (size_t)p * 8;
+            const float32x4_t lo = vld1q_f32(b);
+            const float32x4_t hi = vld1q_f32(b + 4);
+            lo0 = vfmaq_n_f32(lo0, lo, a0[p]); hi0 = vfmaq_n_f32(hi0, hi, a0[p]);
+            lo1 = vfmaq_n_f32(lo1, lo, a1[p]); hi1 = vfmaq_n_f32(hi1, hi, a1[p]);
+            lo2 = vfmaq_n_f32(lo2, lo, a2[p]); hi2 = vfmaq_n_f32(hi2, hi, a2[p]);
+            lo3 = vfmaq_n_f32(lo3, lo, a3[p]); hi3 = vfmaq_n_f32(hi3, hi, a3[p]);
+        }
+        float tile[4][8];
+        vst1q_f32(tile[0], lo0); vst1q_f32(tile[0] + 4, hi0);
+        vst1q_f32(tile[1], lo1); vst1q_f32(tile[1] + 4, hi1);
+        vst1q_f32(tile[2], lo2); vst1q_f32(tile[2] + 4, hi2);
+        vst1q_f32(tile[3], lo3); vst1q_f32(tile[3] + 4, hi3);
+        for (int r = 0; r < active; ++r) {
+            memcpy(c + (size_t)(row + r) * ldc, tile[r], (size_t)cols * sizeof(float));
+        }
+    }
+}
+
+static void cob_sgemm_neon_ragged(int m, int n, int k,
+    const float* a, int lda, const cob_packed_b_f32* packed, float* c, int ldc)
+{
+    const int full_rows = m / 8 * 8;
+    const int full_cols = n / 8 * 8;
+    if (full_rows && full_cols) {
+        cob_sgemm_rowmajor_packed_b_fallback(full_rows, full_cols, k, a, lda, packed, c, ldc);
+    }
+    if (full_cols < n) {
+        const float* b = packed->data + (size_t)full_cols * k;
+        for (int i = 0; i < full_rows; i += 8) {
+            float tile[64];
+            cob_sgemm_8x8_neon_packed_b(k, a + (size_t)i * lda, lda, b, tile, 8);
+            for (int r = 0; r < 8; ++r) {
+                memcpy(c + (size_t)(i + r) * ldc + full_cols, tile + 8 * r,
+                    (size_t)(n - full_cols) * sizeof(float));
+            }
+        }
+    }
+    if (full_rows < m) {
+        for (int j = 0; j < n; j += 8) {
+            cob_sgemm_neon_bottom_tile(m - full_rows, cob_min_i32(8, n - j), k,
+                a + (size_t)full_rows * lda, lda, packed->data + (size_t)j * k,
+                c + (size_t)full_rows * ldc + j, ldc);
+        }
+    }
+}
+#endif
 
 static void cob_sgemm_rowmajor_packed_ab_fallback(
     int m,
@@ -2748,6 +2860,187 @@ void cob_sgemm_rowmajor_packed_ab(
     cob_sgemm_rowmajor_packed_ab_fallback(m, n, k, packed_a, packed_b, c, ldc);
 }
 
+#if defined(COB_USE_X86_SIMD)
+
+/* 6 independent rows, each holding two 8-float accumulation vectors. */
+__attribute__((target("avx2,fma")))
+static void cob_sgemm_tile_avx2(int k, const float* a, const float* b,
+    float* c, int ldc, int resume)
+{
+    __m256 left[6], right[6];
+    for (int i = 0; i < 6; ++i) {
+        const float* row = c + (size_t)i * ldc;
+        left[i] = resume ? _mm256_loadu_ps(row) : _mm256_setzero_ps();
+        right[i] = resume ? _mm256_loadu_ps(row + 8) : _mm256_setzero_ps();
+    }
+    for (int p = 0; p < k; ++p) {
+        const __m256 b0 = _mm256_load_ps(b);
+        const __m256 b1 = _mm256_load_ps(b + 8);
+#pragma GCC unroll 6
+        for (int i = 0; i < 6; ++i) {
+            const __m256 av = _mm256_set1_ps(a[i]);
+            left[i] = _mm256_fmadd_ps(av, b0, left[i]);
+            right[i] = _mm256_fmadd_ps(av, b1, right[i]);
+        }
+        a += 6;
+        b += 16;
+    }
+    for (int i = 0; i < 6; ++i) {
+        float* row = c + (size_t)i * ldc;
+        _mm256_storeu_ps(row, left[i]);
+        _mm256_storeu_ps(row + 8, right[i]);
+    }
+}
+
+/* 8 independent rows, each holding two 16-float accumulation vectors. */
+__attribute__((target("avx512f,fma")))
+static void cob_sgemm_tile_avx512(int k, const float* a, const float* b,
+    float* c, int ldc, int resume)
+{
+    __m512 left[8], right[8];
+    for (int i = 0; i < 8; ++i) {
+        const float* row = c + (size_t)i * ldc;
+        left[i] = resume ? _mm512_loadu_ps(row) : _mm512_setzero_ps();
+        right[i] = resume ? _mm512_loadu_ps(row + 16) : _mm512_setzero_ps();
+    }
+    for (int p = 0; p < k; ++p) {
+        const __m512 b0 = _mm512_load_ps(b);
+        const __m512 b1 = _mm512_load_ps(b + 16);
+#pragma GCC unroll 8
+        for (int i = 0; i < 8; ++i) {
+            const __m512 av = _mm512_set1_ps(a[i]);
+            left[i] = _mm512_fmadd_ps(av, b0, left[i]);
+            right[i] = _mm512_fmadd_ps(av, b1, right[i]);
+        }
+        a += 8;
+        b += 32;
+    }
+    for (int i = 0; i < 8; ++i) {
+        float* row = c + (size_t)i * ldc;
+        _mm512_storeu_ps(row, left[i]);
+        _mm512_storeu_ps(row + 16, right[i]);
+    }
+}
+typedef void (*cob_sgemm_x86_tile)(int, const float*, const float*, float*, int, int);
+
+/* Only the final row or column tile needs a temporary. No vector read or
+   write may extend into a caller's row padding. */
+static void cob_sgemm_x86_edge(cob_sgemm_x86_tile tile, int k,
+    const float* a, const float* b, float* c, int ldc, int rows, int cols,
+    int nr, int resume)
+{
+    _Alignas(64) float edge[8 * 32] = {0};
+    if (resume) {
+        for (int i = 0; i < rows; ++i) {
+            memcpy(edge + (size_t)i * nr, c + (size_t)i * ldc, (size_t)cols * sizeof(float));
+        }
+    }
+    tile(k, a, b, edge, nr, resume);
+    for (int i = 0; i < rows; ++i) {
+        memcpy(c + (size_t)i * ldc, edge + (size_t)i * nr, (size_t)cols * sizeof(float));
+    }
+}
+
+static void cob_sgemm_x86_pack_b(float* dst, const float* b, int ldb,
+    int k, int n, int nr)
+{
+    for (int j = 0; j < n; j += nr) {
+        const int cols = cob_min_i32(nr, n - j);
+        for (int p = 0; p < k; ++p) {
+            memcpy(dst, b + (size_t)p * ldb + j, (size_t)cols * sizeof(float));
+            if (cols < nr) {
+                memset(dst + cols, 0, (size_t)(nr - cols) * sizeof(float));
+            }
+            dst += nr;
+        }
+    }
+}
+
+static void cob_sgemm_x86_pack_a(float* dst, const float* a, int lda,
+    int m, int k, int mr)
+{
+    for (int i = 0; i < m; i += mr) {
+        const int rows = cob_min_i32(mr, m - i);
+        for (int p = 0; p < k; ++p) {
+            for (int r = 0; r < rows; ++r) {
+                dst[r] = a[(size_t)(i + r) * lda + p];
+            }
+            for (int r = rows; r < mr; ++r) {
+                dst[r] = 0;
+            }
+            dst += mr;
+        }
+    }
+}
+
+static int cob_sgemm_one_shot_x86(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+    if (m < 6 || n < 16 || k < 16 || !__builtin_cpu_supports("fma")) {
+        return 0;
+    }
+    const size_t c_count = (size_t)(m - 1) * ldc + n;
+    if (cob_f32_ranges_overlap(c, c_count, a, (size_t)(m - 1) * lda + k) ||
+        cob_f32_ranges_overlap(c, c_count, b, (size_t)(k - 1) * ldb + n)) {
+        return 0;
+    }
+    int mr, nr, mc;
+    cob_sgemm_x86_tile tile;
+#if !defined(COB_DISABLE_X86_AVX512)
+    if (__builtin_cpu_supports("avx512f")) {
+        mr = 8; nr = 32; mc = 128;
+        tile = cob_sgemm_tile_avx512;
+    } else
+#endif
+    if (__builtin_cpu_supports("avx2")) {
+        mr = 6; nr = 16; mc = 120;
+        tile = cob_sgemm_tile_avx2;
+    } else {
+        return 0;
+    }
+    const int kc = cob_min_i32(k, 256);
+    const int nc = cob_min_i32(n, 256);
+    const int packed_n = (nc + nr - 1) / nr * nr;
+    const int packed_m = (cob_min_i32(m, mc) + mr - 1) / mr * mr;
+    float* pack = cob_aligned_alloc(64, (size_t)(packed_n + packed_m) * kc * sizeof(float));
+    if (pack == NULL) {
+        return 0;
+    }
+    float* pa = pack + (size_t)packed_n * kc;
+    for (int j = 0; j < n;) {
+        const int nb = cob_min_i32(nc, n - j);
+        for (int p = 0; p < k;) {
+            const int kb = cob_min_i32(kc, k - p);
+            cob_sgemm_x86_pack_b(pack, b + (size_t)p * ldb + j, ldb, kb, nb, nr);
+            for (int i = 0; i < m;) {
+                const int mb = cob_min_i32(mc, m - i);
+                cob_sgemm_x86_pack_a(pa, a + (size_t)i * lda + p, lda, mb, kb, mr);
+                for (int col = 0; col < nb; col += nr) {
+                    const float* bp = pack + (size_t)col * kb;
+                    const int cols = cob_min_i32(nr, nb - col);
+                    for (int row = 0; row < mb; row += mr) {
+                        const int rows = cob_min_i32(mr, mb - row);
+                        float* ct = c + (size_t)(i + row) * ldc + j + col;
+                        const float* ap = pa + (size_t)row * kb;
+                        if (rows == mr && cols == nr) {
+                            tile(kb, ap, bp, ct, ldc, p != 0);
+                        } else {
+                            cob_sgemm_x86_edge(tile, kb, ap, bp, ct, ldc, rows, cols, nr, p != 0);
+                        }
+                    }
+                }
+                i += mb;
+            }
+            p += kb;
+        }
+        j += nb;
+    }
+    free(pack);
+    return 1;
+}
+
+#endif
+
 static void cob_sgemm_rowmajor_fallback(
     int m,
     int n,
@@ -2764,12 +3057,27 @@ static void cob_sgemm_rowmajor_fallback(
         return;
     }
 
+#if defined(COB_USE_X86_SIMD)
+    if (cob_sgemm_one_shot_x86(m, n, k, a, lda, b, ldb, c, ldc)) {
+        return;
+    }
+#endif
+
     cob_packed_b_f32 packed_b;
     if (cob_sgemm_pack_b(&packed_b, k, n, b, ldb) != 0) {
         cob_sgemm_ref_rowmajor(m, n, k, a, lda, b, ldb, c, ldc);
         return;
     }
 
+#if defined(COB_USE_NEON) && !defined(COB_USE_APPLE_AMX)
+    if (packed_b.nr == 8 && (m % 8 != 0 || n % 8 != 0) &&
+        !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, a, (size_t)(m - 1) * lda + k) &&
+        !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, b, (size_t)(k - 1) * ldb + n)) {
+        cob_sgemm_neon_ragged(m, n, k, a, lda, &packed_b, c, ldc);
+        cob_sgemm_free_packed_b(&packed_b);
+        return;
+    }
+#endif
     cob_sgemm_rowmajor_packed_b_fallback(m, n, k, a, lda, &packed_b, c, ldc);
     cob_sgemm_free_packed_b(&packed_b);
 }
@@ -3278,6 +3586,16 @@ void cob_sgemm_rowmajor(
         )
 #endif
         ) {
+        return;
+    }
+#endif
+
+#if defined(COB_USE_NEON) && !defined(COB_USE_APPLE_AMX)
+    if (m == 1 && n > 0 && k > 0 && a != NULL && b != NULL && c != NULL &&
+        lda >= k && ldb >= n && ldc >= n &&
+        !cob_f32_ranges_overlap(c, (size_t)n, a, (size_t)k) &&
+        !cob_f32_ranges_overlap(c, (size_t)n, b, (size_t)(k - 1) * ldb + n)) {
+        cob_sgemm_vector_matrix(n, k, a, b, ldb, c);
         return;
     }
 #endif
