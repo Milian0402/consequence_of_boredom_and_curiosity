@@ -1,0 +1,124 @@
+diff --git a/src/cob_hk15.inc b/src/cob_hk15.inc
+index d96e79a..1e6d60e 100644
+--- a/src/cob_hk15.inc
++++ b/src/cob_hk15.inc
+@@ -128,6 +128,110 @@ static int cob_hk15_has_coherent_dots(int m, int n, int k, const float* a, int l
+     return 0;
+ }
+ 
++/* Estimate an upper bound for a sufficient test. The caller checks every
++   element against it; an underestimate cannot admit an unsafe product. */
++static uint32_t cob_hk15_bound(int rows, int cols, const float* x, int ld)
++{
++    uint32_t sample = 0;
++    const int width = cob_min_i32(cols, 16);
++    for (int t = 0; t < 4; ++t) {
++        const float* start = x + ((size_t)(rows-1)*t/3)*ld + (cols-width)*t/3;
++        for (int j = 0; j < width; ++j) {
++            const uint32_t value = cob_hk15_magnitude(start+j);
++            if (value > sample) sample = value;
++        }
++    }
++    if (sample < UINT32_C(0x27800000) || sample > UINT32_C(0x57800000)) return 0;
++    return (sample + UINT32_C(0x007fffff)) & UINT32_C(0x7f800000);
++}
++
++/* One witness per line suffices for the fourfold axis test provided all
++   magnitudes are at most upper. Restrict these searches to short prefixes;
++   the original classifier covers cases whose witnesses lie elsewhere. */
++static int cob_hk15_axis_witnesses(int rows, int cols, const float* x, int ld, uint32_t upper)
++{
++    const uint32_t witness = upper - (UINT32_C(2) << 23);
++    const int across = cob_min_i32(cols, 16), down = cob_min_i32(rows, 16);
++    for (int i = 0; i < rows; ++i) {
++        uint32_t peak = 0;
++        for (int j = 0; j < across; ++j) {
++            const uint32_t mag = cob_hk15_magnitude(x+(size_t)i*ld+j);
++            if (mag > peak) peak = mag;
++        }
++        if (peak < witness) return 0;
++    }
++    for (int j = 0; j < cols; j += 32) {
++        uint32_t peaks[32] = {0};
++        const int count = cob_min_i32(cols-j, 32);
++        for (int i = 0; i < down; ++i) {
++            const float* strip = x + (size_t)i*ld + j;
++            for (int q = 0; q < count; ++q) {
++                const uint32_t mag = cob_hk15_magnitude(strip+q);
++                if (mag > peaks[q]) peaks[q] = mag;
++            }
++        }
++        for (int q = 0; q < count; ++q)
++            if (peaks[q] < witness) return 0;
++    }
++    return 1;
++}
++
++static uint32_t cob_hk15_outside(uint32_t mag, uint32_t upper)
++{
++    /* The subtraction excludes zero and detects subnormals using integer arithmetic. */
++    return mag - UINT32_C(1) < UINT32_C(0x277fffff) || mag > upper;
++}
++
++static int cob_hk15_regular_certificate(int m, int n, int k, const float* a, int lda,
++    const float* b, int ldb, uint32_t* counts)
++{
++    const uint32_t upper_a = cob_hk15_bound(m,k,a,lda), upper_b = cob_hk15_bound(k,n,b,ldb);
++    if (!upper_a || !upper_b || !cob_hk15_axis_witnesses(m,k,a,lda,upper_a) ||
++        !cob_hk15_axis_witnesses(k,n,b,ldb,upper_b)) return 0;
++
++    const uint32_t cutoff_a = upper_a - (UINT32_C(3) << 23);
++    const uint32_t cutoff_b = upper_b - (UINT32_C(3) << 23);
++    const uint32_t needed = (uint32_t)(k - k/4);
++    for (int i = 0; i < m; ++i) {
++        const float* row = a + (size_t)i*lda;
++        uint32_t live = 0, bad = 0;
++        for (int p = 0; p < k; ++p) {
++            const uint32_t mag = cob_hk15_magnitude(row+p);
++            live += mag >= cutoff_a;
++            bad |= cob_hk15_outside(mag,upper_a);
++        }
++        if (bad || live < needed) return 0;
++    }
++    memset(counts, 0, (size_t)n * sizeof(*counts));
++    uint32_t bad = 0;
++    int p = 0;
++    for (; p+3 < k; p += 4) {
++        const float* r0 = b + (size_t)p*ldb;
++        const float* r1 = r0+ldb;
++        const float* r2 = r1+ldb;
++        const float* r3 = r2+ldb;
++        for (int j = 0; j < n; ++j) {
++            const uint32_t x0 = cob_hk15_magnitude(r0+j), x1 = cob_hk15_magnitude(r1+j);
++            const uint32_t x2 = cob_hk15_magnitude(r2+j), x3 = cob_hk15_magnitude(r3+j);
++            counts[j] += (x0 >= cutoff_b) + (x1 >= cutoff_b) + (x2 >= cutoff_b) + (x3 >= cutoff_b);
++            bad |= cob_hk15_outside(x0,upper_b) | cob_hk15_outside(x1,upper_b) |
++                   cob_hk15_outside(x2,upper_b) | cob_hk15_outside(x3,upper_b);
++        }
++    }
++    for (; p < k; ++p) {
++        const float* row = b + (size_t)p*ldb;
++        for (int j = 0; j < n; ++j) {
++            const uint32_t mag = cob_hk15_magnitude(row+j);
++            counts[j] += mag >= cutoff_b;
++            bad |= cob_hk15_outside(mag,upper_b);
++        }
++    }
++    if (bad) return 0;
++    for (int j = 0; j < n; ++j)
++        if (counts[j] < needed) return 0;
++    return 1;
++}
++
+ /* Keep the scan's bounded scratch and stack probing off ordinary SGEMM calls. */
+ #if defined(__GNUC__) || defined(__clang__)
+ __attribute__((noinline))
+@@ -142,6 +246,8 @@ static enum cob_hk15_policy cob_hk15_policy_for(int m, int n, int k,
+     uint32_t columns[3 * 1280 + 2];
+     if ((size_t)n > sizeof(columns)/sizeof(*columns) ||
+         (size_t)k > sizeof(columns)/sizeof(*columns)) return COB_HK15_WIDE;
++    if (m > 0 && n > 0 && k > 0 && cob_hk15_regular_certificate(m,n,k,a,lda,b,ldb,columns))
++        return cob_hk15_has_coherent_dots(m,n,k,a,lda,b,ldb) ? COB_HK15_CLASSICAL : COB_HK15_REGULAR;
+     uint32_t max_a, max_b;
+     enum cob_hk15_policy left = cob_hk15_axis_policy(m, k, a, lda, columns, &max_a);
+     if (left == COB_HK15_WIDE) return left;

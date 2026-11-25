@@ -1,0 +1,3 @@
+PASS 42 guard cases, 23142 FP64-referenced outputs, complete parent guards and route counters.
+PASS 5 correlation fixtures and 25365 FP64-referenced outputs.
+PASS 11 actual size boundaries, 18 residue classes x 6 fixtures, 108 one-shot calls, 55944 FP64 outputs, max_abs_error=2.72706158e-06. Uniform-input routes {'regular': 5, 'classical': 13}.

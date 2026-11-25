@@ -1,0 +1,2 @@
+requested_stack_bytes,observed_stack_bytes,public_calls,outputs_checked,padding_checked
+16384,16384,32,128,64

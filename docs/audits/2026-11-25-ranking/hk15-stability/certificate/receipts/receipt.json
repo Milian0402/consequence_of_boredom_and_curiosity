@@ -1,0 +1,63 @@
+{
+  "base": "85a007747ff54241f47c4754216e0a65748f2847",
+  "original_source_sha256": "533854e4da8d95199190efa14ee960c7d594c3f115225eb11c985741fb5710cc",
+  "candidate_source_sha256": "ca077ce185e05508eaff83edc68d6fdc7690bfb1328b46abcec4f3366ed4cad7",
+  "compiler": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+  "architecture": "arm64",
+  "os": "Darwin",
+  "flags": [
+    "-O3",
+    "-std=c11",
+    "-fPIC",
+    "-DCOB_ENABLE_HK15=1",
+    "-DCOB_ENABLE_HK15_RAGGED=1",
+    "-DCOB_DISABLE_APPLE_SME=1",
+    "-DCOB_DISABLE_APPLE_AMX=1",
+    "-DCOB_USE_NEON=1"
+  ],
+  "base_case_count": 235,
+  "receipt_sha256": "f8682c0c8e6186f23f66cf7593d3d5c8af1e5c9015e60382504c44d3324233af",
+  "production_shape_checks": 12,
+  "rejected_size_before_access": 3,
+  "per_path": {
+    "certificate=0.policy=0": 20,
+    "certificate=0.policy=1": 56,
+    "certificate=0.policy=2": 59,
+    "certificate=1.policy=0": 84,
+    "certificate=1.policy=1": 16
+  },
+  "per_family": {
+    "axis-maxima": 16,
+    "certificate-too-conservative": 2,
+    "coherence-hit-count": 8,
+    "coherence-size": 5,
+    "exact-fallback": 2,
+    "exceptional-precedence": 4,
+    "four-lane-and-tail": 20,
+    "full-scale-policy": 2,
+    "inclusive-eighth": 3,
+    "last-valid-size": 2,
+    "magnitude-bound": 10,
+    "random-axis-boundary": 12,
+    "random-dense": 18,
+    "random-depth-boundary": 32,
+    "random-range-or-prominence-spike": 30,
+    "random-sign-coherence": 15,
+    "sample-misses-bound": 2,
+    "strict-cosine": 6,
+    "three-quarter-ceil": 32,
+    "underestimated-bound": 14
+  },
+  "certificate_stages": {
+    "A-axis-witnesses": 25,
+    "A-bound": 6,
+    "B-axis-witnesses": 17,
+    "B-bound": 10,
+    "certified": 100,
+    "full-range-or-depth": 77
+  },
+  "source_file_sha256": {
+    "check.py": "e7928e35f53022fe8e30eb9dbbedfc0e40a99bd1c77aab210453c5689d8dacb5",
+    "random_cases.py": "42b0b17f0d7e26b2633e1e344032126db95c5c5e3ee421527c4be611e56c4698"
+  }
+}
