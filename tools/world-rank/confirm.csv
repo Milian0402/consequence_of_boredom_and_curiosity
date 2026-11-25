@@ -1,0 +1,12 @@
+family,m,n,k,pad
+small,48,48,48,0
+medium,96,256,512,0
+irregular,97,641,193,5
+short-row,2,3073,1703,3
+short-row,11,513,385,0
+tall-wide,128,4096,256,0
+tall-wide,1024,128,2048,0
+square,2048,2048,2048,0
+square,4608,4608,4608,0
+rectangle,3072,4480,2688,7
+irregular,3713,2049,3329,0

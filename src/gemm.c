@@ -3144,6 +3144,12 @@ static int cob_sgemm_one_shot_x86(int m, int n, int k, const float* a, int lda,
 
 #endif
 
+#if defined(COB_ENABLE_BLOCKED_LEAF) && COB_ENABLE_BLOCKED_LEAF && !defined(COB_USE_APPLE_AMX) && \
+    (defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && defined(__aarch64__)))
+#define COB_USE_BLOCKED_LEAF 1
+#include "cob_blocked_leaf.inc"
+#endif
+
 static void cob_sgemm_rowmajor_fallback(
     int m,
     int n,
@@ -3159,6 +3165,10 @@ static void cob_sgemm_rowmajor_fallback(
         lda < k || ldb < n || ldc < n) {
         return;
     }
+
+#if defined(COB_USE_BLOCKED_LEAF)
+    if (cob_sgemm_one_shot_blocked(m, n, k, a, lda, b, ldb, c, ldc)) return;
+#endif
 
 #if defined(COB_USE_X86_SIMD)
     if (cob_sgemm_one_shot_x86(m, n, k, a, lda, b, ldb, c, ldc)) {
@@ -3970,6 +3980,8 @@ COB_THIN_TARGET static void cob_sgemm_few_rows(int m, int n, int k,
 #undef COB_THIN_FMA
 #endif
 
+#include "cob_small_direct.inc"
+
 void cob_sgemm_rowmajor(
     int m,
     int n,
@@ -3981,6 +3993,18 @@ void cob_sgemm_rowmajor(
     float* c,
     int ldc)
 {
+#if defined(COB_USE_DIRECT_SMALL_GEMM)
+    if (m >= 4 && m <= 128 && n >= 16 && n <= 128 && k > 0 && k <= 128 &&
+        m % 4 == 0 && n % 16 == 0 && a && b && c && lda >= k && ldb >= n && ldc >= n &&
+#if defined(COB_USE_X86_SIMD)
+        __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma") &&
+#endif
+        !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, a, (size_t)(m - 1) * lda + k) &&
+        !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, b, (size_t)(k - 1) * ldb + n)) {
+        cob_sgemm_small_direct(m, n, k, a, lda, b, ldb, c, ldc);
+        return;
+    }
+#endif
 #if defined(COB_USE_SKINNY_GEMM) && !defined(COB_USE_APPLE_AMX)
     if (m >= 2 && m <= COB_SKINNY_GEMM_MAX_ROWS && n >= 256 && k >= 64 &&
         a && b && c && lda >= k && ldb >= n && ldc >= n &&

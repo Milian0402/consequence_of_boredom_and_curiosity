@@ -1,73 +1,59 @@
-name: Native rectangular GEMM comparison
-
+name: One-thread FP32 world ranking
 on:
   push:
     branches: [bench/native-linux-gemm]
-
 permissions:
   contents: read
-
 jobs:
   benchmark:
-    name: Single-thread GEMM on ${{ matrix.arch }}
+    name: Frozen ranking on ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { runner: ubuntu-24.04, arch: x86_64 }
-          - { runner: ubuntu-24.04-arm, arch: aarch64 }
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 40
+          - {runner: ubuntu-24.04, arch: x86_64}
+          - {runner: ubuntu-24.04-arm, arch: aarch64}
+    timeout-minutes: 70
+    env:
+      VENDOR_DIR: ${{ github.workspace }}/../world-rank-vendors
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Install system OpenBLAS development library
+      - name: Prepare system tools and fallback FP64 BLAS
         run: |
           sudo apt-get update -qq
-          sudo apt-get install --no-install-recommends -y gcc pkg-config libopenblas-pthread-dev
-      - name: Verify optional OpenBLAS build and runtime paths
+          sudo apt-get install --no-install-recommends -y gcc gfortran make pkg-config libopenblas-pthread-dev unzip
+          mkdir -p "$VENDOR_DIR" "$RUNNER_TEMP/rank-result"
+      - name: Build pinned OpenBLAS
+        id: openblas
+        continue-on-error: true
+        run: bash tools/world-rank/openblas/build.sh "$VENDOR_DIR"
+      - name: Build AMD AOCL-BLAS
+        id: aocl
+        if: matrix.arch == 'x86_64'
+        continue-on-error: true
+        run: bash tools/world-rank/aocl/build.sh "$VENDOR_DIR"
+      - name: Prepare native vendor BLAS
+        id: vendor
+        continue-on-error: true
+        run: bash tools/world-rank/vendors/build.sh "$VENDOR_DIR"
+      - name: Compare installed candidates against an independent FP64 product
+        run: bash tools/world-rank/run.sh "$RUNNER_TEMP/rank-result" "$VENDOR_DIR"
+      - name: Record incomplete installation as a failed comparison
+        if: >-
+          ${{ !cancelled() && (steps.openblas.outcome == 'failure' ||
+          steps.aocl.outcome == 'failure' || steps.vendor.outcome == 'failure') }}
         run: |
-          if test "$(cat tools/native-gemm/phase.txt)" = skinny-final; then
-            mkdir -p "$RUNNER_TEMP/native-gemm"
-            log="$RUNNER_TEMP/native-gemm/build-verification.log"
-            python3 tools/native-gemm/verify_openblas.py > "$log" 2>&1 || { cat "$log"; exit 1; }
-            cat "$log"
-          fi
-      - name: Measure selected benchmark phase
-        env:
-          BENCH_ARCH: ${{ matrix.arch }}
-        run: |
-          sh tools/native-gemm/run.sh "$BENCH_ARCH" "$RUNNER_TEMP/native-gemm"
-      - name: Run portable regression suites
-        env:
-          BENCH_ARCH: ${{ matrix.arch }}
-        run: |
-          set -eu
-          log="$RUNNER_TEMP/native-gemm/regressions.txt"
-          case "$BENCH_ARCH" in
-            x86_64) set -- -march=native ;;
-            aarch64) set -- -mcpu=native -DCOB_USE_NEON=1 ;;
-          esac
-          for deep in 0 1; do
-            gcc -O3 -std=c11 "$@" -Iinclude -DCOB_ENABLE_PORTABLE_STRASSEN=1 \
-              -DCOB_PORTABLE_STRASSEN_MIN_DIM=128 -DCOB_RECTANGULAR_MIN_HARMONIC_DIM=192 \
-              -DCOB_ENABLE_RECURSIVE_STRASSEN="$deep" -DCOB_RECURSIVE_MIN_DIM=128 -DCOB_RECURSIVE_MAX_DIM=256 \
-              tests/test_portable_strassen.c -lm -o "$RUNNER_TEMP/portable-regression"
-            "$RUNNER_TEMP/portable-regression" >> "$log"
-          done
-      - name: Summarize verified cases
+          echo "At least one requested vendor build was unavailable." > "$RUNNER_TEMP/rank-result/missing-vendor.txt"
+          exit 1
+      - name: Preserve raw measurements and accuracy
         if: ${{ !cancelled() }}
-        run: |
-          if test -f "$RUNNER_TEMP/native-gemm/summary.md"; then
-            cat "$RUNNER_TEMP/native-gemm/summary.md" >> "$GITHUB_STEP_SUMMARY"
-          fi
-      - name: Upload timing, accuracy and host evidence
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: native-gemm-${{ matrix.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/native-gemm
+          name: world-rank-${{ matrix.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/rank-result
           if-no-files-found: warn
           retention-days: 14
