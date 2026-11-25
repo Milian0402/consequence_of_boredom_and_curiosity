@@ -74,7 +74,7 @@ else ifneq ($(COB_ENABLE_OPENBLAS_LEAF),OFF)
 $(error COB_ENABLE_OPENBLAS_LEAF must be ON or OFF)
 endif
 
-NATIVE_KERNEL_HEADERS := src/cob_blocked_leaf.inc src/cob_short_axes.inc src/cob_fused_strassen.inc src/cob_small_x86.inc
+NATIVE_KERNEL_HEADERS := src/cob_blocked_leaf.inc src/cob_short_axes.inc src/cob_fused_strassen.inc src/cob_small_x86.inc src/cob_few_row_panel.inc
 LIB_OBJ := $(BUILD_DIR)/gemm.o
 TEST_BIN := $(BUILD_DIR)/cob_gemm_test
 STRASSEN_TEST_OBJ := $(BUILD_DIR)/gemm_strassen_test.o

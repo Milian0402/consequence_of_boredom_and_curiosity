@@ -3166,6 +3166,7 @@ static int cob_sgemm_one_shot_x86(int m, int n, int k, const float* a, int lda,
 #define COB_USE_NATIVE_PANELS 1
 #include "cob_blocked_leaf.inc"
 #include "cob_short_axes.inc"
+#include "cob_few_row_panel.inc"
 #if defined(COB_USE_X86_SIMD) && ((defined(__AVX2__) && defined(__FMA__)) || \
     (defined(__AVX512F__) && !defined(COB_DISABLE_X86_AVX512)))
 #define COB_USE_SMALL_X86 1
@@ -4227,10 +4228,11 @@ void cob_sgemm_rowmajor(
         return;
     }
 #endif
+#if defined(COB_USE_NATIVE_PANELS)
+    if (cob_try_panel_few_rows(m, n, k, a, lda, b, ldb, c, ldc)) return;
 #if defined(COB_USE_SMALL_X86)
     if (cob_try_small_x86(m, n, k, a, lda, b, ldb, c, ldc)) return;
 #endif
-#if defined(COB_USE_NATIVE_PANELS)
     if (cob_try_short_axes(m, n, k, a, lda, b, ldb, c, ldc)) return;
 #endif
 #if defined(COB_USE_APPLE_AMX) && defined(COB_USE_APPLE_SME) && defined(COB_WITH_STRASSEN_SME_LEAF) && COB_SGEMM_STRASSEN1
