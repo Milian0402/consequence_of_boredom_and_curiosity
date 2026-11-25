@@ -1,0 +1,71 @@
+{
+  "run": 45691645697,
+  "source_revision": "b2cdc6a2985726cb1658dc7cc730b5a1c4b99680",
+  "job_ids": [
+    139478395098,
+    139482794074
+  ],
+  "archive_sha256": [
+    "1759f1ef42a1b7007cc9572b2e1e27c31cdb1a962449f1c168cdc40c43ecf02e",
+    "a2febe87f60232bf4626796ef0aed190f052a93d57e2b2d011723cdb47cfc581"
+  ],
+  "host_record_sha256": [
+    "5ae4482313b70a74ec32f140a78ebee10107d01513ec55416004e307d4355b60",
+    "7c940c53d7d0e32a7da3fbe58fb932c59f275444234a5f7c31ca04192b26b4cd"
+  ],
+  "different_vm_hostnames": true,
+  "vendor_builds": [
+    {
+      "mkl": {
+        "release": "2026.2.1"
+      },
+      "mkl-jit": {
+        "release": "2026.2.1"
+      },
+      "blasfeo": {
+        "source_commit": "e5d1cbbb2f458acd7adb7d9e8a6522416b7e336f",
+        "target": "X64_INTEL_HASWELL"
+      },
+      "aocl": {
+        "source_commit": "e5f75c24bdb8670ff648da7e483eb7e51b28a1db",
+        "source_tag": "6.0.0"
+      },
+      "openblas": {
+        "source_commit": "e0166008be8e466242aa76b2ff75ce3f0fbf574a",
+        "core": "SAPPHIRERAPIDS"
+      },
+      "onednn": {
+        "source_tag": "v3.14.2",
+        "source_commit": "4db284662a37cf46401655b5ee99391d9de52c00",
+        "runtime_version": "3.14.1",
+        "engine_sha256": "9a6c34dd237ed50d5c6b26522ffa2f4f5135e4899a9fef03ea7ea20cba1e1a0a"
+      }
+    },
+    {
+      "mkl": {
+        "release": "2026.2.1"
+      },
+      "mkl-jit": {
+        "release": "2026.2.1"
+      },
+      "blasfeo": {
+        "source_commit": "e5d1cbbb2f458acd7adb7d9e8a6522416b7e336f",
+        "target": "X64_INTEL_HASWELL"
+      },
+      "aocl": {
+        "source_commit": "e5f75c24bdb8670ff648da7e483eb7e51b28a1db",
+        "source_tag": "6.0.0"
+      },
+      "openblas": {
+        "source_commit": "e0166008be8e466242aa76b2ff75ce3f0fbf574a",
+        "core": "COOPERLAKE"
+      },
+      "onednn": {
+        "source_tag": "v3.14.2",
+        "source_commit": "4db284662a37cf46401655b5ee99391d9de52c00",
+        "runtime_version": "3.14.1",
+        "engine_sha256": "9a6c34dd237ed50d5c6b26522ffa2f4f5135e4899a9fef03ea7ea20cba1e1a0a"
+      }
+    }
+  ]
+}

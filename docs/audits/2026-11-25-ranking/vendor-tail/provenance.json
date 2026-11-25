@@ -1,0 +1,18 @@
+{
+  "run": 45691645697,
+  "measured_commit": "b2cdc6a2985726cb1658dc7cc730b5a1c4b99680",
+  "attempts": [
+    {
+      "attempt": 1,
+      "artifact_id": 15059751517,
+      "sha256": "1759f1ef42a1b7007cc9572b2e1e27c31cdb1a962449f1c168cdc40c43ecf02e",
+      "bytes": 362892
+    },
+    {
+      "attempt": 2,
+      "artifact_id": 15058669694,
+      "sha256": "a2febe87f60232bf4626796ef0aed190f052a93d57e2b2d011723cdb47cfc581",
+      "bytes": 365172
+    }
+  ]
+}

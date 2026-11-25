@@ -1,0 +1,639 @@
+{
+  "valid": true,
+  "cpu": "0",
+  "seeds": [
+    348271759,
+    710438957
+  ],
+  "participants": 15,
+  "shapes": 12,
+  "timed_rounds": 1080,
+  "accuracy_fixtures": 720,
+  "fp64_cells": 126912000,
+  "max_abs_error": 2.43740323818e-05,
+  "public_trace_rows": 48,
+  "provenance": {
+    "provider_artifacts": {
+      "openblas": {
+        "libopenblas.a": "5968a836bf7dad48c9b56a57aa17ea91e1c9f9317171c78e794623301af585f1",
+        "libcob_rank_openblas.so": "d69a72b348768e6097d308174ed92d45b2a566fdf872b7b88deea54ccaf9d06a"
+      },
+      "mkl": {
+        "libmkl_intel_lp64.so.3": "eb5a6748ec4e85dc07bd4dbf860af21e86f26647dbba837a94338a8289bf1faa",
+        "libmkl_sequential.so.3": "812f56b8de337f2bc591426462232a4b114a443b284dabfb985e9af0c39f32be",
+        "libmkl_core.so.3": "2b7ed4833447281eec1edee574115f663169dec03d38c7cd2ed8fe2db8c0861e"
+      }
+    },
+    "provider_runtime": {
+      "matched-openblas": [
+        "libcob_rank_openblas.so"
+      ],
+      "matched-mkl": [
+        "libmkl_intel_lp64.so.3"
+      ],
+      "vendor-wide-openblas-full": [
+        "libcob_rank_openblas.so"
+      ],
+      "vendor-wide-openblas-split": [
+        "libcob_rank_openblas.so"
+      ],
+      "vendor-wide-mkl-full": [
+        "libmkl_intel_lp64.so.3"
+      ],
+      "vendor-wide-mkl-split": [
+        "libmkl_intel_lp64.so.3"
+      ]
+    },
+    "hashes": {
+      "registration.sha256": "eac860a798287d2a11ce2ce1dac114129409c5124522fd60fc4f115d3c69e87b",
+      "methods.csv": "f258e6c7f47adedbeced448d2fe72adaf7ba9e3ac90939bac58ca2a6a6c0f5c9",
+      "builds.csv": "2dbd9c42efecb24a236ac13f31bbdf7524ab7e29cb6b41e96146748b8f792f17",
+      "routes.csv": "0fbed8a89181cb42217e5f45faae2a7ee7d3a4acd156695ca99aebf315dbb315",
+      "accuracy.csv": "012037ba311ebddae06bcf5f7691c9cfd849e69003d227f126a932632ec9b07b",
+      "timings.csv": "42f91ca79f00191ae2423911dd581644da59354f6a0aa0d28124b9bcb1409627"
+    }
+  },
+  "candidates": {
+    "vendor-wide-openblas-full": {
+      "original_five": {
+        "shapes": [
+          "fresh-thin-tail",
+          "fresh-wide-tail",
+          "fresh-deeper",
+          "fresh-compact-tile",
+          "fresh-near-footprint"
+        ],
+        "comparisons": {
+          "matched_direct": {
+            "geomean_paired": 0.9717307556836663,
+            "seed_gms": [
+              0.979352715072468,
+              0.9766288302728954
+            ],
+            "shape_wins": 1,
+            "paired_wins": 10,
+            "minimum": 0.9002590110877158
+          },
+          "matched_public_full": {
+            "geomean_paired": 1.0,
+            "seed_gms": [
+              1.0,
+              1.0
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 1.0
+          },
+          "standalone": {
+            "geomean_paired": 0.9976282552000701,
+            "seed_gms": [
+              0.9962316102856659,
+              0.9983505960466228
+            ],
+            "shape_wins": 2,
+            "paired_wins": 12,
+            "minimum": 0.9421952197336334
+          },
+          "stream": {
+            "geomean_paired": 0.8913067056473664,
+            "seed_gms": [
+              0.8882234456105849,
+              0.892094448151459
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.771439367344921
+          },
+          "best_oneshot": {
+            "geomean_paired": 0.8575760363981616,
+            "seed_gms": [
+              0.8597567853643139,
+              0.8615498140811602
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.7311778714469352
+          },
+          "best_any": {
+            "geomean_paired": 0.8497344040340171,
+            "seed_gms": [
+              0.8521854567926708,
+              0.8512774906722316
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.7311778714469352
+          }
+        }
+      },
+      "added_four": {
+        "shapes": [
+          "fresh-tail-1",
+          "fresh-tail-2",
+          "fresh-tail-3",
+          "fresh-tail-4"
+        ],
+        "comparisons": {
+          "matched_direct": {
+            "geomean_paired": 1.0045729369960246,
+            "seed_gms": [
+              0.9855148212384676,
+              1.0096648736221996
+            ],
+            "shape_wins": 3,
+            "paired_wins": 13,
+            "minimum": 0.9997995274243079
+          },
+          "matched_public_full": {
+            "geomean_paired": 1.0,
+            "seed_gms": [
+              1.0,
+              1.0
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 1.0
+          },
+          "standalone": {
+            "geomean_paired": 0.9444587053820084,
+            "seed_gms": [
+              0.9385151788424319,
+              0.9485997690545506
+            ],
+            "shape_wins": 0,
+            "paired_wins": 3,
+            "minimum": 0.9091363859212365
+          },
+          "stream": {
+            "geomean_paired": 0.9202251852155036,
+            "seed_gms": [
+              0.9213587045288111,
+              0.9212988954874362
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.8833059269413379
+          },
+          "best_oneshot": {
+            "geomean_paired": 0.8765713423092361,
+            "seed_gms": [
+              0.8786839118565111,
+              0.8718786369102949
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.8397415055801392
+          },
+          "best_any": {
+            "geomean_paired": 0.861431611859289,
+            "seed_gms": [
+              0.8499223916995291,
+              0.8651837635146232
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.8397415055801392
+          }
+        }
+      },
+      "tail_beats_both": []
+    },
+    "vendor-wide-openblas-split": {
+      "original_five": {
+        "shapes": [
+          "fresh-thin-tail",
+          "fresh-wide-tail",
+          "fresh-deeper",
+          "fresh-compact-tile",
+          "fresh-near-footprint"
+        ],
+        "comparisons": {
+          "matched_direct": {
+            "geomean_paired": 0.9733726174100982,
+            "seed_gms": [
+              0.9692598750192738,
+              0.9819251569873486
+            ],
+            "shape_wins": 1,
+            "paired_wins": 8,
+            "minimum": 0.8976249030083361
+          },
+          "matched_public_full": {
+            "geomean_paired": 1.0041479143755885,
+            "seed_gms": [
+              0.9997264278737603,
+              1.0077356821047503
+            ],
+            "shape_wins": 3,
+            "paired_wins": 14,
+            "minimum": 0.9968070271418645
+          },
+          "standalone": {
+            "geomean_paired": 0.9987419057390299,
+            "seed_gms": [
+              0.993263442492584,
+              1.005211895885762
+            ],
+            "shape_wins": 1,
+            "paired_wins": 11,
+            "minimum": 0.952531458275029
+          },
+          "stream": {
+            "geomean_paired": 0.8959589107400723,
+            "seed_gms": [
+              0.8877746394756661,
+              0.8977443539132223
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.7686418062607906
+          },
+          "best_oneshot": {
+            "geomean_paired": 0.8633762035326967,
+            "seed_gms": [
+              0.8560644253077538,
+              0.868241858670883
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.7341981849481757
+          },
+          "best_any": {
+            "geomean_paired": 0.8537236035615016,
+            "seed_gms": [
+              0.8534409192331069,
+              0.857365415171027
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.7341981849481757
+          }
+        }
+      },
+      "added_four": {
+        "shapes": [
+          "fresh-tail-1",
+          "fresh-tail-2",
+          "fresh-tail-3",
+          "fresh-tail-4"
+        ],
+        "comparisons": {
+          "matched_direct": {
+            "geomean_paired": 0.9906465050980265,
+            "seed_gms": [
+              0.9707575098886957,
+              0.9994489324808891
+            ],
+            "shape_wins": 1,
+            "paired_wins": 8,
+            "minimum": 0.9736594498755899
+          },
+          "matched_public_full": {
+            "geomean_paired": 0.9861254641601824,
+            "seed_gms": [
+              0.9759278658288915,
+              0.9901951476397665
+            ],
+            "shape_wins": 1,
+            "paired_wins": 6,
+            "minimum": 0.969732194806038
+          },
+          "standalone": {
+            "geomean_paired": 0.9339365702732509,
+            "seed_gms": [
+              0.9203357726526842,
+              0.9396819759846627
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.9191817778896761
+          },
+          "stream": {
+            "geomean_paired": 0.9077152017559318,
+            "seed_gms": [
+              0.9001498842203224,
+              0.9088683621951049
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.8901200744299724
+          },
+          "best_oneshot": {
+            "geomean_paired": 0.8673740411277268,
+            "seed_gms": [
+              0.8672611546863543,
+              0.865734235734809
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.8173979052287548
+          },
+          "best_any": {
+            "geomean_paired": 0.8486264928646252,
+            "seed_gms": [
+              0.8351523840423704,
+              0.8587364066628835
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.8173979052287548
+          }
+        }
+      },
+      "tail_beats_both": [
+        "fresh-tail-3"
+      ]
+    },
+    "vendor-wide-mkl-full": {
+      "original_five": {
+        "shapes": [
+          "fresh-thin-tail",
+          "fresh-wide-tail",
+          "fresh-deeper",
+          "fresh-compact-tile",
+          "fresh-near-footprint"
+        ],
+        "comparisons": {
+          "matched_direct": {
+            "geomean_paired": 1.110607412751402,
+            "seed_gms": [
+              1.1117363534390539,
+              1.1156184982606046
+            ],
+            "shape_wins": 2,
+            "paired_wins": 15,
+            "minimum": 0.9915509081633116
+          },
+          "matched_public_full": {
+            "geomean_paired": 1.0,
+            "seed_gms": [
+              1.0,
+              1.0
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 1.0
+          },
+          "standalone": {
+            "geomean_paired": 0.5467102254083486,
+            "seed_gms": [
+              0.5424935503341844,
+              0.5499484909340742
+            ],
+            "shape_wins": 0,
+            "paired_wins": 3,
+            "minimum": 0.4473898037039015
+          },
+          "stream": {
+            "geomean_paired": 0.48849845524134616,
+            "seed_gms": [
+              0.48662889853249663,
+              0.49037061731852327
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.43046922308583446
+          },
+          "best_oneshot": {
+            "geomean_paired": 0.47022674194338315,
+            "seed_gms": [
+              0.4696462138439914,
+              0.47434929803881243
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.4172462431269419
+          },
+          "best_any": {
+            "geomean_paired": 0.4663537069162186,
+            "seed_gms": [
+              0.46676125626149184,
+              0.46911671121152576
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.41710485071214337
+          }
+        }
+      },
+      "added_four": {
+        "shapes": [
+          "fresh-tail-1",
+          "fresh-tail-2",
+          "fresh-tail-3",
+          "fresh-tail-4"
+        ],
+        "comparisons": {
+          "matched_direct": {
+            "geomean_paired": 1.0055760296306482,
+            "seed_gms": [
+              0.9902862756351585,
+              1.0100606697727184
+            ],
+            "shape_wins": 2,
+            "paired_wins": 15,
+            "minimum": 0.9946708692833697
+          },
+          "matched_public_full": {
+            "geomean_paired": 1.0,
+            "seed_gms": [
+              1.0,
+              1.0
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 1.0
+          },
+          "standalone": {
+            "geomean_paired": 0.45789140474390916,
+            "seed_gms": [
+              0.45374954959141667,
+              0.4592526841049582
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.4460142752271692
+          },
+          "stream": {
+            "geomean_paired": 0.44589526153973613,
+            "seed_gms": [
+              0.44569720226576864,
+              0.44458903598377925
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.4343821891826736
+          },
+          "best_oneshot": {
+            "geomean_paired": 0.42584949115279264,
+            "seed_gms": [
+              0.42822273361545354,
+              0.42522217180364136
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.4164997098695141
+          },
+          "best_any": {
+            "geomean_paired": 0.4182224637417983,
+            "seed_gms": [
+              0.4118708023508493,
+              0.4212955826373964
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.41634692700121
+          }
+        }
+      },
+      "tail_beats_both": []
+    },
+    "vendor-wide-mkl-split": {
+      "original_five": {
+        "shapes": [
+          "fresh-thin-tail",
+          "fresh-wide-tail",
+          "fresh-deeper",
+          "fresh-compact-tile",
+          "fresh-near-footprint"
+        ],
+        "comparisons": {
+          "matched_direct": {
+            "geomean_paired": 1.1096591743445654,
+            "seed_gms": [
+              1.1058457532834942,
+              1.1149501330343903
+            ],
+            "shape_wins": 3,
+            "paired_wins": 21,
+            "minimum": 0.9880694561980753
+          },
+          "matched_public_full": {
+            "geomean_paired": 1.0001805374503183,
+            "seed_gms": [
+              1.0013413710152488,
+              0.9969997097776727
+            ],
+            "shape_wins": 3,
+            "paired_wins": 15,
+            "minimum": 0.9926554137811736
+          },
+          "standalone": {
+            "geomean_paired": 0.5471377942211173,
+            "seed_gms": [
+              0.5457075987891743,
+              0.5473444779515065
+            ],
+            "shape_wins": 0,
+            "paired_wins": 2,
+            "minimum": 0.4510847554311893
+          },
+          "stream": {
+            "geomean_paired": 0.48779001755307116,
+            "seed_gms": [
+              0.4851891025568793,
+              0.4893782138641867
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.43068882676442755
+          },
+          "best_oneshot": {
+            "geomean_paired": 0.47093005165199375,
+            "seed_gms": [
+              0.4691174290952287,
+              0.47335423518131076
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.41260057761714813
+          },
+          "best_any": {
+            "geomean_paired": 0.46513819544268453,
+            "seed_gms": [
+              0.4670264576489124,
+              0.46764567793763956
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.41260057761714813
+          }
+        }
+      },
+      "added_four": {
+        "shapes": [
+          "fresh-tail-1",
+          "fresh-tail-2",
+          "fresh-tail-3",
+          "fresh-tail-4"
+        ],
+        "comparisons": {
+          "matched_direct": {
+            "geomean_paired": 1.0082155963138384,
+            "seed_gms": [
+              1.0061085076777194,
+              1.0103022038745413
+            ],
+            "shape_wins": 3,
+            "paired_wins": 17,
+            "minimum": 0.9934385052143699
+          },
+          "matched_public_full": {
+            "geomean_paired": 1.0039391576689796,
+            "seed_gms": [
+              1.0118659367466016,
+              1.0012070117342835
+            ],
+            "shape_wins": 2,
+            "paired_wins": 14,
+            "minimum": 0.9963879964596423
+          },
+          "standalone": {
+            "geomean_paired": 0.46066656471311285,
+            "seed_gms": [
+              0.46240887027224153,
+              0.45961274892691867
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.4561065696701825
+          },
+          "stream": {
+            "geomean_paired": 0.4465669947425225,
+            "seed_gms": [
+              0.4502953715392438,
+              0.44524428227699075
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.4331221720943508
+          },
+          "best_oneshot": {
+            "geomean_paired": 0.427980140576217,
+            "seed_gms": [
+              0.4299819242362919,
+              0.4268347881158191
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.41720310199965616
+          },
+          "best_any": {
+            "geomean_paired": 0.4200165659054471,
+            "seed_gms": [
+              0.41811276965864297,
+              0.42184770168420677
+            ],
+            "shape_wins": 0,
+            "paired_wins": 0,
+            "minimum": 0.41720310199965616
+          }
+        }
+      },
+      "tail_beats_both": [
+        "fresh-tail-2",
+        "fresh-tail-3"
+      ]
+    }
+  }
+}

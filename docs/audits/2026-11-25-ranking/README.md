@@ -30,9 +30,9 @@ Packing one strip of B and reusing it across the output rows accelerated standal
 | Intel Xeon 6975P-C | 1.1200× | 0.935× | 2/5 |
 | AMD EPYC 9V45 | 1.1201× | 0.958× | 0/5 |
 
-The two Intel wins were at 108 × 1728 × 320 and 137 × 2179 × 347. AOCL led the independent field on all five AMD layouts. Each native comparison checked 69,104,464 output elements against FP64. [Intel timings and verifier](intel-stream-b/README.md) · [AMD timings and verifier](amd-stream-b/README.md)
+The two Intel wins were at 108 × 1728 × 320 and 137 × 2179 × 347. AOCL led the independent field on all five AMD layouts. Each native comparison checked 69,104,464 output elements against FP64. [Cross-CPU comparison and verifier](stream-b/README.md) · [Intel timings](stream-b/intel/README.md) · [AMD timings](stream-b/amd/README.md)
 
-A separate test delegated whole products or all but the last few rows to a sequential BLAS. Across eight eligible layouts (four shared with the streamed-B panel and four additional), the whole oneMKL wrapper reached 1.100× the speed of released standalone COB and 1.002× the speed of calling the same oneMKL library directly. Moving the last one to four rows back into COB slowed down both providers on average. [Matched comparisons and single-thread checks](intel-vendor-tail/README.md)
+A separate test delegated whole products or all but the last few rows to a sequential BLAS. Across eight eligible layouts (four shared with the streamed-B panel and four additional), the whole oneMKL wrapper reached 1.100× the speed of prior standalone COB on Intel and 0.464× on AMD. It reached 1.002× the speed of calling the same oneMKL library directly on both hosts. Moving the last one to four rows into COB produced no consistently winning split across providers and CPUs. [Matched comparisons and single-thread checks](vendor-tail/README.md)
 
 ## Removing fourteen Winograd output updates
 

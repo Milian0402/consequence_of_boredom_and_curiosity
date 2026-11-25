@@ -1,0 +1,49 @@
+{
+  "models": [
+    "Intel(R) Xeon(R) 6975P-C",
+    "AMD EPYC 9V45 96-Core Processor"
+  ],
+  "cohorts": {
+    "eight_routed_fresh": [
+      "fresh-wide-tail",
+      "fresh-deeper",
+      "fresh-compact-tile",
+      "fresh-near-footprint",
+      "fresh-tail-1",
+      "fresh-tail-2",
+      "fresh-tail-3",
+      "fresh-tail-4"
+    ],
+    "original_five_holdouts": [
+      "fresh-thin-tail",
+      "fresh-wide-tail",
+      "fresh-deeper",
+      "fresh-compact-tile",
+      "fresh-near-footprint"
+    ],
+    "four_new_tail_holdouts": [
+      "fresh-tail-1",
+      "fresh-tail-2",
+      "fresh-tail-3",
+      "fresh-tail-4"
+    ]
+  },
+  "maximum_abs_fp64": [
+    2.43740323818e-05,
+    2.43740323818e-05
+  ],
+  "cpus": [
+    "0",
+    "0"
+  ],
+  "tail_split_wins_in_both_attempts": {
+    "openblas": [
+      "fresh-tail-3"
+    ],
+    "mkl": []
+  },
+  "provider_hash_matches": {
+    "mkl": true,
+    "openblas": false
+  }
+}

@@ -1,0 +1,670 @@
+{
+  "complete": true,
+  "phase": "stream-b",
+  "panel_sha256": "c05f30a91720c54086c0b6d5e858267501af8488e4af9614555e2f5e12c55bd6",
+  "seeds": [
+    348271759,
+    710438957
+  ],
+  "cpus": [
+    "0"
+  ],
+  "issues": [],
+  "candidates": {
+    "vendor-wide-openblas-full": {
+      "original_five": {
+        "fastest_independent_any": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.8497344040340171,
+          "seed_geometric_means": [
+            0.8521854567926708,
+            0.8512774906722316
+          ],
+          "shape_wins": 0,
+          "minimum": 0.7311778714469352
+        },
+        "fastest_independent_oneshot": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.8575760363981616,
+          "seed_geometric_means": [
+            0.8597567853643139,
+            0.8615498140811602
+          ],
+          "shape_wins": 0,
+          "minimum": 0.7311778714469352
+        },
+        "fastest_standalone": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.8913067056473664,
+          "seed_geometric_means": [
+            0.8882234456105849,
+            0.892094448151459
+          ],
+          "shape_wins": 0,
+          "minimum": 0.771439367344921
+        },
+        "matched_direct": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.9717307556836663,
+          "seed_geometric_means": [
+            0.979352715072468,
+            0.9766288302728954
+          ],
+          "shape_wins": 1,
+          "minimum": 0.9002590110877158
+        },
+        "stream-incumbent": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.9976282552000701,
+          "seed_geometric_means": [
+            0.9962316102856659,
+            0.9983505960466228
+          ],
+          "shape_wins": 2,
+          "minimum": 0.9421952197336334
+        },
+        "stream-native": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.8913067056473664,
+          "seed_geometric_means": [
+            0.8882234456105849,
+            0.892094448151459
+          ],
+          "shape_wins": 0,
+          "minimum": 0.771439367344921
+        }
+      },
+      "four_tail_treatments": {
+        "fastest_independent_any": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.861431611859289,
+          "seed_geometric_means": [
+            0.8499223916995291,
+            0.8651837635146232
+          ],
+          "shape_wins": 0,
+          "minimum": 0.8397415055801392
+        },
+        "fastest_independent_oneshot": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.8765713423092361,
+          "seed_geometric_means": [
+            0.8786839118565111,
+            0.8718786369102949
+          ],
+          "shape_wins": 0,
+          "minimum": 0.8397415055801392
+        },
+        "fastest_standalone": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.9202251852155036,
+          "seed_geometric_means": [
+            0.9213587045288111,
+            0.9212988954874362
+          ],
+          "shape_wins": 0,
+          "minimum": 0.8833059269413379
+        },
+        "matched_direct": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 1.0045729369960246,
+          "seed_geometric_means": [
+            0.9855148212384676,
+            1.0096648736221996
+          ],
+          "shape_wins": 3,
+          "minimum": 0.9997995274243079
+        },
+        "stream-incumbent": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.9444587053820084,
+          "seed_geometric_means": [
+            0.9385151788424319,
+            0.9485997690545506
+          ],
+          "shape_wins": 0,
+          "minimum": 0.9091363859212365
+        },
+        "stream-native": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.9202251852155036,
+          "seed_geometric_means": [
+            0.9213587045288111,
+            0.9212988954874362
+          ],
+          "shape_wins": 0,
+          "minimum": 0.8833059269413379
+        }
+      }
+    },
+    "vendor-wide-openblas-split": {
+      "original_five": {
+        "fastest_independent_any": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.8537236035615016,
+          "seed_geometric_means": [
+            0.8534409192331069,
+            0.857365415171027
+          ],
+          "shape_wins": 0,
+          "minimum": 0.7341981849481757
+        },
+        "fastest_independent_oneshot": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.8633762035326967,
+          "seed_geometric_means": [
+            0.8560644253077538,
+            0.868241858670883
+          ],
+          "shape_wins": 0,
+          "minimum": 0.7341981849481757
+        },
+        "fastest_standalone": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.8959589107400723,
+          "seed_geometric_means": [
+            0.8877746394756661,
+            0.8977443539132223
+          ],
+          "shape_wins": 0,
+          "minimum": 0.7686418062607906
+        },
+        "matched_direct": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.9733726174100982,
+          "seed_geometric_means": [
+            0.9692598750192738,
+            0.9819251569873486
+          ],
+          "shape_wins": 1,
+          "minimum": 0.8976249030083361
+        },
+        "same_provider_full": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 1.0041479143755885,
+          "seed_geometric_means": [
+            0.9997264278737603,
+            1.0077356821047503
+          ],
+          "shape_wins": 3,
+          "minimum": 0.9968070271418645
+        },
+        "stream-incumbent": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.9987419057390299,
+          "seed_geometric_means": [
+            0.993263442492584,
+            1.005211895885762
+          ],
+          "shape_wins": 1,
+          "minimum": 0.952531458275029
+        },
+        "stream-native": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.8959589107400723,
+          "seed_geometric_means": [
+            0.8877746394756661,
+            0.8977443539132223
+          ],
+          "shape_wins": 0,
+          "minimum": 0.7686418062607906
+        }
+      },
+      "four_tail_treatments": {
+        "fastest_independent_any": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.8486264928646252,
+          "seed_geometric_means": [
+            0.8351523840423704,
+            0.8587364066628835
+          ],
+          "shape_wins": 0,
+          "minimum": 0.8173979052287548
+        },
+        "fastest_independent_oneshot": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.8673740411277268,
+          "seed_geometric_means": [
+            0.8672611546863543,
+            0.865734235734809
+          ],
+          "shape_wins": 0,
+          "minimum": 0.8173979052287548
+        },
+        "fastest_standalone": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.9077152017559318,
+          "seed_geometric_means": [
+            0.9001498842203224,
+            0.9088683621951049
+          ],
+          "shape_wins": 0,
+          "minimum": 0.8901200744299724
+        },
+        "matched_direct": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.9906465050980265,
+          "seed_geometric_means": [
+            0.9707575098886957,
+            0.9994489324808891
+          ],
+          "shape_wins": 1,
+          "minimum": 0.9736594498755899
+        },
+        "same_provider_full": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.9861254641601824,
+          "seed_geometric_means": [
+            0.9759278658288915,
+            0.9901951476397665
+          ],
+          "shape_wins": 1,
+          "minimum": 0.969732194806038
+        },
+        "stream-incumbent": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.9339365702732509,
+          "seed_geometric_means": [
+            0.9203357726526842,
+            0.9396819759846627
+          ],
+          "shape_wins": 0,
+          "minimum": 0.9191817778896761
+        },
+        "stream-native": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.9077152017559318,
+          "seed_geometric_means": [
+            0.9001498842203224,
+            0.9088683621951049
+          ],
+          "shape_wins": 0,
+          "minimum": 0.8901200744299724
+        }
+      },
+      "shapes_beating_both_matched_full_and_direct_with_tail_selected": [
+        "fresh-tail-3"
+      ]
+    },
+    "vendor-wide-mkl-full": {
+      "original_five": {
+        "fastest_independent_any": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.4663537069162186,
+          "seed_geometric_means": [
+            0.46676125626149184,
+            0.46911671121152576
+          ],
+          "shape_wins": 0,
+          "minimum": 0.41710485071214337
+        },
+        "fastest_independent_oneshot": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.47022674194338315,
+          "seed_geometric_means": [
+            0.4696462138439914,
+            0.47434929803881243
+          ],
+          "shape_wins": 0,
+          "minimum": 0.4172462431269419
+        },
+        "fastest_standalone": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.48849845524134616,
+          "seed_geometric_means": [
+            0.48662889853249663,
+            0.49037061731852327
+          ],
+          "shape_wins": 0,
+          "minimum": 0.43046922308583446
+        },
+        "matched_direct": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 1.110607412751402,
+          "seed_geometric_means": [
+            1.1117363534390539,
+            1.1156184982606046
+          ],
+          "shape_wins": 2,
+          "minimum": 0.9915509081633116
+        },
+        "stream-incumbent": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.5467102254083486,
+          "seed_geometric_means": [
+            0.5424935503341844,
+            0.5499484909340742
+          ],
+          "shape_wins": 0,
+          "minimum": 0.4473898037039015
+        },
+        "stream-native": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.48849845524134616,
+          "seed_geometric_means": [
+            0.48662889853249663,
+            0.49037061731852327
+          ],
+          "shape_wins": 0,
+          "minimum": 0.43046922308583446
+        }
+      },
+      "four_tail_treatments": {
+        "fastest_independent_any": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.4182224637417983,
+          "seed_geometric_means": [
+            0.4118708023508493,
+            0.4212955826373964
+          ],
+          "shape_wins": 0,
+          "minimum": 0.41634692700121
+        },
+        "fastest_independent_oneshot": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.42584949115279264,
+          "seed_geometric_means": [
+            0.42822273361545354,
+            0.42522217180364136
+          ],
+          "shape_wins": 0,
+          "minimum": 0.4164997098695141
+        },
+        "fastest_standalone": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.44589526153973613,
+          "seed_geometric_means": [
+            0.44569720226576864,
+            0.44458903598377925
+          ],
+          "shape_wins": 0,
+          "minimum": 0.4343821891826736
+        },
+        "matched_direct": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 1.0055760296306482,
+          "seed_geometric_means": [
+            0.9902862756351585,
+            1.0100606697727184
+          ],
+          "shape_wins": 2,
+          "minimum": 0.9946708692833697
+        },
+        "stream-incumbent": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.45789140474390916,
+          "seed_geometric_means": [
+            0.45374954959141667,
+            0.4592526841049582
+          ],
+          "shape_wins": 0,
+          "minimum": 0.4460142752271692
+        },
+        "stream-native": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.44589526153973613,
+          "seed_geometric_means": [
+            0.44569720226576864,
+            0.44458903598377925
+          ],
+          "shape_wins": 0,
+          "minimum": 0.4343821891826736
+        }
+      }
+    },
+    "vendor-wide-mkl-split": {
+      "original_five": {
+        "fastest_independent_any": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.46513819544268453,
+          "seed_geometric_means": [
+            0.4670264576489124,
+            0.46764567793763956
+          ],
+          "shape_wins": 0,
+          "minimum": 0.41260057761714813
+        },
+        "fastest_independent_oneshot": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.47093005165199375,
+          "seed_geometric_means": [
+            0.4691174290952287,
+            0.47335423518131076
+          ],
+          "shape_wins": 0,
+          "minimum": 0.41260057761714813
+        },
+        "fastest_standalone": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.48779001755307116,
+          "seed_geometric_means": [
+            0.4851891025568793,
+            0.4893782138641867
+          ],
+          "shape_wins": 0,
+          "minimum": 0.43068882676442755
+        },
+        "matched_direct": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 1.1096591743445654,
+          "seed_geometric_means": [
+            1.1058457532834942,
+            1.1149501330343903
+          ],
+          "shape_wins": 3,
+          "minimum": 0.9880694561980753
+        },
+        "same_provider_full": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 1.0001805374503183,
+          "seed_geometric_means": [
+            1.0013413710152488,
+            0.9969997097776727
+          ],
+          "shape_wins": 3,
+          "minimum": 0.9926554137811736
+        },
+        "stream-incumbent": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.5471377942211173,
+          "seed_geometric_means": [
+            0.5457075987891743,
+            0.5473444779515065
+          ],
+          "shape_wins": 0,
+          "minimum": 0.4510847554311893
+        },
+        "stream-native": {
+          "shapes": 5,
+          "expected": 5,
+          "complete": true,
+          "geometric_mean": 0.48779001755307116,
+          "seed_geometric_means": [
+            0.4851891025568793,
+            0.4893782138641867
+          ],
+          "shape_wins": 0,
+          "minimum": 0.43068882676442755
+        }
+      },
+      "four_tail_treatments": {
+        "fastest_independent_any": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.4200165659054471,
+          "seed_geometric_means": [
+            0.41811276965864297,
+            0.42184770168420677
+          ],
+          "shape_wins": 0,
+          "minimum": 0.41720310199965616
+        },
+        "fastest_independent_oneshot": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.427980140576217,
+          "seed_geometric_means": [
+            0.4299819242362919,
+            0.4268347881158191
+          ],
+          "shape_wins": 0,
+          "minimum": 0.41720310199965616
+        },
+        "fastest_standalone": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.4465669947425225,
+          "seed_geometric_means": [
+            0.4502953715392438,
+            0.44524428227699075
+          ],
+          "shape_wins": 0,
+          "minimum": 0.4331221720943508
+        },
+        "matched_direct": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 1.0082155963138384,
+          "seed_geometric_means": [
+            1.0061085076777194,
+            1.0103022038745413
+          ],
+          "shape_wins": 3,
+          "minimum": 0.9934385052143699
+        },
+        "same_provider_full": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 1.0039391576689796,
+          "seed_geometric_means": [
+            1.0118659367466016,
+            1.0012070117342835
+          ],
+          "shape_wins": 2,
+          "minimum": 0.9963879964596423
+        },
+        "stream-incumbent": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.46066656471311285,
+          "seed_geometric_means": [
+            0.46240887027224153,
+            0.45961274892691867
+          ],
+          "shape_wins": 0,
+          "minimum": 0.4561065696701825
+        },
+        "stream-native": {
+          "shapes": 4,
+          "expected": 4,
+          "complete": true,
+          "geometric_mean": 0.4465669947425225,
+          "seed_geometric_means": [
+            0.4502953715392438,
+            0.44524428227699075
+          ],
+          "shape_wins": 0,
+          "minimum": 0.4331221720943508
+        }
+      },
+      "shapes_beating_both_matched_full_and_direct_with_tail_selected": [
+        "fresh-tail-2",
+        "fresh-tail-3"
+      ]
+    }
+  }
+}
