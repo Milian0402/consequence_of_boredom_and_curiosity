@@ -1,0 +1,20 @@
+{
+  "x86_64": {
+    "method": "release-mkl-aligned-two",
+    "model": "AMD EPYC 7763 64-Core Processor",
+    "hostname": "runnervmeozm8",
+    "artifact_id": 15052332595,
+    "artifact_digest": "sha256:c0aa600bf81c47d84f0a7a89fe19efdc56c65ef434692972f21677e435b68f32",
+    "run": 45672997916,
+    "revision": "29f5817ed45a728bc012f332fa378dc95c6e7ef5"
+  },
+  "aarch64": {
+    "method": "release-openblas-aligned-two",
+    "model": "Neoverse-N2",
+    "hostname": "runnervmu7lcj",
+    "artifact_id": 15050829617,
+    "artifact_digest": "sha256:8956aa31e1535f0b6cc2d1809a2234270f94376e3f9358453cd12ce64dd60ef6",
+    "run": 45672997916,
+    "revision": "29f5817ed45a728bc012f332fa378dc95c6e7ef5"
+  }
+}

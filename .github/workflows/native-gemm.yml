@@ -111,7 +111,7 @@ jobs:
           path: ${{ runner.temp }}/onednn-input
       - name: Fetch the pinned oneDNN artifact from the aligned-core run
         continue-on-error: true
-        if: needs.phase.outputs.label == 'hk-forms'
+        if: needs.phase.outputs.label == 'hk-forms' || needs.phase.outputs.label == 'release-replay'
         env:
           GH_TOKEN: ${{ github.token }}
           ARCH: ${{ matrix.arch }}
@@ -133,7 +133,7 @@ jobs:
           unzip -q "$RUNNER_TEMP/onednn-hosted.zip" -d "$dest"
       - name: Qualify oneDNN on the CPU that will be measured
         id: onednn
-        if: needs.phase.outputs.label == 'aligned-core' || needs.phase.outputs.label == 'hk-forms'
+        if: needs.phase.outputs.label == 'aligned-core' || needs.phase.outputs.label == 'hk-forms' || needs.phase.outputs.label == 'release-replay'
         continue-on-error: true
         run: |
           cd "$RUNNER_TEMP/onednn-input"
@@ -183,7 +183,7 @@ jobs:
         run: bash tools/world-rank/aocl/build.sh "$VENDOR_DIR"
       - name: Qualify the independent FastMMW Winograd comparator
         id: fastmmw
-        if: needs.phase.outputs.label == 'tile-parent' || needs.phase.outputs.label == 'leaf-wave' || needs.phase.outputs.label == 'aligned-core' || needs.phase.outputs.label == 'hk-forms'
+        if: needs.phase.outputs.label == 'tile-parent' || needs.phase.outputs.label == 'leaf-wave' || needs.phase.outputs.label == 'aligned-core' || needs.phase.outputs.label == 'hk-forms' || needs.phase.outputs.label == 'release-replay'
         continue-on-error: true
         run: |
           set -o pipefail
@@ -194,7 +194,7 @@ jobs:
         run: bash tools/world-rank/vendors/build.sh "$VENDOR_DIR"
       - name: Build LIBXSMM small-shape JIT kernels
         id: libxsmm
-        if: needs.phase.outputs.label != 'aligned-core' && needs.phase.outputs.label != 'hk-forms'
+        if: needs.phase.outputs.label != 'aligned-core' && needs.phase.outputs.label != 'hk-forms' && needs.phase.outputs.label != 'release-replay'
         continue-on-error: true
         run: bash tools/world-rank/libxsmm/build.sh "$VENDOR_DIR"
       - name: Build native BLASFEO and verify its standard SGEMM entry
@@ -202,16 +202,21 @@ jobs:
         if: success()
         continue-on-error: true
         run: |
-          if [[ $(cat tools/world-rank/phase.txt) =~ ^(heldout|tile-screen|tile-confirm|tile-replay|tile-child|tile-parent|leaf-wave|aligned-core|hk-forms)$ ]]; then
+          if [[ $(cat tools/world-rank/phase.txt) =~ ^(heldout|tile-screen|tile-confirm|tile-replay|tile-child|tile-parent|leaf-wave|aligned-core|hk-forms|release-replay)$ ]]; then
             bash tools/world-rank/blasfeo/build.sh "$VENDOR_DIR"
           fi
           if [[ $(cat tools/world-rank/phase.txt) == tile-replay && $(uname -m) == x86_64 ]]; then
             RANK_BLASFEO_ROW_SLAB=48 bash tools/world-rank/blasfeo/build.sh "$VENDOR_DIR"
           fi
       - name: Qualify optional Intel Haswell TBLIS Strassen
-        if: (needs.phase.outputs.label == 'aligned-core' || needs.phase.outputs.label == 'hk-forms') && matrix.arch == 'x86_64'
+        if: (needs.phase.outputs.label == 'aligned-core' || needs.phase.outputs.label == 'hk-forms' || needs.phase.outputs.label == 'release-replay') && matrix.arch == 'x86_64'
         continue-on-error: true
         run: bash tools/world-rank/tblis/build.sh "$VENDOR_DIR"
+      - name: Restore missing pinned release peers
+        id: restore_release
+        if: needs.phase.outputs.label == 'release-replay'
+        continue-on-error: true
+        run: bash tools/world-rank/release-replay/restore-peers.sh "$VENDOR_DIR" "$RUNNER_TEMP/rank-result"
       - name: Compare installed candidates against an independent FP64 product
         run: bash tools/world-rank/run.sh "$RUNNER_TEMP/rank-result" "$VENDOR_DIR"
       - name: Measure whole-call and component times on the same CPU
@@ -227,10 +232,10 @@ jobs:
           fi
       - name: Record incomplete installation as a failed comparison
         if: >-
-          ${{ !cancelled() && (steps.openblas.outcome == 'failure' ||
+          ${{ !cancelled() && ((needs.phase.outputs.label != 'release-replay' && (steps.openblas.outcome == 'failure' ||
           steps.aocl.outcome == 'failure' || steps.vendor.outcome == 'failure' ||
           steps.libxsmm.outcome == 'failure' || steps.blasfeo.outcome == 'failure' ||
-          steps.fastmmw.outcome == 'failure' || steps.onednn.outcome == 'failure') }}
+          steps.fastmmw.outcome == 'failure' || steps.onednn.outcome == 'failure')) || steps.restore_release.outcome == 'failure') }}
         run: |
           echo "At least one requested vendor build was unavailable." > "$RUNNER_TEMP/rank-result/missing-vendor.txt"
           exit 1

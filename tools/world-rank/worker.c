@@ -213,7 +213,7 @@ static void write_reference(shape s,const float* a,const float* b,const char* pa
 }
 static rank_sgemm_fn choose(const char* variant,void* lib)
 {
-    if (!strcmp(variant,"native")) return cob_sgemm_rowmajor;
+    if (!strcmp(variant,"native") || !strcmp(variant,"linked-public")) return cob_sgemm_rowmajor;
     if (!lib) fatal("selected variant requires a vendor plugin");
     if (!strcmp(variant,"direct") || !strcmp(variant,"hk233")) return selected_sgemm;
     if (!strcmp(variant,"hybrid")) return hybrid_sgemm_rowmajor;
@@ -311,8 +311,31 @@ static void measure(shape s,const char* variant,const char* file,const float* a,
     }
     free(original_b); free(original_a); free(c);
 }
+static int exact_public_fixture(char **argv)
+{
+    const uint32_t m=number(argv[2]),n=number(argv[3]),k=number(argv[4]),pad=number(argv[5]);
+    if (!m || !n || !k || m>INT_MAX || n>INT_MAX || k>INT_MAX || pad>INT_MAX-n || pad>INT_MAX-k || !pin_cpu()) return 2;
+    const int lda=(int)(k+pad), ldb=(int)(n+pad);
+    float *a=matrix(m,lda), *b=matrix(k,ldb), *c=matrix(m,ldb);
+    if (!a || !b || !c) fatal("fixture allocation failed");
+    for (uint32_t i=0;i<m;++i) for (uint32_t p=0;p<k;++p) a[(size_t)i*lda+p]=((i^p)&1) ? -1.0f : 1.0f;
+    for (uint32_t p=0;p<k;++p) for (uint32_t j=0;j<n;++j) b[(size_t)p*ldb+j]=((p^j)&1) ? -1.0f : 1.0f;
+    for (uint32_t i=0;i<m;++i) for (uint32_t j=0;j<n;++j) c[(size_t)i*ldb+j]=NAN;
+    set_guards(a,m,k,lda,input_guard); set_guards(b,k,n,ldb,input_guard); set_guards(c,m,n,ldb,output_guard);
+    cob_sgemm_rowmajor(m,n,k,a,lda,b,ldb,c,ldb);
+    int inputs=1, exact=1, one=single_task();
+    for (uint32_t i=0;i<m;++i) for (uint32_t p=0;p<k;++p) inputs &= a[(size_t)i*lda+p]==(((i^p)&1) ? -1.0f : 1.0f);
+    for (uint32_t p=0;p<k;++p) for (uint32_t j=0;j<n;++j) inputs &= b[(size_t)p*ldb+j]==(((p^j)&1) ? -1.0f : 1.0f);
+    for (uint32_t i=0;i<m;++i) for (uint32_t j=0;j<n;++j) exact &= c[(size_t)i*ldb+j]==(((i^j)&1) ? -(float)k : (float)k);
+    int guards=!changed_guards(a,m,k,lda,input_guard) && !changed_guards(b,k,n,ldb,input_guard) && !changed_guards(c,m,n,ldb,output_guard);
+    printf("FIXTURE,checked=%zu,output_exact=%d,inputs_unchanged=%d,guards=%d,threads=%d\n",(size_t)m*n,exact,inputs,guards,one);
+    free(c); free(b); free(a);
+    return !(exact && inputs && guards && one);
+}
+
 int main(int argc,char** argv)
 {
+    if (argc==6 && !strcmp(argv[1],"fixture")) return exact_public_fixture(argv);
     int oracle=argc>1&&!strcmp(argv[1],"oracle");
     if (argc!=(oracle?10:11) || (!oracle && strcmp(argv[1],"measure"))) return 2;
     int arg=2;

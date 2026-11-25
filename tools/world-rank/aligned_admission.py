@@ -19,6 +19,8 @@ def qualified_layouts(args, cases, entries, results, seeds):
     route_files = ["routes.csv", "fastmmw-routes.csv"]
     if args.phase == "aligned-core":
         route_files.append("aligned-routes.csv")
+    if args.phase == "release-replay":
+        route_files += ["release-routes.csv", "aligned-routes.csv"]
     for filename in route_files:
         with (args.out / filename).open() as stream:
             for row in csv.DictReader(stream):
@@ -54,7 +56,7 @@ def qualified_layouts(args, cases, entries, results, seeds):
                 reason = "all_checks_passed"
                 if name == "hk-packed-forms" and not preflight_ok:
                     reason="whole_call_preflight_failed"
-                elif (name.startswith(("cob-","fastmmw-")) or name == "hk-packed-forms") and not routes.get((name,geometry),False):
+                elif (name.startswith(("cob-","fastmmw-","release-")) or name == "hk-packed-forms") and not routes.get((name,geometry),False):
                     reason="route_unqualified"
                 elif gate!=required or len(inspected)!=4:
                     reason="incomplete_or_failed_full_fp64"

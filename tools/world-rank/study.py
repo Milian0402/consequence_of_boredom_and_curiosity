@@ -20,8 +20,9 @@ SEEDS = {"discovery": (19473017, 37292229), "confirm": (6191231, 89743091),
          "tile-screen": (43891307, 96537493), "tile-confirm": (53719481, 94173107),
          "tile-replay": (61003441, 74271079), "tile-child": (89132871, 31570843),
          "tile-parent": (45682013, 79065127), "leaf-wave": (63714293, 91375811),
-         "aligned-core": (48236471, 85109381), "hk-forms": (62490137, 87035629)}
-TILE_PHASES = ("tile-screen", "tile-confirm", "tile-replay", "tile-child", "tile-parent", "leaf-wave", "aligned-core", "hk-forms")
+         "aligned-core": (48236471, 85109381), "hk-forms": (62490137, 87035629),
+         "release-replay": (73194653, 28417069)}
+TILE_PHASES = ("tile-screen", "tile-confirm", "tile-replay", "tile-child", "tile-parent", "leaf-wave", "aligned-core", "hk-forms", "release-replay")
 SHAPE_KEYS = ("family", "m", "n", "k", "pad", "mode")
 SMALL_VENDOR_MAX_MNK = 64 ** 3
 
@@ -174,7 +175,10 @@ def run_block(args, trace, case, index, block, seed, entries, accuracy, timings,
 
         def acquire(name, stack, record):
             variant, so = entries[name]
-            command = [args.worker, "measure", variant, so, reference, *shape_args]
+            if variant == "linked-public":
+                command = [so, "measure", variant, "-", reference, *shape_args]
+            else:
+                command = [args.worker, "measure", variant, so, reference, *shape_args]
             print(f"worker {name} block={block} seed={seed} {shape_args}", file=trace, flush=True)
             proc = stack.enter_context(worker_session(command, trace, args.timeout))
             fields = reply(proc, "READY", args.timeout)
@@ -249,7 +253,7 @@ def summarize(args, cases, entries, small_peers, results, errors, comparisons):
     full_peers = ["openblas", *(spec.partition("=")[0] for spec in args.vendor)]
     for i, case in enumerate(cases):
         names = list(eligible_entries(case, entries, small_peers))
-        if args.phase in ("aligned-core", "hk-forms"):
+        if args.phase in ("aligned-core", "hk-forms", "release-replay"):
             names = [name for name in names if (i, name) in args.qualified_layouts]
         independents = [name for name in names if name in full_peers or name in small_peers]
         if not names or not independents:
@@ -261,7 +265,7 @@ def summarize(args, cases, entries, small_peers, results, errors, comparisons):
             errors.append({**case, "error": "incomplete paired timing rounds"})
             continue
         elapsed = {name: median(obs.values()) for name, obs in labels.items()}
-        one_shot = [name for name in independents if args.phase not in ("aligned-core", "hk-forms") or name != "onednn-cached-plan"]
+        one_shot = [name for name in independents if args.phase not in ("aligned-core", "hk-forms", "release-replay") or name != "onednn-cached-plan"]
         if not one_shot:
             errors.append({**case, "error": "no eligible one-shot independent comparison"})
             continue
@@ -275,7 +279,7 @@ def summarize(args, cases, entries, small_peers, results, errors, comparisons):
         ranking.append({**case, "eligible_independents": independents, "median_seconds": elapsed,
                         "fastest_median": min(names, key=elapsed.__getitem__),
                         "fastest_independent_median": fastest_peer, "speedups_vs_fastest_independent": vs_fastest})
-        if args.phase in ("aligned-core", "hk-forms"):
+        if args.phase in ("aligned-core", "hk-forms", "release-replay"):
             ranking[-1]["fastest_independent_including_cached"] = min(independents, key=elapsed.__getitem__)
             ranking[-1]["fastest_one_shot_median"] = min((n for n in names if n != "onednn-cached-plan"), key=elapsed.__getitem__)
         for name, peer in itertools.permutations(names, 2):
@@ -352,7 +356,7 @@ def main():
             except (RuntimeError, TimeoutError, OSError, ValueError, subprocess.SubprocessError) as exc:
                 errors.append(dict(**case, block=block, seed=seed, error=str(exc)))
                 print(f"measurement failed: {errors[-1]}", file=trace, flush=True)
-        if args.phase in ("aligned-core", "hk-forms"):
+        if args.phase in ("aligned-core", "hk-forms", "release-replay"):
             from aligned_admission import qualified_layouts
             args.qualified_layouts = qualified_layouts(args, cases, entries, results, SEEDS[args.phase])
         summarize(args, cases, entries, small_peers, results, errors, comps)
