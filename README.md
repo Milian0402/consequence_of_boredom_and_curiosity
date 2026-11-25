@@ -21,8 +21,10 @@ and inner dimensions of 96–384 with compact or padded row-major strides.
 Enable it with `-DCOB_ENABLE_APPLE_MEDIUM_WIDE=ON` in CMake or
 `COB_ENABLE_APPLE_MEDIUM_WIDE=ON` in Make. It requires the Apple SME2 leaf
 and a supported 16-lane implementation at runtime. The public entry packs A
-once per call, computes the first output tile while packing each B panel, and
-uses that panel for the remaining rows. The option defaults to off.
+once per call. With 24–32 rows and compact A, B and C, it reads B directly for
+both output row tiles. For padded matrices and 33–55 rows, it computes the
+first output tile while packing each B panel for the remaining rows. The
+option defaults to off.
 
 ## M5 Max benchmark
 
