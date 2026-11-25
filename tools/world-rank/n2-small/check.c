@@ -68,6 +68,17 @@ static int check(int m, int n, int k, int apad, int bpad, int cpad)
 
 int main(void)
 {
+    /* Exercise every remaining height at each routed width/reduction tail. */
+    for (int m=8;m<32;++m)
+        for (int n=8;n<12;++n)
+            for (int kr=0;kr<4;++kr)
+                if (check(m,n + 16*((m+n)%3),32+kr,m%3,n%3,kr+1)) return 1;
+    const int region[][4]={{54,72,67,3},{81,89,61,1},{62,56,82,5},{47,64,57,3},
+        {57,72,77,3},{101,88,107,5},{33,25,51,3},{87,106,93,7},{43,80,69,1}};
+    for (size_t t=0;t<sizeof(region)/sizeof(region[0]);++t) {
+        const int *v=region[t];
+        if (check(v[0],v[1],v[2],v[3],v[3],v[3])) return 1;
+    }
     for (int n = 16; n <= 128; n += 16) {
         if (check(n,n,n,0,0,0) || check(n,n,n,2,1,3)) return 1;
     }

@@ -88,7 +88,7 @@ jobs:
         if: success()
         continue-on-error: true
         run: |
-          if [[ $(cat tools/world-rank/phase.txt) == heldout ]]; then
+          if [[ $(cat tools/world-rank/phase.txt) =~ ^(heldout|tile-screen|tile-confirm)$ ]]; then
             bash tools/world-rank/blasfeo/build.sh "$VENDOR_DIR"
           fi
       - name: Compare installed candidates against an independent FP64 product

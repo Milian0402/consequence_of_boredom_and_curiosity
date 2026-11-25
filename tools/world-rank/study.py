@@ -16,7 +16,9 @@ from contextlib import ExitStack, contextmanager
 
 SEEDS = {"discovery": (19473017, 37292229), "confirm": (6191231, 89743091),
          "small": (40762813, 92862107), "replicate": (59147207, 81729353), "short": (61734017, 39142873),
-         "pilot": (72413951, 86537761), "heldout": (15741487, 84927113)}
+         "pilot": (72413951, 86537761), "heldout": (15741487, 84927113),
+         "tile-screen": (43891307, 96537493), "tile-confirm": (53719481, 94173107)}
+TILE_PHASES = ("tile-screen", "tile-confirm")
 SHAPE_KEYS = ("family", "m", "n", "k", "pad", "mode")
 SMALL_VENDOR_MAX_MNK = 64 ** 3
 
@@ -42,7 +44,7 @@ def read_panel(path):
 
 
 def implementations(args):
-    entries = {"cob-native": ("native", "-")}
+    entries = {} if args.phase in TILE_PHASES else {"cob-native": ("native", "-")}
     peers = [("openblas", str(args.openblas.resolve()))]
     for spec in args.vendor:
         name, sep, lib = spec.partition("=")
@@ -51,7 +53,7 @@ def implementations(args):
         peers.append((name, lib))
     for name, lib in peers:
         variants = [("direct", name)]
-        if args.phase not in ("small", "replicate", "short", "pilot", "heldout"):
+        if args.phase not in ("small", "replicate", "short", "pilot", "heldout", *TILE_PHASES):
             variants.append(("hybrid", f"cob-{name}"))
         for variant, label in variants:
             if label in entries:

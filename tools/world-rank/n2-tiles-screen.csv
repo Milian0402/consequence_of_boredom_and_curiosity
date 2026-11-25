@@ -1,0 +1,7 @@
+family,m,n,k,pad,mode
+square-anchor,56,56,56,0,random
+square-anchor,104,104,104,0,random
+tail,54,72,67,3,random
+tail-plus-one,81,89,61,1,random
+tail,62,56,82,5,random
+unaffected-control,47,64,57,3,random

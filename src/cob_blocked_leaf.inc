@@ -262,8 +262,13 @@ static int cob_blocked_select_kernel(cob_blocked_kernel* kernel)
 #include "cob_first_tile_pack.inc"
 #endif
 
-static void cob_blocked_apply_panel(cob_blocked_kernel kernel, int m, int n, int k,
-    const float* pack_a, const float* pack_b, float* c, int ldc, int resume)
+#if defined(COB_USE_SCOPED_X86_MEDIUM) && defined(COB_ENABLE_X86_EXACT_EDGE) && COB_ENABLE_X86_EXACT_EDGE
+#define COB_USE_X86_EXACT_EDGE 1
+#include "cob_x86_cache_edge.inc"
+#endif
+
+static inline void cob_blocked_apply_panel_impl(cob_blocked_kernel kernel, int m, int n, int k,
+    const float* pack_a, const float* pack_b, float* c, int ldc, int resume, int allow_cache_edge)
 {
     for (int j = 0; j < n; j += kernel.nr) {
         const float* bp = pack_b + (size_t)j*k;
@@ -273,9 +278,23 @@ static void cob_blocked_apply_panel(cob_blocked_kernel kernel, int m, int n, int
             float* cp = c + (size_t)i*ldc + j;
             const int rows = cob_min_i32(kernel.mr, m-i);
             if (rows == kernel.mr && cols == kernel.nr) kernel.tile(k, ap, bp, cp, ldc, resume);
-            else cob_blocked_edge(kernel.tile, k, ap, bp, cp, ldc, rows, cols, kernel.nr, resume);
+            else {
+#if defined(COB_USE_X86_EXACT_EDGE)
+                if (allow_cache_edge &&
+                    cob_x86_cache_edge(kernel,k,ap,bp,cp,ldc,rows,cols,resume)) continue;
+#else
+                (void)allow_cache_edge;
+#endif
+                cob_blocked_edge(kernel.tile,k,ap,bp,cp,ldc,rows,cols,kernel.nr,resume);
+            }
         }
     }
+}
+
+static void cob_blocked_apply_panel(cob_blocked_kernel kernel, int m, int n, int k,
+    const float* pack_a, const float* pack_b, float* c, int ldc, int resume)
+{
+    cob_blocked_apply_panel_impl(kernel,m,n,k,pack_a,pack_b,c,ldc,resume,0);
 }
 
 #if defined(COB_USE_SCOPED_X86_MEDIUM) || (defined(COB_ENABLE_CACHE_PANEL) && COB_ENABLE_CACHE_PANEL)
@@ -285,12 +304,24 @@ static void cob_blocked_apply_panel(cob_blocked_kernel kernel, int m, int n, int
 #ifndef COB_PANEL_COL_TILES
 #define COB_PANEL_COL_TILES 8
 #endif
+#if defined(COB_USE_X86_SIMD) && !defined(COB_DISABLE_X86_AVX512) && defined(COB_ENABLE_DIRECT_B) && COB_ENABLE_DIRECT_B
+#include "cob_direct_b.inc"
+#endif
+#if defined(COB_USE_SCOPED_X86_MEDIUM) && defined(COB_ENABLE_X86_TILE14) && COB_ENABLE_X86_TILE14
+#include "cob_x86_tile14.inc"
+#endif
 /* Pack a bounded slab of A once, then consume consecutive small slabs of B.
    Short-wide products reuse the same packed A for the full output width. */
 static int cob_sgemm_cache_panel(cob_blocked_kernel kernel, int m, int n, int k,
     const float* a, int lda, const float* b, int ldb, float* c, int ldc)
 {
     if (m > 256 || n < 128 || k < 64) return 0;
+#if defined(COB_USE_X86_SIMD) && !defined(COB_DISABLE_X86_AVX512) && defined(COB_ENABLE_DIRECT_B) && COB_ENABLE_DIRECT_B
+    if (kernel.nr == 32) return cob_sgemm_direct_b(m,n,k,a,lda,b,ldb,c,ldc);
+#endif
+#if defined(COB_USE_SCOPED_X86_MEDIUM) && defined(COB_ENABLE_X86_TILE14) && COB_ENABLE_X86_TILE14
+    if (kernel.nr == 32) kernel = (cob_blocked_kernel){14, 32, 112, cob_x86_tile_14x32};
+#endif
     const int mr = kernel.mr, nr = kernel.nr;
     const int depth = cob_min_i32(COB_PANEL_DEPTH, k);
     const int cols = cob_min_i32(COB_PANEL_COL_TILES * nr, n);
@@ -305,7 +336,12 @@ static int cob_sgemm_cache_panel(cob_blocked_kernel kernel, int m, int n, int k,
         for (int j = 0; j < n;) {
             const int nb = cob_min_i32(cols, n - j);
             cob_blocked_pack_b(packed_b, b + (size_t)p * ldb + j, ldb, kb, nb, nr);
-            cob_blocked_apply_panel(kernel, m, nb, kb, packed_a, packed_b, c + j, ldc, p != 0);
+#if defined(COB_USE_SCOPED_X86_MEDIUM) && defined(COB_ENABLE_X86_TILE14) && COB_ENABLE_X86_TILE14
+            if (kernel.mr == 14)
+                cob_x86_apply_14x32(m, nb, kb, packed_a, packed_b, c + j, ldc, p != 0);
+            else
+#endif
+                cob_blocked_apply_panel_impl(kernel, m, nb, kb, packed_a, packed_b, c + j, ldc, p != 0, 1);
             j += nb;
         }
         p += kb;

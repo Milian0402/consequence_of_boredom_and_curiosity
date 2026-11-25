@@ -56,6 +56,78 @@ static inline __attribute__((always_inline)) void n2_full(
 #define N2_INLINE static inline __attribute__((always_inline))
 #define N2_ROWS(F) F(0) F(1) F(2) F(3) F(4) F(5)
 
+#if defined(COB_N2_TAIL_ROWS) && COB_N2_TAIL_ROWS != 0 && COB_N2_TAIL_ROWS != 4
+#if COB_N2_TAIL_ROWS != 6 && COB_N2_TAIL_ROWS != 8
+#error "COB_N2_TAIL_ROWS must be 0, 4, 6, or 8"
+#endif
+
+/* Reduce four K elements per A load. One pair of B vectors serves every
+   active row of this eight-column tile; the outer strip shares no state. */
+#define N2_X8_ROWS(F) F(0) F(1) F(2) F(3) F(4) F(5) F(6) F(7)
+N2_INLINE void n2_lane8_tile(int rows, int k, const float *a, int lda,
+                             const float *b, int ldb, float *c, int ldc)
+{
+#define N2_X8_INIT(r) float32x4_t lo##r=vdupq_n_f32(0), hi##r=vdupq_n_f32(0);
+    N2_X8_ROWS(N2_X8_INIT)
+#undef N2_X8_INIT
+    int p=0;
+    for (; p<=k-4; p+=4) {
+#define N2_X8_A(r) const float32x4_t a##r = rows>(r) ? vld1q_f32(a+(size_t)(r)*lda+p) : vdupq_n_f32(0);
+        N2_X8_ROWS(N2_X8_A)
+#undef N2_X8_A
+#define N2_X8_FMA(r, l) if (rows>(r)) { \
+        lo##r=vfmaq_laneq_f32(lo##r,bl,a##r,l); \
+        hi##r=vfmaq_laneq_f32(hi##r,bh,a##r,l); \
+    }
+#define N2_X8_K(l) do { \
+        const float *bp=b+(size_t)(p+(l))*ldb; \
+        float32x4_t bl=vld1q_f32(bp), bh=vld1q_f32(bp+4); \
+        N2_X8_FMA(0,l) N2_X8_FMA(1,l) N2_X8_FMA(2,l) N2_X8_FMA(3,l) \
+        N2_X8_FMA(4,l) N2_X8_FMA(5,l) N2_X8_FMA(6,l) N2_X8_FMA(7,l) \
+    } while (0)
+        N2_X8_K(0); N2_X8_K(1); N2_X8_K(2); N2_X8_K(3);
+#undef N2_X8_K
+#undef N2_X8_FMA
+    }
+    for (; p<k; ++p) {
+        const float *bp=b+(size_t)p*ldb;
+        const float32x4_t bl=vld1q_f32(bp), bh=vld1q_f32(bp+4);
+#define N2_X8_SCALAR(r) if (rows>(r)) { \
+        float av=a[(size_t)(r)*lda+p]; \
+        lo##r=vfmaq_n_f32(lo##r,bl,av); hi##r=vfmaq_n_f32(hi##r,bh,av); \
+    }
+        N2_X8_ROWS(N2_X8_SCALAR)
+#undef N2_X8_SCALAR
+    }
+#define N2_X8_STORE(r) if (rows>(r)) { \
+        float *cp=c+(size_t)(r)*ldc; \
+        vst1q_f32(cp,lo##r); vst1q_f32(cp+4,hi##r); \
+    }
+    N2_X8_ROWS(N2_X8_STORE)
+#undef N2_X8_STORE
+}
+#undef N2_X8_ROWS
+#if COB_N2_TAIL_ROWS == 8
+/* No need to replay any C values on the bottom edge. Compile each active
+   row count as a constant so both the loads and FMAs disappear for padding. */
+static void n2_lane8_strip(int m,int k,const float *a,int lda,
+                           const float *b,int ldb,float *c,int ldc)
+{
+    int i=0;
+    for (; i<=m-8; i+=8)
+        n2_lane8_tile(8,k,a+(size_t)i*lda,lda,b,ldb,c+(size_t)i*ldc,ldc);
+    if (i==m) return;
+    a+=(size_t)i*lda; c+=(size_t)i*ldc;
+#define N2_X8_REST(r) case r: n2_lane8_tile(r,k,a,lda,b,ldb,c,ldc); break;
+    switch (m-i) {
+        N2_X8_REST(1) N2_X8_REST(2) N2_X8_REST(3) N2_X8_REST(4)
+        N2_X8_REST(5) N2_X8_REST(6) N2_X8_REST(7)
+    }
+#undef N2_X8_REST
+}
+#endif
+#endif
+
 /* Each complete group loads ordinary four-column vectors. For the last
    one-to-three columns, read the final four in-bounds columns and store only
    the valid suffix. The K loop stays identical to a full vector. */
@@ -101,6 +173,10 @@ N2_INLINE void n2_edge(int rows, int vecs, int valid, int k, const float *a, int
 #undef N2_WRITE
 }
 
+#if defined(COB_N2_TAIL_ROWS) && COB_N2_TAIL_ROWS == 4
+#include "cob_n2_tail24.inc"
+#endif
+
 N2_INLINE void n2_strip(int rows, int n, int k, const float *a, int lda,
                         const float *b, int ldb, float *c, int ldc)
 {
@@ -113,7 +189,17 @@ N2_INLINE void n2_strip(int rows, int n, int k, const float *a, int lda,
        A separate narrow group handles one to three leftover columns. */
     const int groups=(n-j)/4;
 #define N2_EDGE(g) case g: n2_edge(rows,g,4,k,a,lda,b+j,ldb,c+j,ldc); break;
-    switch (groups) { N2_EDGE(1) N2_EDGE(2) N2_EDGE(3) }
+    switch (groups) {
+        N2_EDGE(1)
+#if defined(COB_N2_TAIL_ROWS) && COB_N2_TAIL_ROWS == 6
+        case 2: n2_lane8_tile(rows,k,a,lda,b+j,ldb,c+j,ldc); break;
+#elif defined(COB_N2_TAIL_ROWS) && COB_N2_TAIL_ROWS == 8
+        case 2: break; /* n2_lane8_strip computes the entire column strip. */
+#else
+        N2_EDGE(2)
+#endif
+        N2_EDGE(3)
+    }
 #undef N2_EDGE
     j+=groups*4;
     if (j<n) n2_edge(rows,1,n-j,k,a,lda,b+n-4,ldb,c+n-4,ldc);
@@ -131,6 +217,21 @@ static int cob_n2_try_sgemm(int m,int n,int k,const float *a,int lda,const float
         lda<k || ldb<n || ldc<n) return 0;
     const size_t count=(size_t)(m-1)*ldc+n;
     if (n2_overlap(c,count,a,(size_t)(m-1)*lda+k) || n2_overlap(c,count,b,(size_t)(k-1)*ldb+n)) return 0;
+#if defined(COB_N2_TAIL_ROWS) && COB_N2_TAIL_ROWS == 4
+    const int rem = n % 16;
+    if (n >= 24 && rem >= 8 && rem <= 11) {
+        const int prefix = n - rem - 16;
+        n2_tail24_strip(m, rem - 8, k, a, lda, b + prefix, ldb, c + prefix, ldc);
+        if (prefix == 0) return 1;
+        n = prefix;
+    }
+#elif defined(COB_N2_TAIL_ROWS) && COB_N2_TAIL_ROWS == 8
+    const int last=n%16;
+    if (last>=8 && last<=11) {
+        const int first=n-last;
+        n2_lane8_strip(m,k,a,lda,b+first,ldb,c+first,ldc);
+    }
+#endif
     int i=0;
     for (; i<=m-6; i+=6) n2_strip(6,n,k,a+(size_t)i*lda,lda,b,ldb,c+(size_t)i*ldc,ldc);
     if (i==m) return 1;

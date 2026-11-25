@@ -1,0 +1,11 @@
+family,m,n,k,pad
+odd,71,389,263,3
+aligned,64,256,128,0
+aligned,96,640,320,0
+odd,141,923,411,5
+aligned,160,1280,512,0
+deep,223,279,825,7
+aligned,256,2048,768,0
+wide,249,1579,1009,1
+control-above-m,257,773,613,3
+control-below-n,144,127,737,5

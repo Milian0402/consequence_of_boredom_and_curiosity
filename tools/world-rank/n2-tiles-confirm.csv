@@ -1,0 +1,6 @@
+family,m,n,k,pad,mode
+tail,57,72,77,3,random
+tail,101,88,107,5,random
+tail-plus-one,33,25,51,3,random
+tail-plus-two,87,106,93,7,random
+unaffected-control,43,80,69,1,random
