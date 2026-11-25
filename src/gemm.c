@@ -9,12 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if defined(COB_USE_NEON)
-#include <arm_neon.h>
-#endif
-
 #if defined(__APPLE__) && defined(__aarch64__) && !defined(COB_DISABLE_APPLE_AMX)
 #define COB_USE_APPLE_AMX 1
+#endif
+
+#if defined(COB_USE_NEON) || defined(COB_USE_APPLE_AMX)
+#include <arm_neon.h>
 #endif
 
 #if defined(__APPLE__) && defined(__aarch64__) && !defined(COB_DISABLE_APPLE_SME)
@@ -2734,6 +2734,99 @@ static void cob_sgemm_rowmajor_fallback(
 }
 
 #if defined(COB_USE_APPLE_AMX)
+static int cob_f32_ranges_overlap(const float* x, size_t nx, const float* y, size_t ny)
+{
+    const uintptr_t px = (uintptr_t)x;
+    const uintptr_t py = (uintptr_t)y;
+    return px <= py ? py - px < nx * sizeof(float) : px - py < ny * sizeof(float);
+}
+
+/* Fuse four consecutive K updates while streaming each B row in order. */
+static void cob_sgemm_vector_matrix(
+    int n, int k, const float* a, const float* b, int ldb, float* restrict c)
+{
+    memset(c, 0, (size_t)n * sizeof(float));
+    int p = 0;
+    for (; k - p >= 4; p += 4) {
+        const float* b0 = b + (size_t)p * ldb;
+        const float* b1 = b0 + ldb;
+        const float* b2 = b1 + ldb;
+        const float* b3 = b2 + ldb;
+        const float a0 = a[p], a1 = a[p + 1], a2 = a[p + 2], a3 = a[p + 3];
+        for (int j = 0; j < n; ++j) {
+            float sum = c[j];
+            sum += a0 * b0[j];
+            sum += a1 * b1[j];
+            sum += a2 * b2[j];
+            sum += a3 * b3[j];
+            c[j] = sum;
+        }
+    }
+    for (; p < k; ++p) {
+        const float* bp = b + (size_t)p * ldb;
+        for (int j = 0; j < n; ++j) {
+            c[j] += a[p] * bp[j];
+        }
+    }
+}
+
+/* Each lane accumulates an independent dot in the original K order. */
+static inline float32x4_t cob_sgemm_dot_four_rows(float32x4_t sums,
+    const float* a, size_t lda, float32x4_t bv)
+{
+    const float32x4_t a0 = vld1q_f32(a);
+    const float32x4_t a1 = vld1q_f32(a + lda);
+    const float32x4_t a2 = vld1q_f32(a + 2 * lda);
+    const float32x4_t a3 = vld1q_f32(a + 3 * lda);
+    const float32x4x2_t ab01 = vtrnq_f32(a0, a1);
+    const float32x4x2_t ab23 = vtrnq_f32(a2, a3);
+    const float32x4_t col0 = vcombine_f32(vget_low_f32(ab01.val[0]), vget_low_f32(ab23.val[0]));
+    const float32x4_t col1 = vcombine_f32(vget_low_f32(ab01.val[1]), vget_low_f32(ab23.val[1]));
+    const float32x4_t col2 = vcombine_f32(vget_high_f32(ab01.val[0]), vget_high_f32(ab23.val[0]));
+    const float32x4_t col3 = vcombine_f32(vget_high_f32(ab01.val[1]), vget_high_f32(ab23.val[1]));
+    sums = vfmaq_laneq_f32(sums, col0, bv, 0);
+    sums = vfmaq_laneq_f32(sums, col1, bv, 1);
+    sums = vfmaq_laneq_f32(sums, col2, bv, 2);
+    return vfmaq_laneq_f32(sums, col3, bv, 3);
+}
+
+static void cob_sgemm_matrix_vector(
+    int m, int k, const float* a, int lda, const float* b, float* restrict c, int ldc)
+{
+    int i = 0;
+    for (; m - i >= 16; i += 16) {
+        const float* ai = a + (size_t)i * lda;
+        float32x4_t sums[4] = {0};
+        int p = 0;
+        for (; k - p >= 4; p += 4) {
+            const float32x4_t bv = vld1q_f32(b + p);
+            for (int g = 0; g < 4; ++g) {
+                sums[g] = cob_sgemm_dot_four_rows(sums[g], ai + (size_t)(4 * g) * lda + p, lda, bv);
+            }
+        }
+        float tail[16];
+        for (int g = 0; g < 4; ++g) {
+            vst1q_f32(tail + 4 * g, sums[g]);
+        }
+        for (int j = 0; j < 16; ++j) {
+            float sum = tail[j];
+            const float* row = ai + (size_t)j * lda;
+            for (int q = p; q < k; ++q) {
+                sum += row[q] * b[q];
+            }
+            c[(size_t)(i + j) * ldc] = sum;
+        }
+    }
+    for (; i < m; ++i) {
+        const float* ai = a + (size_t)i * lda;
+        float sum = 0.0f;
+        for (int p = 0; p < k; ++p) {
+            sum += ai[p] * b[p];
+        }
+        c[(size_t)i * ldc] = sum;
+    }
+}
+
 static int cob_sgemm_rowmajor_amx(
     int m,
     int n,
@@ -2745,6 +2838,18 @@ static int cob_sgemm_rowmajor_amx(
     float* c,
     int ldc)
 {
+    if (m == 1 || (n == 1 && ldb == 1)) {
+        const size_t c_span = (size_t)(m - 1) * ldc + n;
+        if (!cob_f32_ranges_overlap(c, c_span, a, (size_t)(m - 1) * lda + k) &&
+            !cob_f32_ranges_overlap(c, c_span, b, (size_t)(k - 1) * ldb + n)) {
+            if (n == 1 && ldb == 1) {
+                cob_sgemm_matrix_vector(m, k, a, lda, b, c, ldc);
+            } else {
+                cob_sgemm_vector_matrix(n, k, a, b, ldb, c);
+            }
+            return 1;
+        }
+    }
     const int b_panels = (n + COB_SGEMM_AMX_NR - 1) / COB_SGEMM_AMX_NR;
     const size_t a_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_MR;
     const size_t b_panel_floats = (size_t)k * (size_t)COB_SGEMM_AMX_NR;
@@ -3213,6 +3318,68 @@ static int cob_sgemm_rowmajor_strassen1(
 }
 
 #endif
+
+/* Compact aligned matrices let the existing block kernels reuse panels even
+   when the original rows or output tiles end on an odd boundary. */
+static void cob_copy_padded_rows(
+    float* dst, int padded_rows, int padded_cols,
+    const float* src, int rows, int cols, int ld)
+{
+    for (int i = 0; i < rows; ++i) {
+        float* row = dst + (size_t)i * (size_t)padded_cols;
+        memcpy(row, src + (size_t)i * (size_t)ld, (size_t)cols * sizeof(float));
+        memset(row + cols, 0, (size_t)(padded_cols - cols) * sizeof(float));
+    }
+    memset(dst + (size_t)rows * (size_t)padded_cols, 0,
+        (size_t)(padded_rows - rows) * (size_t)padded_cols * sizeof(float));
+}
+
+static int cob_sgemm_rowmajor_padded(
+    int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+    if ((m % 32 == 0 && n % 32 == 0) || m < 2048 || n < 2048 || k < 2048 ||
+        m > 8192 || n > 8192 || k > 8192) {
+        return 0;
+    }
+    const int smallest = cob_min_i32(cob_min_i32(m, n), k);
+    const int largest = m > n ? (m > k ? m : k) : (n > k ? n : k);
+    if (3 * largest > 4 * smallest) {
+        return 0;
+    }
+
+    const int mp = (m + 63) / 64 * 64;
+    const int np = (n + 63) / 64 * 64;
+    const int kp = (k + 63) / 64 * 64;
+    const int copy_a = m != mp || k != kp || lda != kp;
+    const int copy_b = k != kp || n != np || ldb != np;
+    const size_t a_count = copy_a ? (size_t)mp * (size_t)kp : 0;
+    const size_t b_count = copy_b ? (size_t)kp * (size_t)np : 0;
+    const size_t c_count = (size_t)mp * (size_t)np;
+    float* workspace = cob_aligned_alloc(128, (a_count + b_count + c_count) * sizeof(float));
+    if (workspace == NULL) {
+        return 0;
+    }
+    float* bp = workspace + a_count;
+    float* cp = bp + b_count;
+    if (copy_a) {
+        cob_copy_padded_rows(workspace, mp, kp, a, m, k, lda);
+        a = workspace;
+    }
+    if (copy_b) {
+        cob_copy_padded_rows(bp, kp, np, b, k, n, ldb);
+        b = bp;
+    }
+    /* All padded dimensions are multiples of 64, so this dispatches once
+       to the normal aligned kernel or its existing allocation fallback. */
+    cob_sgemm_rowmajor(mp, np, kp, a, kp, b, np, cp, np);
+    for (int i = 0; i < m; ++i) {
+        memcpy(c + (size_t)i * (size_t)ldc, cp + (size_t)i * (size_t)np,
+            (size_t)n * sizeof(float));
+    }
+    free(workspace);
+    return 1;
+}
 #endif
 
 void cob_sgemm_rowmajor(
@@ -3229,14 +3396,12 @@ void cob_sgemm_rowmajor(
 #if defined(COB_USE_APPLE_AMX)
     if (m > 0 && n > 0 && k > 0 && a != NULL && b != NULL && c != NULL &&
         lda >= k && ldb >= n && ldc >= n &&
+        (cob_sgemm_rowmajor_padded(m, n, k, a, lda, b, ldb, c, ldc) ||
 #if COB_SGEMM_STRASSEN1
-        (cob_sgemm_rowmajor_strassen1(m, n, k, a, lda, b, ldb, c, ldc) ||
+        cob_sgemm_rowmajor_strassen1(m, n, k, a, lda, b, ldb, c, ldc) ||
 #endif
         cob_sgemm_rowmajor_amx(m, n, k, a, lda, b, ldb, c, ldc)
-#if COB_SGEMM_STRASSEN1
-        )
-#endif
-        ) {
+        )) {
         return;
     }
 #endif

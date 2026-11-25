@@ -643,6 +643,22 @@ static const char* cob_one_shot_route(bench_shape shape)
         return "fallback";
     }
 
+    if (n == 1) {
+        return "matrix_vector";
+    }
+    if (m == 1) {
+        return "vector_matrix";
+    }
+
+    if ((m % 32 != 0 || n % 32 != 0) && m >= 2048 && n >= 2048 && k >= 2048 &&
+        m <= 8192 && n <= 8192 && k <= 8192) {
+        const int smallest = m < n ? (m < k ? m : k) : (n < k ? n : k);
+        const int largest = m > n ? (m > k ? m : k) : (n > k ? n : k);
+        if (3 * largest <= 4 * smallest) {
+            return "amx_padded_balanced";
+        }
+    }
+
 #if COB_SGEMM_STRASSEN1
     const int min_dim = m < n ? (m < k ? m : k) : (n < k ? n : k);
     const int max_dim = m > n ? (m > k ? m : k) : (n > k ? n : k);

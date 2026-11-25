@@ -92,7 +92,7 @@ make test
 ```
 
 The test command runs the normal scheduler plus lowered-threshold Strassen test
-configurations. On Apple Silicon, the suite currently checks 648 shapes in each
+configurations. On Apple Silicon, the suite currently checks 657 shapes in each
 configuration.
 
 You can also benchmark rectangular matrices. Arguments use `M x N x K`, where
@@ -157,6 +157,9 @@ matrix shape, layout, and available hardware:
 
 - A scalar reference path handles portability and edge cases.
 - ARM64 systems can use an `8x8` NEON kernel.
+- On Apple Silicon, single-row products stream the rows of `B` directly.
+  Single-column products with a contiguous input vector use a NEON dot-product
+  kernel. Both paths skip packing.
 - Apple Silicon uses a `32x32` AMX kernel and hardware-assisted packing.
 - SME2.1 routes reduce packing work and reuse `B` data on selected shapes.
 - Large balanced inputs use one level of Strassen, reducing eight half-size
@@ -165,7 +168,15 @@ matrix shape, layout, and available hardware:
 Eligible exact square matrices switch to Strassen at `5632`. Other eligible
 balanced matrices switch at `6144`. The route requires contiguous `A` and `B`,
 dimensions divisible by 64, and a largest-to-smallest dimension ratio no
-greater than `4:3`. Everything else stays on the classical AMX/SME scheduler.
+greater than `4:3`.
+
+On Apple Silicon, balanced inputs with all dimensions between 2048 and 8192
+and a partial 32-row or 32-column output tile are copied into a shape rounded
+up to multiples of 64. COB applies the usual classical or Strassen crossover
+to those padded dimensions and copies the active result back to the caller.
+Compatible inputs are reused directly. At `8191³` the three padding buffers
+add 768 MiB of temporary storage on top of the aligned kernel's workspace.
+If that allocation fails, COB uses its existing unpadded implementation.
 
 The Apple AMX path is enabled by default. Define
 `COB_DISABLE_APPLE_AMX=1` at compile time to disable it. Route thresholds and

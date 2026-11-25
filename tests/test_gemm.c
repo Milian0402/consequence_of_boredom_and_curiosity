@@ -320,6 +320,10 @@ int main(void)
     }
     static const int shapes[][3] = {
         {1, 1, 1},
+        {1, 127, 131},
+        {131, 1, 127},
+        {1, 128, 128},
+        {128, 1, 128},
         {2, 3, 5},
         {7, 8, 9},
         {8, 8, 8},
@@ -347,6 +351,8 @@ int main(void)
         failures += test_shape(shapes[i][0], shapes[i][1], shapes[i][2]);
     }
 
+    failures += test_shape_ex(31, 1, 131, 137, 1, 7, 0);
+    failures += test_shape_ex(48, 1, 128, 128, 1, 1, 1);
     failures += test_aligned_shape(32, 32, 32);
     failures += test_aligned_shape(64, 64, 64);
     failures += test_aligned_shape(128, 128, 129);
@@ -976,6 +982,9 @@ int main(void)
     failures += test_packed_matches_direct_aligned_shape(128, 2048, 2048);
     failures += test_packed_matches_direct_aligned_shape(1280, 1280, 1280);
     failures += test_packed_matches_direct_aligned_shape(2048, 2048, 2048);
+    failures += test_packed_matches_direct_aligned_shape(2048, 2049, 2048);
+    failures += test_packed_matches_direct_aligned_shape(2049, 2048, 2048);
+    failures += test_packed_matches_direct_aligned_shape(2049, 2049, 2051);
 #endif
 
     if (failures != 0) {
