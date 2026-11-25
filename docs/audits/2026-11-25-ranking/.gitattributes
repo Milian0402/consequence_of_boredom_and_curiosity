@@ -1,4 +1,5 @@
 # Preserve the bytes checked by each study's SHA-256 manifest on checkout.
 * -text
 *.csv whitespace=trailing-space,space-before-tab,cr-at-eol
-*.patch whitespace=-blank-at-eol
+# A unified diff encodes context lines with a leading space, including Make recipe tabs.
+*.patch -whitespace

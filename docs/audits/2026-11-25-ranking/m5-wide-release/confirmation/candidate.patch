@@ -1,0 +1,117 @@
+--- a/src/gemm.c
++++ b/src/gemm.c
+@@ -4246,6 +4246,8 @@
+ #endif
+ 
+ #if defined(COB_WITH_STRASSEN_SME_LEAF) && defined(COB_USE_APPLE_SME) && defined(COB_USE_APPLE_AMX)
++extern int cob_sgemm_sme_medium_wide(int m, int n, int k, const float *a, int lda,
++    const float *b, int ldb, float *c, int ldc);
+ extern int cob_sgemm_sme_tiny(int m, int n, int k, const float* a, int lda,
+     const float* b, int ldb, float* c, int ldc);
+ #endif
+@@ -4280,6 +4282,11 @@
+     if (cob_n2_try_sgemm(m, n, k, a, lda, b, ldb, c, ldc)) return;
+ #endif
+ #if defined(COB_WITH_STRASSEN_SME_LEAF) && defined(COB_USE_APPLE_SME) && defined(COB_USE_APPLE_AMX)
++    if (m >= 24 && m <= 55 && n >= 1024 && n <= 4096 && k >= 96 && k <= 384 &&
++        a && b && c && lda >= k && ldb >= n && ldc >= n && cob_apple_sme2p1_available() &&
++        !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, a, (size_t)(m - 1) * lda + k) &&
++        !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, b, (size_t)(k - 1) * ldb + n) &&
++        cob_sgemm_sme_medium_wide(m, n, k, a, lda, b, ldb, c, ldc)) return;
+     if (m >= 16 && m <= 96 && n >= 16 && n <= 96 && k >= 16 && k <= 96 &&
+         a && b && c && lda >= k && ldb >= n && ldc >= n && cob_apple_sme2p1_available() &&
+         !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, a, (size_t)(m - 1) * lda + k) &&
+--- a/third_party/maxmulsk/strassen_leaf.c
++++ b/third_party/maxmulsk/strassen_leaf.c
+@@ -1678,3 +1678,91 @@
+         return cob_rect_entry(m, n, k, a, lda, b, ldb, c, ldc);
+     return cob_sme_tiny_legacy(m, n, k, a, lda, b, ldb, c, ldc);
+ }
++
++/* Accumulate a 32 x 32 output block from two adjacent 16-row packed A panels
++   and two adjacent B vectors. C is overwritten once after all K steps. */
++__attribute__((always_inline)) static inline void
++cob_thin_tile32(int k, size_t depth, const float *ap, const float *b, int ldb,
++                int height, int width, float *c, int ldc) __arm_streaming __arm_inout("za")
++{
++    const svbool_t all = svptrue_b32();
++    const svcount_t four = svptrue_c32();
++    const svcount_t cols = svwhilelt_c32_u64(0, (unsigned)width, 2);
++    const float *lower = ap + (size_t)16 * depth;
++    svzero_za();
++#define COB_THIN_STEP(a0, a1, p)                                                       \
++    do {                                                                               \
++        svfloat32x2_t bv = svld1_f32_x2(cols, b + (size_t)(p) * ldb);                   \
++        svmopa_za32_f32_m(0, all, all, a0, svget2_f32(bv, 0));                         \
++        svmopa_za32_f32_m(1, all, all, a0, svget2_f32(bv, 1));                         \
++        svmopa_za32_f32_m(2, all, all, a1, svget2_f32(bv, 0));                         \
++        svmopa_za32_f32_m(3, all, all, a1, svget2_f32(bv, 1));                         \
++    } while (0)
++    int p = 0;
++    for (; p + 4 <= k; p += 4) {
++        svfloat32x4_t av = svld1_f32_x4(four, ap + (size_t)p * 16);
++        svfloat32x4_t dv = svld1_f32_x4(four, lower + (size_t)p * 16);
++        COB_THIN_STEP(svget4_f32(av, 0), svget4_f32(dv, 0), p);
++        COB_THIN_STEP(svget4_f32(av, 1), svget4_f32(dv, 1), p + 1);
++        COB_THIN_STEP(svget4_f32(av, 2), svget4_f32(dv, 2), p + 2);
++        COB_THIN_STEP(svget4_f32(av, 3), svget4_f32(dv, 3), p + 3);
++    }
++    for (; p < k; ++p) {
++        svfloat32_t av = svld1_f32(all, ap + (size_t)p * 16);
++        svfloat32_t dv = svld1_f32(all, lower + (size_t)p * 16);
++        COB_THIN_STEP(av, dv, p);
++    }
++#undef COB_THIN_STEP
++    const svbool_t left = svwhilelt_b32_s32(0, width);
++    const svbool_t right = svwhilelt_b32_s32(16, width);
++    for (int i = 0; i < 16; ++i) {
++        float *dst = c + (size_t)i * ldc;
++        svst1_hor_za32(0, i, left, dst);
++        if (width > 16) svst1_hor_za32(1, i, right, dst + 16);
++    }
++    for (int i = 0; i < height - 16; ++i) {
++        float *dst = c + (size_t)(16 + i) * ldc;
++        svst1_hor_za32(2, i, left, dst);
++        if (width > 16) svst1_hor_za32(3, i, right, dst + 16);
++    }
++}
++
++__arm_locally_streaming __arm_new("za") static int
++cob_thin_wide_run(int m, int n, int k, const float *a, int lda, const float *b,
++                  int ldb, float *c, int ldc, float *packed, size_t depth)
++{
++    if (svcntsw() != 16) return 0;
++    _Alignas(64) float stage[16 * 64];
++    pack_A_block(a, lda, 0, m, 0, k, depth, packed, stage);
++    for (int i = 0; i < m; i += 32) {
++        int height = m - i < 32 ? m - i : 32;
++        const float *ap = packed + (size_t)i * depth;
++        float *out = c + (size_t)i * ldc;
++        if (height > 16) {
++            for (int j = 0; j < n; j += 32) {
++                int width = n - j < 32 ? n - j : 32;
++                cob_thin_tile32(k, depth, ap, b + j, ldb, height, width, out + j, ldc);
++            }
++        } else {
++            for (int j = 0; j < n; j += 64) {
++                int width = n - j < 64 ? n - j : 64;
++                svzero_za();
++                cob_sme_short_k_tile(k, ap, b + j, ldb, svwhilelt_c32_u64(0, (unsigned)width, 4));
++                cob_sme_transfer_short_c(height, width, out + j, ldc, 1);
++            }
++        }
++    }
++    return 1;
++}
++
++int cob_sgemm_sme_medium_wide(int m, int n, int k, const float *a, int lda,
++                             const float *b, int ldb, float *c, int ldc)
++{
++    const size_t depth = ((size_t)k + 63) & ~(size_t)63;
++    const size_t rows = ((size_t)m + 15) & ~(size_t)15;
++    float *packed = aligned_alloc(64, rows * depth * sizeof(*packed));
++    if (!packed) return 0;
++    const int done = cob_thin_wide_run(m, n, k, a, lda, b, ldb, c, ldc, packed, depth);
++    free(packed);
++    return done;
++}

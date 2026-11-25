@@ -1,0 +1,7 @@
+{
+  "release": "a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6",
+  "production_commit": "602a9dddce7e940a282b0716a7b2ca40bd2ad35e",
+  "apple_panel_sha256": "f148a4deb24821290571706133412533000e75cb3872badcdd3bdd6d2cbed251",
+  "production_patch_sha256": "16dba7dfa03920f412d0dfb04020e39813258a1a4862b07462e2a972bf3c122c",
+  "protocol_sha256": "3969d8b02231086874850852796406fd4cd9012fec25d32a94667a245d8625d1"
+}

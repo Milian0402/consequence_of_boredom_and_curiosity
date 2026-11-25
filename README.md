@@ -13,6 +13,7 @@ independent implementation on each layout.
 
 | CPU and workload | Result |
 |---|---|
+| Apple M5 Max, nine wide rectangles with 24–55 rows | The installed Apple SME kernel averaged 4.807× the speed of the same build with the option off and 0.972× the fastest measured external implementation on each layout. [Timings and accuracy](docs/audits/2026-11-25-ranking/m5-wide-release/README.md) |
 | Arm Neoverse N2, two odd large rectangles | Released COB with OpenBLAS leaves beat FastMMW in all twelve paired calls. |
 | Intel Xeon 6975P-C, the same two rectangles | Direct oneMKL beat every released build. At 2039 × 2969 × 3367 it took 221.63 ms versus 233.14 ms for COB. |
 | Intel Xeon 6975P-C and AMD EPYC 9V45, five wide rectangles | Streaming a panel of B improved standalone COB by 1.120× on each CPU. It beat the fastest independent library on two Intel layouts. AMD AOCL won all five on EPYC. |

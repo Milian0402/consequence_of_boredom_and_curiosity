@@ -1,0 +1,25 @@
+{
+  "panel_sha256": "f148a4deb24821290571706133412533000e75cb3872badcdd3bdd6d2cbed251",
+  "seeds": [
+    318741563,
+    1557601921
+  ],
+  "unique_geometry_tables": 752,
+  "rows_checked": 205351,
+  "matching_prior_tables": {
+    "repeat-hardest": 4,
+    "repeat-mid-thin": 4,
+    "repeat-upper-thin": 4,
+    "fresh-24-compact": 0,
+    "fresh-28-narrow": 0,
+    "fresh-31-wide": 0,
+    "fresh-34-odd": 0,
+    "fresh-39-aligned": 0,
+    "fresh-46-deep": 0,
+    "fresh-49-odd": 0,
+    "fresh-52-wide": 0,
+    "fresh-55-aligned": 0,
+    "control-below": 0,
+    "control-above": 0
+  }
+}

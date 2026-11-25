@@ -1,0 +1,13 @@
+Test project $PROJECT/work/world-rank/frontier-wave/apple-thin/package-on
+    Start 1: cob_apple_medium_wide_test
+1/4 Test #1: cob_apple_medium_wide_test .......   Passed    0.37 sec
+    Start 2: cob_gemm_test
+2/4 Test #2: cob_gemm_test ....................   Passed    5.15 sec
+    Start 3: cob_gemm_strassen_test
+3/4 Test #3: cob_gemm_strassen_test ...........   Passed    4.95 sec
+    Start 4: cob_gemm_strassen_square_test
+4/4 Test #4: cob_gemm_strassen_square_test ....   Passed    4.74 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =  15.22 sec

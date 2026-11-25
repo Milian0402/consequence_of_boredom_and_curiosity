@@ -1,0 +1,38 @@
+{
+  "candidate": {
+    "timings": 624,
+    "max_abs": 2.74768146085e-05,
+    "max_threads": 1,
+    "fresh": 9,
+    "gm_release": 4.667209056391777,
+    "gm_peer": 0.9426090105984687,
+    "gm_predecessor": 0.9762696592480574,
+    "gm_apple": 0.9703750989007786,
+    "gm_jit": 0.992689934871784,
+    "wins_both_release": 9,
+    "release_min": 1.727303142578406,
+    "peer_min": 0.8450342910790957,
+    "predecessor_min": 0.8943837467695719,
+    "leading_wins": 0,
+    "opt_in": false,
+    "field": false
+  },
+  "predecessor": {
+    "timings": 624,
+    "max_abs": 2.74768146085e-05,
+    "max_threads": 1,
+    "fresh": 9,
+    "gm_release": 4.84282200168521,
+    "gm_peer": 0.9944257246051228,
+    "gm_predecessor": 1.0,
+    "gm_apple": 1.0204842577242483,
+    "gm_jit": 1.0398311965591904,
+    "wins_both_release": 9,
+    "release_min": 1.9511182933267794,
+    "peer_min": 0.8837829660943194,
+    "predecessor_min": 1.0,
+    "leading_wins": 3,
+    "opt_in": true,
+    "field": false
+  }
+}

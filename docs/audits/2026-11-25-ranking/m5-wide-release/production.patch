@@ -1,0 +1,313 @@
+From 602a9dddce7e940a282b0716a7b2ca40bd2ad35e Mon Sep 17 00:00:00 2001
+From: Milian0402 <max@nordler.se>
+Date: Wed, 25 Nov 2026 21:48:30 +0100
+Subject: [PATCH] Add opt-in Apple SME2 kernel for thin medium-wide SGEMM
+
+---
+ CMakeLists.txt                       | 12 +++++
+ Makefile                             | 23 +++++++--
+ README.md                            |  8 +++
+ src/gemm.c                           | 11 ++++
+ tests/test_apple_medium_wide.c       | 47 +++++++++++++++++
+ third_party/maxmulsk/strassen_leaf.c | 75 ++++++++++++++++++++++++++++
+ 6 files changed, 173 insertions(+), 3 deletions(-)
+ create mode 100644 tests/test_apple_medium_wide.c
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 37503d0..41198af 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -9,6 +9,7 @@ set(CMAKE_C_EXTENSIONS OFF)
+ option(COB_BUILD_TESTS "Build correctness tests" ON)
+ option(COB_BUILD_BENCH "Build benchmark runner" ON)
+ option(COB_ENABLE_HK15 "Use one level of Hopcroft-Kerr on eligible 2-by-3-by-3 products" OFF)
++option(COB_ENABLE_APPLE_MEDIUM_WIDE "Use the SME2 medium-wide FP32 kernel on Apple arm64" OFF)
+ option(COB_ENABLE_N2_SMALL "Use the Neoverse N2 small-matrix kernel on Linux Arm64" OFF)
+ option(COB_ENABLE_X86_STREAM_B "Use runtime-dispatched packed B panels for medium-wide FP32 products on Linux x86-64" OFF)
+ option(COB_ENABLE_X86_MEDIUM_ROUTE "Reuse packed left panels for medium row-wide products on Linux x86-64" OFF)
+@@ -130,6 +131,9 @@ function(cob_configure_strassen_leaf)
+         if(sme_compiles)
+             add_library(cob_strassen_sme_leaf OBJECT "${sme_source}")
+             target_compile_options(cob_strassen_sme_leaf PRIVATE ${sme_flags})
++            if(COB_ENABLE_APPLE_MEDIUM_WIDE)
++                target_compile_definitions(cob_strassen_sme_leaf PRIVATE COB_ENABLE_APPLE_MEDIUM_WIDE=1)
++            endif()
+             return()
+         endif()
+     endif()
+@@ -182,6 +186,11 @@ endif()
+ 
+ if(COB_BUILD_TESTS)
+     enable_testing()
++    if(COB_ENABLE_APPLE_MEDIUM_WIDE AND TARGET cob_strassen_sme_leaf)
++        add_executable(cob_apple_medium_wide_test tests/test_apple_medium_wide.c)
++        target_link_libraries(cob_apple_medium_wide_test PRIVATE cob_matmul)
++        add_test(NAME cob_apple_medium_wide_test COMMAND cob_apple_medium_wide_test)
++    endif()
+     if(TARGET cob_stream_b_avx2)
+         add_executable(cob_stream_b_test tests/test_stream_b.c ${cob_stream_b_objects})
+         target_include_directories(cob_stream_b_test PRIVATE include)
+@@ -288,6 +297,9 @@ foreach(target cob_matmul cob_matmul_strassen_test cob_matmul_strassen_square_te
+         if(COB_ENABLE_HK15)
+             target_compile_definitions(${target} PRIVATE COB_ENABLE_HK15=1)
+         endif()
++        if(COB_ENABLE_APPLE_MEDIUM_WIDE AND TARGET cob_strassen_sme_leaf)
++            target_compile_definitions(${target} PRIVATE COB_ENABLE_APPLE_MEDIUM_WIDE=1)
++        endif()
+         if(COB_ENABLE_N2_SMALL)
+             target_compile_definitions(${target} PRIVATE COB_ENABLE_N2_SMALL=1)
+         endif()
+diff --git a/Makefile b/Makefile
+index fcc6844..d031189 100644
+--- a/Makefile
++++ b/Makefile
+@@ -29,6 +29,7 @@ COB_ENABLE_OPENBLAS_LEAF ?= OFF
+ COB_BLAS_LEAF ?= NONE
+ COB_ENABLE_ALIGNED_WINOGRAD ?= OFF
+ COB_ENABLE_HK15 ?= OFF
++COB_ENABLE_APPLE_MEDIUM_WIDE ?= OFF
+ COB_ENABLE_N2_SMALL ?= OFF
+ COB_ENABLE_X86_MEDIUM_ROUTE ?= OFF
+ COB_ENABLE_X86_STREAM_B ?= OFF
+@@ -146,6 +147,16 @@ else ifneq ($(COB_ENABLE_HK15),OFF)
+ $(error COB_ENABLE_HK15 must be ON or OFF)
+ endif
+ 
++ifeq ($(COB_ENABLE_APPLE_MEDIUM_WIDE),ON)
++ifneq ($(SME_OBJ),)
++APPLE_WIDE_DEFINE := -DCOB_ENABLE_APPLE_MEDIUM_WIDE=1
++SME_DEFINE += $(APPLE_WIDE_DEFINE)
++APPLE_WIDE_TEST := $(BUILD_DIR)/cob_apple_medium_wide_test
++endif
++else ifneq ($(COB_ENABLE_APPLE_MEDIUM_WIDE),OFF)
++$(error COB_ENABLE_APPLE_MEDIUM_WIDE must be ON or OFF)
++endif
++
+ ifeq ($(COB_ENABLE_N2_SMALL),ON)
+ SME_DEFINE += -DCOB_ENABLE_N2_SMALL=1
+ else ifneq ($(COB_ENABLE_N2_SMALL),OFF)
+@@ -200,7 +211,7 @@ $(BUILD_DIR):
+ 
+ # Track each output separately so reconfiguring a partially built directory
+ # works even on versions of Make with one-second file timestamps.
+-SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN) recursive:$(COB_ENABLE_RECURSIVE_STRASSEN) blas:$(leaf_provider) aligned:$(COB_ENABLE_ALIGNED_WINOGRAD) blas-root:$(COB_BLAS_ROOT) n2small:$(COB_ENABLE_N2_SMALL) stream-b:$(COB_ENABLE_X86_STREAM_B) x86-medium:$(COB_ENABLE_X86_MEDIUM_ROUTE) hk15:$(COB_ENABLE_HK15)
++SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN) recursive:$(COB_ENABLE_RECURSIVE_STRASSEN) blas:$(leaf_provider) aligned:$(COB_ENABLE_ALIGNED_WINOGRAD) blas-root:$(COB_BLAS_ROOT) apple-wide:$(COB_ENABLE_APPLE_MEDIUM_WIDE) n2small:$(COB_ENABLE_N2_SMALL) stream-b:$(COB_ENABLE_X86_STREAM_B) x86-medium:$(COB_ENABLE_X86_MEDIUM_ROUTE) hk15:$(COB_ENABLE_HK15)
+ SME_OUTPUTS := $(LIB_OBJ) $(STRASSEN_TEST_OBJ) $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) \
+                $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN) \
+                $(BENCH_BIN) $(CBLAS_BENCH_BIN) $(FORTRAN_BLAS_BENCH_BIN) $(BLAS_LEAF_TEST)
+@@ -213,7 +224,7 @@ $(foreach target,$(SME_OUTPUTS),$(eval $(call cob_track_sme_config,$(target))))
+ save_sme_config = @printf '%s\n' '$(SME_CONFIG)' > "$@.sme-config"
+ 
+ $(BUILD_DIR)/strassen_sme_leaf.o: $(SME_SRC) | $(BUILD_DIR)
+-	$(COB_SME_CC) $(CFLAGS) $(SME_FLAGS) -c $(SME_SRC) -o $@
++	$(COB_SME_CC) $(CFLAGS) $(SME_FLAGS) $(APPLE_WIDE_DEFINE) -c $(SME_SRC) -o $@
+ 	$(save_sme_config)
+ 
+ ifneq ($(STREAM_B_OBJS),)
+@@ -269,12 +280,18 @@ $(BLAS_LEAF_TEST): tests/test_openblas_winograd.c src/gemm.c include/cob_gemm.h
+ 	$(save_sme_config)
+ endif
+ 
+-test: $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN) $(BLAS_LEAF_TEST) $(STREAM_B_TEST)
++ifneq ($(APPLE_WIDE_TEST),)
++$(APPLE_WIDE_TEST): tests/test_apple_medium_wide.c $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) | $(BUILD_DIR)
++	$(CC) $(CFLAGS) $< $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) $(BLAS_LEAF_LIBS) -o $@
++endif
++
++test: $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN) $(BLAS_LEAF_TEST) $(STREAM_B_TEST) $(APPLE_WIDE_TEST)
+ 	$(TEST_BIN)
+ 	$(STRASSEN_TEST_BIN)
+ 	$(STRASSEN_SQUARE_TEST_BIN)
+ 	$(BLAS_LEAF_TEST)
+ 	$(STREAM_B_TEST)
++	$(APPLE_WIDE_TEST)
+ 
+ test-portable-strassen: $(BUILD_DIR)/cob_portable_strassen_test
+ 	$<
+diff --git a/README.md b/README.md
+index fd8019c..e822a83 100644
+--- a/README.md
++++ b/README.md
+@@ -16,6 +16,14 @@ on each Linux CPU. Geometric mean speedups were 1.20× on the M5 Max,
+ [rectangular benchmark audit](docs/audits/2026-11-25-general-gemm.md)
+ gives the external-library comparisons, numerical checks and limits.
+ 
++The optional Apple medium-wide kernel handles 24–55 rows, 1024–4096 columns
++and inner dimensions of 96–384 with compact or padded row-major strides.
++Enable it with `-DCOB_ENABLE_APPLE_MEDIUM_WIDE=ON` in CMake or
++`COB_ENABLE_APPLE_MEDIUM_WIDE=ON` in Make. It requires the Apple SME2 leaf
++and a supported 16-lane implementation at runtime. The public entry packs A
++once per call, computes the first output tile while packing each B panel, and
++uses that panel for the remaining rows. The option defaults to off.
++
+ ## M5 Max benchmark
+ 
+ On one Apple M5 Max, COB had the fastest median one-thread, one-shot FP32 time on six prespecified large square and near-square products against Apple Accelerate, MpGEMM and MaxMulSK v5.1. Geometric mean paired speedups were 1.067× over previous COB, 1.067× over MaxMulSK, 1.197× over MpGEMM and 1.209× over Accelerate. MaxMulSK led on the 4096-square control. All times include packing and allocation. The public multiply entry point selects the new kernel automatically in supported builds.
+diff --git a/src/gemm.c b/src/gemm.c
+index 840b6e0..7a3f8e6 100644
+--- a/src/gemm.c
++++ b/src/gemm.c
+@@ -4246,6 +4246,10 @@ static int cob_sgemm_try_sme_classical(int m, int n, int k, const float* a, int
+ #endif
+ 
+ #if defined(COB_WITH_STRASSEN_SME_LEAF) && defined(COB_USE_APPLE_SME) && defined(COB_USE_APPLE_AMX)
++#if defined(COB_ENABLE_APPLE_MEDIUM_WIDE) && COB_ENABLE_APPLE_MEDIUM_WIDE
++extern int cob_sgemm_sme_medium_wide(int m, int n, int k, const float *a, int lda,
++    const float *b, int ldb, float *c, int ldc);
++#endif
+ extern int cob_sgemm_sme_tiny(int m, int n, int k, const float* a, int lda,
+     const float* b, int ldb, float* c, int ldc);
+ #endif
+@@ -4280,6 +4284,13 @@ void cob_sgemm_rowmajor_base(
+     if (cob_n2_try_sgemm(m, n, k, a, lda, b, ldb, c, ldc)) return;
+ #endif
+ #if defined(COB_WITH_STRASSEN_SME_LEAF) && defined(COB_USE_APPLE_SME) && defined(COB_USE_APPLE_AMX)
++#if defined(COB_ENABLE_APPLE_MEDIUM_WIDE) && COB_ENABLE_APPLE_MEDIUM_WIDE
++    if (m >= 24 && m <= 55 && n >= 1024 && n <= 4096 && k >= 96 && k <= 384 &&
++        a && b && c && lda >= k && ldb >= n && ldc >= n && cob_apple_sme2p1_available() &&
++        !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, a, (size_t)(m - 1) * lda + k) &&
++        !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, b, (size_t)(k - 1) * ldb + n) &&
++        cob_sgemm_sme_medium_wide(m, n, k, a, lda, b, ldb, c, ldc)) return;
++#endif
+     if (m >= 16 && m <= 96 && n >= 16 && n <= 96 && k >= 16 && k <= 96 &&
+         a && b && c && lda >= k && ldb >= n && ldc >= n && cob_apple_sme2p1_available() &&
+         !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, a, (size_t)(m - 1) * lda + k) &&
+diff --git a/tests/test_apple_medium_wide.c b/tests/test_apple_medium_wide.c
+new file mode 100644
+index 0000000..7adafe5
+--- /dev/null
++++ b/tests/test_apple_medium_wide.c
+@@ -0,0 +1,47 @@
++#include "cob_gemm.h"
++#include <math.h>
++#include <stdio.h>
++#include <stdlib.h>
++
++static int run_case(int m, int n, int k, int pad)
++{
++    const int lda = k + pad, ldb = n + pad, ldc = n + pad + 1;
++    const float guard = -8765.0f;
++    float *a = malloc((size_t)m * lda * sizeof(*a));
++    float *b = malloc((size_t)k * ldb * sizeof(*b));
++    float *c = malloc(((size_t)m * ldc + 1) * sizeof(*c));
++    if (!a || !b || !c) exit(EXIT_FAILURE);
++    for (int i = 0; i < m; ++i)
++        for (int p = 0; p < lda; ++p)
++            a[(size_t)i * lda + p] = p < k ? (float)((i * 23 + p * 13) % 31 - 15) / 16.0f : NAN;
++    for (int p = 0; p < k; ++p)
++        for (int j = 0; j < ldb; ++j)
++            b[(size_t)p * ldb + j] = j < n ? (float)((p * 17 + j * 11) % 29 - 14) / 16.0f : NAN;
++    for (int i = 0; i < m; ++i)
++        for (int j = 0; j < ldc; ++j) c[(size_t)i * ldc + j] = j < n ? NAN : guard;
++    c[(size_t)m * ldc] = guard;
++    cob_sgemm_rowmajor(m, n, k, a, lda, b, ldb, c, ldc);
++    int ok = c[(size_t)m * ldc] == guard;
++    for (int i = 0; i < m; ++i) {
++        for (int j = 0; j < n; ++j) {
++            double expected = 0;
++            for (int p = 0; p < k; ++p)
++                expected += (double)a[(size_t)i * lda + p] * b[(size_t)p * ldb + j];
++            if ((double)c[(size_t)i * ldc + j] != expected) ok = 0;
++        }
++        for (int j = n; j < ldc; ++j)
++            if (c[(size_t)i * ldc + j] != guard) ok = 0;
++    }
++    free(a); free(b); free(c);
++    if (!ok) fprintf(stderr, "medium-wide mismatch for %d x %d x %d with pad %d\n", m, n, k, pad);
++    return ok;
++}
++
++int main(void)
++{
++    const int cases[][4] = {{24, 1024, 96, 0}, {31, 1087, 127, 3}, {48, 1153, 193, 7},
++                            {55, 4096, 384, 1}, {23, 1089, 131, 5}, {56, 1217, 147, 0}};
++    for (size_t i = 0; i < sizeof(cases) / sizeof(*cases); ++i)
++        if (!run_case(cases[i][0], cases[i][1], cases[i][2], cases[i][3])) return EXIT_FAILURE;
++    return EXIT_SUCCESS;
++}
+diff --git a/third_party/maxmulsk/strassen_leaf.c b/third_party/maxmulsk/strassen_leaf.c
+index 061a021..62f81df 100644
+--- a/third_party/maxmulsk/strassen_leaf.c
++++ b/third_party/maxmulsk/strassen_leaf.c
+@@ -1678,3 +1678,78 @@ int cob_sgemm_sme_tiny(int m, int n, int k, const float *a, int lda, const float
+         return cob_rect_entry(m, n, k, a, lda, b, ldb, c, ldc);
+     return cob_sme_tiny_legacy(m, n, k, a, lda, b, ldb, c, ldc);
+ }
++
++#if defined(COB_ENABLE_APPLE_MEDIUM_WIDE) && COB_ENABLE_APPLE_MEDIUM_WIDE
++/* Stream one 64-column B panel through the first row tile. Keeping its packed
++   copy in the cache lets every subsequent A panel use the existing SME kernel. */
++__attribute__((always_inline)) static inline void
++cob_wide_first(int k, const float *ap, const float *b, int ldb, svcount_t cols,
++               float *bp) __arm_streaming __arm_inout("za")
++{
++    const svbool_t pg = svptrue_b32();
++    const svcount_t all = svptrue_c32();
++    svzero_za();
++    int p = 0;
++#define COB_WIDE_STEP(lhs, depth)                                                      \
++    do {                                                                               \
++        svfloat32x4_t rhs = svld1_f32_x4(cols, b + (size_t)(depth) * ldb);               \
++        svst1_f32_x4(all, bp + (size_t)(depth) * 64, rhs);                              \
++        svmopa_za32_f32_m(0, pg, pg, lhs, svget4_f32(rhs, 0));                         \
++        svmopa_za32_f32_m(1, pg, pg, lhs, svget4_f32(rhs, 1));                         \
++        svmopa_za32_f32_m(2, pg, pg, lhs, svget4_f32(rhs, 2));                         \
++        svmopa_za32_f32_m(3, pg, pg, lhs, svget4_f32(rhs, 3));                         \
++    } while (0)
++    for (; p + 4 <= k; p += 4) {
++        svfloat32x4_t av = svld1_f32_x4(all, ap + (size_t)p * 16);
++        COB_WIDE_STEP(svget4_f32(av, 0), p);
++        COB_WIDE_STEP(svget4_f32(av, 1), p + 1);
++        COB_WIDE_STEP(svget4_f32(av, 2), p + 2);
++        COB_WIDE_STEP(svget4_f32(av, 3), p + 3);
++    }
++    for (; p < k; ++p) {
++        svfloat32_t av = svld1_f32(pg, ap + (size_t)p * 16);
++        COB_WIDE_STEP(av, p);
++    }
++#undef COB_WIDE_STEP
++}
++
++__arm_locally_streaming __arm_new("za") static int
++cob_wide_run(int m, int n, int k, const float *a, int lda, const float *b, int ldb,
++             float *c, int ldc, float *ap, size_t depth, float *bp)
++{
++    if (svcntsw() != 16) return 0;
++    _Alignas(64) float stage[16 * 64];
++    pack_A_block(a, lda, 0, m, 0, k, depth, ap, stage);
++    for (int j = 0; j < n; j += 64) {
++        const int width = n - j < 64 ? n - j : 64;
++        if (width == 64)
++            cob_wide_first(k, ap, b + j, ldb, svptrue_c32(), bp);
++        else
++            cob_wide_first(k, ap, b + j, ldb, svwhilelt_c32_u64(0, (unsigned)width, 4), bp);
++        if (width == 64) store_za(c + j, ldc);
++        else cob_sme_transfer_short_c(16, width, c + j, ldc, 1);
++        for (int i = 16; i < m; i += 16) {
++            const int height = m - i < 16 ? m - i : 16;
++            float *dst = c + (size_t)i * ldc + j;
++            svzero_za();
++            micro_kernel_1x4(ap + i * depth, bp, k);
++            if (width == 64 && height == 16) store_za(dst, ldc);
++            else cob_sme_transfer_short_c(height, width, dst, ldc, 1);
++        }
++    }
++    return 1;
++}
++
++int cob_sgemm_sme_medium_wide(int m, int n, int k, const float *a, int lda,
++                             const float *b, int ldb, float *c, int ldc)
++{
++    const size_t depth = ((size_t)k + 63) & ~(size_t)63;
++    const size_t rows = ((size_t)m + 15) & ~(size_t)15;
++    const size_t a_size = rows * depth;
++    float *packed = aligned_alloc(64, (a_size + (size_t)k * 64) * sizeof(*packed));
++    if (!packed) return 0;
++    const int done = cob_wide_run(m, n, k, a, lda, b, ldb, c, ldc, packed, depth, packed + a_size);
++    free(packed);
++    return done;
++}
++#endif
+-- 
+2.54.0 (Apple Git-157)
+

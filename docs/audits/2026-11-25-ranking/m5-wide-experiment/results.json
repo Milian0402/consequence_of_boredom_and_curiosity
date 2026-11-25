@@ -1,0 +1,19 @@
+{
+  "timings": 576,
+  "max_abs": 2.87820957823e-05,
+  "max_threads": 1,
+  "min_threads": 1,
+  "fresh": 8,
+  "gm_release": 2.773403934767175,
+  "gm_peer": 0.9781610629327993,
+  "gm_apple": 1.010514976965878,
+  "gm_jit": 1.0090528999778834,
+  "seed_wins": [
+    8,
+    8
+  ],
+  "release_min": 1.1514357845728944,
+  "leading_wins": 2,
+  "checks": 153771264,
+  "qualifies": false
+}

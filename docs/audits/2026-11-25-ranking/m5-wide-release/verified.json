@@ -1,0 +1,23 @@
+{
+  "sample_count": 624,
+  "cold_processes": 208,
+  "fresh_shape_count": 9,
+  "fresh_release_gm": 4.671816077700803,
+  "fresh_option_off_gm": 4.807006281611699,
+  "fresh_peer_gm": 0.9717252586180756,
+  "fresh_accelerate_gm": 1.0053119715655368,
+  "fresh_prepared_gm": 1.0029631374514514,
+  "fresh_min_release": 1.9401870007914375,
+  "fresh_min_peer": 0.8987487038848766,
+  "fresh_both_seed_release_wins": 9,
+  "fresh_peer_wins_1pct": 2,
+  "cold_first_release_gm": 3.9107305818742955,
+  "cold_first_peer_gm": 1.2090067123308272,
+  "total_warm_fp64_cells": 73317128,
+  "total_first_process_fp64_cells": 18329282,
+  "normalized_warm_max_abs": 2.74768146085e-05,
+  "opt_in_qualified": true,
+  "external_qualified": false,
+  "cells_stress_per_build": 8789904,
+  "protected_cells_per_build": 6638493
+}

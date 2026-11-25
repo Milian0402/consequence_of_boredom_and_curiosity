@@ -19,6 +19,14 @@ A subsequent M5 Max experiment improved the 49 × 35 × 39 case from 393.9 ns to
 
 Checking the input magnitudes and switching to double accumulation fixed that failing value, from 0.00283442 to 0.00088130 absolute error. The successor passed all 350 stronger numerical fixtures. It improved on the released kernel by 1.175× across eight fresh ordinary layouts, but beat both the fastest independent public entry and a direct prepared LIBXSMM call on only four. The performance rule required six. [Follow-up results, numerical criteria and replay](m5-numerical/README.md)
 
+## Apple M5 Max wide rectangles
+
+A new opt-in SME kernel packs A once and computes the first 16 rows while packing each panel of B. The broad prototype improved on released COB across eight fresh wide layouts by 2.773×, with a geometric mean of 0.978× the strongest external entry. A subsequent nine-layout confirmation supported a narrower range of 24–55 rows. [Broad test and raw timings](m5-wide-experiment/README.md)
+
+On those nine layouts, the installed library with `COB_ENABLE_APPLE_MEDIUM_WIDE=ON` delivered **4.807× the speed of the same build with the option off** and 4.672× the prior release. The weakest gain over the prior release was 1.940×. The new implementation averaged 0.972× the fastest measured external entry per layout, including prepared LIBXSMM. Its lead exceeded 1% on two layouts. MaxMulSK and MpGEMM were called directly on compact layouts in this study.
+
+The installed option reproduced the default output bit for bit on 108 stress fixtures. Both configurations exceeded the 0.002 absolute-error threshold on some high-magnitude inputs. The speed result applies to the normalized benchmark inputs. The release option requires Apple SME2.1, 1024–4096 output columns and reduction depth 96–384. [Installed timings, accuracy limits and offline replay](m5-wide-release/README.md)
+
 ## Medium rectangular products
 
 A standalone candidate packed A across output rows and read B in place. It lost all five fresh warm-call comparisons against the release on each of Intel Xeon Platinum 8573C and Arm Neoverse N2. Its geometric-mean speed relative to the release was 0.775× on Intel and 0.980× on Arm. All 576 full-output validations passed. On the Intel 49 × 2861 × 157 layout with eleven floats of row padding, the released implementation reached 0.679× oneMKL's speed. [Timings, checks and offline verifier](linux-medium/README.md) · [Native run](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45686443679)
