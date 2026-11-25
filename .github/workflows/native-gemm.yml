@@ -111,7 +111,7 @@ jobs:
           path: ${{ runner.temp }}/onednn-input
       - name: Fetch the pinned oneDNN artifact from the aligned-core run
         continue-on-error: true
-        if: needs.phase.outputs.label == 'hk-forms' || needs.phase.outputs.label == 'release-replay' || needs.phase.outputs.label == 'medium-transfer'
+        if: needs.phase.outputs.label == 'hk-forms' || needs.phase.outputs.label == 'release-replay' || needs.phase.outputs.label == 'medium-transfer' || needs.phase.outputs.label == 'signed-leaves'
         env:
           GH_TOKEN: ${{ github.token }}
           ARCH: ${{ matrix.arch }}
@@ -133,7 +133,7 @@ jobs:
           unzip -q "$RUNNER_TEMP/onednn-hosted.zip" -d "$dest"
       - name: Qualify oneDNN on the CPU that will be measured
         id: onednn
-        if: needs.phase.outputs.label == 'aligned-core' || needs.phase.outputs.label == 'hk-forms' || needs.phase.outputs.label == 'release-replay' || needs.phase.outputs.label == 'medium-transfer'
+        if: needs.phase.outputs.label == 'aligned-core' || needs.phase.outputs.label == 'hk-forms' || needs.phase.outputs.label == 'release-replay' || needs.phase.outputs.label == 'medium-transfer' || needs.phase.outputs.label == 'signed-leaves'
         continue-on-error: true
         run: |
           cd "$RUNNER_TEMP/onednn-input"
@@ -183,7 +183,7 @@ jobs:
         run: bash tools/world-rank/aocl/build.sh "$VENDOR_DIR"
       - name: Qualify the independent FastMMW Winograd comparator
         id: fastmmw
-        if: needs.phase.outputs.label == 'tile-parent' || needs.phase.outputs.label == 'leaf-wave' || needs.phase.outputs.label == 'aligned-core' || needs.phase.outputs.label == 'hk-forms' || needs.phase.outputs.label == 'release-replay'
+        if: needs.phase.outputs.label == 'tile-parent' || needs.phase.outputs.label == 'leaf-wave' || needs.phase.outputs.label == 'aligned-core' || needs.phase.outputs.label == 'hk-forms' || needs.phase.outputs.label == 'release-replay' || needs.phase.outputs.label == 'signed-leaves'
         continue-on-error: true
         run: |
           set -o pipefail
@@ -194,7 +194,7 @@ jobs:
         run: bash tools/world-rank/vendors/build.sh "$VENDOR_DIR"
       - name: Build LIBXSMM small-shape JIT kernels
         id: libxsmm
-        if: needs.phase.outputs.label != 'aligned-core' && needs.phase.outputs.label != 'hk-forms' && needs.phase.outputs.label != 'release-replay' && needs.phase.outputs.label != 'medium-transfer'
+        if: needs.phase.outputs.label != 'aligned-core' && needs.phase.outputs.label != 'hk-forms' && needs.phase.outputs.label != 'release-replay' && needs.phase.outputs.label != 'medium-transfer' && needs.phase.outputs.label != 'signed-leaves'
         continue-on-error: true
         run: bash tools/world-rank/libxsmm/build.sh "$VENDOR_DIR"
       - name: Build native BLASFEO and verify its standard SGEMM entry
@@ -202,7 +202,7 @@ jobs:
         if: success()
         continue-on-error: true
         run: |
-          if [[ $(cat tools/world-rank/phase.txt) =~ ^(heldout|tile-screen|tile-confirm|tile-replay|tile-child|tile-parent|leaf-wave|aligned-core|hk-forms|release-replay|medium-transfer)$ ]]; then
+          if [[ $(cat tools/world-rank/phase.txt) =~ ^(heldout|tile-screen|tile-confirm|tile-replay|tile-child|tile-parent|leaf-wave|aligned-core|hk-forms|release-replay|medium-transfer|signed-leaves)$ ]]; then
             bash tools/world-rank/blasfeo/build.sh "$VENDOR_DIR"
           fi
           if [[ $(cat tools/world-rank/phase.txt) == tile-replay && $(uname -m) == x86_64 ]]; then
@@ -232,7 +232,7 @@ jobs:
           fi
       - name: Record incomplete installation as a failed comparison
         if: >-
-          ${{ !cancelled() && ((needs.phase.outputs.label != 'release-replay' && (steps.openblas.outcome == 'failure' ||
+          ${{ !cancelled() && ((needs.phase.outputs.label != 'release-replay' && needs.phase.outputs.label != 'signed-leaves' && (steps.openblas.outcome == 'failure' ||
           steps.aocl.outcome == 'failure' || steps.vendor.outcome == 'failure' ||
           steps.libxsmm.outcome == 'failure' || steps.blasfeo.outcome == 'failure' ||
           steps.fastmmw.outcome == 'failure' || steps.onednn.outcome == 'failure')) || steps.restore_release.outcome == 'failure') }}

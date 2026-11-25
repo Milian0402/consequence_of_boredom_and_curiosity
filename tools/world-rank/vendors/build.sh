@@ -50,7 +50,7 @@ Linux/aarch64)
 *) echo "The vendor adapters require a native Linux x86-64 or aarch64 runner." >&2; exit 2 ;;
 esac
 
-if [[ $(cat "$src/../phase.txt") == aligned-core || $(cat "$src/../phase.txt") == release-replay ]]; then
+if [[ $(cat "$src/../phase.txt") == aligned-core || $(cat "$src/../phase.txt") == release-replay || $(cat "$src/../phase.txt") == signed-leaves ]]; then
     printf '%s\n%s\n' "$inc" "$lib" > "$dest/$name-prefix.txt"
 fi
 

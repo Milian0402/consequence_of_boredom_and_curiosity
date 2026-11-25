@@ -1,0 +1,16 @@
+{
+  "public_revision": "a9dd7149bb6f14915bc73843562a1c03e184fc1b",
+  "path": "docs/audits/2026-11-25-ranking/signed-winograd",
+  "release": "b218beff1eaf8fd606d0934405cdc1e28ecdfe15",
+  "files": {
+    "README.md": "9f61281f7545b0693d29e777bd035358e2585abe599441c2cdbe772062daa1b3",
+    "check.sh": "7aedf8b1e35cbd750fe297d0285eb2b794294c504a2a1f7fbcd96f3cbf9f7600",
+    "panel.csv": "a6252eac41350bc92c87c15476441ab30aec65b6dc9602715ddbb44f98a2d2c9",
+    "protocol.md": "77d7a42bff8acdd606ab1981ea27cf8b38258aad14843860c5d26e6bcea44c09",
+    "public.c": "52bf342b1f4da60301d2828d16a7378b229e4bbb2c9846f80deaad25d0dfd2a2",
+    "signed-leaves.patch": "c5044a79c02e82ec3dca393c8115fcdc2bb0ffcc321b656c033f68321e2e8a94",
+    "validate.c": "07c8822ea151f423aec1296e84b17a5b105cfd5bd5dda1d17ed4726fd8e3990e",
+    "validation.csv": "432dbc812bce26153bf79bc438a880311d407fb5837515f4048d166d79d89c0f",
+    "validation.txt": "13bf0ec0058eac1469d4ab62547fe39b7e36d67ee4de364f8e8c5a06140d24c4"
+  }
+}

@@ -56,7 +56,7 @@ def qualified_layouts(args, cases, entries, results, seeds):
                 reason = "all_checks_passed"
                 if name == "hk-packed-forms" and not preflight_ok:
                     reason="whole_call_preflight_failed"
-                elif (name.startswith(("cob-","fastmmw-","release-")) or name in ("hk-packed-forms","medium-incumbent","medium-transposed")) and not routes.get((name,geometry),False):
+                elif (name.startswith(("cob-","fastmmw-","release-","original-","signed-")) or name in ("hk-packed-forms","medium-incumbent","medium-transposed")) and not routes.get((name,geometry),False):
                     reason="route_unqualified"
                 elif gate!=required or len(inspected)!=4:
                     reason="incomplete_or_failed_full_fp64"
