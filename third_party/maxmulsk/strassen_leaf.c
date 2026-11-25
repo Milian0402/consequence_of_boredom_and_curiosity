@@ -1339,7 +1339,7 @@ static inline void cob_sme_regular_grid(int m,int n,int k,const float* a,int lda
 }
 
 __arm_new("za") __arm_locally_streaming
-int cob_sgemm_sme_tiny(int m,int n,int k,const float *a,int lda,const float *b,int ldb,float *c,int ldc)
+__attribute__((noinline)) static int cob_sme_tiny_legacy(int m,int n,int k,const float *a,int lda,const float *b,int ldb,float *c,int ldc)
 {
     if (svcntsw()!=16 || k>96) return 0;
     if (((m | n | k) & 15) == 0 && m >= 32 && k >= 32 &&
@@ -1378,4 +1378,124 @@ int cob_sgemm_sme_tiny(int m,int n,int k,const float *a,int lda,const float *b,i
         }
     }
     return 1;
+}
+
+/* Move four independent source rows into ZA in one instruction. Reading four
+   columns back as a vector group writes 64 packed floats with a single store. */
+__attribute__((always_inline)) static inline void
+cob_rect_pack16(const float *a, int lda, float *packed) __arm_streaming __arm_inout("za")
+{
+    const svbool_t full = svptrue_b32();
+#pragma clang loop unroll(full)
+    for (int row = 0; row < 16; row += 4) {
+        const float *src = a + (size_t)row * lda;
+        svfloat32x4_t group = svcreate4_f32(svld1_f32(full, src), svld1_f32(full, src + lda),
+                                            svld1_f32(full, src + 2 * (size_t)lda),
+                                            svld1_f32(full, src + 3 * (size_t)lda));
+        svwrite_hor_za32_f32_vg4(0, row, group);
+    }
+#pragma clang loop unroll(full)
+    for (int col = 0; col < 16; col += 4)
+        svst1_f32_x4(svptrue_c32(), packed + 16 * col, svread_ver_za32_f32_vg4(0, col));
+}
+/* Pack four K slices together in each 16-row A panel. A compact 16-column B
+   then supplies all four K steps with a single four-vector load. */
+__attribute__((always_inline)) static inline void
+cob_rect_pack(int panel_rows, int k, const float *a, int lda,
+              float *packed) __arm_streaming __arm_inout("za")
+{
+    for (int row = 0; row < panel_rows; row += 16)
+        for (int p = 0; p < k; p += 16)
+            cob_rect_pack16(a + (size_t)row * lda + p, lda, packed + (size_t)row * k + 16 * p);
+}
+__attribute__((always_inline)) static inline void
+cob_rect_tile(int panel_rows, int k, const float *packed, const float *b, int ldb, float *c,
+              int ldc) __arm_streaming __arm_inout("za")
+{
+    const svbool_t full = svptrue_b32();
+    const svcount_t four = svptrue_c32();
+    svzero_za();
+    for (int p = 0; p < k; p += 4) {
+        const float *a = packed + 16 * p;
+        const float *r = b + (size_t)p * ldb;
+        svfloat32x4_t b4 = ldb == 16 ? svld1_f32_x4(four, r)
+                                     : svcreate4_f32(svld1_f32(full, r), svld1_f32(full, r + ldb),
+                                                     svld1_f32(full, r + 2 * (size_t)ldb),
+                                                     svld1_f32(full, r + 3 * (size_t)ldb));
+        svfloat32x4_t a0 = svld1_f32_x4(four, a);
+        svfloat32x4_t a1 = panel_rows >= 32 ? svld1_f32_x4(four, a + 16 * k) : a0;
+        svfloat32x4_t a2 = panel_rows >= 48 ? svld1_f32_x4(four, a + 32 * k) : a0;
+        svfloat32x4_t a3 = panel_rows == 64 ? svld1_f32_x4(four, a + 48 * k) : a0;
+#define COB_RECT_STEP(I)                                                                           \
+    do {                                                                                           \
+        svfloat32_t y = svget4_f32(b4, I);                                                         \
+        svmopa_za32_f32_m(0, full, full, svget4_f32(a0, I), y);                                    \
+        if (panel_rows >= 32) svmopa_za32_f32_m(1, full, full, svget4_f32(a1, I), y);              \
+        if (panel_rows >= 48) svmopa_za32_f32_m(2, full, full, svget4_f32(a2, I), y);              \
+        if (panel_rows == 64) svmopa_za32_f32_m(3, full, full, svget4_f32(a3, I), y);              \
+    } while (0)
+        COB_RECT_STEP(0);
+        COB_RECT_STEP(1);
+        COB_RECT_STEP(2);
+        COB_RECT_STEP(3);
+#undef COB_RECT_STEP
+    }
+    for (int row = 0; row < 16; ++row) {
+        float *dst = c + (size_t)row * ldc;
+        svst1_hor_za32(0, row, full, dst);
+        if (panel_rows >= 32) svst1_hor_za32(1, row, full, dst + 16 * (size_t)ldc);
+        if (panel_rows >= 48) svst1_hor_za32(2, row, full, dst + 32 * (size_t)ldc);
+        if (panel_rows == 64) svst1_hor_za32(3, row, full, dst + 48 * (size_t)ldc);
+    }
+}
+__attribute__((always_inline)) static inline void
+cob_rect_band(int h, int n, int k, const float *a, int lda, const float *b, int ldb, float *c,
+              int ldc, float *packed) __arm_streaming __arm_inout("za")
+{
+    cob_rect_pack(h, k, a, lda, packed);
+    for (int j = 0; j < n; j += 16)
+        cob_rect_tile(h, k, packed, b + j, ldb, c + j, ldc);
+}
+__attribute__((always_inline)) static inline void
+cob_rect_grid(int m, int n, int k, const float *a, int lda, const float *b, int ldb, float *c,
+              int ldc) __arm_streaming __arm_inout("za")
+{
+    _Alignas(64) float packed[64 * 96];
+    int i = 0;
+    for (; i + 64 <= m; i += 64)
+        cob_rect_band(64, n, k, a + (size_t)i * lda, lda, b, ldb, c + (size_t)i * ldc, ldc, packed);
+    if (i < m) {
+        const float *left = a + (size_t)i * lda;
+        float *out = c + (size_t)i * ldc;
+        switch (m - i) {
+        case 48:
+            cob_rect_band(48, n, k, left, lda, b, ldb, out, ldc, packed);
+            break;
+        case 32:
+            cob_rect_band(32, n, k, left, lda, b, ldb, out, ldc, packed);
+            break;
+        case 16:
+            cob_rect_band(16, n, k, left, lda, b, ldb, out, ldc, packed);
+            break;
+        }
+    }
+}
+
+__arm_new("za") __arm_locally_streaming
+    __attribute__((noinline)) static int cob_rect_entry(int m, int n, int k, const float *a,
+                                                        int lda, const float *b, int ldb, float *c,
+                                                        int ldc)
+{
+    if (svcntsw() != 16 || k > 96) return 0;
+    cob_rect_grid(m, n, k, a, lda, b, ldb, c, ldc);
+    return 1;
+}
+
+int cob_sgemm_sme_tiny(int m, int n, int k, const float *a, int lda, const float *b, int ldb,
+                       float *c, int ldc)
+{
+    /* The public entry checked pointers, strides, non-aliasing and 16..96 bounds. */
+    if (((m | n | k) & 15) == 0 && m > 16 && n == 16 && k >= 32)
+        return cob_rect_entry(m, n, k, a, lda, b, ldb, c, ldc);
+    return cob_sme_tiny_legacy(m, n, k, a, lda, b, ldb, c, ldc);
 }
