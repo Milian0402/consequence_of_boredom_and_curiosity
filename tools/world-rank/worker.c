@@ -215,7 +215,7 @@ static rank_sgemm_fn choose(const char* variant,void* lib)
 {
     if (!strcmp(variant,"native")) return cob_sgemm_rowmajor;
     if (!lib) fatal("selected variant requires a vendor plugin");
-    if (!strcmp(variant,"direct")) return selected_sgemm;
+    if (!strcmp(variant,"direct") || !strcmp(variant,"hk233")) return selected_sgemm;
     if (!strcmp(variant,"hybrid")) return hybrid_sgemm_rowmajor;
     if (!strcmp(variant,"hybrid-next")) return rank_hybrid_next;
     fatal("unknown variant");
@@ -229,10 +229,17 @@ static void measure(shape s,const char* variant,const char* file,const float* a,
     for (int i=0;i<s.m;++i) for (int j=0;j<s.n;++j) c[(size_t)i*ldc+j]=NAN;
     set_guards(c,s.m,s.n,ldc,output_guard);
     rank_sgemm_fn multiply=choose(variant,lib);
+    int (*finite_products)(void)=NULL;
+    if (!strcmp(variant,"hk233")) {
+        void* address=symbol(lib,"rank_hk233_last_products");
+        memcpy(&finite_products,&address,sizeof finite_products);
+    }
     rank_bridge=traced_sgemm;
     double start_first=seconds();
     multiply(s.m,s.n,s.k,a,lda,b,ldb,c,ldc);
     double first_seconds=seconds()-start_first;
+    int products=finite_products ? finite_products() : 0;
+    if (finite_products && products!=15) fatal("expected rank-15 decomposition");
     rank_bridge=selected_sgemm;
     if (!single_task()) fatal("warm multiply launched multiple threads");
     FILE* ref=fopen(file,"rb");
@@ -261,9 +268,9 @@ static void measure(shape s,const char* variant,const char* file,const float* a,
     int actual_cpu=-1;
 #endif
     printf("READY,%.12g,%zu,%zu,%zu,cpu=%d,threads=1,signed_min_error=%.12g,signed_max_error=%.12g,"
-           "checksum=%.12g,hybrid_vendor_calls=%d,first_sgemm_seconds=%.12g\n",
+           "checksum=%.12g,hybrid_vendor_calls=%d,finite_products=%d,first_sgemm_seconds=%.12g\n",
            maximum,nonfinite,guards,(size_t)s.m*s.n,
-           actual_cpu,min_signed,max_signed,checksum,vendor_calls,first_seconds);
+           actual_cpu,min_signed,max_signed,checksum,vendor_calls,products,first_seconds);
     fflush(stdout);
     if (nonfinite || guards || maximum>0.002) fatal("FP64 or guard rejection");
     const double work=2.0*s.m*s.n*s.k;
@@ -275,6 +282,7 @@ static void measure(shape s,const char* variant,const char* file,const float* a,
         double start=seconds();
         for (int i=0;i<calls;++i) multiply(s.m,s.n,s.k,a,lda,b,ldb,c,ldc);
         double elapsed=seconds()-start;
+        if (finite_products && finite_products()!=15) fatal("rank-15 route changed");
         if (elapsed<=0 || !single_task() ||
             changed_guards(c,s.m,s.n,ldc,output_guard) ||
             changed_guards(a,s.m,s.k,lda,input_guard) ||

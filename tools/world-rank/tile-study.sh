@@ -102,5 +102,5 @@ if [[ $arch == x86_64 ]]; then native_vendor=mkl; fi
 sha256sum "$build/finite/hk233.so" "$build/incumbent.so" "$build/worker" "$finite_out/panel.csv" > "$finite_out/finite-build.txt"
 taskset -c "$cpu" python3 "$dir/study.py" "$build/worker" "$finite_out/panel.csv" "$finite_out" "$vendor/openblas.so" \
     --phase "$phase" --rounds 3 --stress "${finite_peers[@]}" \
-    --candidate "cob-incumbent=direct:$build/incumbent.so" --candidate "hk233=direct:$build/finite/hk233.so" \
+    --candidate "cob-incumbent=direct:$build/incumbent.so" --candidate "hk233=hk233:$build/finite/hk233.so" \
     --candidate "hybrid-openblas=hybrid-next:$vendor/openblas.so" --candidate "hybrid-$native_vendor=hybrid-next:$vendor/$native_vendor.so"
