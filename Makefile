@@ -24,6 +24,8 @@ endif
 # AUTO retains the native C path when the target compiler lacks SME intrinsics.
 COB_STRASSEN_SME ?= AUTO
 COB_ENABLE_PORTABLE_STRASSEN ?= OFF
+COB_ENABLE_RECURSIVE_STRASSEN ?= OFF
+COB_ENABLE_OPENBLAS_LEAF ?= OFF
 COB_SME_CC ?= $(CC)
 SME_SRC := third_party/maxmulsk/strassen_leaf.c
 SME_FLAGS := -mcpu=apple-m4 -march=armv8.7-a+sme+sme2
@@ -49,6 +51,29 @@ else ifneq ($(COB_ENABLE_PORTABLE_STRASSEN),OFF)
 $(error COB_ENABLE_PORTABLE_STRASSEN must be ON or OFF)
 endif
 
+ifeq ($(COB_ENABLE_RECURSIVE_STRASSEN),ON)
+SME_DEFINE += -DCOB_ENABLE_RECURSIVE_STRASSEN=1
+else ifneq ($(COB_ENABLE_RECURSIVE_STRASSEN),OFF)
+$(error COB_ENABLE_RECURSIVE_STRASSEN must be ON or OFF)
+endif
+
+ifeq ($(COB_ENABLE_OPENBLAS_LEAF),ON)
+ifneq ($(UNAME_S):$(COB_ENABLE_PORTABLE_STRASSEN),Linux:ON)
+$(error COB_ENABLE_OPENBLAS_LEAF=ON requires Linux and COB_ENABLE_PORTABLE_STRASSEN=ON)
+endif
+ifeq ($(filter $(UNAME_M),aarch64 arm64 x86_64 amd64),)
+$(error COB_ENABLE_OPENBLAS_LEAF=ON requires a native x86-64 or Arm64 target)
+endif
+PKG_CONFIG ?= pkg-config
+ifneq ($(shell $(PKG_CONFIG) --exists openblas && echo yes),yes)
+$(error COB_ENABLE_OPENBLAS_LEAF=ON requires the OpenBLAS development package and its openblas.pc)
+endif
+SME_DEFINE += -DCOB_ENABLE_OPENBLAS_LEAF=1 $(shell $(PKG_CONFIG) --cflags openblas)
+OPENBLAS_LEAF_LIBS := $(shell $(PKG_CONFIG) --libs openblas)
+else ifneq ($(COB_ENABLE_OPENBLAS_LEAF),OFF)
+$(error COB_ENABLE_OPENBLAS_LEAF must be ON or OFF)
+endif
+
 LIB_OBJ := $(BUILD_DIR)/gemm.o
 TEST_BIN := $(BUILD_DIR)/cob_gemm_test
 STRASSEN_TEST_OBJ := $(BUILD_DIR)/gemm_strassen_test.o
@@ -69,7 +94,7 @@ FORTRAN_BLAS_LDFLAGS ?=
 FORTRAN_BLAS_BENCH_CFLAGS := -DCOB_HAVE_EXTERNAL_FORTRAN_SGEMM=1 -DCOB_EXTERNAL_FORTRAN_SGEMM_NAME=\"$(FORTRAN_BLAS_NAME)\"
 
 .PHONY: all test bench bench-cblas bench-fortran-blas clean FORCE
-.PHONY: test-portable-strassen
+.PHONY: test-portable-strassen test-recursive-strassen
 
 all: $(TEST_BIN) $(BENCH_BIN)
 
@@ -78,7 +103,7 @@ $(BUILD_DIR):
 
 # Track each output separately so reconfiguring a partially built directory
 # works even on versions of Make with one-second file timestamps.
-SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN)
+SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN) recursive:$(COB_ENABLE_RECURSIVE_STRASSEN) openblas:$(COB_ENABLE_OPENBLAS_LEAF)
 SME_OUTPUTS := $(LIB_OBJ) $(STRASSEN_TEST_OBJ) $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) \
                $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN) \
                $(BENCH_BIN) $(CBLAS_BENCH_BIN) $(FORTRAN_BLAS_BENCH_BIN)
@@ -99,7 +124,7 @@ $(LIB_OBJ): src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
 	$(save_sme_config)
 
 $(TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) tests/test_gemm.c $(LIB_OBJ) $(SME_OBJ) -o $@
+	$(CC) $(CFLAGS) tests/test_gemm.c $(LIB_OBJ) $(SME_OBJ) $(OPENBLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
 $(STRASSEN_TEST_OBJ): src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
@@ -107,7 +132,7 @@ $(STRASSEN_TEST_OBJ): src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
 	$(save_sme_config)
 
 $(STRASSEN_TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(STRASSEN_TEST_OBJ) $(SME_OBJ) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_TEST_OBJ) $(SME_OBJ) -o $@
+	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_TEST_OBJ) $(SME_OBJ) $(OPENBLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
 $(STRASSEN_SQUARE_TEST_OBJ): src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
@@ -115,19 +140,19 @@ $(STRASSEN_SQUARE_TEST_OBJ): src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
 	$(save_sme_config)
 
 $(STRASSEN_SQUARE_TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) -o $@
+	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) $(OPENBLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
 $(BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(BENCH_LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(BENCH_LDFLAGS) $(OPENBLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
 $(CBLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) FORCE | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(CBLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(CBLAS_LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(CBLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(CBLAS_LDFLAGS) $(OPENBLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
 $(FORTRAN_BLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) FORCE | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(FORTRAN_BLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(FORTRAN_BLAS_LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(FORTRAN_BLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(FORTRAN_BLAS_LDFLAGS) $(OPENBLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
 test: $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN)
@@ -138,8 +163,12 @@ test: $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN)
 test-portable-strassen: $(BUILD_DIR)/cob_portable_strassen_test
 	$<
 
-$(BUILD_DIR)/cob_portable_strassen_test: tests/test_portable_strassen.c src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
-	$(CC) $(CFLAGS) -DCOB_ENABLE_PORTABLE_STRASSEN=1 -DCOB_PORTABLE_STRASSEN_MIN_DIM=128 \
+test-recursive-strassen: $(BUILD_DIR)/cob_recursive_strassen_test
+	$<
+
+$(BUILD_DIR)/cob_recursive_strassen_test: RECURSIVE_TEST_FLAGS := -DCOB_ENABLE_RECURSIVE_STRASSEN=1 -DCOB_RECURSIVE_MIN_DIM=128 -DCOB_RECURSIVE_MAX_DIM=256
+$(BUILD_DIR)/cob_recursive_strassen_test $(BUILD_DIR)/cob_portable_strassen_test: tests/test_portable_strassen.c src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(RECURSIVE_TEST_FLAGS) -DCOB_ENABLE_PORTABLE_STRASSEN=1 -DCOB_PORTABLE_STRASSEN_MIN_DIM=128 -DCOB_RECTANGULAR_MIN_HARMONIC_DIM=192 \
 	    -DCOB_DISABLE_APPLE_AMX=1 -DCOB_DISABLE_APPLE_SME=1 $< -lm -o $@
 
 bench: $(BENCH_BIN)

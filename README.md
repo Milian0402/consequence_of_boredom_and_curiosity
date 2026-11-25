@@ -7,6 +7,15 @@ as possible, especially on Apple Silicon. It is not a full BLAS replacement.
 The deliberately narrow contract leaves more room for specialized AMX, SME,
 and packing strategies.
 
+## Rectangular and strided benchmarks
+
+On previously unmeasured large layouts, COB improved over its preceding
+single-thread release on all six Apple M5 Max cases and all seven cases
+on each Linux CPU. Geometric mean speedups were 1.20× on the M5 Max,
+1.13× on an AMD EPYC 9V45 and 1.15× on an Arm Neoverse-N2. The
+[rectangular benchmark audit](docs/audits/2026-11-25-general-gemm.md)
+gives the external-library comparisons, numerical checks and limits.
+
 ## M5 Max benchmark
 
 On one Apple M5 Max, COB had the fastest median one-thread, one-shot FP32 time on six prespecified large square and near-square products against Apple Accelerate, MpGEMM and MaxMulSK v5.1. Geometric mean paired speedups were 1.067× over previous COB, 1.067× over MaxMulSK, 1.197× over MpGEMM and 1.209× over Accelerate. MaxMulSK led on the 4096-square control. All times include packing and allocation. The public multiply entry point selects the new kernel automatically in supported builds.
@@ -17,7 +26,19 @@ The [November 25 audit](docs/audits/2026-11-25-strassen-sme.md) gives the dimens
 
 COB selects AVX-512 or AVX2/FMA at runtime on supported x86-64 CPUs. On Arm64, the NEON path handles ragged output tiles and one-row products directly. On an Intel Xeon 6975P-C, the vector kernel improved on COB's preceding C kernel by 32–36× across five medium shapes. On an Arm Neoverse-N2, the ragged 383 × 385 × 389 product improved by 1.26×. The [native Linux audit](docs/audits/2026-11-25-linux-native.md) includes the comparisons against single-thread OpenBLAS.
 
-For large balanced, contiguous products on native Linux x86-64 or Arm64, enable the experimental one-level Strassen path with `make COB_ENABLE_PORTABLE_STRASSEN=ON` or configure CMake with `-DCOB_ENABLE_PORTABLE_STRASSEN=ON`. It uses the native single-thread kernels for each subproduct. The default crossover is 1536 in each dimension, with dimensions divisible by 64 and a largest-to-smallest ratio of at most 4:3.
+For large products on native Linux x86-64 or Arm64, enable the one-level Strassen path with `make COB_ENABLE_PORTABLE_STRASSEN=ON` or configure CMake with `-DCOB_ENABLE_PORTABLE_STRASSEN=ON`. It uses the native single-thread kernels for each subproduct. Contiguous balanced products use the original 1536 crossover. For rectangular or strided inputs, the dispatcher also weighs the number of products saved against the workspace needed for the three temporary matrices.
+
+Linux builds can also select a second Winograd level by enabling
+`COB_ENABLE_RECURSIVE_STRASSEN=ON` together with portable Strassen in Make
+or CMake. It applies to contiguous square inputs from 3072 through 5120 in
+steps of 128 and adds 25% to the one-level temporary workspace. If the
+larger allocation fails, COB retries the one-level schedule.
+
+The experimental `COB_ENABLE_OPENBLAS_LEAF=ON` option in Make and CMake
+uses OpenBLAS for the Strassen subproducts on native Linux x86-64 and Arm64.
+Enable portable Strassen as well and install the OpenBLAS development package
+with its `openblas.pc` file. Each subproduct uses OpenBLAS when its current
+thread count is one. Other thread counts select COB's native kernel.
 
 ### Where the change applies
 
@@ -60,7 +81,7 @@ make test
 ```
 
 The test command runs the normal scheduler plus lowered-threshold Strassen test
-configurations. On Apple Silicon, the suite currently checks 657 shapes in each
+configurations. On Apple Silicon, the suite currently checks 667 shapes in each
 configuration.
 
 You can also benchmark rectangular matrices. Arguments use `M x N x K`, where
@@ -130,16 +151,29 @@ matrix shape, layout, and available hardware:
   kernel. Both paths skip packing.
 - Apple Silicon uses a `32x32` AMX kernel and hardware-assisted packing.
 - SME2.1 routes reduce packing work and reuse `B` data on selected shapes.
+- For wide outputs with a handful of rows, Arm NEON and x86 AVX2/FMA stream
+  the right-hand matrix directly. The minimum width is 256 and the minimum
+  inner dimension is 64. Apple SME2.1 selects it for two to three rows, Arm
+  NEON on Linux for two to eight, AVX-512 systems for two to seven and
+  AVX2-only systems for two to five.
 - Large balanced inputs use one level of Strassen, reducing eight half-size
   products to seven.
 
-Eligible exact square matrices switch to Strassen at `5632`. Other eligible
-balanced matrices switch at `6144`. The route requires contiguous `A` and `B`,
+On Apple silicon, eligible exact square matrices switch to Strassen at `5632`,
+and other eligible balanced matrices switch at `6144`. These crossovers
+apply to contiguous `A` and `B`,
 dimensions divisible by 64, and a largest-to-smallest dimension ratio no
 greater than `4:3`.
 
+For other eligible rectangles and strided inputs, COB applies seven products
+to the aligned interior and computes the remaining rows, columns and inner
+dimension directly. Its three outer scratch buffers together occupy at most
+256 MiB. Leaf kernels can allocate additional packing buffers. The longest
+dimension can be up to eight times the shortest. This route uses the
+optional native Strassen kernels on Linux or the SME2.1 leaf on Apple.
+
 On Apple Silicon, balanced inputs with all dimensions between 2048 and 8192
-and a partial 32-row or 32-column output tile are copied into a shape rounded
+and a partial 32-row or 32-column output tile can be copied into a shape rounded
 up to multiples of 64. COB applies the usual classical or Strassen crossover
 to those padded dimensions and copies the active result back to the caller.
 Compatible inputs are reused directly. At `8191³` the three padding buffers

@@ -91,10 +91,10 @@ static int test_shape_ex(int m, int n, int k, int lda, int ldb, int ldc, int ali
     uint32_t state = 0x12345678u ^ (uint32_t)(m * 131 + n * 17 + k);
     fill_random(a, a_count, &state);
     fill_random(b, b_count, &state);
-    memset(cref, 0, (size_t)c_count * sizeof(float));
-    memset(cgot, 0, (size_t)c_count * sizeof(float));
-    memset(cpacked, 0, (size_t)c_count * sizeof(float));
-    memset(cpacked_ab, 0, (size_t)c_count * sizeof(float));
+    /* Catch writes to padded output columns even if they write zero. */
+    for (int i = 0; i < c_count; ++i) {
+        cref[i] = cgot[i] = cpacked[i] = cpacked_ab[i] = 123456.0f;
+    }
 
     cob_sgemm_ref_rowmajor(m, n, k, a, lda, b, ldb, cref, ldc);
     cob_sgemm_rowmajor(m, n, k, a, lda, b, ldb, cgot, ldc);
@@ -325,6 +325,17 @@ int main(void)
         {1, 128, 128},
         {128, 1, 128},
         {2, 3, 5},
+        /* Streaming kernels and the adjacent fallback shapes. */
+        {2, 256, 64},
+        {3, 271, 65},
+        {4, 257, 79},
+        {5, 511, 127},
+        {6, 259, 83},
+        {7, 273, 67},
+        {8, 513, 129},
+        {9, 257, 65},
+        {3, 255, 64},
+        {3, 256, 63},
         {7, 8, 9},
         {8, 8, 8},
         {8, 8, 31},
