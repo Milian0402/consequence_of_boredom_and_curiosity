@@ -1,4 +1,4 @@
-name: Native one-level FP32 Strassen comparison
+name: Native rectangular GEMM comparison
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
           - { runner: ubuntu-24.04, arch: x86_64 }
           - { runner: ubuntu-24.04-arm, arch: aarch64 }
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -27,7 +27,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install --no-install-recommends -y gcc pkg-config libopenblas-pthread-dev
-      - name: Measure optional native Strassen holdouts
+      - name: Measure selected benchmark phase
         env:
           BENCH_ARCH: ${{ matrix.arch }}
         run: |

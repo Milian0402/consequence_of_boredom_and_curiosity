@@ -187,6 +187,15 @@ enum {
 #error "COB_SGEMM_STRASSEN1 must be 0 or 1"
 #endif
 
+#if defined(COB_ENABLE_SKINNY_GEMM) && COB_ENABLE_SKINNY_GEMM && \
+    (defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && defined(__aarch64__)))
+#define COB_USE_SKINNY_GEMM 1
+#endif
+
+#if defined(COB_ENABLE_RECURSIVE_STRASSEN) && COB_ENABLE_RECURSIVE_STRASSEN
+#define COB_USE_RECURSIVE_STRASSEN 1
+#endif
+
 /* Experimental one-level schedule for native 64-bit x86 and Arm kernels. */
 #if defined(COB_ENABLE_PORTABLE_STRASSEN) && COB_ENABLE_PORTABLE_STRASSEN && \
     !defined(COB_USE_APPLE_AMX) && (defined(COB_USE_X86_SIMD) || \
@@ -2027,7 +2036,10 @@ static void cob_sgemm_tile_scalar_packed_b(
     }
 }
 
-#if defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && !defined(COB_USE_APPLE_AMX))
+#if defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && \
+    (!defined(COB_USE_APPLE_AMX) || defined(COB_USE_SKINNY_GEMM) || \
+     (defined(COB_ENABLE_RECTANGULAR_STRASSEN) && COB_ENABLE_RECTANGULAR_STRASSEN && \
+      defined(COB_WITH_STRASSEN_SME_LEAF) && defined(COB_USE_APPLE_SME))))
 static int cob_f32_ranges_overlap(const float* x, size_t nx, const float* y, size_t ny)
 {
     const uintptr_t px = (uintptr_t)x;
@@ -3533,6 +3545,137 @@ static int cob_strassen_leaf(int m, int n, int k, const float* a, int lda,
 #endif
 }
 
+#if defined(COB_ENABLE_RECTANGULAR_STRASSEN) && COB_ENABLE_RECTANGULAR_STRASSEN && \
+    defined(COB_USE_PORTABLE_STRASSEN)
+#define COB_USE_RECTANGULAR_STRASSEN 1
+#ifndef COB_RECTANGULAR_MIN_HARMONIC_DIM
+#if defined(COB_USE_PORTABLE_STRASSEN)
+#define COB_RECTANGULAR_MIN_HARMONIC_DIM 1536
+#else
+#define COB_RECTANGULAR_MIN_HARMONIC_DIM 3072
+#endif
+#endif
+
+/* Strassen saves work proportional to M*N*K and forms temporaries of size
+   M*N + M*K + N*K. Their ratio scales with the harmonic dimension. */
+static int cob_strassen_rectangle_is_eligible(int m, int n, int k)
+{
+    const int smallest = cob_min_i32(m, cob_min_i32(n, k));
+    const int largest = m > n ? (m > k ? m : k) : (n > k ? n : k);
+    if (smallest < COB_RECTANGULAR_MIN_HARMONIC_DIM / 2 ||
+        (int64_t)largest > 8 * (int64_t)smallest || n < 128) return 0;
+
+    const double areas = (double)m*n + (double)m*k + (double)n*k;
+    /* Three half-product buffers in FP32 consume one byte per element of
+       the three full matrix areas. Bound the newly enabled temporary. */
+    return areas <= 256.0 * 1024 * 1024 &&
+           3.0 * m * n * k >= COB_RECTANGULAR_MIN_HARMONIC_DIM * areas;
+}
+
+static void cob_strassen_complete_edges(int m, int n, int k,
+    int core_m, int core_n, int core_k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+    if (k != core_k) {
+        const float* last_b = b + (size_t)core_k * ldb;
+        for (int i = 0; i < core_m; ++i) {
+            const float last_a = a[(size_t)i * lda + core_k];
+            float* row = c + (size_t)i * ldc;
+            for (int j = 0; j < core_n; ++j) row[j] += last_a * last_b[j];
+        }
+    }
+    /* Both edges use the complete K. Their narrow dimensions preclude
+       redispatch to this seven-product decomposition. */
+    if (n != core_n) {
+        cob_sgemm_rowmajor(core_m, n - core_n, k, a, lda, b + core_n, ldb,
+            c + core_n, ldc);
+    }
+    if (m != core_m) {
+        cob_sgemm_rowmajor(1, n, k, a + (size_t)core_m * lda, lda, b, ldb,
+            c + (size_t)core_m * ldc, ldc);
+    }
+}
+#endif
+
+#if defined(COB_USE_RECURSIVE_STRASSEN)
+#ifndef COB_WINOGRAD_APPLE_MIN
+#define COB_WINOGRAD_APPLE_MIN 8192
+#endif
+#ifndef COB_WINOGRAD_NATIVE_MIN
+#define COB_WINOGRAD_NATIVE_MIN 3072
+#endif
+typedef int (*cob_product_fn)(int, int, int, const float*, int,
+    const float*, int, float*, int);
+
+/* Winograd's seven-product identity uses eight operand additions and
+   seven output additions. Reuse S1/T1 as S2/T2 and then as S4/T4.
+   The outer Strassen level owns these three quarter-matrix temporaries. */
+static int cob_winograd_product(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc, float* scratch, cob_product_fn leaf)
+{
+    if (!scratch) return leaf(m, n, k, a, lda, b, ldb, c, ldc);
+    const int mr = m / 2, nc = n / 2, kr = k / 2;
+    const float* a11 = a;
+    const float* a12 = a + kr;
+    const float* a21 = a + (size_t)mr * lda;
+    const float* a22 = a21 + kr;
+    const float* b11 = b;
+    const float* b12 = b + nc;
+    const float* b21 = b + (size_t)kr * ldb;
+    const float* b22 = b21 + nc;
+    float* c11 = c;
+    float* c12 = c + nc;
+    float* c21 = c + (size_t)mr * ldc;
+    float* c22 = c21 + nc;
+    float* s = scratch;
+    float* t = s + (size_t)mr * kr;
+    float* p = t + (size_t)kr * nc;
+
+    /* P1 and P2 go to C quadrants directly. */
+    if (!leaf(mr, nc, kr, a11, lda, b11, ldb, c21, ldc) ||
+        !leaf(mr, nc, kr, a12, lda, b21, ldb, c11, ldc)) return 0;
+    cob_strassen_linear2(s, mr, kr, a21, lda, a22, lda, 1);
+    cob_strassen_linear2(t, kr, nc, b12, ldb, b11, ldb, -1);
+    if (!leaf(mr, nc, kr, s, kr, t, nc, c22, ldc)) return 0;
+    cob_strassen_linear2(s, mr, kr, s, kr, a11, lda, -1);
+    cob_strassen_linear2(t, kr, nc, b22, ldb, t, nc, -1);
+    if (!leaf(mr, nc, kr, s, kr, t, nc, c12, ldc)) return 0;
+
+    /* C contains P2, P6, P1, P5. Share U2=P1+P6 and U4=U2+P5. */
+    for (int i = 0; i < mr; ++i) {
+        for (int j = 0; j < nc; ++j) {
+            const size_t z = (size_t)i * ldc + j;
+            const float p1 = c21[z];
+            const float u2 = p1 + c12[z];
+            const float u4 = u2 + c22[z];
+            c11[z] += p1;
+            c12[z] = u4;
+            c21[z] = u2;
+            c22[z] = u4;
+        }
+    }
+    cob_strassen_linear2(s, mr, kr, a12, lda, s, kr, -1);
+    if (!leaf(mr, nc, kr, s, kr, b22, ldb, p, nc)) return 0;
+    cob_strassen_merge_product(c12, ldc, p, mr, nc, 1);
+    cob_strassen_linear2(t, kr, nc, t, nc, b21, ldb, -1);
+    if (!leaf(mr, nc, kr, a22, lda, t, nc, p, nc)) return 0;
+    cob_strassen_merge_product(c21, ldc, p, mr, nc, -1);
+    cob_strassen_linear2(s, mr, kr, a11, lda, a21, lda, -1);
+    cob_strassen_linear2(t, kr, nc, b22, ldb, b12, ldb, -1);
+    if (!leaf(mr, nc, kr, s, kr, t, nc, p, nc)) return 0;
+    for (int i = 0; i < mr; ++i) {
+        for (int j = 0; j < nc; ++j) {
+            const float p7 = p[(size_t)i * nc + j];
+            const size_t z = (size_t)i * ldc + j;
+            c21[z] += p7;
+            c22[z] += p7;
+        }
+    }
+    return 1;
+}
+
+#endif
+
 static int cob_sgemm_rowmajor_strassen1(
     int m,
     int n,
@@ -3546,6 +3689,41 @@ static int cob_sgemm_rowmajor_strassen1(
 {
     const int min_dim = cob_min_i32(cob_min_i32(m, n), k);
     const int max_dim = m > n ? (m > k ? m : k) : (n > k ? n : k);
+#if defined(COB_USE_RECTANGULAR_STRASSEN) || defined(COB_USE_RECURSIVE_STRASSEN)
+    const int legacy_geometry = 3 * (int64_t)max_dim <= 4 * (int64_t)min_dim &&
+        lda == k && ldb == n && m % 64 == 0 && n % 64 == 0 && k % 64 == 0;
+#if defined(COB_USE_RECTANGULAR_STRASSEN)
+    const int full_m = m, full_n = n, full_k = k;
+    if (!legacy_geometry) {
+        if (lda < k || ldb < n || ldc < n || !cob_strassen_rectangle_is_eligible(m, n, k)) {
+            return 0;
+        }
+#if defined(COB_USE_APPLE_AMX)
+        if (!cob_apple_sme2p1_available()) return 0;
+#endif
+        const size_t c_span = (size_t)(m - 1) * ldc + n;
+        if (cob_f32_ranges_overlap(c, c_span, a, (size_t)(m - 1) * lda + k) ||
+            cob_f32_ranges_overlap(c, c_span, b, (size_t)(k - 1) * ldb + n)) return 0;
+        m -= m % 2;
+        n -= n % 128;
+        k -= k % 2;
+    } else
+#endif
+    {
+        if (!legacy_geometry) return 0;
+#if defined(COB_USE_PORTABLE_STRASSEN)
+        if (min_dim < COB_PORTABLE_STRASSEN_MIN_DIM) return 0;
+        const size_t c_span = (size_t)(m - 1) * ldc + n;
+        if (cob_f32_ranges_overlap(c, c_span, a, (size_t)m * k) ||
+            cob_f32_ranges_overlap(c, c_span, b, (size_t)k * n)) return 0;
+#else
+        const int lower_square = m == n && n == k &&
+            min_dim >= COB_SGEMM_STRASSEN1_SQUARE_MIN_DIM;
+        if (!lower_square && min_dim < COB_SGEMM_STRASSEN1_MIN_DIM) return 0;
+#endif
+    }
+
+#else
 #if defined(COB_USE_PORTABLE_STRASSEN)
     if (min_dim < COB_PORTABLE_STRASSEN_MIN_DIM) {
         return 0;
@@ -3572,18 +3750,43 @@ static int cob_sgemm_rowmajor_strassen1(
     }
 #endif
 
+#endif
+
     const int mh = m / 2;
     const int nh = n / 2;
     const int kh = k / 2;
     const size_t x_values = (size_t)mh * (size_t)kh;
     const size_t y_values = (size_t)kh * (size_t)nh;
     const size_t p_values = (size_t)mh * (size_t)nh;
+#if defined(COB_USE_RECURSIVE_STRASSEN)
+    const size_t parent_values = x_values + y_values + p_values;
+    const int compatible = legacy_geometry && (m % 128 == 0 && n % 128 == 0 && k % 128 == 0);
+#if defined(COB_USE_APPLE_AMX)
+    const int deep = compatible && (n % 256 == 0) && min_dim >= COB_WINOGRAD_APPLE_MIN;
+#else
+    const int deep = compatible && min_dim >= COB_WINOGRAD_NATIVE_MIN;
+#endif
+    size_t child_values = deep ? parent_values / 4 : 0;
+    float* workspace = (float*)cob_aligned_alloc(128, (parent_values + child_values) * sizeof(float));
+    if (!workspace && child_values) {
+        workspace = (float*)cob_aligned_alloc(128, parent_values * sizeof(float));
+        if (!workspace) return 0;
+        child_values = 0;
+    }
+    if (workspace == NULL) {
+        return 0;
+    }
+    float* child_workspace = child_values ? workspace + parent_values : NULL;
+#define COB_STRASSEN_CHILD(...) cob_winograd_product(__VA_ARGS__, child_workspace, cob_strassen_leaf)
+#else
     float* workspace = (float*)cob_aligned_alloc(
         128,
         (x_values + y_values + p_values) * sizeof(float));
     if (workspace == NULL) {
         return 0;
     }
+#define COB_STRASSEN_CHILD cob_strassen_leaf
+#endif
     float* x = workspace;
     float* y = x + x_values;
     float* p = y + y_values;
@@ -3608,33 +3811,33 @@ static int cob_sgemm_rowmajor_strassen1(
        is read once. Every quadrant keeps the previous schedule's
        floating-point evaluation order, so results stay bit-identical. */
     cob_strassen_linear2(x, mh, kh, a21, lda, a22, lda, 1);
-    if (!cob_strassen_leaf(mh, nh, kh, x, kh, b11, ldb, c21, ldc)) {
+    if (!COB_STRASSEN_CHILD(mh, nh, kh, x, kh, b11, ldb, c21, ldc)) {
         free(workspace);
         return 0;
     }
 
     cob_strassen_linear2(y, kh, nh, b12, ldb, b22, ldb, -1);
-    if (!cob_strassen_leaf(mh, nh, kh, a11, lda, y, nh, c12, ldc)) {
+    if (!COB_STRASSEN_CHILD(mh, nh, kh, a11, lda, y, nh, c12, ldc)) {
         free(workspace);
         return 0;
     }
 
     cob_strassen_linear2(y, kh, nh, b21, ldb, b11, ldb, -1);
-    if (!cob_strassen_leaf(mh, nh, kh, a22, lda, y, nh, c11, ldc)) {
+    if (!COB_STRASSEN_CHILD(mh, nh, kh, a22, lda, y, nh, c11, ldc)) {
         free(workspace);
         return 0;
     }
 
     cob_strassen_linear2(x, mh, kh, a11, lda, a22, lda, 1);
     cob_strassen_linear2(y, kh, nh, b11, ldb, b22, ldb, 1);
-    if (!cob_strassen_leaf(mh, nh, kh, x, kh, y, nh, p, nh)) {
+    if (!COB_STRASSEN_CHILD(mh, nh, kh, x, kh, y, nh, p, nh)) {
         free(workspace);
         return 0;
     }
     cob_strassen_merge_m1(c11, c12, c21, c22, ldc, p, mh, nh);
 
     cob_strassen_linear2(x, mh, kh, a11, lda, a12, lda, 1);
-    if (!cob_strassen_leaf(mh, nh, kh, x, kh, b22, ldb, p, nh)) {
+    if (!COB_STRASSEN_CHILD(mh, nh, kh, x, kh, b22, ldb, p, nh)) {
         free(workspace);
         return 0;
     }
@@ -3642,7 +3845,7 @@ static int cob_sgemm_rowmajor_strassen1(
 
     cob_strassen_linear2(x, mh, kh, a21, lda, a11, lda, -1);
     cob_strassen_linear2(y, kh, nh, b11, ldb, b12, ldb, 1);
-    if (!cob_strassen_leaf(mh, nh, kh, x, kh, y, nh, p, nh)) {
+    if (!COB_STRASSEN_CHILD(mh, nh, kh, x, kh, y, nh, p, nh)) {
         free(workspace);
         return 0;
     }
@@ -3650,16 +3853,124 @@ static int cob_sgemm_rowmajor_strassen1(
 
     cob_strassen_linear2(x, mh, kh, a12, lda, a22, lda, -1);
     cob_strassen_linear2(y, kh, nh, b21, ldb, b22, ldb, 1);
-    if (!cob_strassen_leaf(mh, nh, kh, x, kh, y, nh, p, nh)) {
+    if (!COB_STRASSEN_CHILD(mh, nh, kh, x, kh, y, nh, p, nh)) {
         free(workspace);
         return 0;
     }
     cob_strassen_merge_product(c11, ldc, p, mh, nh, 1);
 
+#undef COB_STRASSEN_CHILD
     free(workspace);
+#if defined(COB_USE_RECTANGULAR_STRASSEN)
+    if (!legacy_geometry) {
+        cob_strassen_complete_edges(full_m, full_n, full_k, m, n, k, a, lda, b, ldb, c, ldc);
+    }
+#endif
     return 1;
 }
 
+#endif
+
+#if defined(COB_USE_SKINNY_GEMM)
+/* For a handful of output rows each B value has little reuse. Stream B in
+   short K strips directly; all accumulators keep increasing K order. */
+#if defined(COB_USE_X86_SIMD)
+#define COB_THIN_TARGET __attribute__((target("avx2,fma")))
+typedef __m256 cob_thin_vector;
+enum { COB_THIN_LANES = 8 };
+#define COB_THIN_LOAD(p) _mm256_loadu_ps(p)
+#define COB_THIN_STORE(p, v) _mm256_storeu_ps((p), (v))
+#define COB_THIN_ZERO() _mm256_setzero_ps()
+#define COB_THIN_FMA(c, b, a) _mm256_fmadd_ps(_mm256_set1_ps(a), (b), (c))
+#else
+#define COB_THIN_TARGET
+typedef float32x4_t cob_thin_vector;
+enum { COB_THIN_LANES = 4 };
+#define COB_THIN_LOAD(p) vld1q_f32(p)
+#define COB_THIN_STORE(p, v) vst1q_f32((p), (v))
+#define COB_THIN_ZERO() vdupq_n_f32(0)
+#define COB_THIN_FMA(c, b, a) vfmaq_n_f32((c), (b), (a))
+#endif
+enum { COB_THIN_COLS = 16, COB_THIN_VECTORS = COB_THIN_COLS / COB_THIN_LANES };
+
+COB_THIN_TARGET __attribute__((always_inline)) static inline void cob_thin_tile(
+    int rows, int k, const float* a, int lda, const float* b, int ldb,
+    float* c, int ldc, int first)
+{
+    cob_thin_vector accum[4][COB_THIN_VECTORS];
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < COB_THIN_VECTORS; ++j) {
+            accum[i][j] = first ? COB_THIN_ZERO() :
+                COB_THIN_LOAD(c + (size_t)i * ldc + j * COB_THIN_LANES);
+        }
+    }
+    for (int p = 0; p < k; ++p) {
+        const float* bp = b + (size_t)p * ldb;
+        cob_thin_vector bv[COB_THIN_VECTORS];
+        for (int j = 0; j < COB_THIN_VECTORS; ++j) {
+            bv[j] = COB_THIN_LOAD(bp + j * COB_THIN_LANES);
+        }
+        for (int i = 0; i < rows; ++i) {
+            const float av = a[(size_t)i * lda + p];
+            for (int j = 0; j < COB_THIN_VECTORS; ++j) {
+                accum[i][j] = COB_THIN_FMA(accum[i][j], bv[j], av);
+            }
+        }
+    }
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < COB_THIN_VECTORS; ++j) {
+            COB_THIN_STORE(c + (size_t)i * ldc + j * COB_THIN_LANES, accum[i][j]);
+        }
+    }
+}
+
+COB_THIN_TARGET static void cob_sgemm_few_rows(int m, int n, int k,
+    const float* a, int lda, const float* b, int ldb, float* c, int ldc)
+{
+    const int full_cols = n / COB_THIN_COLS * COB_THIN_COLS;
+    for (int p = 0; p < k;) {
+        const int kb = cob_min_i32(16, k - p);
+        for (int j = 0; j < full_cols; j += COB_THIN_COLS) {
+            const float* bp = b + (size_t)p * ldb + j;
+            for (int i = 0; i < m;) {
+                const float* ap = a + (size_t)i * lda + p;
+                float* cp = c + (size_t)i * ldc + j;
+                const int remain = m - i;
+                /* Split five as three plus two to avoid a single-row tail. */
+                if (remain == 2) {
+                    cob_thin_tile(2, kb, ap, lda, bp, ldb, cp, ldc, p == 0);
+                    i += 2;
+                } else if (remain == 3 || remain == 5) {
+                    cob_thin_tile(3, kb, ap, lda, bp, ldb, cp, ldc, p == 0);
+                    i += 3;
+                } else {
+                    cob_thin_tile(4, kb, ap, lda, bp, ldb, cp, ldc, p == 0);
+                    i += 4;
+                }
+            }
+        }
+        p += kb;
+    }
+    /* B's final row need not have accessible storage after its last column. */
+    for (int i = 0; i < m; ++i) {
+        for (int j = full_cols; j < n; ++j) {
+            float sum = 0;
+            for (int p = 0; p < k; ++p) {
+                sum = __builtin_fmaf(a[(size_t)i * lda + p], b[(size_t)p * ldb + j], sum);
+            }
+            c[(size_t)i * ldc + j] = sum;
+        }
+    }
+}
+#undef COB_THIN_TARGET
+#undef COB_THIN_LOAD
+#undef COB_THIN_STORE
+#undef COB_THIN_ZERO
+#undef COB_THIN_FMA
+#endif
+
+#if defined(COB_ENABLE_BILINEAR336) && COB_ENABLE_BILINEAR336
+#include "cob_bilinear336.inc"
 #endif
 
 void cob_sgemm_rowmajor(
@@ -3673,6 +3984,23 @@ void cob_sgemm_rowmajor(
     float* c,
     int ldc)
 {
+#if defined(COB_ENABLE_BILINEAR336) && COB_ENABLE_BILINEAR336
+    if (cob_sgemm_336(m,n,k,a,lda,b,ldb,c,ldc)) return;
+#endif
+
+#if defined(COB_USE_SKINNY_GEMM)
+    if (m >= 2 && m <= 8 && n >= 256 && k >= 64 &&
+        a && b && c && lda >= k && ldb >= n && ldc >= n &&
+#if defined(COB_USE_X86_SIMD)
+        __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma") &&
+#endif
+        !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, a, (size_t)(m - 1) * lda + k) &&
+        !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, b, (size_t)(k - 1) * ldb + n)) {
+        cob_sgemm_few_rows(m, n, k, a, lda, b, ldb, c, ldc);
+        return;
+    }
+#endif
+
 #if defined(COB_USE_APPLE_AMX)
     if (m > 0 && n > 0 && k > 0 && a != NULL && b != NULL && c != NULL &&
         lda >= k && ldb >= n && ldc >= n &&

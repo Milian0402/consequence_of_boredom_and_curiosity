@@ -1,72 +1,141 @@
-"""Report all frozen cases and refuse incomplete or numerically invalid runs."""
+"""Verify all timing pairs and full-output checks before summarizing a phase."""
 import csv
-from collections import Counter, defaultdict
-from math import isfinite
-from statistics import median
+from collections import defaultdict
+from math import isclose, isfinite
+from statistics import geometric_mean, median
 import sys
 
-pairs_file, log_file, arch = sys.argv[1:]
-mode = {"x86_64":"native-x86-dispatch", "aarch64":"native-arm-neon"}[arch]
-shapes = [(1536,1536,1536),(2048,2048,2048),(3072,3072,3072),(4096,4096,4096),
-          (3072,3328,2944),(2049,2112,1984),(1024,1024,1024),
-          (1,1536,1024),(1,2049,1025)]
 
-def blas_name(s):
-    return "openblas-sgemv" if s[0]==1 else "openblas-sgemm"
-seeds = {0:0, 1:0x12345678, 2:0x649f539b}
-groups = defaultdict(list)
-checks = {}
-errors = []
-with open(pairs_file,newline="") as f:
-    for row in csv.DictReader(f):
-        shape = tuple(int(row[v]) for v in ("m","n","k"))
-        block = int(row["block"])
-        if row["mode"]!=mode or shape not in shapes or block not in (1,2) or int(row["seed"])!=seeds[block]:
-            errors.append("Unexpected mode, shape, block or seed in pairs.csv")
-        groups[shape,row["competitor"]].append(row)
-with open(log_file) as f:
-    for line in f:
-        if not line.startswith("accuracy,"):
-            continue
-        _,kind,seed,block,impl,m,n,k,count,mx,_,status=next(csv.reader([line]))
-        s=(int(m),int(n),int(k)); block=int(block); key=(kind,block,impl,s)
-        if key in checks or int(count)!=s[0]*s[1] or int(seed)!=seeds.get(block):
-            errors.append("Invalid/duplicate accuracy scan")
-        value=float(mx)
-        good=status=="pass" and isfinite(value) and value<=0.002
-        checks[key]=(value,good)
-        if not good: errors.append(f"{kind} block {block} {impl} {s} failed")
-expected_checks = {("random",b,impl,s) for s in shapes for b in (1,2)
-                   for impl in ("baseline","candidate",blas_name(s))}
-expected_checks.update(("cancel",0,impl,(2048,2048,2048)) for impl in ("baseline","candidate","openblas-sgemm"))
-if set(checks)!=expected_checks: errors.append("Missing or unexpected full FP64 result")
-if set(groups)-{(s,c) for s in shapes for c in ("baseline",blas_name(s))}: errors.append("Unexpected timing group")
+TARGETS = {
+    "discovery": [(2048,4096,2048,0), (3200,1920,2432,0), (1985,2753,2017,0), (3072,3072,3072,0), (4096,4096,4096,0), (2304,4608,2304,0)],
+    "confirm": [(2240,4480,2240,0), (3840,2304,2944,0), (2560,2560,5120,0), (2689,3329,2497,0), (3073,3073,3073,0), (3584,3584,3584,0), (2688,5376,2688,0)],
+    "recursive": [(3072,3072,3072,0), (4096,4096,4096,0)],
+    "bilinear": [(2304,4608,2304,0), (2048,4096,2048,0)],
+}
+SKINNY = {"discovery": [(3,2048,1536,0), (6,3072,2048,0)],
+          "confirm": [(2,1537,2049,0), (5,4095,1025,0), (8,1024,3072,0)], "recursive": [], "bilinear": []}
+CONTROLS = {"discovery": [], "recursive": [], "bilinear": [], "confirm": [(1536,1536,1536,0), (320,960,768,0), (2240,4480,2240,7), (16,1536,1024,0)]}
+CANCELLATION = [(2048,2048,2048,0), (1793,2049,1537,7)]
+SCALED = (1536,2688,1664,0)
+EXTRA_SCALED = {"recursive": [(3072,3072,3072,0)], "bilinear": [(2304,4608,2304,0)]}
+SEEDS = {0: 0, 1: 0x12345678, 2: 0x649f539b}
+MODES = {"x86_64": "native-x86-dispatch", "aarch64": "native-arm-neon"}
+COMPETITORS = ("baseline", "openblas-sgemm")
+HEADER = "phase,mode,m,n,k,pad,block,seed,pair,calls,competitor,first,competitor_seconds,candidate_seconds,candidate_speedup".split(",")
 
-def result(s,competitor):
-    rows=groups[s,competitor]
-    indices=Counter((int(r["block"]),int(r["pair"])) for r in rows)
-    first=Counter(r["first"] for r in rows)
-    values=[float(r["candidate_speedup"]) for r in rows]
-    if indices!=Counter((b,p) for b in (1,2) for p in (1,2,3)) or first!={competitor:3,"candidate":3} or not all(isfinite(v) and v>0 for v in values):
-        errors.append(f"Incomplete/invalid pairs for {s}, {competitor}")
-        return "unverified"
-    return f"{median(values):.3f}× ({sum(v>1 for v in values)}/6)"
 
-print(f"## Optional one-level Strassen on {arch}\n")
-print("Ratios above 1.0 favor Strassen. Each ratio is the median of six paired whole calls. Baseline commit 5e40c1c.\n")
-print("| M × N × K | vs previous native COB (wins) | OpenBLAS routine | vs OpenBLAS (wins) | Candidate maximum FP64 error, two full scans |")
-print("|---|---:|---|---:|---:|")
-for s in shapes:
-    dim=" × ".join(map(str,s))
-    scans=[checks.get(("random",b,"candidate",s)) for b in (1,2)]
-    error=f"{max(v[0] for v in scans):.7g}" if all(v and v[1] for v in scans) else "unverified"
-    print(f"| {dim} | {result(s,'baseline')} | {blas_name(s).split('-')[1].upper()} | {result(s,blas_name(s))} | {error} |")
-print("\nThe 2048-square cancellation case checks all 4,194,304 outputs independently against FP64 for each implementation.\n")
-for impl in ("baseline","candidate","openblas-sgemm"):
-    reading=checks.get(("cancel",0,impl,(2048,2048,2048)))
-    label=(f"{reading[0]:.7g} ({'passed' if reading[1] else 'failed'})") if reading else "missing"
-    print(f"- {impl} maximum absolute error {label}")
-if errors:
-    print("\nIncomplete or failed verification.\n")
-    for reason in dict.fromkeys(errors): print(f"- {reason}")
-    sys.exit(1)
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def read_pairs(path, mode, phase, shapes, repeats):
+    groups = defaultdict(dict)
+    with open(path, newline="") as stream:
+        reader = csv.DictReader(stream)
+        require(reader.fieldnames == HEADER, "invalid timing header")
+        for row in reader:
+            shape = tuple(int(row[name]) for name in ("m", "n", "k", "pad"))
+            competitor = row["competitor"]
+            block, pair = int(row["block"]), int(row["pair"])
+            require(row["phase"] == phase and row["mode"] == mode and shape in shapes,
+                    f"unexpected timing phase, mode or input at row {reader.line_num}")
+            require(competitor in COMPETITORS and block in (1, 2) and 1 <= pair <= repeats,
+                    f"unexpected implementation, block or index at row {reader.line_num}")
+            require(int(row["seed"]) == SEEDS[block] and int(row["calls"]) == 1,
+                    f"unexpected seed or number of timed calls at row {reader.line_num}")
+            first = row["first"]
+            before, after, ratio = (float(row[name]) for name in
+                                     ("competitor_seconds", "candidate_seconds", "candidate_speedup"))
+            require(first in ("candidate", competitor) and all(isfinite(v) and v > 0 for v in (before, after, ratio)),
+                    f"invalid measurement at row {reader.line_num}")
+            require(isclose(ratio, before / after, rel_tol=1e-7), f"inconsistent ratio at row {reader.line_num}")
+            group = groups[shape, competitor]
+            require((block, pair) not in group, f"duplicate timing pair at row {reader.line_num}")
+            group[block, pair] = (before, after, ratio, first)
+    expected_indices = {(b, p) for b in (1, 2) for p in range(1, repeats + 1)}
+    for shape in shapes:
+        for competitor in COMPETITORS:
+            group = groups[shape, competitor]
+            require(set(group) == expected_indices, f"incomplete paired timings for {shape}, {competitor}")
+            for pair in range(1, repeats + 1):
+                require(group[1,pair][3] != group[2,pair][3], f"unbalanced block order for {shape}, {competitor}")
+                if pair > 1:
+                    require(group[1,pair][3] != group[1,pair-1][3], f"nonalternating pair order for {shape}, {competitor}")
+    return groups
+
+
+def read_accuracy(path, shapes, scaled_shapes):
+    checks = {}
+    implementations = (*COMPETITORS, "candidate")
+    expected = {("random", b, impl, s) for b in (1, 2) for impl in implementations for s in shapes}
+    expected.update(("cancel", 0, impl, s) for impl in implementations for s in CANCELLATION)
+    expected.update(("scaled", 0, impl, s) for impl in implementations for s in scaled_shapes)
+    with open(path) as stream:
+        for line in stream:
+            if not line.startswith("accuracy,"):
+                continue
+            _, kind, seed, block, impl, m, n, k, pad, count, maximum, checksum, canaries, status = next(csv.reader([line]))
+            block = int(block)
+            s = (int(m), int(n), int(k), int(pad))
+            key = (kind, block, impl, s)
+            require(key in expected and key not in checks, f"unexpected or duplicate FP64 scan {key}")
+            require(int(seed) == (117 if kind == "scaled" else SEEDS[block]) and int(count) == s[0] * s[1], f"wrong seed or scan extent for {key}")
+            error = float(maximum)
+            require(status == "pass" and int(canaries) == 0 and isfinite(error) and 0 <= error <= 0.002
+                    and isfinite(float(checksum)), f"failed numerical or canary check for {key}")
+            checks[key] = error
+    require(set(checks) == expected, f"missing {len(expected - set(checks))} full FP64 scans")
+    return checks
+
+
+def main():
+    pairs_path, accuracy_path, arch, phase = sys.argv[1:]
+    targets = TARGETS[phase]
+    shapes = targets + SKINNY[phase] + CONTROLS[phase]
+    repeats = 3 if phase == "confirm" else 1
+    groups = read_pairs(pairs_path, MODES[arch], phase, shapes, repeats)
+    scaled_shapes = [SCALED, *EXTRA_SCALED.get(phase, [])]
+    checks = read_accuracy(accuracy_path, shapes, scaled_shapes)
+    gm = defaultdict(list)
+    print(f"## Single-thread GEMM {phase} on {arch}\n")
+    print("Ratios use competitor time divided by candidate time. Both COB versions enable portable Strassen.")
+    print("The baseline is the primary candidate." if phase in ("recursive", "bilinear") else "The baseline is the preceding published COB revision.")
+    print()
+    print("| Input | M × N × K | Stride pad | Competitor | Median ms, competitor / candidate | Median ratio | Candidate wins | Block geometric means | Max candidate FP64 error |")
+    print("|---|---|---:|---|---:|---:|---:|---|---:|")
+    for s in shapes:
+        error = max(checks["random", b, "candidate", s] for b in (1, 2))
+        for competitor in COMPETITORS:
+            group = groups[s, competitor]
+            values = list(group.values())
+            base_ms = 1000 * median(x[0] for x in values)
+            cand_ms = 1000 * median(x[1] for x in values)
+            ratio = median(x[2] for x in values)
+            block_ratios = [geometric_mean(group[b,p][2] for p in range(1, repeats + 1)) for b in (1, 2)]
+            wins = sum(x[2] > 1 for x in values)
+            role = "matrix target" if s in targets else "skinny target" if s in SKINNY[phase] else "guard"
+            if role != "guard":
+                gm[role, competitor].append(ratio)
+            print(f"| {role} | {s[0]} × {s[1]} × {s[2]} | {s[3]} | {competitor} | {base_ms:.3f} / {cand_ms:.3f} | "
+                  f"{ratio:.4f}× | {wins}/{len(values)} | {block_ratios[0]:.4f} / {block_ratios[1]:.4f} | {error:.7g} |")
+    print("\nTarget-only geometric means of per-input median ratios\n")
+    for (role, competitor), values in gm.items():
+        print(f"- {competitor} {geometric_mean(values):.4f}× over {len(values)} {role}s.")
+    peak = max(v for key, v in checks.items() if key[2] == "candidate")
+    nout = sum(key[3][0] * key[3][1] for key in checks if key[2] == "candidate")
+    print(f"\nChecked all {nout:,} candidate outputs across two random seeds per shape, two cancellation cases and scaled inputs. "
+          f"Peak absolute error was {peak:.7g}. All padding canaries passed.\n")
+    for shape in CANCELLATION:
+        error = checks["cancel", 0, "candidate", shape]
+        print(f"- Cancellation {shape[0]} × {shape[1]} × {shape[2]}, stride pad {shape[3]}, candidate max error {error:.7g}.")
+    for s in scaled_shapes:
+        print(f"- Scaled input {s[0]} × {s[1]} × {s[2]}, candidate max error {checks['scaled',0,'candidate',s]:.7g}.")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, KeyError, ValueError) as error:
+        print(f"Benchmark verification failed: {error}", file=sys.stderr)
+        sys.exit(1)
