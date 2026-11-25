@@ -20,6 +20,12 @@ register_tile_variants() {
                 "$build/check-n2-$rows" | tee "$out/n2-$rows-validation.txt"
             done
             ;;
+        x86_64/tile-confirm)
+            tile_candidate exact-edge -DCOB_ENABLE_X86_EXACT_EDGE=1
+            ;;
+        aarch64/tile-confirm)
+            tile_candidate n2-tail6 -DCOB_N2_TAIL_ROWS=6
+            ;;
         *) echo "No configuration frozen for $arch/$phase" >&2; return 2 ;;
     esac
 }

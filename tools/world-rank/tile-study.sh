@@ -81,15 +81,13 @@ tile_plugin cob-incumbent "$build/incumbent.so"
 source "$dir/tile-variants.inc"
 register_tile_variants "$arch" "$phase"
 if (( ${#registered[@]} < 4 )); then echo 'No tile candidate registered' >&2; exit 1; fi
-taskset -c "$cpu" python3 "$dir/study.py" "$build/worker" "$out/panel.csv" "$out" "$vendor/openblas.so" \
+study_failed=0
+run_study() {
+    taskset -c "$cpu" python3 "$dir/study.py" "$@" || study_failed=1
+}
+run_study "$build/worker" "$out/panel.csv" "$out" "$vendor/openblas.so" \
     --phase "$phase" --rounds 3 --stress "${peers[@]}" "${registered[@]}"
 
-finite_out=$(dirname "$out")/finite
-mkdir -p "$finite_out"
-bash "$dir/finite/build.sh" "$build/finite" "$build/incumbent.so"
-cp "$build/finite/hk233-certificate.txt" "$build/finite/hk233-smoke.txt" "$out/host.txt" "$out/build.txt" "$finite_out/"
-cp "$dir/hk-${phase#tile-}.csv" "$finite_out/panel.csv"
-for info in "$vendor"/*.txt; do if [[ -f $info ]]; then cp "$info" "$finite_out/"; fi; done
 finite_peers=()
 for name in "${names[@]}"; do
     case "$name" in
@@ -99,8 +97,46 @@ for name in "${names[@]}"; do
 done
 native_vendor=armpl
 if [[ $arch == x86_64 ]]; then native_vendor=mkl; fi
-sha256sum "$build/finite/hk233.so" "$build/incumbent.so" "$build/worker" "$finite_out/panel.csv" > "$finite_out/finite-build.txt"
-taskset -c "$cpu" python3 "$dir/study.py" "$build/worker" "$finite_out/panel.csv" "$finite_out" "$vendor/openblas.so" \
-    --phase "$phase" --rounds 3 --stress "${finite_peers[@]}" \
-    --candidate "cob-incumbent=direct:$build/incumbent.so" --candidate "hk233=hk233:$build/finite/hk233.so" \
-    --candidate "hybrid-openblas=hybrid-next:$vendor/openblas.so" --candidate "hybrid-$native_vendor=hybrid-next:$vendor/$native_vendor.so"
+run_finite() {
+    local finite_out=$(dirname "$out")/$2
+    local phase=$1
+    mkdir -p "$finite_out"
+    bash "$dir/finite/build.sh" "$build/finite" "$build/incumbent.so"
+    cp "$build/finite/hk233-certificate.txt" "$build/finite/hk233-smoke.txt" "$out/host.txt" "$out/build.txt" "$finite_out/"
+    cp "$dir/hk-${phase#tile-}.csv" "$finite_out/panel.csv"
+    for info in "$vendor"/*.txt; do if [[ -f $info ]]; then cp "$info" "$finite_out/"; fi; done
+    sha256sum "$build/finite/hk233.so" "$build/incumbent.so" "$build/worker" "$finite_out/panel.csv" > "$finite_out/finite-build.txt"
+    local extra_finite=()
+    if [[ $phase == tile-confirm ]]; then
+        bash "$dir/finite/build.sh" "$build/finite-stored" "$build/incumbent.so" stored
+        cp "$build/finite-stored/hk233-certificate.txt" "$finite_out/stored-certificate.txt"
+        cp "$build/finite-stored/hk233-smoke.txt" "$finite_out/stored-smoke.txt"
+        sha256sum "$build/finite-stored/hk233.so" >> "$finite_out/finite-build.txt"
+        extra_finite+=(--candidate "hk233-stored=hk233:$build/finite-stored/hk233.so")
+    fi
+    run_study "$build/worker" "$finite_out/panel.csv" "$finite_out" "$vendor/openblas.so" \
+        --phase "$phase" --rounds 3 --stress "${finite_peers[@]}" \
+        --candidate "cob-incumbent=direct:$build/incumbent.so" --candidate "hk233=hk233:$build/finite/hk233.so" \
+        --candidate "hybrid-openblas=hybrid-next:$vendor/openblas.so" --candidate "hybrid-$native_vendor=hybrid-next:$vendor/$native_vendor.so" "${extra_finite[@]}"
+}
+if [[ $phase == tile-confirm && $arch == x86_64 ]]; then
+    run_finite tile-screen finite-screen-replay
+fi
+run_finite "$phase" finite
+
+if [[ $phase == tile-confirm ]]; then
+    dual_out=$(dirname "$out")/dual
+    mkdir -p "$dual_out"
+    "$cc" -O3 -std=c11 "${target[@]}" -fPIC -shared "$dir/dual/dual.c" -lm -o "$build/dual.so"
+    "$cc" -O3 -std=c11 "$dir/dual/check.c" "$build/dual.so" -lm -o "$build/check-dual"
+    "$build/check-dual" | tee "$dual_out/dual-validation.txt"
+    cp "$out/host.txt" "$out/build.txt" "$dual_out/"
+    for info in "$vendor"/*.txt; do if [[ -f $info ]]; then cp "$info" "$dual_out/"; fi; done
+    cp "$dir/dual/panel.csv" "$dual_out/panel.csv"
+    sha256sum "$build/dual.so" "$build/worker" "$build/incumbent.so" "$dual_out/panel.csv" > "$dual_out/dual-build.txt"
+    run_study "$build/worker" "$dual_out/panel.csv" "$dual_out" "$vendor/openblas.so" \
+        --phase "$phase" --rounds 3 --stress "${finite_peers[@]}" \
+        --candidate "cob-incumbent=direct:$build/incumbent.so" --candidate "dual-kernel=direct:$build/dual.so"
+fi
+
+exit "$study_failed"

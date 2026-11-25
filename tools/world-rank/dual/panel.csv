@@ -1,0 +1,7 @@
+family,m,n,k,pad
+dual-square,256,256,16,0
+dual-padded,573,579,24,3
+dual-square,1024,1024,32,0
+dual-padded,1597,1603,40,5
+dual-square,2304,2304,48,0
+dual-padded,4093,4099,64,7
