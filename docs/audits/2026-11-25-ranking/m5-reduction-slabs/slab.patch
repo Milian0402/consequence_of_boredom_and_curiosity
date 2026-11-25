@@ -1,0 +1,46 @@
+diff --git a/third_party/maxmulsk/strassen_leaf.c b/third_party/maxmulsk/strassen_leaf.c
+index ed2132c..e060f35 100644
+--- a/third_party/maxmulsk/strassen_leaf.c
++++ b/third_party/maxmulsk/strassen_leaf.c
+@@ -1750,19 +1750,28 @@ cob_wide_two_panels(int m, int n, int k, const float *a, const float *b,
+     _Alignas(64) float stage[16 * 64];
+     pack_A_block(a, k, 0, m, 0, k, depth, packed_a, stage);
+ 
+-    for (int col = 0; col < n; col += 64) {
+-        const int width = n - col < 64 ? n - col : 64;
+-        for (int row = 0; row < m; row += 16) {
+-            const int height = m - row < 16 ? m - row : 16;
+-            const float *left = packed_a + row * depth;
+-            float *dst = c + (size_t)row * n + col;
+-            svzero_za();
+-            if (width == 64)
+-                cob_sme_short_k_tile(k, left, b + col, n, svptrue_c32());
+-            else
+-                cob_sme_short_k_tile(k, left, b + col, n, svwhilelt_c32_u64(0, (unsigned)width, 4));
+-            if (width == 64 && height == 16) store_za(dst, n);
+-            else cob_sme_transfer_short_c(height, width, dst, n, 1);
++    enum { panel_cols = 256, slab_depth = 64 };
++    for (int panel = 0; panel < n; panel += panel_cols) {
++        const int end = n - panel < panel_cols ? n : panel + panel_cols;
++        for (int slab = 0; slab < k; slab += slab_depth) {
++            const int steps = k - slab < slab_depth ? k - slab : slab_depth;
++            for (int col = panel; col < end; col += 64) {
++                const int width = end - col < 64 ? end - col : 64;
++                const float *right = b + (size_t)slab * n + col;
++                for (int row = 0; row < m; row += 16) {
++                    const int height = m - row < 16 ? m - row : 16;
++                    const float *left = packed_a + row * depth + (size_t)slab * 16;
++                    float *dst = c + (size_t)row * n + col;
++                    if (slab == 0) svzero_za();
++                    else cob_sme_transfer_short_c(height, width, dst, n, 0);
++                    if (width == 64)
++                        cob_sme_short_k_tile(steps, left, right, n, svptrue_c32());
++                    else
++                        cob_sme_short_k_tile(steps, left, right, n, svwhilelt_c32_u64(0, (unsigned)width, 4));
++                    if (width == 64 && height == 16) store_za(dst, n);
++                    else cob_sme_transfer_short_c(height, width, dst, n, 1);
++                }
++            }
+         }
+     }
+     return 1;

@@ -1,0 +1,17 @@
+{
+  "production": "a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6",
+  "benchmark": "6977fd9dd9542b67eb2ddcf763b78f6e84fda56b",
+  "run": 45704182519,
+  "attempt": 1,
+  "replica": 2,
+  "cpu": 0,
+  "page": 4096,
+  "source_files": {
+    "panel.csv": "2b4d6871262a4d038533b6cab819e819c3cff1eaf3ef606678b2ad6e30520ed5",
+    "protocol.md": "02581f0e088da5d11c0308b3583b9ef5f87e239999268ff6430952596db57c60",
+    "novelty.json": "e9baadd9bcefb088d294250cb23ac31361576f8799c8b30ba06aaa372c1808e7",
+    "methods.csv": "8d19c9290fde5db4fcdf59f39f844948046b7d5f0ef165094a9d5addce7f8b32",
+    "prefix-source.sha256": "8c7b0dd05d22d33b51627273b80de1e39484d37719f5d4ba14f0b16cf9b37ee1",
+    "grouped-sources.json": "62ace1a212786ff0f998492dc1e3255dfed7062535381d8b8b5c70bb449d11cf"
+  }
+}

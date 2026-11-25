@@ -1,0 +1,57 @@
+{
+  "replica": 2,
+  "run": 45704182519,
+  "attempt": 1,
+  "benchmark_sha": "6977fd9dd9542b67eb2ddcf763b78f6e84fda56b",
+  "branch": "bench/native-linux-gemm",
+  "url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45704182519",
+  "job": "Prefix-eight on x86-64, replica 2",
+  "job_id": 139521811716,
+  "job_url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45704182519/job/139521811716",
+  "status": "success",
+  "steps": [
+    {
+      "name": "Set up job",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "conclusion": "success"
+    },
+    {
+      "name": "Build the registered single-thread library field",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify provider calls and time the complete operations",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "conclusion": "success"
+    }
+  ],
+  "artifact": "prefix-eight-45704182519-1-2",
+  "artifact_id": 15065640588,
+  "source_sha": "6977fd9dd9542b67eb2ddcf763b78f6e84fda56b",
+  "artifact_sha256": "46ebcad53cb4705fe0361412a024dc4986a254002094e711bb2f1aec5cedcc71",
+  "bytes": 85834,
+  "members": 60,
+  "zipped_crc_passed": true
+}

@@ -1,0 +1,12 @@
+family,layout,public_calls,isa,kernel_calls,checked,cpu,forwarded_args,workspace_aligned,passed
+repeat-deeper,origin,1,avx2,1,186624,0,1,1,1
+repeat-ragged,origin,1,avx2,1,298523,0,1,1,1
+repeat-short,origin,1,avx2,1,98513,0,1,1,1
+fresh-thin,aligned-b,1,avx2,1,35641,0,1,1,1
+fresh-odd,aligned-b,1,avx2,1,83468,0,1,1,1
+fresh-exact,compact,1,avx2,1,147968,0,1,1,1
+fresh-long,aligned-b,1,avx2,1,254561,0,1,1,1
+fresh-high-depth,aligned-b,1,avx2,1,401072,0,1,1,1
+fresh-upper,aligned-b,1,avx2,1,381879,0,1,1,1
+control-cropped-deeper,cropped,1,avx2,1,186624,0,1,1,1
+control-cropped-short,cropped,1,avx2,1,98513,0,1,1,1

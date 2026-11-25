@@ -1,0 +1,49 @@
+vendor=mkl
+version=2026.2.1
+
+Dynamic section at offset 0x2da8 contains 29 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libmkl_intel_lp64.so.3]
+ 0x0000000000000001 (NEEDED)             Shared library: [libmkl_sequential.so.3]
+ 0x0000000000000001 (NEEDED)             Shared library: [libmkl_core.so.3]
+ 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x000000000000000f (RPATH)              Library rpath: [/home/runner/work/_temp/gemm-vendor.hALfco/runtime/mkl-2026.2.1.data/data/lib]
+ 0x000000000000000c (INIT)               0x1000
+ 0x000000000000000d (FINI)               0x13b8
+ 0x0000000000000019 (INIT_ARRAY)         0x3d98
+ 0x000000000000001b (INIT_ARRAYSZ)       8 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x3da0
+ 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x2f0
+ 0x0000000000000005 (STRTAB)             0x498
+ 0x0000000000000006 (SYMTAB)             0x318
+ 0x000000000000000a (STRSZ)              443 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000003 (PLTGOT)             0x3fe8
+ 0x0000000000000002 (PLTRELSZ)           168 (bytes)
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000017 (JMPREL)             0x7a0
+ 0x0000000000000007 (RELA)               0x6c8
+ 0x0000000000000008 (RELASZ)             216 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffffe (VERNEED)            0x678
+ 0x000000006fffffff (VERNEEDNUM)         1
+ 0x000000006ffffff0 (VERSYM)             0x654
+ 0x000000006ffffff9 (RELACOUNT)          3
+ 0x0000000000000000 (NULL)               0x0
+	linux-vdso.so.1 (0x00007f8edf436000)
+	libmkl_intel_lp64.so.3 => /home/runner/work/_temp/gemm-vendor.hALfco/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3 (0x00007f8ede400000)
+	libmkl_sequential.so.3 => /home/runner/work/_temp/gemm-vendor.hALfco/runtime/mkl-2026.2.1.data/data/lib/libmkl_sequential.so.3 (0x00007f8edca00000)
+	libmkl_core.so.3 => /home/runner/work/_temp/gemm-vendor.hALfco/runtime/mkl-2026.2.1.data/data/lib/libmkl_core.so.3 (0x00007f8ed8200000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f8ede317000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f8ed7e00000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f8edf418000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f8edf413000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f8edf438000)
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (/home/runner/work/_temp/gemm-vendor.hALfco/runtime/mkl-2026.2.1.data/data/lib/libmkl_intel_lp64.so.3)
+MKL_VERBOSE oneMKL 2026 Update 2 Product build 20260915 for Intel(R) 64 architecture Intel(R) Architecture processors, Lnx 4.30GHz lp64 sequential
+MKL_VERBOSE SGEMM(N,N,9,7,5,0x7ffed120d158,0x7f1385512f70,11,0x7f1385986a20,6,0x7ffed120d154,0x7f138597f0c0,12) 964.02us CNR:OFF Dyn:1 FastMM:1
+MKL_VERBOSE SGEMM(N,N,9,7,5,0x7ffed120d158,0x7f13855691b0,11,0x7f1385986ad0,6,0x7ffed120d154,0x7f138597ef70,12) 1.59us CNR:OFF Dyn:1 FastMM:1
+MKL_VERBOSE SGEMM(N,N,64,64,65,0x7ffed120d158,0x275f25f0,66,0x275edcf0,66,0x7ffed120d154,0x275f6ff0,67) 64.24us CNR:OFF Dyn:1 FastMM:1
+Padded FP32 SGEMM and same-shape changing operands passed

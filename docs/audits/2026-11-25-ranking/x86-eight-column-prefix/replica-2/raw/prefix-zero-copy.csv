@@ -1,0 +1,4 @@
+method,ordinary_sha256,alloc_imports,copy_imports,passed
+host-forward,01398d24966f07a7c090986e2c0e1e0ef22c85830705b35f7ffe9870ae05aa7b,0,0,1
+host-split8,4241947cdd65c27193b5e9867fcd3aedb8771c325a44eda9f75757dae546393c,0,0,1
+host-prefix8,082a01e758c6eae81db55c5cde0f056a28b433677ddf2b61984e9e5694951fa5,0,0,1

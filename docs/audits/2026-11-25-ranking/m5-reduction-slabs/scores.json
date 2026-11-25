@@ -1,0 +1,31 @@
+{
+  "scores": {
+    "hot": {
+      "gm": 0.8007895883272953,
+      "caller_gm": 0.8003439993404247,
+      "wins": 0,
+      "seedwins": [
+        0,
+        0
+      ],
+      "minimum": 0.7367349663667095,
+      "null_alerts": 3
+    },
+    "rotate": {
+      "gm": 0.8178450211031801,
+      "caller_gm": 0.8186271735565889,
+      "wins": 0,
+      "seedwins": [
+        0,
+        0
+      ],
+      "minimum": 0.810041934773456,
+      "null_alerts": 0
+    }
+  },
+  "promote_to_holdouts": false,
+  "fp64_cells": 67981542,
+  "max_abs": 2.43512411942e-05,
+  "timings": 648,
+  "timed_calls": 43416
+}

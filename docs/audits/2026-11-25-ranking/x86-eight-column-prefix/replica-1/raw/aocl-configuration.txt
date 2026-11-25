@@ -1,0 +1,15 @@
+source_url=https://github.com/amd/blis
+release_tag=6.0.0
+source_sha=e5f75c24bdb8670ff648da7e483eb7e51b28a1db
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+configure: hardware detection driver returned 'zen3'.
+Architecture:                            x86_64
+Vendor ID:                               AuthenticAMD
+Model name:                              AMD EPYC 7763 64-Core Processor
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen3 model=Milan threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+AOCL-BLAS padded LP64 row-major SGEMM smoke passed
+	linux-vdso.so.1 (0x00007f1d5fd03000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f1d5fc08000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f1d5f400000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f1d5fd05000)
+9f1ae9bf57a78cf4c71576bbfa49df4e9ee6fa10e415717bb4a727323b73108d  /home/runner/work/_temp/prefix-vendors/aocl.so

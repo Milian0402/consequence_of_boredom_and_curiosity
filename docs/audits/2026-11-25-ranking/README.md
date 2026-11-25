@@ -27,6 +27,8 @@ A third comparison added two Arm KleidiAI SME2 kernels. Both packed their FP32 i
 
 Changing the matrices on every call reversed the lead over external libraries. With 22–121 distinct input/output triples per shape and all matrix pages locked in memory, COB reached 1.026× the fastest external method on repeated identical buffers and 0.950× when cycling through different buffers. It still delivered 1.051× its predecessor’s speed on changing data. A separately prefaulted run reproduced the reversal (1.013× and 0.936×). At 24 × 1088 × 280, COB went from 14.1 µs to 38.8 µs. Identical-function controls also show that close per-shape differences can vary by several percent. [Changing-input measurements, accuracy checks and replay](m5-changing-inputs/README.md)
 
+A follow-up changed the order of computation to fit 64 reduction steps and 256 columns of B into each pass. On all three pilot shapes, the extra stores and reloads came with lower throughput. It achieved 0.801× the existing kernel’s speed on repeated buffers and 0.818× on changing inputs. The outputs matched bit for bit. [Pilot measurements and experimental patch](m5-reduction-slabs/README.md)
+
 An earlier trial removed the B copy throughout the 24–55-row range. At 53 × 3757 × 129 the direct path was slower than the previous packed implementation even in the same-address crossover. The shipping kernel retains B packing for 33–55 rows and for padded layouts. [Broad trial, identical-function controls and observations](m5-wide-layouts/README.md)
 
 ## Apple M5 Max wide rectangles
@@ -48,6 +50,8 @@ On two Neoverse N2 runners, packing 16 columns of B at a time raised the standal
 ## Why cropped views changed the Intel ranking
 
 A full factorial test independently switched each of the three physical row strides and each of the three starting addresses for three previously measured products. Increasing B's row stride cut oneMKL time by 2.7–6.9%. Changing the start of B cut its time by 2.1–11.5%. Both changes saved time in all eighteen shape-and-round comparisons for each factor. COB's response was smaller and varied by shape. At 43 × 2291 × 137, changing B's stride saved 12.7% at the original B address and 0.7% at the shifted address. Every timed implementation received the same mathematical inputs. [Measurements, interactions and offline replay](intel-layout-factors/RESULTS.md)
+
+The first two jobs for a follow-up eight-column Intel kernel landed on AMD EPYC 7763 and 9V45. Both exercised its forwarding control, with all 66 wrapper calls going directly to sequential oneMKL. Across six fresh layouts the wrappers ran within 0.2% of calling oneMKL directly. [Host identities, other libraries, raw timings and route checks](x86-eight-column-prefix/README.md)
 
 ## Packing adjacent B panels on x86
 

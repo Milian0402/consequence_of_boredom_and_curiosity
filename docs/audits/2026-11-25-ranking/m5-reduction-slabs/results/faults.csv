@@ -1,0 +1,13 @@
+family,seed,block,mode,major_faults,minor_faults,locked
+loss-24,619325179,1,hot,0,110,1
+loss-24,619325179,1,rotate,0,111,1
+loss-29,619325179,1,rotate,0,111,1
+loss-29,619325179,1,hot,0,110,1
+control-31,619325179,1,hot,0,109,1
+control-31,619325179,1,rotate,0,108,1
+control-31,1639120403,2,rotate,0,110,1
+control-31,1639120403,2,hot,0,108,1
+loss-29,1639120403,2,hot,0,109,1
+loss-29,1639120403,2,rotate,0,108,1
+loss-24,1639120403,2,rotate,0,109,1
+loss-24,1639120403,2,hot,0,108,1

@@ -1,0 +1,14 @@
+Apple M5 Max. Darwin sysctl native values.
+hw.pagesize: 16384
+hw.memsize: 51539607552
+hw.cachelinesize: 128
+hw.l1dcachesize: 65536
+hw.l2cachesize: 8388608
+hw.perflevel0.name: Super
+hw.perflevel0.l1dcachesize: 131072
+hw.perflevel0.l2cachesize: 16777216
+hw.perflevel0.cpusperl2: 6
+hw.perflevel1.name: Performance
+hw.perflevel1.l1dcachesize: 65536
+hw.perflevel1.l2cachesize: 8388608
+hw.l3cachesize returned no entry in the selected native query. System-level cache capacity, memory-controller traffic and core affinity are unmeasured.
