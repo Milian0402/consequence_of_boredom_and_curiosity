@@ -1,0 +1,178 @@
+{
+  "phase": "signed-leaves",
+  "run": 45689461015,
+  "run_url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45689461015",
+  "benchmark_revision": "af33d7d4266ff27525839b6ed644929792720c76",
+  "release": "b218beff1eaf8fd606d0934405cdc1e28ecdfe15",
+  "patch_sha256": "c5044a79c02e82ec3dca393c8115fcdc2bb0ffcc321b656c033f68321e2e8a94",
+  "protocol_sha256": "77d7a42bff8acdd606ab1981ea27cf8b38258aad14843860c5d26e6bcea44c09",
+  "panel_sha256": "a6252eac41350bc92c87c15476441ab30aec65b6dc9602715ddbb44f98a2d2c9",
+  "seeds": [
+    31048579,
+    196173023
+  ],
+  "rounds_per_seed": 3,
+  "fp64_max_abs_tolerance": 0.002,
+  "hosts": {
+    "x86_64": {
+      "model": "Intel(R) Xeon(R) 6975P-C",
+      "cpu": "0",
+      "job": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45689461015/job/139470869823",
+      "job_id": 139470869823,
+      "artifact_id": 15059191062,
+      "artifact_url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45689461015/artifacts/15059191062",
+      "artifact_sha256": "ab94b382ab06acf211dc5340ba20357cb92e91ccb6a0ba055f6325aae4f41251",
+      "job_conclusion": "success",
+      "timings": 390,
+      "validation_records": 260,
+      "checked_outputs": 1704088776,
+      "all_max_absolute_error": 0.00134679333777,
+      "failed_accuracy_records": 0,
+      "worker_binaries": {
+        "openblas": {
+          "basename": "openblas.so",
+          "sha256": "087ff7b12b067726a94a31c523fee297010fbd9cef6df247c5983dcc5659f59c"
+        },
+        "aocl": {
+          "basename": "aocl.so",
+          "sha256": "2f3e88f05be8d6733fe5661217750a78990af70fbc0c2fe24eb276bad2a2d2cb"
+        },
+        "mkl": {
+          "basename": "mkl.so",
+          "sha256": "18ea013ae317dd04119774a95159ff96bbb18e74c4398adab2c99b3c9d1ac7be"
+        },
+        "mkl-jit": {
+          "basename": "mkl-jit.so",
+          "sha256": "38478318a422b0598bf5b5e623bd595e64d0a9a9a41b6dad4107836815313fe0"
+        },
+        "blasfeo": {
+          "basename": "blasfeo.so",
+          "sha256": "3a025c26f814b9a56ff21a911ed1307b0f7806822fd666814fc9b65a2c74f600"
+        },
+        "onednn-oneshot": {
+          "basename": "onednn-f32-oneshot.so",
+          "sha256": "f3dc9b57dc2046e9fec635bd8b702346fb1088c68882422917c21ce1fc3158bd"
+        },
+        "onednn-cached-plan": {
+          "basename": "onednn-f32-cached-plan.so",
+          "sha256": "423b5124eb72da7042867e06e81bc4c125cd89998508f96d800a405df9c092df"
+        },
+        "fastmmw-768": {
+          "basename": "fastmmw-768.so",
+          "sha256": "ac62278fc19c1fbe9dd02b5dd736a5a316170016feb78bddae3a2bc688a564ca"
+        },
+        "fastmmw-1536": {
+          "basename": "fastmmw-1536.so",
+          "sha256": "7103b6f277219095d2135c8190cbf4500b8fd5ac27c27b3d30eee99152132aad"
+        },
+        "original-openblas": {
+          "basename": "original-openblas.worker",
+          "sha256": "93ea04ae21d7825f3c3850e0affc1566739cb6558dae7af15fa2aa052ac69750"
+        },
+        "signed-openblas": {
+          "basename": "signed-openblas.worker",
+          "sha256": "f9b60a56439b853720a77794f9e8f1d7f902f5ab82077abaa7e793eddfe55c2d"
+        },
+        "original-mkl": {
+          "basename": "original-mkl.worker",
+          "sha256": "96c0520dd8133c746d97ec169808883154138ef604c8b66a1408607c499296e2"
+        },
+        "signed-mkl": {
+          "basename": "signed-mkl.worker",
+          "sha256": "0e7d4c56ad36b798d2a94aeb20fb0c8919b780092aba4b28b322d877ffe0de57"
+        }
+      },
+      "matched_sequential_sdks": {
+        "openblas": {
+          "manifest_sha256": "60d486c994d70eef70c12994c412144df56fc88b6caa4eb3e8da5ac94966ad69",
+          "files": {
+            "libopenblas.a": "c5be0f5003d539c99445c8e9539c82b0b467530b0d7549a5051fcb30114c75b9"
+          }
+        },
+        "mkl": {
+          "manifest_sha256": "0a9e1a09b55f12351143541397213abbbd756b149b9cab2a337ea84f610b9687",
+          "files": {
+            "libmkl_intel_lp64.so.3": "eb5a6748ec4e85dc07bd4dbf860af21e86f26647dbba837a94338a8289bf1faa",
+            "libmkl_sequential.so.3": "812f56b8de337f2bc591426462232a4b114a443b284dabfb985e9af0c39f32be",
+            "libmkl_core.so.3": "2b7ed4833447281eec1edee574115f663169dec03d38c7cd2ed8fe2db8c0861e"
+          }
+        }
+      }
+    },
+    "aarch64": {
+      "model": "Neoverse-N2",
+      "cpu": "0",
+      "job": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45689461015/job/139470869789",
+      "job_id": 139470869789,
+      "artifact_id": 15059520953,
+      "artifact_url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45689461015/artifacts/15059520953",
+      "artifact_sha256": "ac6621adbf3efb0bc7c6c906063d7ba91d48922b28a32508edb149866260faf6",
+      "job_conclusion": "success",
+      "timings": 330,
+      "validation_records": 220,
+      "checked_outputs": 1441921272,
+      "all_max_absolute_error": 0.00134334827844,
+      "failed_accuracy_records": 0,
+      "worker_binaries": {
+        "openblas": {
+          "basename": "openblas.so",
+          "sha256": "1cb29ea7585e3a3c6348e1eb8d5b776234450d78bb0da799f01f7b2f7a1b086c"
+        },
+        "armpl": {
+          "basename": "armpl.so",
+          "sha256": "f158586e1e557280c932909abffcca16fb2ffb0ff4c10759d26a95f5b5c29bc4"
+        },
+        "blasfeo": {
+          "basename": "blasfeo.so",
+          "sha256": "8c151d333c552d279b57775b50dabbfb04653fcfe684dd60ed2a35342d0bdf10"
+        },
+        "onednn-oneshot": {
+          "basename": "onednn-f32-oneshot.so",
+          "sha256": "afe2b020ec09617595adb5a257b873ce204190deb96dee0141d5a055201763a9"
+        },
+        "onednn-cached-plan": {
+          "basename": "onednn-f32-cached-plan.so",
+          "sha256": "7c411a7cb9f285af6bc70bf451db2b67de9b8304b180beae1edfbfebe64d9de5"
+        },
+        "fastmmw-768": {
+          "basename": "fastmmw-768.so",
+          "sha256": "0227a7cdb493de7456d0c80cc5a05aecaaead4715cda68eaafcb3ff8746f1c59"
+        },
+        "fastmmw-1536": {
+          "basename": "fastmmw-1536.so",
+          "sha256": "b7402fa391bf1a06544069a309723ae62a698499ebc1e398ab18d99824d11dc6"
+        },
+        "original-openblas": {
+          "basename": "original-openblas.worker",
+          "sha256": "4d4985a5ba753993afde2818baa9a4b61d67a896b94f3170a8864fd6ad3a304a"
+        },
+        "signed-openblas": {
+          "basename": "signed-openblas.worker",
+          "sha256": "489eccab3526d43b7378e4ddf69fe4ab9ddb449d666240df1bea0514e2bf097a"
+        },
+        "original-armpl": {
+          "basename": "original-armpl.worker",
+          "sha256": "6cb1b646bebfe7c7fc9b17837344dfed0d92bafae47cc3cbfd4d0e2c8cfef6fe"
+        },
+        "signed-armpl": {
+          "basename": "signed-armpl.worker",
+          "sha256": "4dca1726e989c8daab429267cc16e036f55da38d9807ceb80d49ef17aa7c0bba"
+        }
+      },
+      "matched_sequential_sdks": {
+        "openblas": {
+          "manifest_sha256": "3001acdace8b9af3f95a4fff4a7c240a3366b96afcf24bf381dec34cc2316d8c",
+          "files": {
+            "libopenblas.a": "bc8ff277e9c3853ec30f4abb82e3cac1c9907d5d2ea87628598d0f701d7c8dc1"
+          }
+        },
+        "armpl": {
+          "manifest_sha256": "c28da7d61b75f048f3d8026432160171b0086b03d2cd4b7edaaaf87e78a63d11",
+          "files": {
+            "libarmpl_lp64.so": "42ad9482d2eeddb85ceddb127a8a88975def8491a77af254e20f05fd0b388cf9"
+          }
+        }
+      }
+    }
+  }
+}

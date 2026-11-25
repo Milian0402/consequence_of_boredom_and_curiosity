@@ -23,9 +23,26 @@ Checking the input magnitudes and switching to double accumulation fixed that fa
 
 A standalone candidate packed A across output rows and read B in place. It lost all five fresh warm-call comparisons against the release on each of Intel Xeon Platinum 8573C and Arm Neoverse N2. Its geometric-mean speed relative to the release was 0.775× on Intel and 0.980× on Arm. All 576 full-output validations passed. On the Intel 49 × 2861 × 157 layout with eleven floats of row padding, the released implementation reached 0.679× oneMKL's speed. [Timings, checks and offline verifier](linux-medium/README.md) · [Native run](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45686443679)
 
-## Next large-matrix experiment
+## Removing fourteen Winograd output updates
 
-An experimental patch writes two terminal Winograd products directly into their output quadrants, removing fourteen separate addition or subtraction passes across a two-level multiply. The patch passed local Linux Arm64 correctness checks with serial OpenBLAS. Its speed has yet to be measured. The registered performance comparison covers two previously losing Intel layouts and three follow-up layouts against both the released code and direct oneMKL. [Research patch, correctness checks and timing protocol](signed-winograd/README.md)
+A two-level variant uses serial BLAS to accumulate fourteen terminal products directly into C. On Neoverse N2 the OpenBLAS-backed variant had the lowest median of all eleven methods on each of five layouts. It beat the strongest independent method, FastMMW, in all twelve pairs on the two fresh odd layouts. Most of the advantage was already present in released COB.
+
+| CPU and leaf provider | Speed relative to released COB, deep / wide | Speed relative to fastest independent entry, deep / wide |
+|---|---:|---:|
+| Intel Xeon 6975P-C, oneMKL | 1.0044× / 1.0048× | 0.989× / 1.015× |
+| Arm Neoverse N2, OpenBLAS | 1.0016× / 1.0049× | 1.056× / 1.048× |
+
+The two new layouts are 2083 × 2887 × 3433 with nine padding floats per row and 1933 × 3407 × 2947 with five. The Intel acceptance rule required more than 2% on both. All 480 full-output checks passed. The patch remains experimental. [Native results, raw measurements and offline verifier](signed-winograd/results-linux/README.md) · [Research patch](signed-winograd/README.md)
+
+A separately frozen rule used two older layouts to choose the schedule for these two layouts and a compact control. It retained released COB on both CPUs. [Calibration results](host-selection/README.md)
+
+## Testing a formula with fewer multiplications
+
+Two published formulas partition each matrix into 4 × 4 blocks. The first computes 48 block products and needs 201 additions, subtractions or halvings. The comparison formula uses 49 block products and 156 other operations. The benchmark verified every one of the 4,096 bilinear coefficients in each formula over exact rationals. Both formulas used the same implementation for forming the operands and combining the results. [Published schedules](https://github.com/jgdumas/plinopt/tree/a539243938203fd1d2104a820930e8902df4aad7/data) · [Benchmark implementation](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/tree/af33d7d4266ff27525839b6ed644929792720c76/tools/world-rank/rank48)
+
+On Arm Neoverse N2, the 48-product formula beat both direct OpenBLAS and ArmPL on three of four layouts. Its paired speedups over the faster library were 1.075×, 1.093× and 1.121×. It lost the 2048-square case and lost all four comparisons against the fastest direct Intel library. The Arm screen did not include released COB or FastMMW. [Linux timings, exact identities and offline replay](rank48-linux/README.md)
+
+On the M5 Max, the 48-product formula passed all sixteen accuracy fixtures. At 2048 square it took 36.13 ms, against 8.92 ms for released COB and 9.46 ms for single-thread Accelerate. Both rivals beat the 48-product formula in all 24 paired comparisons. The 49-product formula exceeded the accuracy limit on the cancellation inputs at both square sizes. [Apple timings, error measurements and replay](rank48-m5/README.md)
 
 ## Reproduction
 

@@ -1,0 +1,6 @@
+family,m,n,k,pad
+deep-odd-prior,2039,2969,3367,11
+wide-odd-prior,1973,3319,2897,7
+deep-odd-followup,2083,2887,3433,9
+wide-odd-followup,1933,3407,2947,5
+near-square-followup,2688,2816,2752,0

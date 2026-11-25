@@ -1,0 +1,5 @@
+arch,provider,intended_target,odd_followups,odd_passing,odd_geomean,reaches_numeric_threshold,preregistered_confirmation
+x86_64,openblas,0,2,0,1.00958357078,0,0
+x86_64,mkl,1,2,0,1.00458719301,0,0
+aarch64,openblas,0,2,0,1.00322700034,0,0
+aarch64,armpl,0,2,0,1.00069875686,0,0

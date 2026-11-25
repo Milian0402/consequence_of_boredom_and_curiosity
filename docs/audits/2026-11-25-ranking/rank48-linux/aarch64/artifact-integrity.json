@@ -1,0 +1,15 @@
+{
+  "run": 45689461015,
+  "attempt": 1,
+  "job_id": 139470869789,
+  "source_revision": "af33d7d4266ff27525839b6ed644929792720c76",
+  "artifact_id": 15059520953,
+  "artifact_name": "world-rank-aarch64-45689461015-1",
+  "hosted_digest": "sha256:ac6621adbf3efb0bc7c6c906063d7ba91d48922b28a32508edb149866260faf6",
+  "download_sha256": "ac6621adbf3efb0bc7c6c906063d7ba91d48922b28a32508edb149866260faf6",
+  "zip_crc_passed": true,
+  "archive_bytes": 125970,
+  "files_verified": 86,
+  "raw_bytes": 747287,
+  "file_manifest_sha256": "3072ba7d29470fb4f1c377782b211d493eb723b9047e5e0706cc33e54bdbf69a"
+}

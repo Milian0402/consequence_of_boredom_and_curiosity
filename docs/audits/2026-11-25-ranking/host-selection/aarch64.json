@@ -1,0 +1,52 @@
+{
+  "model": "Neoverse-N2",
+  "release": "original-openblas",
+  "chosen": "original-openblas",
+  "calibration_timed_multiply_seconds": 24.902453383999998,
+  "calibration_ratios": {
+    "openblas": [
+      0.8502953480570468,
+      0.8490413045791827
+    ],
+    "signed-openblas": [
+      1.0031674859390094,
+      1.0027079641558014
+    ]
+  },
+  "followups": [
+    {
+      "family": "deep-odd-followup",
+      "qualified": true,
+      "chosen_ms": 676.2781595,
+      "speedup_vs_release": 1.0,
+      "wins_vs_release": 0,
+      "fastest_external": "fastmmw-768",
+      "speedup_vs_external": 1.0547353624300082,
+      "wins_vs_external": 6,
+      "identical_external": false
+    },
+    {
+      "family": "wide-odd-followup",
+      "qualified": true,
+      "chosen_ms": 638.9501735,
+      "speedup_vs_release": 1.0,
+      "wins_vs_release": 0,
+      "fastest_external": "fastmmw-768",
+      "speedup_vs_external": 1.0425759522487335,
+      "wins_vs_external": 6,
+      "identical_external": false
+    },
+    {
+      "family": "near-square-followup",
+      "qualified": true,
+      "chosen_ms": 669.818955,
+      "speedup_vs_release": 1.0,
+      "wins_vs_release": 0,
+      "fastest_external": "fastmmw-768",
+      "speedup_vs_external": 1.0040025357040843,
+      "wins_vs_external": 5,
+      "identical_external": false
+    }
+  ],
+  "meets_public_retest_rule": false
+}

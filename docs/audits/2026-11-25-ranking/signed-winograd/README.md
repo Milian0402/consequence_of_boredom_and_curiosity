@@ -1,6 +1,6 @@
 # Signed SGEMM updates in two-level Winograd
 
-This optional research patch changes two terminal products in the rectangular, two-level Winograd path that uses serial CBLAS leaves. It passed local correctness tests with serial OpenBLAS on Linux Arm64. Its performance on oneMKL, OpenBLAS and other providers remains unmeasured.
+This optional research patch changes two terminal products in the rectangular, two-level Winograd path that uses serial CBLAS leaves. It passed local correctness tests with serial OpenBLAS on Linux Arm64. On the two fresh Intel layouts, the signed oneMKL build gained 0.44% and 0.48% over the original, below the required 2% on each. [Native timing and accuracy results](results-linux/README.md)
 
 The release computes P3 in a temporary and adds it to C12, then computes P4 in the same temporary and subtracts it from C21. At the point each product is issued, its destination already contains the partial sum. The patch asks SGEMM to compute `C12 ← (+1) S·B22 + C12` and `C21 ← (−1) A22·T + C21` directly. Each of the seven child products at the outer level uses both updates, removing fourteen terminal merge passes. The temporary still serves P7, which contributes to two outputs. An SGEMM accumulation may round differently or choose a different kernel.
 
@@ -28,4 +28,4 @@ Across the 19 traced fixtures, each configuration checked 4,648,073 output cells
 
 ## Frozen performance follow-up
 
-`panel.csv` and `protocol.md` specify five layouts, two seeds, six paired timings, whole-call measurement, numerical admission and a fixed success criterion. The planned Intel comparison includes the original and patched public release and direct sequential oneMKL. oneMKL JIT is a separate comparator when qualified. This directory contains no native performance results for the patch.
+`panel.csv` and `protocol.md` specify five layouts, two seeds, six paired timings, whole-call measurement, numerical admission and a fixed success criterion. The Intel comparison included the original and patched public release and direct sequential oneMKL. oneMKL JIT is a separate comparator when qualified. The recorded measurements, qualification decisions and standalone verifier are in [results-linux](results-linux/README.md).

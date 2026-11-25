@@ -1,0 +1,112 @@
+{
+  "run": 45689461015,
+  "revision": "af33d7d4266ff27525839b6ed644929792720c76",
+  "schedule_source": "a539243938203fd1d2104a820930e8902df4aad7",
+  "rational_coefficients_per_scheme": 4096,
+  "hosts": [
+    {
+      "arch": "x86_64",
+      "model": "Intel(R) Xeon(R) 6975P-C",
+      "leaf": "mkl",
+      "pinned_cpu": 0,
+      "methods": [
+        "form48",
+        "form49",
+        "mkl",
+        "mkl-jit",
+        "openblas",
+        "aocl"
+      ],
+      "fp64_fixtures": 96,
+      "fp64_cells": 678606384,
+      "warm_observations": 144,
+      "routes": 8,
+      "route_cells": 56550532,
+      "numerical_failures": [
+        [
+          "large-square",
+          "form49",
+          "cancel",
+          0,
+          35485721,
+          0.00418976100888
+        ]
+      ],
+      "rank48_median_wins_vs_49": 3,
+      "gate": true,
+      "run": 45689461015,
+      "source": "af33d7d4266ff27525839b6ed644929792720c76",
+      "job_id": 139470869823,
+      "job_conclusion": "success",
+      "job_url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45689461015/job/139470869823",
+      "artifact_id": 15059191062,
+      "artifact_name": "world-rank-x86_64-45689461015-1",
+      "github_zip_sha256": "ab94b382ab06acf211dc5340ba20357cb92e91ccb6a0ba055f6325aae4f41251",
+      "member_sha256": {
+        "finite-ranks/comparisons.csv": "6dab81bd08b9fae482b959246b4b3fc7676ca7548d54580d7ea305eb848cbe37",
+        "finite-ranks/certificates.txt": "5457e30689b0510dc481ea87657a47c0b07834d9ea21881252878ab3d541f3ef",
+        "finite-ranks/accuracy.csv": "ca383d2f5608369e4e4a9a97d162961f460c9e21eae823865ab190446cbe6ca0",
+        "finite-ranks/cpu.txt": "3d9601a374bc3faf0c92865c7dfdd07f45e654ae6742304cea818ce3e5a7bdb4",
+        "finite-ranks/leaf.txt": "b1e92a43fd18113ecb2c73ba36c5d080a0cf18646198ab80356f68bc5b8cd931",
+        "finite-ranks/panel.csv": "21aca48602498f5413ffea99197d078eec5fcede5580253dcbf9068dfdd65aeb",
+        "finite-ranks/ranking.json": "47d1cd140b452dfb56ddc918c98cb713481412bbbbd527b63a922834b9538a6b",
+        "finite-ranks/routes.csv": "4eb3dcd4deb3e4c04d54f1e3448d03c92aa8bdcf52ee5eefc7620e79dacb9026",
+        "finite-ranks/scores.csv": "f513b8fb9627fba9c368954ece5117f228a2e0773093b1241b0961fb95336ff8",
+        "finite-ranks/source-sha256.txt": "d0bb23a71f30e319ce8faa137a04026c5be6e70f4cb57a4930bde3d9f8e6d6e4",
+        "finite-ranks/timings.csv": "eda1d782bcb5e6e0abcbfd863682a33b8935bcfd2c70182cf80633a185a9404b",
+        "finite-ranks/worker.log": "e3545b71694f5437b07954d7695c6f48f7f09089e40c2ae74182acb60426d730"
+      }
+    },
+    {
+      "arch": "aarch64",
+      "model": "Neoverse-N2",
+      "leaf": "openblas",
+      "pinned_cpu": 0,
+      "methods": [
+        "form48",
+        "form49",
+        "openblas",
+        "armpl"
+      ],
+      "fp64_fixtures": 64,
+      "fp64_cells": 452404256,
+      "warm_observations": 96,
+      "routes": 8,
+      "route_cells": 56550532,
+      "numerical_failures": [
+        [
+          "large-square",
+          "form49",
+          "cancel",
+          0,
+          35485721,
+          0.0040306882025
+        ]
+      ],
+      "rank48_median_wins_vs_49": 3,
+      "gate": true,
+      "run": 45689461015,
+      "source": "af33d7d4266ff27525839b6ed644929792720c76",
+      "job_id": 139470869789,
+      "job_conclusion": "success",
+      "job_url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45689461015/job/139470869789",
+      "artifact_id": 15059520953,
+      "artifact_name": "world-rank-aarch64-45689461015-1",
+      "github_zip_sha256": "ac6621adbf3efb0bc7c6c906063d7ba91d48922b28a32508edb149866260faf6",
+      "member_sha256": {
+        "finite-ranks/certificates.txt": "5457e30689b0510dc481ea87657a47c0b07834d9ea21881252878ab3d541f3ef",
+        "finite-ranks/accuracy.csv": "1c55c968a6d60b5664488de7d3e04d571cbde82fc4e117ff4e948c92e82a0be2",
+        "finite-ranks/comparisons.csv": "ec853f3a8ce0cf1c58f775701f386b589d5f767bfb6b311f86a5cc5aa9ec3bd2",
+        "finite-ranks/cpu.txt": "e5f7302f9882c8b4eca9892fce7bab78f37c49da0f8babcb23d2c2db5ed004bc",
+        "finite-ranks/leaf.txt": "d3c3f554e29e8ab88fdc02d3b47ebfd589753ed27a23b078b169454857d91e56",
+        "finite-ranks/panel.csv": "21aca48602498f5413ffea99197d078eec5fcede5580253dcbf9068dfdd65aeb",
+        "finite-ranks/ranking.json": "26ad67425ee01da3db49abb78845f72abfd74d2a0ff639b9e15b152894b3ae52",
+        "finite-ranks/routes.csv": "4eb3dcd4deb3e4c04d54f1e3448d03c92aa8bdcf52ee5eefc7620e79dacb9026",
+        "finite-ranks/scores.csv": "48f5f5e2fb4539e37c38253ea5309d7557e1578822bdb0c91defe348dc3a025c",
+        "finite-ranks/source-sha256.txt": "d0bb23a71f30e319ce8faa137a04026c5be6e70f4cb57a4930bde3d9f8e6d6e4",
+        "finite-ranks/timings.csv": "924985bc725bf822cfde4170510aa2dd74070fe0de6860bdf0d9cc5ff94571b1",
+        "finite-ranks/worker.log": "13d259fb73ee1da263a9a16f0e57e61b07bac4e4187b549a4a7c04755f5d76cf"
+      }
+    }
+  ]
+}

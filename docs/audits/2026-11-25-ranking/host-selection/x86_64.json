@@ -1,0 +1,52 @@
+{
+  "model": "Intel(R) Xeon(R) 6975P-C",
+  "release": "original-mkl",
+  "chosen": "original-mkl",
+  "calibration_timed_multiply_seconds": 6.663699586,
+  "calibration_ratios": {
+    "mkl": [
+      1.0227326865110453,
+      0.9895110343082019
+    ],
+    "signed-mkl": [
+      0.9998890246264258,
+      1.0061215118779896
+    ]
+  },
+  "followups": [
+    {
+      "family": "deep-odd-followup",
+      "qualified": true,
+      "chosen_ms": 192.59311000000002,
+      "speedup_vs_release": 1.0,
+      "wins_vs_release": 0,
+      "fastest_external": "mkl-jit",
+      "speedup_vs_external": 0.9861724948929584,
+      "wins_vs_external": 0,
+      "identical_external": false
+    },
+    {
+      "family": "wide-odd-followup",
+      "qualified": true,
+      "chosen_ms": 177.732437,
+      "speedup_vs_release": 1.0,
+      "wins_vs_release": 0,
+      "fastest_external": "mkl",
+      "speedup_vs_external": 1.0100542882765202,
+      "wins_vs_external": 4,
+      "identical_external": false
+    },
+    {
+      "family": "near-square-followup",
+      "qualified": true,
+      "chosen_ms": 181.0838075,
+      "speedup_vs_release": 1.0,
+      "wins_vs_release": 0,
+      "fastest_external": "mkl",
+      "speedup_vs_external": 1.0706515371747474,
+      "wins_vs_external": 6,
+      "identical_external": false
+    }
+  ],
+  "meets_public_retest_rule": false
+}

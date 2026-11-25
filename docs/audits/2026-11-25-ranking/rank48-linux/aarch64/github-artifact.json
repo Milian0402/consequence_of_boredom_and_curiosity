@@ -1,0 +1,20 @@
+{
+  "id": 15059520953,
+  "node_id": "MDg6QXJ0aWZhY3QxNTA1OTUyMDk1Mw==",
+  "name": "world-rank-aarch64-45689461015-1",
+  "size_in_bytes": 125970,
+  "url": "https://api.github.com/repos/Milian0402/consequence_of_boredom_and_curiosity/actions/artifacts/15059520953",
+  "archive_download_url": "https://api.github.com/repos/Milian0402/consequence_of_boredom_and_curiosity/actions/artifacts/15059520953/zip",
+  "expired": false,
+  "digest": "sha256:ac6621adbf3efb0bc7c6c906063d7ba91d48922b28a32508edb149866260faf6",
+  "created_at": "2026-11-25T20:10:36Z",
+  "updated_at": "2026-11-25T20:10:36Z",
+  "expires_at": "2026-12-09T20:10:35Z",
+  "workflow_run": {
+    "id": 45689461015,
+    "repository_id": 1229205014,
+    "head_repository_id": 1229205014,
+    "head_branch": "bench/native-linux-gemm",
+    "head_sha": "af33d7d4266ff27525839b6ed644929792720c76"
+  }
+}

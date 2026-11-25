@@ -1,0 +1,21 @@
+arch,family,implementation,leaf,leaf_calls,padded,leaf_evidence,output_elements,timed_binary_exact,trace_binary_exact,timed_inputs_unchanged,trace_inputs_unchanged,passed
+x86_64,deep-odd-prior,fastmmw-768,openblas,49,1,linked static OpenBLAS,6053791,1,1,1,1,1
+x86_64,deep-odd-prior,fastmmw-1536,openblas,7,1,linked static OpenBLAS,6053791,1,1,1,1,1
+x86_64,wide-odd-prior,fastmmw-768,openblas,49,1,linked static OpenBLAS,6548387,1,1,1,1,1
+x86_64,wide-odd-prior,fastmmw-1536,openblas,7,1,linked static OpenBLAS,6548387,1,1,1,1,1
+x86_64,deep-odd-followup,fastmmw-768,openblas,49,1,linked static OpenBLAS,6013621,1,1,1,1,1
+x86_64,deep-odd-followup,fastmmw-1536,openblas,7,1,linked static OpenBLAS,6013621,1,1,1,1,1
+x86_64,wide-odd-followup,fastmmw-768,openblas,49,1,linked static OpenBLAS,6585731,1,1,1,1,1
+x86_64,wide-odd-followup,fastmmw-1536,openblas,7,1,linked static OpenBLAS,6585731,1,1,1,1,1
+x86_64,near-square-followup,fastmmw-768,openblas,49,0,linked static OpenBLAS,7569408,1,1,1,1,1
+x86_64,near-square-followup,fastmmw-1536,openblas,7,0,linked static OpenBLAS,7569408,1,1,1,1,1
+aarch64,deep-odd-prior,fastmmw-768,openblas,49,1,linked static OpenBLAS,6053791,1,1,1,1,1
+aarch64,deep-odd-prior,fastmmw-1536,openblas,7,1,linked static OpenBLAS,6053791,1,1,1,1,1
+aarch64,wide-odd-prior,fastmmw-768,openblas,49,1,linked static OpenBLAS,6548387,1,1,1,1,1
+aarch64,wide-odd-prior,fastmmw-1536,openblas,7,1,linked static OpenBLAS,6548387,1,1,1,1,1
+aarch64,deep-odd-followup,fastmmw-768,openblas,49,1,linked static OpenBLAS,6013621,1,1,1,1,1
+aarch64,deep-odd-followup,fastmmw-1536,openblas,7,1,linked static OpenBLAS,6013621,1,1,1,1,1
+aarch64,wide-odd-followup,fastmmw-768,openblas,49,1,linked static OpenBLAS,6585731,1,1,1,1,1
+aarch64,wide-odd-followup,fastmmw-1536,openblas,7,1,linked static OpenBLAS,6585731,1,1,1,1,1
+aarch64,near-square-followup,fastmmw-768,openblas,49,0,linked static OpenBLAS,7569408,1,1,1,1,1
+aarch64,near-square-followup,fastmmw-1536,openblas,7,0,linked static OpenBLAS,7569408,1,1,1,1,1
