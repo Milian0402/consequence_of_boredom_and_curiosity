@@ -16,6 +16,14 @@ on each Linux CPU. Geometric mean speedups were 1.20× on the M5 Max,
 [rectangular benchmark audit](docs/audits/2026-11-25-general-gemm.md)
 gives the external-library comparisons, numerical checks and limits.
 
+The optional Apple medium-wide kernel handles 24–55 rows, 1024–4096 columns
+and inner dimensions of 96–384 with compact or padded row-major strides.
+Enable it with `-DCOB_ENABLE_APPLE_MEDIUM_WIDE=ON` in CMake or
+`COB_ENABLE_APPLE_MEDIUM_WIDE=ON` in Make. It requires the Apple SME2 leaf
+and a supported 16-lane implementation at runtime. The public entry packs A
+once per call, computes the first output tile while packing each B panel, and
+uses that panel for the remaining rows. The option defaults to off.
+
 ## M5 Max benchmark
 
 On one Apple M5 Max, COB had the fastest median one-thread, one-shot FP32 time on six prespecified large square and near-square products against Apple Accelerate, MpGEMM and MaxMulSK v5.1. Geometric mean paired speedups were 1.067× over previous COB, 1.067× over MaxMulSK, 1.197× over MpGEMM and 1.209× over Accelerate. MaxMulSK led on the 4096-square control. All times include packing and allocation. The public multiply entry point selects the new kernel automatically in supported builds.
