@@ -45,7 +45,9 @@ for fixture in sorted({x['fixture'] for x in stress}):
     assert len(t)==18
     stress_rows.append(dict(fixture=fixture,cells=sum(int(x['cells']) for x in t),on_max=max(float(x['max_on']) for x in t),off_max=max(float(x['max_off']) for x in t),nearest_max=max(float(x['max_nearest']) for x in t),on_over=sum(int(x['over_on']) for x in t),off_over=sum(int(x['over_off']) for x in t),nearest_over=sum(int(x['over_nearest']) for x in t),on_new_over=sum(int(x['newly_over_on']) for x in t)))
 for mode in ('installed-on','installed-off','installed-trace','make-ON','make-OFF'):
-    guards=records(mode+'-guards.csv');assert len(guards)==60
+    guard_path=Path(sys.argv[2]).resolve() if len(sys.argv)>2 else root
+    with (guard_path/(mode+'-guards.csv')).open() as cf:guards=list(csv.DictReader(cf))
+    assert len(guards)==60
     assert all(int(x['prefix_guard'])==int(x['inputs_readonly'])==1 and 0<=float(x['max_abs_error'])<=.002 for x in guards)
     if mode=='installed-trace':assert all(x['expected_route']==x['actual_route'] for x in guards)
 summary['cells_stress_per_build']=sum(x['cells'] for x in stress_rows);summary['protected_cells_per_build']=sum(int(x['checked']) for x in guards)

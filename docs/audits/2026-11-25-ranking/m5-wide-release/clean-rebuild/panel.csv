@@ -1,0 +1,15 @@
+family,m,n,k,pad
+repeat-hardest,25,1087,97,3
+repeat-mid-thin,41,2377,139,11
+repeat-upper-thin,55,3072,184,1
+fresh-24-compact,24,1280,131,0
+fresh-28-narrow,28,1057,107,9
+fresh-31-wide,31,4033,199,7
+fresh-34-odd,34,1799,241,3
+fresh-39-aligned,39,2304,160,0
+fresh-46-deep,46,2983,353,13
+fresh-49-odd,49,2059,127,5
+fresh-52-wide,52,3403,283,7
+fresh-55-aligned,55,1536,384,0
+control-below,23,1379,199,7
+control-above,56,1597,239,3

@@ -1,0 +1,75 @@
+{
+  "summary": {
+    "warm_Accelerate": {
+      "gm": 1.0483860172018475,
+      "min": 0.8755516660463764,
+      "wins": 3
+    },
+    "cold_Accelerate": {
+      "gm": 1.4311508107068578,
+      "min": 0.9932683196650661,
+      "wins": 5
+    },
+    "warm_prepared-LIBXSMM": {
+      "gm": 1.1380415340481689,
+      "min": 0.8794417180772399,
+      "wins": 4
+    },
+    "cold_prepared-LIBXSMM": {
+      "gm": 1.5132738246780715,
+      "min": 0.8901407637421763,
+      "wins": 5
+    },
+    "warm_MaxMulSK-adapted": {
+      "gm": 3.079476746383269,
+      "min": 2.1940187704907457,
+      "wins": 6
+    },
+    "cold_MaxMulSK-adapted": {
+      "gm": 4.366556126834876,
+      "min": 2.8482694643177386,
+      "wins": 6
+    },
+    "warm_MpGEMM-adapted": {
+      "gm": 2.769251028286396,
+      "min": 2.4875379900280157,
+      "wins": 6
+    },
+    "cold_MpGEMM-adapted": {
+      "gm": 3.0536413108117175,
+      "min": 2.436056153134043,
+      "wins": 6
+    },
+    "warm_fastest": {
+      "gm": 0.9560358229902747,
+      "min": 0.8755516660463764,
+      "wins": 2
+    },
+    "cold_fastest": {
+      "gm": 1.2264929201926644,
+      "min": 0.8901407637421763,
+      "wins": 4
+    }
+  },
+  "timings": 180,
+  "cold_processes": 60,
+  "checked": 31542500,
+  "guards": {
+    "candidate": {
+      "rows": 24,
+      "cells": 2642118,
+      "largest": 4.84166506567e-05
+    },
+    "MpGEMM-adapted": {
+      "rows": 24,
+      "cells": 2642118,
+      "largest": 4.84166506567e-05
+    },
+    "MaxMulSK-adapted": {
+      "rows": 24,
+      "cells": 2642118,
+      "largest": 4.84166506567e-05
+    }
+  },
+  "largest": 2.47599600769e-05
+}
