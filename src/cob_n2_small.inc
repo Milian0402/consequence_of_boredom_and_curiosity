@@ -56,6 +56,51 @@ static inline __attribute__((always_inline)) void n2_full(
 #define N2_INLINE static inline __attribute__((always_inline))
 #define N2_ROWS(F) F(0) F(1) F(2) F(3) F(4) F(5)
 
+/* Reduce four K elements per A load. One pair of B vectors serves every
+   active row of this eight-column tile. */
+N2_INLINE void n2_lane8_tile(int rows, int k, const float *a, int lda,
+                             const float *b, int ldb, float *c, int ldc)
+{
+#define N2_X8_INIT(r) float32x4_t lo##r=vdupq_n_f32(0), hi##r=vdupq_n_f32(0);
+    N2_ROWS(N2_X8_INIT)
+#undef N2_X8_INIT
+    int p=0;
+    for (; p<=k-4; p+=4) {
+#define N2_X8_A(r) const float32x4_t a##r = rows>(r) ? vld1q_f32(a+(size_t)(r)*lda+p) : vdupq_n_f32(0);
+        N2_ROWS(N2_X8_A)
+#undef N2_X8_A
+#define N2_X8_FMA(r, l) if (rows>(r)) { \
+        lo##r=vfmaq_laneq_f32(lo##r,bl,a##r,l); \
+        hi##r=vfmaq_laneq_f32(hi##r,bh,a##r,l); \
+    }
+#define N2_X8_K(l) do { \
+        const float *bp=b+(size_t)(p+(l))*ldb; \
+        float32x4_t bl=vld1q_f32(bp), bh=vld1q_f32(bp+4); \
+        N2_X8_FMA(0,l) N2_X8_FMA(1,l) N2_X8_FMA(2,l) N2_X8_FMA(3,l) \
+        N2_X8_FMA(4,l) N2_X8_FMA(5,l) \
+    } while (0)
+        N2_X8_K(0); N2_X8_K(1); N2_X8_K(2); N2_X8_K(3);
+#undef N2_X8_K
+#undef N2_X8_FMA
+    }
+    for (; p<k; ++p) {
+        const float *bp=b+(size_t)p*ldb;
+        const float32x4_t bl=vld1q_f32(bp), bh=vld1q_f32(bp+4);
+#define N2_X8_SCALAR(r) if (rows>(r)) { \
+        float av=a[(size_t)(r)*lda+p]; \
+        lo##r=vfmaq_n_f32(lo##r,bl,av); hi##r=vfmaq_n_f32(hi##r,bh,av); \
+    }
+        N2_ROWS(N2_X8_SCALAR)
+#undef N2_X8_SCALAR
+    }
+#define N2_X8_STORE(r) if (rows>(r)) { \
+        float *cp=c+(size_t)(r)*ldc; \
+        vst1q_f32(cp,lo##r); vst1q_f32(cp+4,hi##r); \
+    }
+    N2_ROWS(N2_X8_STORE)
+#undef N2_X8_STORE
+}
+
 /* Each complete group loads ordinary four-column vectors. For the last
    one-to-three columns, read the final four in-bounds columns and store only
    the valid suffix. The K loop stays identical to a full vector. */
@@ -113,7 +158,11 @@ N2_INLINE void n2_strip(int rows, int n, int k, const float *a, int lda,
        A separate narrow group handles one to three leftover columns. */
     const int groups=(n-j)/4;
 #define N2_EDGE(g) case g: n2_edge(rows,g,4,k,a,lda,b+j,ldb,c+j,ldc); break;
-    switch (groups) { N2_EDGE(1) N2_EDGE(2) N2_EDGE(3) }
+    switch (groups) {
+        N2_EDGE(1)
+        case 2: n2_lane8_tile(rows,k,a,lda,b+j,ldb,c+j,ldc); break;
+        N2_EDGE(3)
+    }
 #undef N2_EDGE
     j+=groups*4;
     if (j<n) n2_edge(rows,1,n-j,k,a,lda,b+n-4,ldb,c+n-4,ldc);
