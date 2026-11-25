@@ -32,6 +32,23 @@ jobs:
           BENCH_ARCH: ${{ matrix.arch }}
         run: |
           sh tools/native-gemm/run.sh "$BENCH_ARCH" "$RUNNER_TEMP/native-gemm"
+      - name: Run portable regression suites
+        env:
+          BENCH_ARCH: ${{ matrix.arch }}
+        run: |
+          set -eu
+          log="$RUNNER_TEMP/native-gemm/regressions.txt"
+          case "$BENCH_ARCH" in
+            x86_64) set -- -march=native ;;
+            aarch64) set -- -mcpu=native -DCOB_USE_NEON=1 ;;
+          esac
+          for deep in 0 1; do
+            gcc -O3 -std=c11 "$@" -Iinclude -DCOB_ENABLE_PORTABLE_STRASSEN=1 \
+              -DCOB_PORTABLE_STRASSEN_MIN_DIM=128 -DCOB_RECTANGULAR_MIN_HARMONIC_DIM=192 \
+              -DCOB_ENABLE_RECURSIVE_STRASSEN="$deep" -DCOB_RECURSIVE_MIN_DIM=128 -DCOB_RECURSIVE_MAX_DIM=256 \
+              tests/test_portable_strassen.c -lm -o "$RUNNER_TEMP/portable-regression"
+            "$RUNNER_TEMP/portable-regression" >> "$log"
+          done
       - name: Summarize verified cases
         if: ${{ !cancelled() }}
         run: |

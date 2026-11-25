@@ -247,11 +247,14 @@ cleanup:
 
 int main(int argc,char** argv)
 {
-    if (argc!=4 || (strcmp(argv[2],"discovery") && strcmp(argv[2],"confirm") && strcmp(argv[2],"recursive") && strcmp(argv[2],"bilinear")) ||
-        (strcmp(argv[3],"1") && strcmp(argv[3],"2") && strcmp(argv[3],"cancel"))) return 2;
+    if (argc!=4 || (strcmp(argv[3],"1") && strcmp(argv[3],"2") && strcmp(argv[3],"cancel"))) return 2;
+    const char* phase=argv[2];
     const int block=!strcmp(argv[3],"cancel") ? 0 : atoi(argv[3]);
-    const int discovery=!strcmp(argv[2],"discovery");
-    const int recursive=!strcmp(argv[2],"recursive"), bilinear=!strcmp(argv[2],"bilinear");
+    const int discovery=!strcmp(phase,"discovery"), confirm=!strcmp(phase,"confirm");
+    const int recursive=!strcmp(phase,"recursive"), bilinear=!strcmp(phase,"bilinear");
+    const int confirm_recursive=!strcmp(phase,"recursive-confirm"), confirm_bilinear=!strcmp(phase,"bilinear-confirm");
+    const int confirm_hybrid=!strcmp(phase,"hybrid-confirm");
+    if (!(discovery || confirm || recursive || bilinear || confirm_recursive || confirm_bilinear || confirm_hybrid)) return 2;
     openblas_set_num_threads(1);
     if (openblas_get_num_threads()!=1 || !pin_cpu()) return 1;
     fprintf(stderr,"block=%d phase=%s mode=%s openblas_threads=1 configuration=%s core=%s\n",
@@ -264,19 +267,33 @@ int main(int argc,char** argv)
                            {2689,3329,2497,0},{3073,3073,3073,0},{1536,1536,1536,0},
                            {320,960,768,0},{2688,5376,2688,0},{2240,4480,2240,7},{3584,3584,3584,0},{2,1537,2049,0},
                            {5,4095,1025,0},{8,1024,3072,0},{16,1536,1024,0}};
+    const shape deep_holdout[]={{3584,3584,3584,0},{5120,5120,5120,0}};
+    const shape rank40_holdout[]={{2688,5376,2688,0},{3072,6144,3072,0}};
+    const shape hybrid_holdout[]={{2816,3840,2304,0},{3520,2112,3072,0},{2817,4033,2113,0},{2816,3840,2304,7}};
     const shape cancellations[]={{2048,2048,2048,0},{1793,2049,1537,7}};
-    const shape* cases=block==0 ? cancellations : bilinear ? rank40 : recursive ? recursion : discovery ? tune : holdout;
-    const int n=block==0 ? (int)(sizeof cancellations/sizeof *cancellations)
-        : bilinear ? (int)(sizeof rank40/sizeof *rank40)
-        : recursive ? (int)(sizeof recursion/sizeof *recursion)
-        : discovery ? (int)(sizeof tune/sizeof *tune) : (int)(sizeof holdout/sizeof *holdout);
+    const shape* cases=NULL;
+    size_t n=0;
+    if (block==0)               { cases=cancellations; n=sizeof cancellations/sizeof *cases; }
+    else if (discovery)         { cases=tune; n=sizeof tune/sizeof *cases; }
+    else if (confirm)           { cases=holdout; n=sizeof holdout/sizeof *cases; }
+    else if (recursive)         { cases=recursion; n=sizeof recursion/sizeof *cases; }
+    else if (bilinear)          { cases=rank40; n=sizeof rank40/sizeof *cases; }
+    else if (confirm_recursive) { cases=deep_holdout; n=sizeof deep_holdout/sizeof *cases; }
+    else if (confirm_bilinear)  { cases=rank40_holdout; n=sizeof rank40_holdout/sizeof *cases; }
+    else                        { cases=hybrid_holdout; n=sizeof hybrid_holdout/sizeof *cases; }
+    const int repeats=(confirm || confirm_recursive || confirm_bilinear || confirm_hybrid) ? 3 : 1;
     int ok=1;
-    for (int j=0;j<n;++j)
-        if (!measure(cases[block==2 ? n-1-j : j],argv[1],argv[2],block,(discovery || recursive || bilinear) ? 1 : 3)) ok=0;
+    for (size_t j=0;j<n;++j)
+        if (!measure(cases[block==2 ? n-1-j : j],argv[1],phase,block,repeats)) ok=0;
     if (block==0) {
-        if (!measure((shape){1536,2688,1664,0},argv[1],argv[2],-1,0)) ok=0;
-        if (recursive && !measure(recursion[0],argv[1],argv[2],-1,0)) ok=0;
-        if (bilinear && !measure(rank40[0],argv[1],argv[2],-1,0)) ok=0;
+        if (!measure((shape){1536,2688,1664,0},argv[1],phase,-1,0)) ok=0;
+        if (recursive && !measure(recursion[0],argv[1],phase,-1,0)) ok=0;
+        if (bilinear && !measure(rank40[0],argv[1],phase,-1,0)) ok=0;
+        if (confirm_recursive || confirm_bilinear || confirm_hybrid) {
+            const shape active=confirm_recursive ? deep_holdout[0] : confirm_bilinear ? rank40_holdout[0] : hybrid_holdout[0];
+            if (!measure(active,argv[1],phase,0,0)) ok=0;
+            if (!measure(active,argv[1],phase,-1,0)) ok=0;
+        }
     }
     return ok ? 0 : 1;
 }

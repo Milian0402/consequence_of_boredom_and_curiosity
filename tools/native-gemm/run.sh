@@ -66,12 +66,23 @@ run_variant() {
     extra=$2
     result_dir=$3
     base_obj=$4
+    candidate_src=src/gemm.c
+    blas_flags=
+    replay_blas=
+    if [ "$job_phase" = hybrid-confirm ]; then
+        candidate_src="$stage/hybrid.c"
+        python3 tools/native-gemm/openblas_leaf.py src/gemm.c > "$candidate_src" || return 2
+        blas_flags=$(pkg-config --cflags openblas) || return 2
+        replay_blas=$(pkg-config --cflags --libs openblas) || return 2
+    fi
     mkdir -p "$result_dir"
     if [ "$result_dir" != "$out" ]; then cp "$out/host.txt" "$result_dir/host.txt"; fi
+    printf 'measured_source=%s source_sha256=%s\n' "${candidate_src##*/}" "$(sha256sum "$candidate_src" | cut -d' ' -f1)" >> "$result_dir/host.txt"
     printf 'measured_phase=%s candidate_only_flags=%s paired_baseline_object=%s\n' "$job_phase" "$extra" "${base_obj##*/}" >> "$result_dir/host.txt"
     echo 'phase,mode,m,n,k,pad,block,seed,pair,calls,competitor,first,competitor_seconds,candidate_seconds,candidate_speedup' > "$result_dir/pairs.csv"
+    : > "$result_dir/accuracy-and-affinity.log"
     # shellcheck disable=SC2086
-    gcc $FLAGS $native_flags $strassen_flag $extra -Iinclude -c src/gemm.c -o "$stage/candidate.o" || return 2
+    gcc $FLAGS $native_flags $strassen_flag $extra $blas_flags -Iinclude -Isrc -c "$candidate_src" -o "$stage/candidate.o" || return 2
     # shellcheck disable=SC2046
     gcc -O2 -std=c11 -Wall -Wextra -Wpedantic -Iinclude $(pkg-config --cflags openblas) \
         tools/native-gemm/paired.c "$base_obj" "$stage/candidate.o" $(pkg-config --libs openblas) -lm -o "$stage/paired" || return 2
@@ -81,23 +92,52 @@ run_variant() {
         "$stage/paired" "$native_path" "$job_phase" "$block" >> "$result_dir/pairs.csv" 2>> "$result_dir/accuracy-and-affinity.log" || failed=1
     done
     python3 tools/native-gemm/summary.py "$result_dir/pairs.csv" "$result_dir/accuracy-and-affinity.log" "$expected_arch" "$job_phase" > "$result_dir/summary.md" || failed=1
+    manifest_files="host.txt pairs.csv accuracy-and-affinity.log summary.md"
+    if [ "$phase" = confirm ]; then
+        # Trace separately, after timing. Match the implementation, defines and matrix layouts.
+        python3 tools/native-gemm/replay_routes.py --source "$candidate_src" --pairs "$result_dir/pairs.csv" --cc gcc \
+            -- $FLAGS $native_flags $strassen_flag $extra -Iinclude -Isrc $replay_blas > "$result_dir/routes.csv" || failed=1
+        manifest_files="$manifest_files routes.csv"
+    fi
     (
-        cd "$result_dir"
-        sha256sum host.txt pairs.csv accuracy-and-affinity.log summary.md > SHA256SUMS
-    )
+        cd "$result_dir" && sha256sum $manifest_files > SHA256SUMS
+    ) || failed=1
     return "$failed"
 }
 main_failed=0
 run_variant "$phase" "$primary_flags" "$out" "$stage/base.o" || main_failed=1
-if [ "$phase" = discovery ] && { [ -n "$recursive_flags" ] || [ -n "$bilinear_flags" ]; }; then
-    # Compare optional algorithms directly against the same candidate source with primary routes enabled.
+# An empty file enables only the primary confirmation. Each live entry is an
+# experimentally selected (architecture, alternate) pair.
+confirmed_alternates=$(awk -v arch="$expected_arch" '
+    /^[[:space:]]*(#.*)?$/ {next}
+    NF == 2 && ($1 == "aarch64" || $1 == "x86_64") && ($2 == "bilinear" || $2 == "recursive" || $2 == "hybrid") {
+        if (seen[$1,$2]++) { print "Duplicate entry in " FILENAME ": " $0 > "/dev/stderr"; exit 2 }
+        if ($1 == arch) print $2
+        next
+    }
+    { print "Invalid alternate selection in " FILENAME ": " $0 > "/dev/stderr"; exit 2 }
+' tools/native-gemm/confirm-variants.txt)
+alternates=
+if [ "$phase" = discovery ]; then
+    if [ -n "$recursive_flags" ]; then alternates=recursive; fi
+    if [ -n "$bilinear_flags" ]; then alternates="$alternates bilinear"; fi
+else
+    alternates=$confirmed_alternates
+fi
+if [ -n "$alternates" ]; then
+    # Alternate implementations always compete directly with the same revision's primary.
     # shellcheck disable=SC2086
     gcc $FLAGS $native_flags $strassen_flag $primary_flags $renames -Iinclude -c src/gemm.c -o "$stage/primary-as-base.o"
-    if [ -n "$recursive_flags" ]; then
-        run_variant recursive "$primary_flags $recursive_flags" "$out/recursive" "$stage/primary-as-base.o" || main_failed=1
-    fi
-    if [ -n "$bilinear_flags" ]; then
-        run_variant bilinear "$primary_flags $bilinear_flags" "$out/bilinear" "$stage/primary-as-base.o" || main_failed=1
-    fi
+    for variant in $alternates; do
+        case "$variant" in
+            recursive) extra=$recursive_flags ;;
+            bilinear) extra=$bilinear_flags ;;
+            hybrid) extra= ;;
+        esac
+        if [ "$variant" != hybrid ] && [ -z "$extra" ]; then echo "No extra flags defined for $variant" >&2; exit 2; fi
+        name=$variant
+        if [ "$phase" = confirm ]; then name=$variant-confirm; fi
+        run_variant "$name" "$primary_flags $extra" "$out/$name" "$stage/primary-as-base.o" || main_failed=1
+    done
 fi
 exit "$main_failed"

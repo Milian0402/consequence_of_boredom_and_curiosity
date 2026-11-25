@@ -187,13 +187,39 @@ enum {
 #error "COB_SGEMM_STRASSEN1 must be 0 or 1"
 #endif
 
-#if defined(COB_ENABLE_SKINNY_GEMM) && COB_ENABLE_SKINNY_GEMM && \
-    (defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && defined(__aarch64__)))
+/* Each native Linux backend can select its own skinny-row ceiling and
+   rectangular crossover independently. */
+#if defined(COB_USE_X86_SIMD)
+#define COB_DEFAULT_SKINNY_MAX_ROWS 8
+#define COB_DEFAULT_RECTANGULAR_STRASSEN 1
+#elif defined(COB_USE_NEON) && defined(__aarch64__) && !defined(COB_USE_APPLE_AMX)
+#define COB_DEFAULT_SKINNY_MAX_ROWS 8
+#define COB_DEFAULT_RECTANGULAR_STRASSEN 1
+#else
+#define COB_DEFAULT_SKINNY_MAX_ROWS 0
+#define COB_DEFAULT_RECTANGULAR_STRASSEN 0
+#endif
+
+#ifndef COB_SKINNY_GEMM_MAX_ROWS
+#define COB_SKINNY_GEMM_MAX_ROWS COB_DEFAULT_SKINNY_MAX_ROWS
+#endif
+#if COB_SKINNY_GEMM_MAX_ROWS != 0 && (COB_SKINNY_GEMM_MAX_ROWS < 2 || COB_SKINNY_GEMM_MAX_ROWS > 8)
+#error "COB_SKINNY_GEMM_MAX_ROWS must be zero or in [2, 8]"
+#endif
+#ifndef COB_ENABLE_SKINNY_GEMM
+#define COB_ENABLE_SKINNY_GEMM (COB_SKINNY_GEMM_MAX_ROWS >= 2)
+#endif
+#ifndef COB_ENABLE_RECTANGULAR_STRASSEN
+#define COB_ENABLE_RECTANGULAR_STRASSEN COB_DEFAULT_RECTANGULAR_STRASSEN
+#endif
+#if COB_ENABLE_SKINNY_GEMM && (defined(COB_USE_X86_SIMD) || \
+    (defined(COB_USE_NEON) && defined(__aarch64__)))
 #define COB_USE_SKINNY_GEMM 1
 #endif
 
-#if defined(COB_ENABLE_RECURSIVE_STRASSEN) && COB_ENABLE_RECURSIVE_STRASSEN
-#define COB_USE_RECURSIVE_STRASSEN 1
+/* The second level is an opt-in Linux experiment for native exact squares. */
+#ifndef COB_ENABLE_RECURSIVE_STRASSEN
+#define COB_ENABLE_RECURSIVE_STRASSEN 0
 #endif
 
 /* Experimental one-level schedule for native 64-bit x86 and Arm kernels. */
@@ -2036,10 +2062,7 @@ static void cob_sgemm_tile_scalar_packed_b(
     }
 }
 
-#if defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && \
-    (!defined(COB_USE_APPLE_AMX) || defined(COB_USE_SKINNY_GEMM) || \
-     (defined(COB_ENABLE_RECTANGULAR_STRASSEN) && COB_ENABLE_RECTANGULAR_STRASSEN && \
-      defined(COB_WITH_STRASSEN_SME_LEAF) && defined(COB_USE_APPLE_SME))))
+#if defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && !defined(COB_USE_APPLE_AMX))
 static int cob_f32_ranges_overlap(const float* x, size_t nx, const float* y, size_t ny)
 {
     const uintptr_t px = (uintptr_t)x;
@@ -3545,15 +3568,13 @@ static int cob_strassen_leaf(int m, int n, int k, const float* a, int lda,
 #endif
 }
 
-#if defined(COB_ENABLE_RECTANGULAR_STRASSEN) && COB_ENABLE_RECTANGULAR_STRASSEN && \
-    defined(COB_USE_PORTABLE_STRASSEN)
+#if COB_ENABLE_RECTANGULAR_STRASSEN && defined(COB_USE_PORTABLE_STRASSEN)
 #define COB_USE_RECTANGULAR_STRASSEN 1
 #ifndef COB_RECTANGULAR_MIN_HARMONIC_DIM
-#if defined(COB_USE_PORTABLE_STRASSEN)
 #define COB_RECTANGULAR_MIN_HARMONIC_DIM 1536
-#else
-#define COB_RECTANGULAR_MIN_HARMONIC_DIM 3072
 #endif
+#if COB_RECTANGULAR_MIN_HARMONIC_DIM < 128
+#error "COB_RECTANGULAR_MIN_HARMONIC_DIM must be at least 128"
 #endif
 
 /* Strassen saves work proportional to M*N*K and forms temporaries of size
@@ -3597,13 +3618,24 @@ static void cob_strassen_complete_edges(int m, int n, int k,
 }
 #endif
 
-#if defined(COB_USE_RECURSIVE_STRASSEN)
-#ifndef COB_WINOGRAD_APPLE_MIN
-#define COB_WINOGRAD_APPLE_MIN 8192
+#if COB_ENABLE_RECURSIVE_STRASSEN && defined(COB_USE_PORTABLE_STRASSEN) && defined(__linux__)
+#define COB_USE_RECURSIVE_STRASSEN 1
+#ifndef COB_RECURSIVE_MIN_DIM
+#define COB_RECURSIVE_MIN_DIM 3072
 #endif
-#ifndef COB_WINOGRAD_NATIVE_MIN
-#define COB_WINOGRAD_NATIVE_MIN 3072
+#ifndef COB_RECURSIVE_MAX_DIM
+#define COB_RECURSIVE_MAX_DIM 5120
 #endif
+#if COB_RECURSIVE_MIN_DIM < 128 || COB_RECURSIVE_MAX_DIM < COB_RECURSIVE_MIN_DIM
+#error "Invalid recursive Strassen dimension bounds"
+#endif
+
+static int cob_recursive_square_is_eligible(int m, int n, int k)
+{
+    return m == n && n == k && m % 128 == 0 &&
+           m >= COB_RECURSIVE_MIN_DIM && m <= COB_RECURSIVE_MAX_DIM;
+}
+
 typedef int (*cob_product_fn)(int, int, int, const float*, int,
     const float*, int, float*, int);
 
@@ -3673,7 +3705,6 @@ static int cob_winograd_product(int m, int n, int k, const float* a, int lda,
     }
     return 1;
 }
-
 #endif
 
 static int cob_sgemm_rowmajor_strassen1(
@@ -3689,28 +3720,12 @@ static int cob_sgemm_rowmajor_strassen1(
 {
     const int min_dim = cob_min_i32(cob_min_i32(m, n), k);
     const int max_dim = m > n ? (m > k ? m : k) : (n > k ? n : k);
-#if defined(COB_USE_RECTANGULAR_STRASSEN) || defined(COB_USE_RECURSIVE_STRASSEN)
     const int legacy_geometry = 3 * (int64_t)max_dim <= 4 * (int64_t)min_dim &&
         lda == k && ldb == n && m % 64 == 0 && n % 64 == 0 && k % 64 == 0;
 #if defined(COB_USE_RECTANGULAR_STRASSEN)
     const int full_m = m, full_n = n, full_k = k;
-    if (!legacy_geometry) {
-        if (lda < k || ldb < n || ldc < n || !cob_strassen_rectangle_is_eligible(m, n, k)) {
-            return 0;
-        }
-#if defined(COB_USE_APPLE_AMX)
-        if (!cob_apple_sme2p1_available()) return 0;
 #endif
-        const size_t c_span = (size_t)(m - 1) * ldc + n;
-        if (cob_f32_ranges_overlap(c, c_span, a, (size_t)(m - 1) * lda + k) ||
-            cob_f32_ranges_overlap(c, c_span, b, (size_t)(k - 1) * ldb + n)) return 0;
-        m -= m % 2;
-        n -= n % 128;
-        k -= k % 2;
-    } else
-#endif
-    {
-        if (!legacy_geometry) return 0;
+    if (legacy_geometry) {
 #if defined(COB_USE_PORTABLE_STRASSEN)
         if (min_dim < COB_PORTABLE_STRASSEN_MIN_DIM) return 0;
         const size_t c_span = (size_t)(m - 1) * ldc + n;
@@ -3721,36 +3736,21 @@ static int cob_sgemm_rowmajor_strassen1(
             min_dim >= COB_SGEMM_STRASSEN1_SQUARE_MIN_DIM;
         if (!lower_square && min_dim < COB_SGEMM_STRASSEN1_MIN_DIM) return 0;
 #endif
-    }
-
+    } else {
+#if defined(COB_USE_RECTANGULAR_STRASSEN)
+        if (lda < k || ldb < n || ldc < n || !cob_strassen_rectangle_is_eligible(m, n, k)) {
+            return 0;
+        }
+        const size_t c_span = (size_t)(m - 1) * ldc + n;
+        if (cob_f32_ranges_overlap(c, c_span, a, (size_t)(m - 1) * lda + k) ||
+            cob_f32_ranges_overlap(c, c_span, b, (size_t)(k - 1) * ldb + n)) return 0;
+        m -= m % 2;
+        n -= n % 128;
+        k -= k % 2;
 #else
-#if defined(COB_USE_PORTABLE_STRASSEN)
-    if (min_dim < COB_PORTABLE_STRASSEN_MIN_DIM) {
         return 0;
-    }
-#else
-    const int use_lower_square_crossover =
-        m == n && n == k && min_dim >= COB_SGEMM_STRASSEN1_SQUARE_MIN_DIM;
-    if (!use_lower_square_crossover && min_dim < COB_SGEMM_STRASSEN1_MIN_DIM) {
-        return 0;
-    }
 #endif
-    if (3 * (int64_t)max_dim > 4 * (int64_t)min_dim ||
-        lda != k || ldb != n || (m % 64) != 0 || (n % 64) != 0 ||
-        (k % 64) != 0) {
-        return 0;
     }
-
-#if defined(COB_USE_PORTABLE_STRASSEN)
-    /* Direct writes to C quadrants must not change a later product's input. */
-    const size_t c_span = (size_t)(m - 1) * ldc + n;
-    if (cob_f32_ranges_overlap(c, c_span, a, (size_t)m * k) ||
-        cob_f32_ranges_overlap(c, c_span, b, (size_t)k * n)) {
-        return 0;
-    }
-#endif
-
-#endif
 
     const int mh = m / 2;
     const int nh = n / 2;
@@ -3758,35 +3758,24 @@ static int cob_sgemm_rowmajor_strassen1(
     const size_t x_values = (size_t)mh * (size_t)kh;
     const size_t y_values = (size_t)kh * (size_t)nh;
     const size_t p_values = (size_t)mh * (size_t)nh;
-#if defined(COB_USE_RECURSIVE_STRASSEN)
     const size_t parent_values = x_values + y_values + p_values;
-    const int compatible = legacy_geometry && (m % 128 == 0 && n % 128 == 0 && k % 128 == 0);
-#if defined(COB_USE_APPLE_AMX)
-    const int deep = compatible && (n % 256 == 0) && min_dim >= COB_WINOGRAD_APPLE_MIN;
-#else
-    const int deep = compatible && min_dim >= COB_WINOGRAD_NATIVE_MIN;
-#endif
-    size_t child_values = deep ? parent_values / 4 : 0;
-    float* workspace = (float*)cob_aligned_alloc(128, (parent_values + child_values) * sizeof(float));
-    if (!workspace && child_values) {
-        workspace = (float*)cob_aligned_alloc(128, parent_values * sizeof(float));
-        if (!workspace) return 0;
+#if defined(COB_USE_RECURSIVE_STRASSEN)
+    size_t child_values = legacy_geometry && cob_recursive_square_is_eligible(m, n, k)
+        ? parent_values / 4 : 0;
+    float* workspace = cob_aligned_alloc(128, (parent_values + child_values) * sizeof(float));
+    if (workspace == NULL && child_values != 0) {
         child_values = 0;
+        workspace = cob_aligned_alloc(128, parent_values * sizeof(float));
     }
-    if (workspace == NULL) {
-        return 0;
-    }
-    float* child_workspace = child_values ? workspace + parent_values : NULL;
-#define COB_STRASSEN_CHILD(...) cob_winograd_product(__VA_ARGS__, child_workspace, cob_strassen_leaf)
+    float* child = workspace && child_values ? workspace + parent_values : NULL;
+#define COB_STRASSEN_CHILD(...) cob_winograd_product(__VA_ARGS__, child, cob_strassen_leaf)
 #else
-    float* workspace = (float*)cob_aligned_alloc(
-        128,
-        (x_values + y_values + p_values) * sizeof(float));
-    if (workspace == NULL) {
-        return 0;
-    }
+    float* workspace = cob_aligned_alloc(128, parent_values * sizeof(float));
 #define COB_STRASSEN_CHILD cob_strassen_leaf
 #endif
+    if (workspace == NULL) {
+        return 0;
+    }
     float* x = workspace;
     float* y = x + x_values;
     float* p = y + y_values;
@@ -3871,7 +3860,7 @@ static int cob_sgemm_rowmajor_strassen1(
 
 #endif
 
-#if defined(COB_USE_SKINNY_GEMM)
+#if defined(COB_USE_SKINNY_GEMM) && !defined(COB_USE_APPLE_AMX)
 /* For a handful of output rows each B value has little reuse. Stream B in
    short K strips directly; all accumulators keep increasing K order. */
 #if defined(COB_USE_X86_SIMD)
@@ -3969,10 +3958,6 @@ COB_THIN_TARGET static void cob_sgemm_few_rows(int m, int n, int k,
 #undef COB_THIN_FMA
 #endif
 
-#if defined(COB_ENABLE_BILINEAR336) && COB_ENABLE_BILINEAR336
-#include "cob_bilinear336.inc"
-#endif
-
 void cob_sgemm_rowmajor(
     int m,
     int n,
@@ -3984,12 +3969,8 @@ void cob_sgemm_rowmajor(
     float* c,
     int ldc)
 {
-#if defined(COB_ENABLE_BILINEAR336) && COB_ENABLE_BILINEAR336
-    if (cob_sgemm_336(m,n,k,a,lda,b,ldb,c,ldc)) return;
-#endif
-
-#if defined(COB_USE_SKINNY_GEMM)
-    if (m >= 2 && m <= 8 && n >= 256 && k >= 64 &&
+#if defined(COB_USE_SKINNY_GEMM) && !defined(COB_USE_APPLE_AMX)
+    if (m >= 2 && m <= COB_SKINNY_GEMM_MAX_ROWS && n >= 256 && k >= 64 &&
         a && b && c && lda >= k && ldb >= n && ldc >= n &&
 #if defined(COB_USE_X86_SIMD)
         __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma") &&

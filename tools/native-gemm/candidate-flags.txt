@@ -1,2 +1,1 @@
-COB_ENABLE_SKINNY_GEMM=1
-COB_ENABLE_RECTANGULAR_STRASSEN=1
+# Confirm the production architecture defaults.

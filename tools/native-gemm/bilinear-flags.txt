@@ -1,1 +1,1 @@
-COB_ENABLE_BILINEAR336=1
+# Rank-40 was measured in the preceding discovery commit.
