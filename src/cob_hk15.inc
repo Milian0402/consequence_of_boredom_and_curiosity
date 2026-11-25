@@ -26,7 +26,7 @@ static void cob_hk15_fused_child(int m, int n, int k, const float* a, int lda,
 enum cob_hk15_policy { COB_HK15_REGULAR, COB_HK15_CLASSICAL, COB_HK15_WIDE };
 
 static enum cob_hk15_policy cob_hk15_axis_policy(int rows, int cols,
-    const float* input, int ld, uint32_t* columns)
+    const float* input, int ld, uint32_t* columns, uint32_t* maximum)
 {
     const uint32_t low = UINT32_C(0x27800000);  /* 2^-48 */
     const uint32_t high = UINT32_C(0x57800000); /* 2^48 */
@@ -46,6 +46,7 @@ static enum cob_hk15_policy cob_hk15_axis_policy(int rows, int cols,
         if (row_max > largest) largest = row_max;
         if (row_max < smallest_line) smallest_line = row_max;
     }
+    *maximum = largest;
     if (has_tiny || largest > high) return COB_HK15_WIDE;
     for (int j = 0; j < cols; ++j)
         if (columns[j] < smallest_line) smallest_line = columns[j];
@@ -55,6 +56,46 @@ static enum cob_hk15_policy cob_hk15_axis_policy(int rows, int cols,
     return COB_HK15_REGULAR;
 }
 
+static uint32_t cob_hk15_magnitude(const float* value)
+{
+    uint32_t bits;
+    memcpy(&bits, value, sizeof(bits));
+    return bits & UINT32_C(0x7fffffff);
+}
+
+/* Each accepted output dot has at least half its K positions large in both
+   operands. Equal line maxima alone allow disjoint depth supports. */
+static int cob_hk15_supported_depth(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, uint32_t max_a, uint32_t max_b, uint32_t* count)
+{
+    const uint32_t needed = (uint32_t)(k - k/4);
+    /* Both extrema have already passed the normal-magnitude check. */
+    const uint32_t cutoff_a = max_a - (UINT32_C(3) << 23);
+    const uint32_t cutoff_b = max_b - (UINT32_C(3) << 23);
+    for (int i = 0; i < m; ++i) {
+        const float* row = a + (size_t)i * lda;
+        uint32_t live = 0;
+        for (int p = 0; p < k; ++p)
+            live += cob_hk15_magnitude(row + p) >= cutoff_a;
+        if (live < needed) return 0;
+    }
+    memset(count, 0, (size_t)n * sizeof(*count));
+    for (int p = 0; p < k; ++p) {
+        const float* row = b + (size_t)p * ldb;
+        for (int j = 0; j < n; ++j)
+            count[j] += cob_hk15_magnitude(row + j) >= cutoff_b;
+    }
+    for (int j = 0; j < n; ++j)
+        if (count[j] < needed) return 0;
+    return 1;
+}
+
+/* Keep the scan's bounded scratch and stack probing off ordinary SGEMM calls. */
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((noinline))
+#elif defined(_MSC_VER)
+__declspec(noinline)
+#endif
 static enum cob_hk15_policy cob_hk15_policy_for(int m, int n, int k,
     const float* a, int lda, const float* b, int ldb)
 {
@@ -63,10 +104,14 @@ static enum cob_hk15_policy cob_hk15_policy_for(int m, int n, int k,
     uint32_t columns[3 * 1280 + 2];
     if ((size_t)n > sizeof(columns)/sizeof(*columns) ||
         (size_t)k > sizeof(columns)/sizeof(*columns)) return COB_HK15_WIDE;
-    enum cob_hk15_policy left = cob_hk15_axis_policy(m, k, a, lda, columns);
+    uint32_t max_a, max_b;
+    enum cob_hk15_policy left = cob_hk15_axis_policy(m, k, a, lda, columns, &max_a);
     if (left == COB_HK15_WIDE) return left;
-    enum cob_hk15_policy right = cob_hk15_axis_policy(k, n, b, ldb, columns);
-    return left > right ? left : right;
+    enum cob_hk15_policy right = cob_hk15_axis_policy(k, n, b, ldb, columns, &max_b);
+    if (left != COB_HK15_REGULAR || right != COB_HK15_REGULAR)
+        return left > right ? left : right;
+    return cob_hk15_supported_depth(m,n,k,a,lda,b,ldb,max_a,max_b,columns)
+        ? COB_HK15_REGULAR : COB_HK15_CLASSICAL;
 }
 
 static void cob_hk15_classical(int m, int n, int k, const float* a, int lda,
@@ -76,6 +121,81 @@ static void cob_hk15_classical(int m, int n, int k, const float* a, int lda,
     if (cob_sgemm_try_sme_classical(m, n, k, a, lda, b, ldb, c, ldc)) return;
 #endif
     cob_sgemm_rowmajor_fallback(m, n, k, a, lda, b, ldb, c, ldc);
+}
+
+/* Floor(log2(value)) from the magnitude encoding, including subnormals. */
+static int cob_hk15_exponent(uint32_t mag)
+{
+    if (mag >= UINT32_C(0x00800000)) return (int)(mag >> 23) - 127;
+    int exponent = -126;
+    while (!(mag & UINT32_C(0x00800000))) {
+        mag <<= 1;
+        --exponent;
+    }
+    return exponent;
+}
+
+static double cob_hk15_power_of_two(int exponent)
+{
+    /* The callers only need exponents between -298 and 254. */
+    uint64_t bits = (uint64_t)(exponent + 1023) << 52;
+    double value;
+    memcpy(&value, &bits, sizeof(value));
+    return value;
+}
+
+static int cob_hk15_scale_exponent(int rows, int cols, const float* matrix,
+    int ld, int* exponent, double* max_value)
+{
+    uint32_t smallest = UINT32_MAX, largest = 0;
+    for (int i = 0; i < rows; ++i) {
+        const float* row = matrix + (size_t)i * ld;
+        for (int j = 0; j < cols; ++j) {
+            const uint32_t mag = cob_hk15_magnitude(row + j);
+            if (mag && mag < smallest) smallest = mag;
+            if (mag > largest) largest = mag;
+        }
+    }
+    if (largest >= UINT32_C(0x7f800000)) return 0;
+    float peak;
+    memcpy(&peak, &largest, sizeof(peak));
+    *max_value = (double)peak;
+    *exponent = largest ? cob_hk15_exponent(largest) : 0;
+    return !largest || *exponent - cob_hk15_exponent(smallest) <= 24;
+}
+
+static void cob_hk15_scale_copy(int rows, int cols, const float* src,
+    int ld, int exponent, float* dst)
+{
+    const double factor = cob_hk15_power_of_two(-exponent);
+    for (int i = 0; i < rows; ++i)
+        for (int j = 0; j < cols; ++j)
+            dst[(size_t)i * cols + j] = (float)((double)src[(size_t)i * ld + j] * factor);
+}
+
+static int cob_hk15_normalized(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+    /* All nonzeros become normal binary32 values in [2^-24, 2). Their
+       exact products are multiples of 2^-94 and no partial sum can overflow.
+       Leave a factor of two below FLT_MAX when restoring the original scale. */
+    int ea, eb;
+    double max_a, max_b;
+    if (!cob_hk15_scale_exponent(m,k,a,lda,&ea,&max_a) ||
+        !cob_hk15_scale_exponent(k,n,b,ldb,&eb,&max_b) ||
+        max_a * max_b * k > 0x1.fffffep126) return 0;
+    const size_t ac = (size_t)m * k, bc = (size_t)k * n;
+    float* workspace = cob_aligned_alloc(128, (ac+bc)*sizeof(float));
+    if (!workspace) return 0;
+    cob_hk15_scale_copy(m,k,a,lda,ea,workspace);
+    cob_hk15_scale_copy(k,n,b,ldb,eb,workspace+ac);
+    cob_hk15_classical(m,n,k,workspace,k,workspace+ac,n,c,ldc);
+    free(workspace);
+    const double restore = cob_hk15_power_of_two(ea + eb);
+    for (int i = 0; i < m; ++i)
+        for (int j = 0; j < n; ++j)
+            c[(size_t)i * ldc + j] = (float)((double)c[(size_t)i * ldc + j] * restore);
+    return 1;
 }
 
 static void cob_hk15_wide(int m, int n, int k, const float* a, int lda,
@@ -133,8 +253,9 @@ static int cob_hk15_try(int m, int n, int k, const float* aa, int lda,
 
     const enum cob_hk15_policy policy = cob_hk15_policy_for(m,n,k,aa,lda,bb,ldb);
     if (policy != COB_HK15_REGULAR) {
-        if (policy == COB_HK15_WIDE) cob_hk15_wide(m,n,k,aa,lda,bb,ldb,cc,ldc);
-        else cob_hk15_classical(m,n,k,aa,lda,bb,ldb,cc,ldc);
+        if (policy == COB_HK15_CLASSICAL) cob_hk15_classical(m,n,k,aa,lda,bb,ldb,cc,ldc);
+        else if (!cob_hk15_normalized(m,n,k,aa,lda,bb,ldb,cc,ldc))
+            cob_hk15_wide(m,n,k,aa,lda,bb,ldb,cc,ldc);
         return 1;
     }
     const int mh = m/2, nh = n/3, kh = k/3;

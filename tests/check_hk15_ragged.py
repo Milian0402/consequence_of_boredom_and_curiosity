@@ -9,7 +9,7 @@ import subprocess
 import sys
 import tempfile
 
-from hk15_guard_cases import check_guard_cases
+from hk15_guard_cases import check_guard_cases, regular_inputs
 
 repo = Path(__file__).resolve().parents[1]
 with tempfile.TemporaryDirectory() as td:
@@ -28,16 +28,20 @@ with tempfile.TemporaryDirectory() as td:
     alloc='cob_aligned_alloc(128, (ac+bc+pc)*sizeof(float))'
     assert hk.count(alloc)==1
     hk=hk.replace(alloc,'(++attempts, refuse ? NULL : '+alloc+')')
+    norm_alloc='cob_aligned_alloc(128, (ac+bc)*sizeof(float))'
+    assert hk.count(norm_alloc)==1
+    hk=hk.replace(norm_alloc,'(++normal_allocs, refuse ? NULL : '+norm_alloc+')')
     code=(src/'gemm.c').read_text()
     spec='int m,int n,int k,const float *a,int lda,const float *b,int ldb,float *c,int ldc'
     values='m,n,k,a,lda,b,ldb,c,ldc'
-    before=f'''int leaf_count, parent_count, attempts, refuse, classical, wide, scans;
+    before=f'''int leaf_count, parent_count, attempts, refuse, classical, wide, scans, normalized, normal_allocs;
 static void counted_leaf({spec}) {{ ++leaf_count; cob_sgemm_rowmajor_base({values}); }}
 '''
     # Count the production decisions at the caller. All three operations forward
     # to their original implementations and preserve each argument and return value.
     hook=hk.index('static int cob_hk15_try')
-    counters={'cob_hk15_classical':'classical','cob_hk15_wide':'wide','cob_hk15_policy_for':'scans'}
+    counters={'cob_hk15_classical':'classical','cob_hk15_wide':'wide',
+              'cob_hk15_policy_for':'scans','cob_hk15_normalized':'normalized'}
     define=''.join(f'#define {name}(...) (++{counter}, {name}(__VA_ARGS__))\n' for name,counter in counters.items())
     undef=''.join(f'#undef {name}\n' for name in counters)
     hk=hk[:hook]+define+hk[hook:]+'\n'+undef
@@ -66,7 +70,8 @@ static void counted_leaf({spec}) {{ ++leaf_count; cob_sgemm_rowmajor_base({value
     def pointer(array,offset):return ct.cast(ct.byref(array,offset*4),P)
     def buf(count):return (ct.c_float*count)(*([551.75]*count))
     def snapshot(array):return bytes(array)
-    rng=random.Random(29384);worst=0;cells=0;calls=0
+    rng=random.Random(29384);dense_rng=random.Random(87231);worst=0;cells=0;calls=0
+    uniform_routes={'regular':0, 'classical':0}
     for dr in range(2):
         for dc in range(3):
             for dd in range(3):
@@ -75,17 +80,20 @@ static void counted_leaf({spec}) {{ ++leaf_count; cob_sgemm_rowmajor_base({value
                 a,b,c=buf((m+3)*la),buf((k+4)*lb),buf((m+5)*lc)
                 a0,b0,c0=la+3,2*lb+5,3*lc+7
                 pa,pb,pc=pointer(a,a0),pointer(b,b0),pointer(c,c0)
-                for mode in ('random','scaled','cancel','integer','allocation-fail'):
+                for mode in ('random','scaled','cancel','integer','allocation-fail','dense'):
+                    generate=dense_rng if mode=='dense' else rng
                     for i in range(m):
                         for p in range(k):
-                            val=rng.uniform(-1,1)
+                            val=generate.uniform(-1,1)
+                            if mode in ('dense','allocation-fail'):val=math.copysign(.5+abs(val)/2,val)
                             if mode=='integer': val=(3*i+7*p)%9-4
                             if mode=='cancel': val=a[a0+i*la+p-1] if p%2 else val
                             if mode=='scaled' and p<k//2:val*=2**-8
                             a[a0+i*la+p]=val
                     for p in range(k):
                         for j in range(n):
-                            val=rng.uniform(-1,1)
+                            val=generate.uniform(-1,1)
+                            if mode in ('dense','allocation-fail'):val=math.copysign(.5+abs(val)/2,val)
                             if mode=='integer':val=(5*j+11*p)%7-3
                             if mode=='cancel':val=-b[b0+(p-1)*lb+j]+1e-6 if p%2 else val
                             if mode=='scaled' and p>=k//2:val*=2**-8
@@ -93,6 +101,11 @@ static void counted_leaf({spec}) {{ ++leaf_count; cob_sgemm_rowmajor_base({value
                     for i in range(m):
                         for j in range(n): c[c0+i*lc+j]=math.nan
                     original=snapshot(a),snapshot(b)
+                    regular=regular_inputs([[a[a0+i*la+p] for p in range(k)] for i in range(m)],
+                                           [[b[b0+p*lb+j] for j in range(n)] for p in range(k)])
+                    if mode in ('dense','integer','allocation-fail'):assert regular
+                    if mode=='scaled':assert not regular
+                    if mode=='random':uniform_routes['regular' if regular else 'classical']+=1
                     leaves.value=entries.value=attempts.value=0
                     refuse.value=int(mode=='allocation-fail')
                     if refuse.value:
@@ -104,7 +117,7 @@ static void counted_leaf({spec}) {{ ++leaf_count; cob_sgemm_rowmajor_base({value
                                 c[c0+i*lc+j]=math.nan
                         attempts.value=0
                     dll.cob_sgemm_rowmajor(m,n,k,pa,la,pb,lb,pc,lc)
-                    assert (entries.value,leaves.value,attempts.value)==(1,0 if mode in ('scaled','allocation-fail') else 15,int(mode!='scaled'))
+                    assert (entries.value,leaves.value,attempts.value)==(1,15*int(regular and not refuse.value),int(regular))
                     assert original==(snapshot(a),snapshot(b))
                     for index,val in enumerate(c):
                         off=index-c0
@@ -124,7 +137,7 @@ static void counted_leaf({spec}) {{ ++leaf_count; cob_sgemm_rowmajor_base({value
         (pa,la,pb,lb,pointer(b,b0+(k-1)*lb+n-1),lc),
         (high,la,pb,lb,pc,lc),(pa,la,high,lb,pc,lc),(pa,la,pb,lb,high,lc)]
     refuse.value=0
-    early=(attempts,leaves,*(I.in_dll(dll,key) for key in ('scans','classical','wide')))
+    early=(attempts,leaves,*(I.in_dll(dll,key) for key in ('scans','classical','wide','normalized','normal_allocs')))
     calls_to_reject=[(m,n,k,*bad) for bad in cases]
     calls_to_reject.extend((rows,n,k,pa,la,pb,lb,pc,lc) for rows in (0,12))
     for args in calls_to_reject:
@@ -132,4 +145,4 @@ static void counted_leaf({spec}) {{ ++leaf_count; cob_sgemm_rowmajor_base({value
         assert dll.attempt_hk(*args)==0 and all(counter.value==0 for counter in early)
     assert saved==(bytes(a),bytes(b),bytes(c))
     check_guard_cases(dll)
-    print(f'PASS 11 actual size boundaries, 18 residue classes x 5 fixtures, {calls} one-shot calls, {cells} FP64 outputs, max_abs_error={worst:.9g}; exact integer outputs, 11 null/stride/tail-overlap/address-overflow guards; scratch failure computes the complete classical fallback.')
+    print(f'PASS 11 actual size boundaries, 18 residue classes x 6 fixtures, {calls} one-shot calls, {cells} FP64 outputs, max_abs_error={worst:.9g}. Uniform-input routes {uniform_routes}.')

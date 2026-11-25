@@ -68,17 +68,26 @@ COB dispatcher. The required coefficient notice and exact integer verifier
 are in [third_party/fast-matmul](third_party/fast-matmul). Run
 `python3 tests/check_hk15.py` to test routing, fallback and FP64 accuracy.
 
-For an eligible product, COB checks the maximum absolute entry in every row
-and column of both operands, including both views of the reduction dimension.
-It uses classical multiplication if a line is zero or the largest line maximum
-in either operand exceeds four times its smallest. Nonfinite inputs and nonzero
-magnitudes outside the inclusive interval [2⁻⁴⁸, 2⁴⁸] use classical binary64
-accumulation with a final conversion to binary32. The scan reads logical
-entries only. Failure to allocate HK workspace also selects classical
-multiplication. This policy catches row, column and reduction-axis scale
-disparities. Complementary sparse patterns can have identical line maxima and
-still suffer cancellation in HK15. Absolute error also depends on the scale
-and conditioning of each dot product.
+Both HK15 options check the input magnitudes once the geometry, strides and
+overlap checks pass. COB uses classical multiplication if any row or column of
+either operand is zero, or if the largest line maximum in either operand is
+more than four times its smallest. It also requires at least three quarters
+of the entries in each A row and each B column to have a magnitude of at least
+one eighth of that operand's global maximum. These two sets then overlap in
+at least half the reduction positions of every output entry. This catches
+complementary sparse or near-zero patterns even when all axis maxima agree.
+Both checks ignore padding. Failure to allocate HK workspace selects classical
+multiplication.
+
+A nonzero input outside the inclusive interval [2⁻⁴⁸, 2⁴⁸] takes a separate
+classical path. If each operand's nonzero exponents span at most 24 powers of
+two and `k × maxabs(A) × maxabs(B)` is at most half the largest finite
+binary32 value, COB rescales each finite operand exactly by a power of two.
+It computes the product in binary32 and restores its scale. Otherwise, or if
+the scaling workspace is unavailable, it accumulates the original products
+in binary64. Nonfinite inputs also use the binary64 path. Opposite-signed
+terms can still cancel even in densely overlapping dots. Absolute and
+relative errors depend on each dot product's scale and conditioning.
 
 The experimental `COB_ENABLE_HK15_RAGGED=ON` option in CMake and Make also
 accepts remainders. It enables HK15, computes the largest divisible core and

@@ -34,12 +34,12 @@ with tempfile.TemporaryDirectory() as folder:
     hk=hk.replace(old_bind,'= hk_test_leaf;')
     alloc='cob_aligned_alloc(128, (ac+bc+pc)*sizeof(float))'
     assert hk.count(alloc)==1
-    hk=hk.replace(alloc,'hk_test_noalloc ? NULL : '+alloc)
+    hk=hk.replace(alloc,'hk_test_noalloc ? (++hk_test_failures, NULL) : '+alloc)
     schedule_include='#include "../third_party/fast-matmul/hk233.inc"'
     assert hk.count(schedule_include)==1
     hk=hk.replace(schedule_include,f'#include "{schedule}"')
     inspector='''
-int hk_test_leaves, hk_test_entries, hk_test_noalloc;
+int hk_test_leaves, hk_test_entries, hk_test_noalloc, hk_test_failures;
 static void hk_test_leaf(int m,int n,int k,const float* a,int lda,const float* b,int ldb,float* c,int ldc)
 {
     ++hk_test_leaves;
@@ -73,39 +73,108 @@ void hk_test_base(int m,int n,int k,const float* a,int lda,const float* b,int ld
     leaves=ct.c_int.in_dll(lib,'hk_test_leaves')
     entries=ct.c_int.in_dll(lib,'hk_test_entries')
     noalloc=ct.c_int.in_dll(lib,'hk_test_noalloc')
+    failed_allocations=ct.c_int.in_dll(lib,'hk_test_failures')
     for shape,expected in [
         ((1536,2304,2304),1),((2560,3840,3840),1),((1920,2880,2880),1),
         ((2432,3648,3648),1),((2048,2880,3264),1),((1920,2304,2304),1),
         ((1922,2304,2304),0),((1534,2304,2304),0),((2562,3840,3840),0),
         ((1536,2303,2304),0),((1536,2304,2303),0),((1537,2304,2304),0)]:
         assert lib.hk_test_shape(*shape)==expected,(shape,expected)
-    rng=Random(38421);worst=0.;checked=0
-    def matrix(count): return (ct.c_float*count)(*([713.25]*count))
+    rng = Random(38421)
+    dense_rng = Random(4897)
+    measurements = []
+    uniform_routes = {0: 0, 15: 0}
+
+    def matrix(count):
+        return (ct.c_float * count)(*([713.25] * count))
+
+    def dense_value():
+        magnitude = dense_rng.uniform(0.5, 1)
+        return magnitude if dense_rng.getrandbits(1) else -magnitude
+
+    def regular_inputs(m, n, k, a, lda, b, ldb):
+        # Use logical elements only. This oracle applies to the bounded random inputs below.
+        a_rows = [[abs(a[i*lda+p]) for p in range(k)] for i in range(m)]
+        b_rows = [[abs(b[p*ldb+j]) for j in range(n)] for p in range(k)]
+        a_cols = list(zip(*a_rows))
+        b_cols = list(zip(*b_rows))
+        for rows, cols, depths in ((a_rows, a_cols, a_rows), (b_rows, b_cols, b_cols)):
+            peak = max(map(max, rows))
+            if any(4 * max(line) < peak for line in (*rows, *cols)):
+                return False
+            if any(4 * sum(8*x >= peak for x in line) < 3*k for line in depths):
+                return False
+        return True
+
+    def check_product(m, n, k, a, lda, b, ldb, expected_leaves, allocation_failure=False):
+        ldc = n + 5
+        c = matrix(m*ldc + 11)
+        for i in range(m):
+            for j in range(n):
+                c[i*ldc+j] = float('nan')
+        originals = bytes(a), bytes(b)
+        leaves.value = entries.value = failed_allocations.value = 0
+        noalloc.value = int(allocation_failure)
+        lib.cob_sgemm_rowmajor(m, n, k, a, lda, b, ldb, c, ldc)
+        assert (leaves.value, entries.value) == (expected_leaves, 1), (m, n, k, expected_leaves, leaves.value)
+        expect_failure = allocation_failure and regular_inputs(m, n, k, a, lda, b, ldb)
+        assert failed_allocations.value == int(expect_failure)
+        worst = 0.0
+        for i in range(m):
+            for j in range(n):
+                ref = sum(a[i*lda+p] * b[p*ldb+j] for p in range(k))
+                err = abs(c[i*ldc+j] - ref)
+                assert math.isfinite(err) and err <= .002, (m, n, k, i, j, err)
+                worst = max(worst, err)
+            assert list(c[i*ldc+n:(i+1)*ldc]) == [713.25] * (ldc-n)
+        assert list(c[-11:]) == [713.25] * 11 and originals == (bytes(a), bytes(b))
+        measurements.append((m*n, worst))
+
     for m,n,k,route in [(32,48,48,15),(44,60,72,15),(16,24,24,15),(64,96,96,15),
                         (33,48,48,0),(32,49,48,0),(32,48,49,0),(32,63,48,0),
                         (14,24,24,0),(66,96,96,0),(32,48,48,0)]:
-        for cancel in (False,True):
-            lda,ldb,ldc=k+1,n+3,n+5
-            a,b,c=matrix(m*lda+11),matrix(k*ldb+11),matrix(m*ldc+11)
+        for legacy in (True, False):
+            for cancel in (False, True):
+                lda, ldb = k+1, n+3
+                a, b = matrix(m*lda+11), matrix(k*ldb+11)
+                sample = (lambda: rng.uniform(-1, 1)) if legacy else dense_value
+                for i in range(m):
+                    for p in range(k):
+                        a[i*lda+p] = a[i*lda+p-1] if cancel and p%2 else sample()
+                for p in range(k):
+                    for j in range(n):
+                        b[p*ldb+j] = -b[(p-1)*ldb+j] if cancel and p%2 else sample()
+                expected = route
+                if legacy and route and not regular_inputs(m, n, k, a, lda, b, ldb):
+                    expected = 0
+                check_product(m, n, k, a, lda, b, ldb, expected,
+                              allocation_failure=(m,n,k,route) == (32,48,48,0))
+                if legacy and route:
+                    uniform_routes[leaves.value] += 1
+
+    # Sweep the four possible K residues while holding geometry, operand peaks,
+    # and the number of logical terms fixed within each accepted/rejected pair.
+    m, n = 28, 42
+    for k in (48, 45, 42, 39):
+        lda, ldb = k+1, n+3
+        required = (3*k+3)//4
+        for operand in ('A', 'B'):
+            a, b = matrix(m*lda+11), matrix(k*ldb+11)
             for i in range(m):
-                for p in range(k): a[i*lda+p]=a[i*lda+p-1] if cancel and p%2 else rng.uniform(-1,1)
+                for p in range(k):
+                    a[i*lda+p] = dense_value()
             for p in range(k):
-                for j in range(n): b[p*ldb+j]=-b[(p-1)*ldb+j] if cancel and p%2 else rng.uniform(-1,1)
-            for i in range(m):
-                for j in range(n): c[i*ldc+j]=float('nan')
-            originals=bytes(a),bytes(b)
-            leaves.value=0;entries.value=0
-            noalloc.value=int((m,n,k,route)==(32,48,48,0))
-            lib.cob_sgemm_rowmajor(m,n,k,a,lda,b,ldb,c,ldc)
-            assert (leaves.value,entries.value)==(route,1),(m,n,k,leaves.value,entries.value)
-            for i in range(m):
                 for j in range(n):
-                    ref=sum(a[i*lda+p]*b[p*ldb+j] for p in range(k))
-                    err=abs(c[i*ldc+j]-ref)
-                    assert math.isfinite(err) and err<=.002,(m,n,k,i,j,err)
-                    worst=max(worst,err);checked+=1
-                assert list(c[i*ldc+n:(i+1)*ldc])==[713.25]*(ldc-n)
-            assert list(c[-11:])==[713.25]*11 and originals==(bytes(a),bytes(b))
+                    b[p*ldb+j] = dense_value()
+            for strong_count in (required, required-1):
+                for p in range(k):
+                    # Preserve a full-size maximum in every affected line.
+                    value = 1.0 if p == 0 else (0.5 if p < strong_count else 0.0625)
+                    if operand == 'A':
+                        a[(m-2)*lda+p] = value
+                    else:
+                        b[p*ldb+n-3] = value
+                check_product(m, n, k, a, lda, b, ldb, 15 if strong_count == required else 0)
     noalloc.value=0
     m,n,k=32,48,48
     buffers=[matrix(48*53+11) for _ in range(3)]
@@ -125,5 +194,8 @@ void hk_test_base(int m,int n,int k,const float* a,int lda,const float* b,int ld
         lib.cob_sgemm_rowmajor(m,n,k,a,49,b,51,c,53)
         lib.hk_test_base(m,n,k,a2,49,b2,51,c2,53)
         assert (leaves.value,entries.value)==(0,1) and bytes(c)==bytes(c2)
-    print(f'12 production geometry checks; 22 public calls; {checked} FP64 cells; max error {worst:.9g}')
+    checked = sum(count for count, _ in measurements)
+    worst = max(error for _, error in measurements)
+    print(f'12 production geometry checks; {len(measurements)} FP64-checked public calls; {checked} FP64 cells; max error {worst:.9g}')
+    print(f'Uniform fixtures on eligible geometries: {uniform_routes[15]} used 15 leaves and {uniform_routes[0]} used the fallback.')
     print('Verified 15 counted base leaves per accepted call, one public entry, forced-allocation fallback, null/stride/alias guards and untouched padding.')
