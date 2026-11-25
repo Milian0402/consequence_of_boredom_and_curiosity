@@ -1,0 +1,5 @@
+gcc -O3 -march=x86-64 -masm=intel -std=c11 -Wall -Wextra -Wpedantic -Iinclude -DCOB_ENABLE_X86_STREAM_B=1 -c src/gemm.c -o gemm.o
+gcc -O3 -march=x86-64 -masm=intel -std=c11 -Wall -Wextra -Wpedantic -Iinclude -march=x86-64 -mavx2 -mfma -DCOB_STREAM_B_AVX512=0 -c src/cob_stream_b_kernel.c -o stream_b_avx2.o
+gcc -O3 -march=x86-64 -masm=intel -std=c11 -Wall -Wextra -Wpedantic -Iinclude -march=x86-64 -mavx512f -mfma -DCOB_STREAM_B_AVX512=1 -c src/cob_stream_b_kernel.c -o stream_b_avx512.o
+gcc -O3 -march=x86-64 -masm=intel -std=c11 -Wall -Wextra -Wpedantic -Iinclude -DCOB_ENABLE_X86_STREAM_B=1 -DCOB_SGEMM_STRASSEN1_MIN_DIM=1024 -c src/gemm.c -o gemm_strassen_test.o
+gcc -O3 -march=x86-64 -masm=intel -std=c11 -Wall -Wextra -Wpedantic -Iinclude -DCOB_ENABLE_X86_STREAM_B=1 -DCOB_SGEMM_STRASSEN1_MIN_DIM=8192 -DCOB_SGEMM_STRASSEN1_SQUARE_MIN_DIM=128 -c src/gemm.c -o gemm_strassen_square_test.o

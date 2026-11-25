@@ -1,0 +1,13 @@
+{
+  "release": "a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6",
+  "base": "b218beff1eaf8fd606d0934405cdc1e28ecdfe15",
+  "research": "b2cdc6a2985726cb1658dc7cc730b5a1c4b99680",
+  "benchmark": "bcc56044efeb37f2ab67bd45c6dae7a42623c292",
+  "release_tree": "18f22622de1a4b1b7aebbdb66985741aa38c6e9e",
+  "cpu": 0,
+  "panel_sha256": "466c2b51ee6df5fd737f3f4b1977c5b4ad75cdb7ae61bbaec7bc5919530f18fd",
+  "protocol_sha256": "ee1fc6d8cf4da9021d11a09f7e0a7eaf58dc49e7d3745236a6fe9f76095dfd6f",
+  "source_manifest_sha256": "31c88bd81cea91d33400d4c7cbeadb41ebef749bc6db081e28af17bde1e583ef",
+  "github_run": "45695245069",
+  "github_attempt": "1"
+}

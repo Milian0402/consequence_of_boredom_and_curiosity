@@ -32,6 +32,8 @@ Packing one strip of B and reusing it across the output rows accelerated standal
 
 The two Intel wins were at 108 × 1728 × 320 and 137 × 2179 × 347. AOCL led the independent field on all five AMD layouts. Each native comparison checked 69,104,464 output elements against FP64. [Cross-CPU comparison and verifier](stream-b/README.md) · [Intel timings](stream-b/intel/README.md) · [AMD timings](stream-b/amd/README.md)
 
+The installed public library passed both acceptance tests on an Intel Xeon 6975P-C. With conservative x86-64 compiler settings, switching on the streamed-B option yielded **1.328×** the speed of the installed default across the five repeated wide rectangles (30/30 paired wins). With both builds tuned to the host, the gain was **1.128×**. The generic opt-in beat the fastest tested direct BLAS on two layouts, by 2.2% and 6.3%. Direct BLAS won the other three. Every one of the 112 method/layout combinations passed full-output checks. The AMD result above is for the earlier native build of the kernel. [Public-archive measurements, compiler flags and offline verifier](stream-b-release/README.md)
+
 A separate test delegated whole products or all but the last few rows to a sequential BLAS. Across eight eligible layouts (four shared with the streamed-B panel and four additional), the whole oneMKL wrapper reached 1.100× the speed of prior standalone COB on Intel and 0.464× on AMD. It reached 1.002× the speed of calling the same oneMKL library directly on both hosts. Moving the last one to four rows into COB produced no consistently winning split across providers and CPUs. [Matched comparisons and single-thread checks](vendor-tail/README.md)
 
 ## Removing fourteen Winograd output updates

@@ -1,0 +1,60 @@
+{
+  "run": 45695245069,
+  "attempt": 1,
+  "benchmark_sha": "bcc56044efeb37f2ab67bd45c6dae7a42623c292",
+  "branch": "bench/native-linux-gemm",
+  "url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45695245069",
+  "job": "Accept public x86 stream-B release",
+  "job_id": 139491017033,
+  "job_url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45695245069/job/139491017033",
+  "status": "success",
+  "steps": [
+    {
+      "name": "Set up job",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "conclusion": "success"
+    },
+    {
+      "name": "Resolve registered production source",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "conclusion": "success"
+    },
+    {
+      "name": "Prepare serial numerical comparators",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check ordinary production builds and measure complete calls",
+      "conclusion": "success"
+    },
+    {
+      "name": "Preserve acceptance measurements and source identities",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "conclusion": "success"
+    }
+  ],
+  "artifact": "stream-release-x86_45695245069-1",
+  "artifact_id": 15060338189,
+  "source_sha": "bcc56044efeb37f2ab67bd45c6dae7a42623c292",
+  "artifact_sha256": "41d77acb9f81f159759596a28ba891bc32676a81dac7715688c1be0167ac3e5e",
+  "bytes": 158819,
+  "members": 71,
+  "zipped_crc_passed": true
+}

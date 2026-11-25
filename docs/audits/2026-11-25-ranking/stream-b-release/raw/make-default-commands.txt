@@ -1,0 +1,3 @@
+gcc -O3 -march=x86-64 -masm=att -std=c11 -Wall -Wextra -Wpedantic -Iinclude  -c src/gemm.c -o gemm.o
+gcc -O3 -march=x86-64 -masm=att -std=c11 -Wall -Wextra -Wpedantic -Iinclude  -DCOB_SGEMM_STRASSEN1_MIN_DIM=1024 -c src/gemm.c -o gemm_strassen_test.o
+gcc -O3 -march=x86-64 -masm=att -std=c11 -Wall -Wextra -Wpedantic -Iinclude  -DCOB_SGEMM_STRASSEN1_MIN_DIM=8192 -DCOB_SGEMM_STRASSEN1_SQUARE_MIN_DIM=128 -c src/gemm.c -o gemm_strassen_square_test.o

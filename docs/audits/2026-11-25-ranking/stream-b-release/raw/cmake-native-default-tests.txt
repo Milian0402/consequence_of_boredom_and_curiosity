@@ -1,0 +1,16 @@
+Internal ctest changing into directory: objects
+Test project objects
+    Start 1: cob_gemm_test
+1/5 Test #1: cob_gemm_test ....................   Passed    0.27 sec
+    Start 2: cob_gemm_strassen_test
+2/5 Test #2: cob_gemm_strassen_test ...........   Passed    0.27 sec
+    Start 3: cob_gemm_strassen_square_test
+3/5 Test #3: cob_gemm_strassen_square_test ....   Passed    0.27 sec
+    Start 4: cob_portable_strassen_test
+4/5 Test #4: cob_portable_strassen_test .......   Passed    0.16 sec
+    Start 5: cob_fused_strassen_test
+5/5 Test #5: cob_fused_strassen_test ..........   Passed    0.04 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =   1.01 sec

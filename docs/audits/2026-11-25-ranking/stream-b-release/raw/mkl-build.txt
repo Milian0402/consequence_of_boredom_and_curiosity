@@ -1,0 +1,14 @@
+vendor=mkl
+version=2026.2.1
+ 0x0000000000000001 (NEEDED)             Shared library: [libmkl_intel_lp64.so.3]
+ 0x0000000000000001 (NEEDED)             Shared library: [libmkl_sequential.so.3]
+ 0x0000000000000001 (NEEDED)             Shared library: [libmkl_core.so.3]
+	libmkl_intel_lp64.so.3 => libmkl_intel_lp64.so.3 (0x00007f2a83800000)
+	libmkl_sequential.so.3 => libmkl_sequential.so.3 (0x00007f2a81e00000)
+	libmkl_core.so.3 => libmkl_core.so.3 (0x00007f2a7d600000)
+oneMKL LP64 sequential: Intel(R) oneAPI Math Kernel Library Version 2026.2-Product Build 20260915 for Intel(R) 64 architecture applications (libmkl_intel_lp64.so.3)
+MKL_VERBOSE oneMKL 2026 Update 2 Product build 20260915 for Intel(R) 64 architecture Intel(R) Advanced Vector Extensions 512 (Intel(R) AVX-512) with support for INT8, BF16, FP16 (limited) instructions, and Intel(R) Advanced Matrix Extensions (Intel(R) AMX) with INT8, BF16, and FP16, Lnx 2.70GHz lp64 sequential
+MKL_VERBOSE SGEMM(N,N,9,7,5,0x7ffd5d36f978,0x7fd764412f70,11,0x7fd764586a20,6,0x7ffd5d36f974,0x7fd76457f0c0,12) 1.39ms CNR:OFF Dyn:1 FastMM:1
+MKL_VERBOSE SGEMM(N,N,9,7,5,0x7ffd5d36f978,0x7fd7644691b0,11,0x7fd764586ad0,6,0x7ffd5d36f974,0x7fd76457ef70,12) 2.41us CNR:OFF Dyn:1 FastMM:1
+MKL_VERBOSE SGEMM(N,N,64,64,65,0x7ffd5d36f978,0x289b73d0,66,0x289b2ad0,66,0x7ffd5d36f974,0x289bbdd0,67) 10.49us CNR:OFF Dyn:1 FastMM:1
+Padded FP32 SGEMM and same-shape changing operands passed

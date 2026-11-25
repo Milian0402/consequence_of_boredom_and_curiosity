@@ -1,0 +1,7 @@
+source_url=https://github.com/amd/blis
+release_tag=6.0.0
+source_sha=e5f75c24bdb8670ff648da7e483eb7e51b28a1db
+configure: hardware detection driver returned 'zen5'.
+Model name:                              Intel(R) Xeon(R) 6975P-C
+AOCL-BLAS version=AOCL-BLAS 6.0.0 Build 20261125 arch=zen5 model=Turin threading_compiled=0 threads=1 blas_integer_bits=32 cblas=1
+AOCL-BLAS padded LP64 row-major SGEMM smoke passed

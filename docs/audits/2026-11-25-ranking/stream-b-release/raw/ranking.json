@@ -1,0 +1,71 @@
+{
+  "phase": "stream-release",
+  "panel_sha256": "466c2b51ee6df5fd737f3f4b1977c5b4ad75cdb7ae61bbaec7bc5919530f18fd",
+  "implementations": {
+    "openblas": [
+      "direct",
+      "openblas.so"
+    ],
+    "mkl": [
+      "direct",
+      "mkl.so"
+    ],
+    "mkl-jit": [
+      "direct",
+      "mkl-jit.so"
+    ],
+    "aocl": [
+      "direct",
+      "aocl.so"
+    ],
+    "cmake-default": [
+      "linked-public",
+      "cmake-default.worker"
+    ],
+    "cmake-att": [
+      "linked-public",
+      "cmake-att.worker"
+    ],
+    "cmake-intel": [
+      "linked-public",
+      "cmake-intel.worker"
+    ],
+    "make-default": [
+      "linked-public",
+      "make-default.worker"
+    ],
+    "make-att": [
+      "linked-public",
+      "make-att.worker"
+    ],
+    "make-intel": [
+      "linked-public",
+      "make-intel.worker"
+    ],
+    "cmake-native-default": [
+      "linked-public",
+      "cmake-native-default.worker"
+    ],
+    "cmake-native-on": [
+      "linked-public",
+      "cmake-native-on.worker"
+    ],
+    "research-incumbent": [
+      "linked-public",
+      "stream-incumbent.worker"
+    ],
+    "research-candidate": [
+      "linked-public",
+      "stream-native.worker"
+    ]
+  },
+  "seeds": [
+    348271759,
+    710438957
+  ],
+  "rounds_per_seed": 3,
+  "full_output_tolerance": 0.002,
+  "expected_cases": 8,
+  "completed_cases": 8,
+  "errors": []
+}

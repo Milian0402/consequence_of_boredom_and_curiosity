@@ -1,0 +1,15 @@
+Internal ctest changing into directory: objects
+Test project objects
+    Start 1: cob_stream_b_test
+1/4 Test #1: cob_stream_b_test ................   Passed    0.05 sec
+    Start 2: cob_gemm_test
+2/4 Test #2: cob_gemm_test ....................   Passed    0.24 sec
+    Start 3: cob_gemm_strassen_test
+3/4 Test #3: cob_gemm_strassen_test ...........   Passed    0.24 sec
+    Start 4: cob_gemm_strassen_square_test
+4/4 Test #4: cob_gemm_strassen_square_test ....   Passed    0.24 sec
+
+100% tests passed, 0 tests failed out of 4
+
+Total Test time (real) =   0.76 sec
+PASS native_width=64 AVX2_width=32 checked=576909 max_abs_error=9.55350697e-06

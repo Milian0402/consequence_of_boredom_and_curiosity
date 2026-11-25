@@ -17,6 +17,11 @@ independent implementation on each layout.
 | Intel Xeon 6975P-C, the same two rectangles | Direct oneMKL beat every released build. At 2039 × 2969 × 3367 it took 221.63 ms versus 233.14 ms for COB. |
 | Intel Xeon 6975P-C and AMD EPYC 9V45, five wide rectangles | Streaming a panel of B improved standalone COB by 1.120× on each CPU. It beat the fastest independent library on two Intel layouts. AMD AOCL won all five on EPYC. |
 
+With `-DCOB_ENABLE_X86_STREAM_B=ON`, the installed x86-64 library was 1.328×
+as fast as the generic default and 1.128× as fast with both builds tuned to
+the Xeon. Each ratio is the geometric mean across the five tested layouts.
+[Installed-library comparison](docs/audits/2026-11-25-ranking/stream-b-release/README.md)
+
 The [benchmark results](docs/audits/2026-11-25-ranking/README.md) include the
 matrix layouts, raw timings, numerical qualification and scripts for replay.
 The [earlier comparisons](docs/audits/2026-11-25-ranking/earlier/README.md)

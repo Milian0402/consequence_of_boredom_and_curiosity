@@ -1,0 +1,148 @@
+mkdir -p objects
+gcc -O3 -march=x86-64 -masm=intel -std=c11 -Wall -Wextra -Wpedantic -Iinclude -DCOB_ENABLE_X86_STREAM_B=1 -c src/gemm.c -o gemm.o
+gcc -O3 -march=x86-64 -masm=intel -std=c11 -Wall -Wextra -Wpedantic -Iinclude -march=x86-64 -mavx2 -mfma -DCOB_STREAM_B_AVX512=0 -c src/cob_stream_b_kernel.c -o stream_b_avx2.o
+src/gemm.c:609:12: warning: ‘cob_sgemm_amx_one_shot_large_mc’ defined but not used [-Wunused-function]
+  609 | static int cob_sgemm_amx_one_shot_large_mc(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:583:12: warning: ‘cob_sgemm_sme_packed_b_excluded_shape’ defined but not used [-Wunused-function]
+  583 | static int cob_sgemm_sme_packed_b_excluded_shape(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:576:12: warning: ‘cob_sgemm_amx_large_block_shape’ defined but not used [-Wunused-function]
+  576 | static int cob_sgemm_amx_large_block_shape(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:565:12: warning: ‘cob_sgemm_amx_packed_b_mc’ defined but not used [-Wunused-function]
+  565 | static int cob_sgemm_amx_packed_b_mc(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:549:12: warning: ‘cob_sgemm_amx_strided_b_prefers_packed_shape’ defined but not used [-Wunused-function]
+  549 | static int cob_sgemm_amx_strided_b_prefers_packed_shape(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:538:12: warning: ‘cob_sgemm_m64_sme_large_kc_shape’ defined but not used [-Wunused-function]
+  538 | static int cob_sgemm_m64_sme_large_kc_shape(int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:515:12: warning: ‘cob_sgemm_m64_sme_wide_reuse_shape’ defined but not used [-Wunused-function]
+  515 | static int cob_sgemm_m64_sme_wide_reuse_shape(int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:504:12: warning: ‘cob_sgemm_m64_sme_direct_nc_shape’ defined but not used [-Wunused-function]
+  504 | static int cob_sgemm_m64_sme_direct_nc_shape(int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:493:12: warning: ‘cob_sgemm_m64_sme_direct_prefetch_shape’ defined but not used [-Wunused-function]
+  493 | static int cob_sgemm_m64_sme_direct_prefetch_shape(int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:324:12: warning: ‘cob_sgemm_sme_direct_extra_n_shape’ defined but not used [-Wunused-function]
+  324 | static int cob_sgemm_sme_direct_extra_n_shape(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+gcc -O3 -march=x86-64 -masm=intel -std=c11 -Wall -Wextra -Wpedantic -Iinclude -march=x86-64 -mavx512f -mfma -DCOB_STREAM_B_AVX512=1 -c src/cob_stream_b_kernel.c -o stream_b_avx512.o
+gcc -O3 -march=x86-64 -masm=intel -std=c11 -Wall -Wextra -Wpedantic -Iinclude -DCOB_ENABLE_X86_STREAM_B=1 -DCOB_SGEMM_STRASSEN1_MIN_DIM=1024 -c src/gemm.c -o gemm_strassen_test.o
+gcc -O3 -march=x86-64 -masm=intel -std=c11 -Wall -Wextra -Wpedantic -Iinclude -DCOB_ENABLE_X86_STREAM_B=1 -DCOB_SGEMM_STRASSEN1_MIN_DIM=8192 -DCOB_SGEMM_STRASSEN1_SQUARE_MIN_DIM=128 -c src/gemm.c -o gemm_strassen_square_test.o
+src/gemm.c:609:12: warning: ‘cob_sgemm_amx_one_shot_large_mc’ defined but not used [-Wunused-function]
+  609 | static int cob_sgemm_amx_one_shot_large_mc(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:583:12: warning: ‘cob_sgemm_sme_packed_b_excluded_shape’ defined but not used [-Wunused-function]
+  583 | static int cob_sgemm_sme_packed_b_excluded_shape(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:576:12: warning: ‘cob_sgemm_amx_large_block_shape’ defined but not used [-Wunused-function]
+  576 | static int cob_sgemm_amx_large_block_shape(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:565:12: warning: ‘cob_sgemm_amx_packed_b_mc’ defined but not used [-Wunused-function]
+  565 | static int cob_sgemm_amx_packed_b_mc(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:549:12: warning: ‘cob_sgemm_amx_strided_b_prefers_packed_shape’ defined but not used [-Wunused-function]
+  549 | static int cob_sgemm_amx_strided_b_prefers_packed_shape(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:538:12: warning: ‘cob_sgemm_m64_sme_large_kc_shape’ defined but not used [-Wunused-function]
+  538 | static int cob_sgemm_m64_sme_large_kc_shape(int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:515:12: warning: ‘cob_sgemm_m64_sme_wide_reuse_shape’ defined but not used [-Wunused-function]
+  515 | static int cob_sgemm_m64_sme_wide_reuse_shape(int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:504:12: warning: ‘cob_sgemm_m64_sme_direct_nc_shape’ defined but not used [-Wunused-function]
+  504 | static int cob_sgemm_m64_sme_direct_nc_shape(int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:493:12: warning: ‘cob_sgemm_m64_sme_direct_prefetch_shape’ defined but not used [-Wunused-function]
+  493 | static int cob_sgemm_m64_sme_direct_prefetch_shape(int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:324:12: warning: ‘cob_sgemm_sme_direct_extra_n_shape’ defined but not used [-Wunused-function]
+  324 | static int cob_sgemm_sme_direct_extra_n_shape(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:609:12: warning: ‘cob_sgemm_amx_one_shot_large_mc’ defined but not used [-Wunused-function]
+  609 | static int cob_sgemm_amx_one_shot_large_mc(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:583:12: warning: ‘cob_sgemm_sme_packed_b_excluded_shape’ defined but not used [-Wunused-function]
+  583 | static int cob_sgemm_sme_packed_b_excluded_shape(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:576:12: warning: ‘cob_sgemm_amx_large_block_shape’ defined but not used [-Wunused-function]
+  576 | static int cob_sgemm_amx_large_block_shape(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:565:12: warning: ‘cob_sgemm_amx_packed_b_mc’ defined but not used [-Wunused-function]
+  565 | static int cob_sgemm_amx_packed_b_mc(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:549:12: warning: ‘cob_sgemm_amx_strided_b_prefers_packed_shape’ defined but not used [-Wunused-function]
+  549 | static int cob_sgemm_amx_strided_b_prefers_packed_shape(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:538:12: warning: ‘cob_sgemm_m64_sme_large_kc_shape’ defined but not used [-Wunused-function]
+  538 | static int cob_sgemm_m64_sme_large_kc_shape(int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:515:12: warning: ‘cob_sgemm_m64_sme_wide_reuse_shape’ defined but not used [-Wunused-function]
+  515 | static int cob_sgemm_m64_sme_wide_reuse_shape(int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:504:12: warning: ‘cob_sgemm_m64_sme_direct_nc_shape’ defined but not used [-Wunused-function]
+  504 | static int cob_sgemm_m64_sme_direct_nc_shape(int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:493:12: warning: ‘cob_sgemm_m64_sme_direct_prefetch_shape’ defined but not used [-Wunused-function]
+  493 | static int cob_sgemm_m64_sme_direct_prefetch_shape(int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/gemm.c:324:12: warning: ‘cob_sgemm_sme_direct_extra_n_shape’ defined but not used [-Wunused-function]
+  324 | static int cob_sgemm_sme_direct_extra_n_shape(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+gcc -O3 -march=x86-64 -masm=intel -std=c11 -Wall -Wextra -Wpedantic -Iinclude -DCOB_ENABLE_X86_STREAM_B=1 tests/test_stream_b.c stream_b_avx2.o stream_b_avx512.o -lm -o cob_stream_b_test
+gcc -O3 -march=x86-64 -masm=intel -std=c11 -Wall -Wextra -Wpedantic -Iinclude tests/test_gemm.c gemm.o  stream_b_avx2.o stream_b_avx512.o  -o cob_gemm_test
+tests/test_gemm.c:245:12: warning: ‘test_cancellation_heavy_aligned_shape’ defined but not used [-Wunused-function]
+  245 | static int test_cancellation_heavy_aligned_shape(int size)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+gcc -O3 -march=x86-64 -masm=intel -std=c11 -Wall -Wextra -Wpedantic -Iinclude tests/test_gemm.c gemm_strassen_test.o  stream_b_avx2.o stream_b_avx512.o  -o cob_gemm_strassen_test
+tests/test_gemm.c:245:12: warning: ‘test_cancellation_heavy_aligned_shape’ defined but not used [-Wunused-function]
+  245 | static int test_cancellation_heavy_aligned_shape(int size)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from tests/test_stream_b.c:25:
+tests/../src/gemm.c:609:12: warning: ‘cob_sgemm_amx_one_shot_large_mc’ defined but not used [-Wunused-function]
+  609 | static int cob_sgemm_amx_one_shot_large_mc(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+tests/../src/gemm.c:583:12: warning: ‘cob_sgemm_sme_packed_b_excluded_shape’ defined but not used [-Wunused-function]
+  583 | static int cob_sgemm_sme_packed_b_excluded_shape(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+tests/../src/gemm.c:576:12: warning: ‘cob_sgemm_amx_large_block_shape’ defined but not used [-Wunused-function]
+  576 | static int cob_sgemm_amx_large_block_shape(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+tests/../src/gemm.c:565:12: warning: ‘cob_sgemm_amx_packed_b_mc’ defined but not used [-Wunused-function]
+  565 | static int cob_sgemm_amx_packed_b_mc(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~
+tests/../src/gemm.c:549:12: warning: ‘cob_sgemm_amx_strided_b_prefers_packed_shape’ defined but not used [-Wunused-function]
+  549 | static int cob_sgemm_amx_strided_b_prefers_packed_shape(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+tests/../src/gemm.c:538:12: warning: ‘cob_sgemm_m64_sme_large_kc_shape’ defined but not used [-Wunused-function]
+  538 | static int cob_sgemm_m64_sme_large_kc_shape(int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+tests/../src/gemm.c:515:12: warning: ‘cob_sgemm_m64_sme_wide_reuse_shape’ defined but not used [-Wunused-function]
+  515 | static int cob_sgemm_m64_sme_wide_reuse_shape(int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+tests/../src/gemm.c:504:12: warning: ‘cob_sgemm_m64_sme_direct_nc_shape’ defined but not used [-Wunused-function]
+  504 | static int cob_sgemm_m64_sme_direct_nc_shape(int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+tests/../src/gemm.c:493:12: warning: ‘cob_sgemm_m64_sme_direct_prefetch_shape’ defined but not used [-Wunused-function]
+  493 | static int cob_sgemm_m64_sme_direct_prefetch_shape(int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+tests/../src/gemm.c:324:12: warning: ‘cob_sgemm_sme_direct_extra_n_shape’ defined but not used [-Wunused-function]
+  324 | static int cob_sgemm_sme_direct_extra_n_shape(int m, int n, int k)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+gcc -O3 -march=x86-64 -masm=intel -std=c11 -Wall -Wextra -Wpedantic -Iinclude tests/test_gemm.c gemm_strassen_square_test.o  stream_b_avx2.o stream_b_avx512.o  -o cob_gemm_strassen_square_test
+tests/test_gemm.c:245:12: warning: ‘test_cancellation_heavy_aligned_shape’ defined but not used [-Wunused-function]
+  245 | static int test_cancellation_heavy_aligned_shape(int size)
+      |            ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cob_gemm_test
+all GEMM tests passed (44 shapes)
+cob_gemm_strassen_test
+all GEMM tests passed (44 shapes)
+cob_gemm_strassen_square_test
+all GEMM tests passed (44 shapes)
+cob_stream_b_test
+PASS native_width=64 AVX2_width=32 checked=576909 max_abs_error=9.55350697e-06

@@ -1,0 +1,4789 @@
+{
+  "phase": "stream-release",
+  "host": "Intel(R) Xeon(R) 6975P-C",
+  "cpu": 0,
+  "kernel_width": 64,
+  "production": "a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6",
+  "benchmark": "bcc56044efeb37f2ab67bd45c6dae7a42623c292",
+  "run": 45695245069,
+  "attempt": 1,
+  "research": "b2cdc6a2985726cb1658dc7cc730b5a1c4b99680",
+  "applicable_external": [
+    "openblas",
+    "mkl",
+    "mkl-jit",
+    "aocl"
+  ],
+  "coverage": {
+    "fixtures": 448,
+    "first_calls": 448,
+    "numerical_exclusions": [],
+    "fp64_cells": 74420192,
+    "qualified_cases": 112,
+    "warm_batches": 672,
+    "warm_calls": 21504,
+    "logical_cpu": 0,
+    "installed_cases": 64,
+    "installed_exact_outputs": 21262912,
+    "research_cases": 48,
+    "research_exact_outputs": 15947184
+  },
+  "max_abs_errors": {
+    "openblas": 2.1228638821e-05,
+    "mkl": 2.39592641051e-05,
+    "mkl-jit": 2.39592641051e-05,
+    "aocl": 2.39592641051e-05,
+    "cmake-default": 2.39592641051e-05,
+    "cmake-att": 2.39592641051e-05,
+    "cmake-intel": 2.39592641051e-05,
+    "make-default": 2.39592641051e-05,
+    "make-att": 2.39592641051e-05,
+    "make-intel": 2.39592641051e-05,
+    "cmake-native-default": 2.39592641051e-05,
+    "cmake-native-on": 2.39592641051e-05,
+    "research-incumbent": 2.39592641051e-05,
+    "research-candidate": 2.39592641051e-05
+  },
+  "providers": {
+    "mkl": {
+      "version": "2026.2.1",
+      "api": "cblas_sgemm"
+    },
+    "mkl-jit": {
+      "version": "2026.2.1",
+      "api": "MKL_DIRECT_CALL_SEQ_JIT"
+    },
+    "aocl": {
+      "version": "6.0.0",
+      "source": "e5f75c24bdb8670ff648da7e483eb7e51b28a1db"
+    },
+    "openblas": {
+      "pkg_config_version": "0.3.26",
+      "measured_core": [
+        "Cooperlake"
+      ]
+    }
+  },
+  "builds": {
+    "timed_sha256": {
+      "openblas": "06e990c9902a86e8b885a9883501de6173afb04d62dd8847bad3a267b58f0d47",
+      "mkl": "2ca3b3eb021ba213687ddb3a4625aacebf908c2162482870d7d91460c2ee5cf5",
+      "mkl-jit": "d96e66e0b3100709358aaf1caa2f2d185ece21563765100d30a24ea96603f69b",
+      "aocl": "2f3e88f05be8d6733fe5661217750a78990af70fbc0c2fe24eb276bad2a2d2cb",
+      "cmake-default": "4ead46ecdb531526a2ba9fc3f0b9cb3ae470254db0259190d71edc9742e3b71b",
+      "cmake-att": "152beb1820b56ffc532ab335b57d6caa5969ac25344b2825759d1d0b095542bd",
+      "cmake-intel": "152beb1820b56ffc532ab335b57d6caa5969ac25344b2825759d1d0b095542bd",
+      "make-default": "4ead46ecdb531526a2ba9fc3f0b9cb3ae470254db0259190d71edc9742e3b71b",
+      "make-att": "152beb1820b56ffc532ab335b57d6caa5969ac25344b2825759d1d0b095542bd",
+      "make-intel": "152beb1820b56ffc532ab335b57d6caa5969ac25344b2825759d1d0b095542bd",
+      "cmake-native-default": "f4b65dad17e796ea6e8be0ae0c4b2d64a1102ff53c085224649c18c962a36616",
+      "cmake-native-on": "dd41dfead67362ec3ae6e310c4237e1d30f1bc65b4b14abdde787cce9d659684",
+      "research-incumbent": "925448eb4405d10415741500d203f6b5b3d8c1bc5f57cb40125b520afbbe0e99",
+      "research-candidate": "7f09270ba904bac9db7e0a1fe24aec876deda9843f12c46aea0b124843bb0264"
+    },
+    "installed_archives": {
+      "cmake-default": "26dcc94a1075a7a4ae803875ac9777adedb283ac410c0e5b330ce109455e437c",
+      "cmake-att": "236718b48d45167e22b530a38ef0bb94c77ce16c1da3a3ea60b517a4a963f7d0",
+      "cmake-intel": "1d7a242f9960f7ed7bec811310ce8afd9ded2e4bc3a0521774a4806bdc01ea37",
+      "make-default": "9fcd049f0e59f6ac0ac702d8d1855cb7699818491e6472e67f56825174cbd668",
+      "make-att": "ec8e1000392505940669d8043a7f4c0179e62efc8e2ba74b913cbc8c6cbb4f8f",
+      "make-intel": "d39065f3ec54e3ef844ff63c1a7b643005d5531211e59ccc977dde96bf9e3f17",
+      "cmake-native-default": "ca0e841b923271dcb51775242b58945c956555dee42fe00af6de75363c104618",
+      "cmake-native-on": "805472a130e84b4b8448f235f7dae424912a19deb0af4dbf447d34d1160158f1"
+    },
+    "guarded_dispatch_fixtures": {
+      "cmake-att": {
+        "checked": 576909,
+        "max_abs_error": 9.55350697e-06
+      },
+      "cmake-intel": {
+        "checked": 576909,
+        "max_abs_error": 9.55350697e-06
+      },
+      "make-att": {
+        "checked": 576909,
+        "max_abs_error": 9.55350697e-06
+      },
+      "make-intel": {
+        "checked": 576909,
+        "max_abs_error": 9.55350697e-06
+      },
+      "cmake-native-on": {
+        "checked": 576909,
+        "max_abs_error": 9.55350697e-06
+      }
+    },
+    "compiler_targets": {
+      "cmake-default": {
+        "public": [
+          "-march=x86-64",
+          "-masm=att",
+          "-O3",
+          "-DNDEBUG"
+        ]
+      },
+      "cmake-att": {
+        "avx2": [
+          "-DCOB_STREAM_B_AVX512=0",
+          "-march=x86-64",
+          "-masm=att",
+          "-O3",
+          "-DNDEBUG",
+          "-march=x86-64",
+          "-mavx2",
+          "-mfma"
+        ],
+        "avx512": [
+          "-DCOB_STREAM_B_AVX512=1",
+          "-march=x86-64",
+          "-masm=att",
+          "-O3",
+          "-DNDEBUG",
+          "-march=x86-64",
+          "-mavx512f",
+          "-mfma"
+        ],
+        "public": [
+          "-DCOB_ENABLE_X86_STREAM_B=1",
+          "-march=x86-64",
+          "-masm=att",
+          "-O3",
+          "-DNDEBUG"
+        ]
+      },
+      "cmake-intel": {
+        "avx2": [
+          "-DCOB_STREAM_B_AVX512=0",
+          "-march=x86-64",
+          "-masm=intel",
+          "-O3",
+          "-DNDEBUG",
+          "-march=x86-64",
+          "-mavx2",
+          "-mfma"
+        ],
+        "avx512": [
+          "-DCOB_STREAM_B_AVX512=1",
+          "-march=x86-64",
+          "-masm=intel",
+          "-O3",
+          "-DNDEBUG",
+          "-march=x86-64",
+          "-mavx512f",
+          "-mfma"
+        ],
+        "public": [
+          "-DCOB_ENABLE_X86_STREAM_B=1",
+          "-march=x86-64",
+          "-masm=intel",
+          "-O3",
+          "-DNDEBUG"
+        ]
+      },
+      "make-default": {
+        "public": [
+          "-O3",
+          "-march=x86-64",
+          "-masm=att"
+        ]
+      },
+      "make-att": {
+        "public": [
+          "-O3",
+          "-march=x86-64",
+          "-masm=att",
+          "-DCOB_ENABLE_X86_STREAM_B=1"
+        ],
+        "avx2": [
+          "-O3",
+          "-march=x86-64",
+          "-masm=att",
+          "-march=x86-64",
+          "-mavx2",
+          "-mfma",
+          "-DCOB_STREAM_B_AVX512=0"
+        ],
+        "avx512": [
+          "-O3",
+          "-march=x86-64",
+          "-masm=att",
+          "-march=x86-64",
+          "-mavx512f",
+          "-mfma",
+          "-DCOB_STREAM_B_AVX512=1"
+        ]
+      },
+      "make-intel": {
+        "public": [
+          "-O3",
+          "-march=x86-64",
+          "-masm=intel",
+          "-DCOB_ENABLE_X86_STREAM_B=1"
+        ],
+        "avx2": [
+          "-O3",
+          "-march=x86-64",
+          "-masm=intel",
+          "-march=x86-64",
+          "-mavx2",
+          "-mfma",
+          "-DCOB_STREAM_B_AVX512=0"
+        ],
+        "avx512": [
+          "-O3",
+          "-march=x86-64",
+          "-masm=intel",
+          "-march=x86-64",
+          "-mavx512f",
+          "-mfma",
+          "-DCOB_STREAM_B_AVX512=1"
+        ]
+      },
+      "cmake-native-default": {
+        "public": [
+          "-DCOB_ENABLE_PORTABLE_STRASSEN=1",
+          "-DCOB_ENABLE_RECURSIVE_STRASSEN=1",
+          "-DCOB_ENABLE_X86_MEDIUM_ROUTE=1",
+          "-march=native",
+          "-DCOB_ENABLE_BLOCKED_LEAF=1",
+          "-DCOB_ENABLE_DIRECT_SMALL_GEMM=0",
+          "-DCOB_ENABLE_SHORT_AXES=1",
+          "-DCOB_ENABLE_FUSED_STRASSEN=1",
+          "-DCOB_ENABLE_SMALL_X86=1",
+          "-DCOB_ENABLE_FEW_ROW_PANEL=1",
+          "-masm=att",
+          "-O3",
+          "-DNDEBUG"
+        ]
+      },
+      "cmake-native-on": {
+        "avx2": [
+          "-DCOB_STREAM_B_AVX512=0",
+          "-march=native",
+          "-DCOB_ENABLE_BLOCKED_LEAF=1",
+          "-DCOB_ENABLE_DIRECT_SMALL_GEMM=0",
+          "-DCOB_ENABLE_SHORT_AXES=1",
+          "-DCOB_ENABLE_FUSED_STRASSEN=1",
+          "-DCOB_ENABLE_SMALL_X86=1",
+          "-DCOB_ENABLE_FEW_ROW_PANEL=1",
+          "-masm=att",
+          "-O3",
+          "-DNDEBUG",
+          "-march=x86-64",
+          "-mavx2",
+          "-mfma"
+        ],
+        "avx512": [
+          "-DCOB_STREAM_B_AVX512=1",
+          "-march=native",
+          "-DCOB_ENABLE_BLOCKED_LEAF=1",
+          "-DCOB_ENABLE_DIRECT_SMALL_GEMM=0",
+          "-DCOB_ENABLE_SHORT_AXES=1",
+          "-DCOB_ENABLE_FUSED_STRASSEN=1",
+          "-DCOB_ENABLE_SMALL_X86=1",
+          "-DCOB_ENABLE_FEW_ROW_PANEL=1",
+          "-masm=att",
+          "-O3",
+          "-DNDEBUG",
+          "-march=x86-64",
+          "-mavx512f",
+          "-mfma"
+        ],
+        "public": [
+          "-DCOB_ENABLE_PORTABLE_STRASSEN=1",
+          "-DCOB_ENABLE_RECURSIVE_STRASSEN=1",
+          "-DCOB_ENABLE_X86_MEDIUM_ROUTE=1",
+          "-DCOB_ENABLE_X86_STREAM_B=1",
+          "-march=native",
+          "-DCOB_ENABLE_BLOCKED_LEAF=1",
+          "-DCOB_ENABLE_DIRECT_SMALL_GEMM=0",
+          "-DCOB_ENABLE_SHORT_AXES=1",
+          "-DCOB_ENABLE_FUSED_STRASSEN=1",
+          "-DCOB_ENABLE_SMALL_X86=1",
+          "-DCOB_ENABLE_FEW_ROW_PANEL=1",
+          "-masm=att",
+          "-O3",
+          "-DNDEBUG"
+        ]
+      }
+    }
+  },
+  "comparisons": {
+    "cmake-att_vs_cmake-default": {
+      "holdout_replay": {
+        "geometric_mean": 1.32829625267412,
+        "minimum": 1.2692857669967446,
+        "faster_layouts": 5,
+        "seed_gms": [
+          1.329672603069847,
+          1.3256539526165916
+        ],
+        "paired_wins": 30
+      },
+      "layouts": {
+        "repeat-skinny-wide": {
+          "candidate_us": 277.6403437505,
+          "peer": "cmake-default",
+          "peer_us": 376.3657968745,
+          "median": 1.3680377836666096,
+          "wins": 6,
+          "ratios": [
+            1.3136340631898282,
+            1.281332045870731,
+            1.2858315942381158,
+            1.4224415041433909,
+            1.4228078707271068,
+            1.4253647328559391
+          ],
+          "seed_medians": [
+            1.2858315942381158,
+            1.4228078707271068
+          ],
+          "first_random_ratios": [
+            1.605241853259263,
+            1.648343144398228
+          ]
+        },
+        "repeat-wide": {
+          "candidate_us": 770.2620781255,
+          "peer": "cmake-default",
+          "peer_us": 911.8776562505,
+          "median": 1.1764397560335214,
+          "wins": 6,
+          "ratios": [
+            1.1830973255478705,
+            1.1678601535385296,
+            1.1635936652318601,
+            1.1959833685896923,
+            1.1847964026246662,
+            1.169782186519172
+          ],
+          "seed_medians": [
+            1.1678601535385296,
+            1.1847964026246662
+          ],
+          "first_random_ratios": [
+            1.1858542360083382,
+            1.2401077716131785
+          ]
+        },
+        "fresh-thin-tail": {
+          "candidate_us": 119.783140626,
+          "peer": "cmake-default",
+          "peer_us": 180.51665625049998,
+          "median": 1.507581837522146,
+          "wins": 6,
+          "ratios": [
+            1.5231221559806036,
+            1.5263271123655144,
+            1.5430672725632941,
+            1.4773048220689349,
+            1.4454455097614438,
+            1.4920415190636882
+          ],
+          "seed_medians": [
+            1.5263271123655144,
+            1.4773048220689349
+          ],
+          "first_random_ratios": [
+            2.048894255003491,
+            1.8417275149718682
+          ]
+        },
+        "fresh-wide-tail": {
+          "candidate_us": 481.62864062449995,
+          "peer": "cmake-default",
+          "peer_us": 619.31278125,
+          "median": 1.2861434748839549,
+          "wins": 6,
+          "ratios": [
+            1.287502288356002,
+            1.284784661411908,
+            1.3045213639563877,
+            1.303392862457532,
+            1.2579565598785403,
+            1.2777133167020134
+          ],
+          "seed_medians": [
+            1.287502288356002,
+            1.2777133167020134
+          ],
+          "first_random_ratios": [
+            1.127902307838801,
+            1.4762508836694788
+          ]
+        },
+        "fresh-deeper": {
+          "candidate_us": 500.3032187485,
+          "peer": "cmake-default",
+          "peer_us": 660.6332031235,
+          "median": 1.31968718932346,
+          "wins": 6,
+          "ratios": [
+            1.3148388122582324,
+            1.3230377360268322,
+            1.3163366426200882,
+            1.3476662976453486,
+            1.3301883372943228,
+            1.3053742660863492
+          ],
+          "seed_medians": [
+            1.3163366426200882,
+            1.3301883372943228
+          ],
+          "first_random_ratios": [
+            1.2668237846307993,
+            1.485958751610692
+          ]
+        },
+        "fresh-compact-tile": {
+          "candidate_us": 646.8373593745,
+          "peer": "cmake-default",
+          "peer_us": 823.174078125,
+          "median": 1.273133690123114,
+          "wins": 6,
+          "ratios": [
+            1.2767233659309423,
+            1.262781497670261,
+            1.2669332949780823,
+            1.2751847807437469,
+            1.2710825995024813,
+            1.2887654891062457
+          ],
+          "seed_medians": [
+            1.2669332949780823,
+            1.2751847807437469
+          ],
+          "first_random_ratios": [
+            1.4607574618810872,
+            1.3240722321662735
+          ]
+        },
+        "fresh-near-footprint": {
+          "candidate_us": 1120.5057656249999,
+          "peer": "cmake-default",
+          "peer_us": 1426.7883125,
+          "median": 1.2692857669967446,
+          "wins": 6,
+          "ratios": [
+            1.268256958784878,
+            1.268530932111042,
+            1.2584734383182463,
+            1.2809017992641623,
+            1.2786776146484962,
+            1.270040601882447
+          ],
+          "seed_medians": [
+            1.268256958784878,
+            1.2786776146484962
+          ],
+          "first_random_ratios": [
+            1.2294953337428025,
+            1.2923851404601794
+          ]
+        },
+        "outside-width": {
+          "candidate_us": 113.51198437400001,
+          "peer": "cmake-default",
+          "peer_us": 114.671609374,
+          "median": 1.0128334128339596,
+          "wins": 4,
+          "ratios": [
+            1.0234894305910576,
+            0.9875233641629253,
+            1.0243737536009252,
+            0.9648772125503826,
+            1.0318207031441442,
+            1.0021773950768613
+          ],
+          "seed_medians": [
+            1.0234894305910576,
+            1.0021773950768613
+          ],
+          "first_random_ratios": [
+            0.9268879645292998,
+            1.151640055577837
+          ]
+        }
+      }
+    },
+    "cmake-native-on_vs_research-candidate": {
+      "holdout_replay": {
+        "geometric_mean": 1.008129208210419,
+        "minimum": 0.995897119970425,
+        "faster_layouts": 4,
+        "seed_gms": [
+          1.0068765870199956,
+          1.0083939521185732
+        ],
+        "paired_wins": 24
+      },
+      "layouts": {
+        "repeat-skinny-wide": {
+          "candidate_us": 265.62343750149995,
+          "peer": "research-candidate",
+          "peer_us": 272.9458281255,
+          "median": 1.018686971508091,
+          "wins": 6,
+          "ratios": [
+            1.0184672628334162,
+            1.0058193092450047,
+            1.0407987410398183,
+            1.0189066801827658,
+            1.0270379286879123,
+            1.0075360795967623
+          ],
+          "seed_medians": [
+            1.0184672628334162,
+            1.0189066801827658
+          ],
+          "first_random_ratios": [
+            1.1324105889542746,
+            0.7995769742659841
+          ]
+        },
+        "repeat-wide": {
+          "candidate_us": 767.0273281255,
+          "peer": "research-candidate",
+          "peer_us": 767.6364062499999,
+          "median": 0.9999690296299982,
+          "wins": 3,
+          "ratios": [
+            0.9994757204086262,
+            0.9927064986085281,
+            1.0063637630257463,
+            1.0004623388513703,
+            1.0326912799370234,
+            0.9941112446554693
+          ],
+          "seed_medians": [
+            0.9994757204086262,
+            1.0004623388513703
+          ],
+          "first_random_ratios": [
+            1.0416911289484465,
+            0.9280559462674207
+          ]
+        },
+        "fresh-thin-tail": {
+          "candidate_us": 118.1833437515,
+          "peer": "research-candidate",
+          "peer_us": 120.609828125,
+          "median": 1.0094757699633647,
+          "wins": 5,
+          "ratios": [
+            1.0143204936470087,
+            1.003875313961723,
+            1.0190257985993538,
+            0.9963940603225724,
+            1.0599179958518556,
+            1.0046310462797206
+          ],
+          "seed_medians": [
+            1.0143204936470087,
+            1.0046310462797206
+          ],
+          "first_random_ratios": [
+            1.1246598268805674,
+            1.0000847804544213
+          ]
+        },
+        "fresh-wide-tail": {
+          "candidate_us": 475.85409375,
+          "peer": "research-candidate",
+          "peer_us": 476.149156251,
+          "median": 0.995897119970425,
+          "wins": 1,
+          "ratios": [
+            0.9967391765473774,
+            0.9961329159795753,
+            0.9956613239612745,
+            1.0064680151592267,
+            0.9915335479914321,
+            0.9949063649379454
+          ],
+          "seed_medians": [
+            0.9961329159795753,
+            0.9949063649379454
+          ],
+          "first_random_ratios": [
+            1.036002213051725,
+            1.0101645606098582
+          ]
+        },
+        "fresh-deeper": {
+          "candidate_us": 496.61975000050006,
+          "peer": "research-candidate",
+          "peer_us": 505.3215624995001,
+          "median": 1.0193728987865487,
+          "wins": 6,
+          "ratios": [
+            1.020508506233155,
+            1.009588629042081,
+            1.0005837870673229,
+            1.0182372913399425,
+            1.0333763533175384,
+            1.0229901209488117
+          ],
+          "seed_medians": [
+            1.009588629042081,
+            1.0229901209488117
+          ],
+          "first_random_ratios": [
+            1.0586418017436325,
+            1.0267272051787357
+          ]
+        },
+        "fresh-compact-tile": {
+          "candidate_us": 641.6520781265,
+          "peer": "research-candidate",
+          "peer_us": 649.354453124,
+          "median": 1.0100709970725164,
+          "wins": 6,
+          "ratios": [
+            1.010851178029166,
+            1.009290816115867,
+            1.0026394082264227,
+            1.030408462642683,
+            1.0072871686094194,
+            1.013157114098789
+          ],
+          "seed_medians": [
+            1.009290816115867,
+            1.013157114098789
+          ],
+          "first_random_ratios": [
+            1.0617597026491195,
+            1.0941308411456272
+          ]
+        },
+        "fresh-near-footprint": {
+          "candidate_us": 1106.9530625,
+          "peer": "research-candidate",
+          "peer_us": 1119.15525,
+          "median": 1.0059713868275066,
+          "wins": 6,
+          "ratios": [
+            1.00514322158588,
+            1.0162164523421346,
+            1.00079940496897,
+            1.0065007878630354,
+            1.0054419857919779,
+            1.02013955862363
+          ],
+          "seed_medians": [
+            1.00514322158588,
+            1.0065007878630354
+          ],
+          "first_random_ratios": [
+            1.004030578158069,
+            1.0138215553141934
+          ]
+        },
+        "outside-width": {
+          "candidate_us": 103.41098437650001,
+          "peer": "research-candidate",
+          "peer_us": 104.929312501,
+          "median": 1.013640198109273,
+          "wins": 5,
+          "ratios": [
+            0.9639747173428737,
+            1.0137987282035117,
+            1.0134816680150343,
+            1.0190544552182308,
+            1.0225675502922775,
+            1.0024539888227355
+          ],
+          "seed_medians": [
+            1.0134816680150343,
+            1.0190544552182308
+          ],
+          "first_random_ratios": [
+            1.0700142852748868,
+            1.0722888687725278
+          ]
+        }
+      }
+    },
+    "cmake-native-on_vs_cmake-native-default": {
+      "holdout_replay": {
+        "geometric_mean": 1.1283603764926364,
+        "minimum": 1.0432048125563722,
+        "faster_layouts": 5,
+        "seed_gms": [
+          1.1218701242102538,
+          1.130149111729155
+        ],
+        "paired_wins": 30
+      },
+      "layouts": {
+        "repeat-skinny-wide": {
+          "candidate_us": 265.62343750149995,
+          "peer": "cmake-native-default",
+          "peer_us": 322.18878125099997,
+          "median": 1.2214782241932725,
+          "wins": 6,
+          "ratios": [
+            1.2326080069415162,
+            1.2240530728064924,
+            1.2150784406853612,
+            1.2189033755800525,
+            1.2285993251983325,
+            1.1852856016725568
+          ],
+          "seed_medians": [
+            1.2240530728064924,
+            1.2189033755800525
+          ],
+          "first_random_ratios": [
+            1.386621345388182,
+            1.3542443051512103
+          ]
+        },
+        "repeat-wide": {
+          "candidate_us": 767.0273281255,
+          "peer": "cmake-native-default",
+          "peer_us": 783.7396406260001,
+          "median": 1.0191422840891224,
+          "wins": 6,
+          "ratios": [
+            1.0154800405176496,
+            1.0113067979597634,
+            1.0190516151054425,
+            1.0390587950733237,
+            1.0332990725684297,
+            1.0192329530728022
+          ],
+          "seed_medians": [
+            1.0154800405176496,
+            1.0332990725684297
+          ],
+          "first_random_ratios": [
+            1.0605565502626808,
+            1.1279462257421926
+          ]
+        },
+        "fresh-thin-tail": {
+          "candidate_us": 118.1833437515,
+          "peer": "cmake-native-default",
+          "peer_us": 163.77878125,
+          "median": 1.3755680746685406,
+          "wins": 6,
+          "ratios": [
+            1.3955061847040304,
+            1.3404346815200212,
+            1.3506306616432695,
+            1.395670556260029,
+            1.3879854548545754,
+            1.3631506944825058
+          ],
+          "seed_medians": [
+            1.3506306616432695,
+            1.3879854548545754
+          ],
+          "first_random_ratios": [
+            1.9361880190899265,
+            2.1864690063759977
+          ]
+        },
+        "fresh-wide-tail": {
+          "candidate_us": 475.85409375,
+          "peer": "cmake-native-default",
+          "peer_us": 548.196734375,
+          "median": 1.146663919061515,
+          "wins": 6,
+          "ratios": [
+            1.171366417647862,
+            1.1512998607598164,
+            1.1420279773632138,
+            1.159724900615248,
+            1.1397409168461006,
+            1.136494769482595
+          ],
+          "seed_medians": [
+            1.1512998607598164,
+            1.1397409168461006
+          ],
+          "first_random_ratios": [
+            1.0914869472449258,
+            1.1352437885406415
+          ]
+        },
+        "fresh-deeper": {
+          "candidate_us": 496.61975000050006,
+          "peer": "cmake-native-default",
+          "peer_us": 515.5610624995,
+          "median": 1.0432048125563722,
+          "wins": 6,
+          "ratios": [
+            1.043346555238709,
+            1.0345617592401783,
+            1.0286712964912623,
+            1.0519810004445096,
+            1.0468677242088746,
+            1.0430630698740353
+          ],
+          "seed_medians": [
+            1.0345617592401783,
+            1.0468677242088746
+          ],
+          "first_random_ratios": [
+            1.1415118304238774,
+            1.0759857667468182
+          ]
+        },
+        "fresh-compact-tile": {
+          "candidate_us": 641.6520781265,
+          "peer": "cmake-native-default",
+          "peer_us": 671.077796875,
+          "median": 1.0458048503581656,
+          "wins": 6,
+          "ratios": [
+            1.052135946916981,
+            1.035955206742761,
+            1.0387160008836922,
+            1.0564827442179947,
+            1.0479227803430942,
+            1.0436869203732368
+          ],
+          "seed_medians": [
+            1.0387160008836922,
+            1.0479227803430942
+          ],
+          "first_random_ratios": [
+            1.1888380655601476,
+            1.0797162815578685
+          ]
+        },
+        "fresh-near-footprint": {
+          "candidate_us": 1106.9530625,
+          "peer": "cmake-native-default",
+          "peer_us": 1175.853390625,
+          "median": 1.0629202149896293,
+          "wins": 6,
+          "ratios": [
+            1.0548562451356212,
+            1.0634929463101122,
+            1.0636051210476305,
+            1.069681689605061,
+            1.0623393693196492,
+            1.0623474836691467
+          ],
+          "seed_medians": [
+            1.0634929463101122,
+            1.0623474836691467
+          ],
+          "first_random_ratios": [
+            1.0574726661581417,
+            1.074780005283521
+          ]
+        },
+        "outside-width": {
+          "candidate_us": 103.41098437650001,
+          "peer": "cmake-native-default",
+          "peer_us": 106.1690625,
+          "median": 1.0124367198530497,
+          "wins": 4,
+          "ratios": [
+            0.9748796127566797,
+            1.0215646387013029,
+            1.0033088010047968,
+            0.9911781835819558,
+            1.0384083170766976,
+            1.0374471810113517
+          ],
+          "seed_medians": [
+            1.0033088010047968,
+            1.0374471810113517
+          ],
+          "first_random_ratios": [
+            1.0976264715913155,
+            1.3053407539735635
+          ]
+        }
+      }
+    },
+    "cmake-native-on_vs_research-incumbent": {
+      "holdout_replay": {
+        "geometric_mean": 1.1278456288727385,
+        "minimum": 1.0374290912787065,
+        "faster_layouts": 5,
+        "seed_gms": [
+          1.1275769828014808,
+          1.133495170200999
+        ],
+        "paired_wins": 30
+      },
+      "layouts": {
+        "repeat-skinny-wide": {
+          "candidate_us": 265.62343750149995,
+          "peer": "research-incumbent",
+          "peer_us": 323.94662500050003,
+          "median": 1.2187307598629054,
+          "wins": 6,
+          "ratios": [
+            1.221924436003352,
+            1.2155370837224584,
+            1.2040086848812772,
+            1.2223824450548069,
+            1.2270784511702868,
+            1.2086845865446674
+          ],
+          "seed_medians": [
+            1.2155370837224584,
+            1.2223824450548069
+          ],
+          "first_random_ratios": [
+            1.368281338173844,
+            1.4861297381325485
+          ]
+        },
+        "repeat-wide": {
+          "candidate_us": 767.0273281255,
+          "peer": "research-incumbent",
+          "peer_us": 781.7418906234999,
+          "median": 1.016618157651651,
+          "wins": 6,
+          "ratios": [
+            1.0255542676198015,
+            1.0092377089251119,
+            1.0127756343322127,
+            1.0223267878785405,
+            1.0204606809710894,
+            1.0114796491339797
+          ],
+          "seed_medians": [
+            1.0127756343322127,
+            1.0204606809710894
+          ],
+          "first_random_ratios": [
+            0.9843897231071571,
+            1.1825562206469822
+          ]
+        },
+        "fresh-thin-tail": {
+          "candidate_us": 118.1833437515,
+          "peer": "research-incumbent",
+          "peer_us": 162.337843749,
+          "median": 1.3627714507494848,
+          "wins": 6,
+          "ratios": [
+            1.3690327420833839,
+            1.3631071062622993,
+            1.3502998357789904,
+            1.3624357952366706,
+            1.3877987670615606,
+            1.3557504356508268
+          ],
+          "seed_medians": [
+            1.3631071062622993,
+            1.3624357952366706
+          ],
+          "first_random_ratios": [
+            1.9413624812735504,
+            1.9034651066212438
+          ]
+        },
+        "fresh-wide-tail": {
+          "candidate_us": 475.85409375,
+          "peer": "research-incumbent",
+          "peer_us": 552.3565624995,
+          "median": 1.1682110265037067,
+          "wins": 6,
+          "ratios": [
+            1.1688500233639185,
+            1.167572029643495,
+            1.1538990871293335,
+            1.193931009016133,
+            1.2232506116602957,
+            1.1496840266734678
+          ],
+          "seed_medians": [
+            1.167572029643495,
+            1.193931009016133
+          ],
+          "first_random_ratios": [
+            1.0255199084895565,
+            1.0704067337271574
+          ]
+        },
+        "fresh-deeper": {
+          "candidate_us": 496.61975000050006,
+          "peer": "research-incumbent",
+          "peer_us": 514.711625,
+          "median": 1.0374290912787065,
+          "wins": 6,
+          "ratios": [
+            1.0352742079992479,
+            1.0370846224006272,
+            1.016678581177539,
+            1.037773560156786,
+            1.0409594105975564,
+            1.0438666436028285
+          ],
+          "seed_medians": [
+            1.0352742079992479,
+            1.0409594105975564
+          ],
+          "first_random_ratios": [
+            1.123469954173112,
+            1.1272633594372956
+          ]
+        },
+        "fresh-compact-tile": {
+          "candidate_us": 641.6520781265,
+          "peer": "research-incumbent",
+          "peer_us": 670.1530156245,
+          "median": 1.0429373790246559,
+          "wins": 6,
+          "ratios": [
+            1.0453963436763114,
+            1.0421321641706385,
+            1.030976867667581,
+            1.060032680943173,
+            1.0424352827778944,
+            1.0434394752714176
+          ],
+          "seed_medians": [
+            1.0421321641706385,
+            1.0434394752714176
+          ],
+          "first_random_ratios": [
+            1.172836580280334,
+            1.1702412474836046
+          ]
+        },
+        "fresh-near-footprint": {
+          "candidate_us": 1106.9530625,
+          "peer": "research-incumbent",
+          "peer_us": 1173.681046875,
+          "median": 1.0594667233238777,
+          "wins": 6,
+          "ratios": [
+            1.0588406654407243,
+            1.062476749842665,
+            1.0615468141724484,
+            1.0599186359210238,
+            1.0590148107267319,
+            1.0539800864009148
+          ],
+          "seed_medians": [
+            1.0615468141724484,
+            1.0590148107267319
+          ],
+          "first_random_ratios": [
+            1.0793988295794896,
+            1.0965466901735137
+          ]
+        },
+        "outside-width": {
+          "candidate_us": 103.41098437650001,
+          "peer": "research-incumbent",
+          "peer_us": 106.6745625005,
+          "median": 1.004664402908924,
+          "wins": 3,
+          "ratios": [
+            0.976463383992502,
+            1.020727144515561,
+            0.9885338727322516,
+            0.9886016613022872,
+            1.0395801761975934,
+            1.053617416047145
+          ],
+          "seed_medians": [
+            0.9885338727322516,
+            1.0395801761975934
+          ],
+          "first_random_ratios": [
+            1.0328592227850846,
+            1.1180859512322276
+          ]
+        }
+      }
+    },
+    "make-att_vs_make-default": {
+      "holdout_replay": {
+        "geometric_mean": 1.3289270947218512,
+        "minimum": 1.2610316595158597,
+        "faster_layouts": 5,
+        "seed_gms": [
+          1.330352803426142,
+          1.3267784722001599
+        ],
+        "paired_wins": 30
+      },
+      "layouts": {
+        "repeat-skinny-wide": {
+          "candidate_us": 269.37514062549997,
+          "peer": "make-default",
+          "peer_us": 382.388437499,
+          "median": 1.4208139215555597,
+          "wins": 6,
+          "ratios": [
+            1.4190321035474076,
+            1.4585799942700033,
+            1.3989380006172423,
+            1.4159981966110624,
+            1.4229532952195285,
+            1.4225957395637117
+          ],
+          "seed_medians": [
+            1.4190321035474076,
+            1.4225957395637117
+          ],
+          "first_random_ratios": [
+            1.6570264552305125,
+            1.9205291778572848
+          ]
+        },
+        "repeat-wide": {
+          "candidate_us": 769.5647812495,
+          "peer": "make-default",
+          "peer_us": 906.7637656254999,
+          "median": 1.1720466785409596,
+          "wins": 6,
+          "ratios": [
+            1.1872338108787637,
+            1.174287909271113,
+            1.1698054478108062,
+            1.1797492638329374,
+            1.1697185814297664,
+            1.162907993981889
+          ],
+          "seed_medians": [
+            1.174287909271113,
+            1.1697185814297664
+          ],
+          "first_random_ratios": [
+            1.2678590314725722,
+            1.1829708112133204
+          ]
+        },
+        "fresh-thin-tail": {
+          "candidate_us": 119.4254375,
+          "peer": "make-default",
+          "peer_us": 182.6587343745,
+          "median": 1.525598176027895,
+          "wins": 6,
+          "ratios": [
+            1.5474926146424857,
+            1.5272852709434914,
+            1.495120068973359,
+            1.5269222376131886,
+            1.5216253158778208,
+            1.5242741144426013
+          ],
+          "seed_medians": [
+            1.5272852709434914,
+            1.5242741144426013
+          ],
+          "first_random_ratios": [
+            1.8681243753326433,
+            1.861830773657553
+          ]
+        },
+        "fresh-wide-tail": {
+          "candidate_us": 482.6837812515,
+          "peer": "make-default",
+          "peer_us": 620.631265624,
+          "median": 1.280688208590925,
+          "wins": 6,
+          "ratios": [
+            1.2974038244426847,
+            1.2793093605433707,
+            1.282067056638479,
+            1.3072334495128022,
+            1.2678412194991842,
+            1.2745094280908704
+          ],
+          "seed_medians": [
+            1.282067056638479,
+            1.2745094280908704
+          ],
+          "first_random_ratios": [
+            1.152006854301693,
+            1.082868997052529
+          ]
+        },
+        "fresh-deeper": {
+          "candidate_us": 500.81232812549996,
+          "peer": "make-default",
+          "peer_us": 659.8181406240001,
+          "median": 1.3188915350460584,
+          "wins": 6,
+          "ratios": [
+            1.3223899068285379,
+            1.3199741948474062,
+            1.3122333085060311,
+            1.310860065537451,
+            1.3178088752447108,
+            1.3208689421833264
+          ],
+          "seed_medians": [
+            1.3199741948474062,
+            1.3178088752447108
+          ],
+          "first_random_ratios": [
+            1.4094484328466834,
+            1.4027744617750157
+          ]
+        },
+        "fresh-compact-tile": {
+          "candidate_us": 644.1833437485,
+          "peer": "make-default",
+          "peer_us": 823.2831718760001,
+          "median": 1.2755196035651952,
+          "wins": 6,
+          "ratios": [
+            1.282010830183244,
+            1.2750495955422243,
+            1.2171198649845656,
+            1.288891883396861,
+            1.2734023503660044,
+            1.275989611588166
+          ],
+          "seed_medians": [
+            1.2750495955422243,
+            1.275989611588166
+          ],
+          "first_random_ratios": [
+            1.5015033879677957,
+            1.3071012899884762
+          ]
+        },
+        "fresh-near-footprint": {
+          "candidate_us": 1121.853625,
+          "peer": "make-default",
+          "peer_us": 1415.266234375,
+          "median": 1.2610316595158597,
+          "wins": 6,
+          "ratios": [
+            1.261409266224751,
+            1.2644763836133732,
+            1.2728436792623472,
+            1.2525758709226935,
+            1.2585961166514854,
+            1.2606540528069683
+          ],
+          "seed_medians": [
+            1.2644763836133732,
+            1.2585961166514854
+          ],
+          "first_random_ratios": [
+            1.1530697118014883,
+            1.3023023919413323
+          ]
+        },
+        "outside-width": {
+          "candidate_us": 114.569468751,
+          "peer": "make-default",
+          "peer_us": 113.1281875,
+          "median": 0.9835449692899936,
+          "wins": 1,
+          "ratios": [
+            0.9803068031493132,
+            0.9795707068410698,
+            0.9586476831179253,
+            0.9986927094065341,
+            0.986783135430674,
+            1.0112026339671771
+          ],
+          "seed_medians": [
+            0.9795707068410698,
+            0.9986927094065341
+          ],
+          "first_random_ratios": [
+            1.0343751589708579,
+            1.007701940652654
+          ]
+        }
+      }
+    },
+    "cmake-intel_vs_cmake-att": {
+      "holdout_replay": {
+        "geometric_mean": 1.0013072158077663,
+        "minimum": 0.9968604216005668,
+        "faster_layouts": 3,
+        "seed_gms": [
+          1.0013511359749812,
+          1.0018327269976073
+        ],
+        "paired_wins": 18
+      },
+      "layouts": {
+        "repeat-skinny-wide": {
+          "candidate_us": 271.8598749995,
+          "peer": "cmake-att",
+          "peer_us": 277.6403437505,
+          "median": 1.0264153422379376,
+          "wins": 4,
+          "ratios": [
+            1.054186800353039,
+            1.049002374080015,
+            1.0600593703018504,
+            0.9898546390097988,
+            0.9742930191677824,
+            1.00382831039586
+          ],
+          "seed_medians": [
+            1.054186800353039,
+            0.9898546390097988
+          ],
+          "first_random_ratios": [
+            1.1106271316091285,
+            0.9645270810461316
+          ]
+        },
+        "repeat-wide": {
+          "candidate_us": 774.5283593739999,
+          "peer": "cmake-att",
+          "peer_us": 770.2620781255,
+          "median": 1.0035191640969727,
+          "wins": 4,
+          "ratios": [
+            1.0067182984698246,
+            0.9965978374167934,
+            1.0127657375163663,
+            0.9868174171628076,
+            1.0013671025164725,
+            1.005671225677473
+          ],
+          "seed_medians": [
+            1.0067182984698246,
+            1.0013671025164725
+          ],
+          "first_random_ratios": [
+            1.040033426354614,
+            0.8970509793062174
+          ]
+        },
+        "fresh-thin-tail": {
+          "candidate_us": 119.1933593765,
+          "peer": "cmake-att",
+          "peer_us": 119.783140626,
+          "median": 1.00494920050727,
+          "wins": 4,
+          "ratios": [
+            0.9977937880609091,
+            1.0052625070538599,
+            1.0058080700341092,
+            0.9992065050667331,
+            1.006339203352832,
+            1.00463589396068
+          ],
+          "seed_medians": [
+            1.0052625070538599,
+            1.00463589396068
+          ],
+          "first_random_ratios": [
+            0.9524521024547336,
+            0.9292936695460478
+          ]
+        },
+        "fresh-wide-tail": {
+          "candidate_us": 481.91454687449993,
+          "peer": "cmake-att",
+          "peer_us": 481.62864062449995,
+          "median": 1.0040919536333612,
+          "wins": 5,
+          "ratios": [
+            1.0091731033263678,
+            1.0035993642763035,
+            1.0037859662489756,
+            0.9952363536746052,
+            1.0122671903862295,
+            1.0043979410177468
+          ],
+          "seed_medians": [
+            1.0037859662489756,
+            1.0043979410177468
+          ],
+          "first_random_ratios": [
+            1.1321092380010154,
+            1.0662451558444508
+          ]
+        },
+        "fresh-deeper": {
+          "candidate_us": 500.4756093745,
+          "peer": "cmake-att",
+          "peer_us": 500.3032187485,
+          "median": 0.9968604216005668,
+          "wins": 2,
+          "ratios": [
+            1.007590810765103,
+            0.9996943066186068,
+            0.9707471703630839,
+            0.9938890739084104,
+            0.9940265365825268,
+            1.0087150454219214
+          ],
+          "seed_medians": [
+            0.9996943066186068,
+            0.9940265365825268
+          ],
+          "first_random_ratios": [
+            0.96007225794436,
+            1.0107067033701844
+          ]
+        },
+        "fresh-compact-tile": {
+          "candidate_us": 643.4881718745,
+          "peer": "cmake-att",
+          "peer_us": 646.8373593745,
+          "median": 1.0032742481865644,
+          "wins": 4,
+          "ratios": [
+            1.0090500667893518,
+            0.9913890059150674,
+            1.004368514051049,
+            1.0021799823220798,
+            1.014364187109163,
+            0.9969474041058279
+          ],
+          "seed_medians": [
+            1.004368514051049,
+            1.0021799823220798
+          ],
+          "first_random_ratios": [
+            0.979232152690867,
+            0.9699363893087203
+          ]
+        },
+        "fresh-near-footprint": {
+          "candidate_us": 1120.7748593750002,
+          "peer": "cmake-att",
+          "peer_us": 1120.5057656249999,
+          "median": 0.9973902419533471,
+          "wins": 3,
+          "ratios": [
+            1.0010901593580406,
+            0.9936903245486538,
+            0.9923873813287789,
+            1.0039633681393416,
+            0.9784581473411579,
+            1.0097878994494878
+          ],
+          "seed_medians": [
+            0.9936903245486538,
+            1.0039633681393416
+          ],
+          "first_random_ratios": [
+            1.1090621638771647,
+            0.8814113980673262
+          ]
+        },
+        "outside-width": {
+          "candidate_us": 113.05418749949999,
+          "peer": "cmake-att",
+          "peer_us": 113.51198437400001,
+          "median": 1.0074690375920863,
+          "wins": 4,
+          "ratios": [
+            1.0036654553587807,
+            1.0413383670687444,
+            1.0112726198253916,
+            1.0368675333913904,
+            0.9985160659514993,
+            0.9812688786939721
+          ],
+          "seed_medians": [
+            1.0112726198253916,
+            0.9985160659514993
+          ],
+          "first_random_ratios": [
+            1.1685908014164048,
+            1.0603545938320513
+          ]
+        }
+      }
+    },
+    "make-intel_vs_make-att": {
+      "holdout_replay": {
+        "geometric_mean": 1.0010283245753722,
+        "minimum": 0.9978204581747344,
+        "faster_layouts": 2,
+        "seed_gms": [
+          1.0009748659323061,
+          1.0038796083335328
+        ],
+        "paired_wins": 16
+      },
+      "layouts": {
+        "repeat-skinny-wide": {
+          "candidate_us": 270.3607812485,
+          "peer": "make-att",
+          "peer_us": 269.37514062549997,
+          "median": 0.9947289561169258,
+          "wins": 1,
+          "ratios": [
+            0.9959597980046053,
+            1.01368169458691,
+            0.9862869603813598,
+            0.994496101103284,
+            0.9870499289734129,
+            0.9949618111305676
+          ],
+          "seed_medians": [
+            0.9959597980046053,
+            0.994496101103284
+          ],
+          "first_random_ratios": [
+            1.0277608613914142,
+            0.7303012484236502
+          ]
+        },
+        "repeat-wide": {
+          "candidate_us": 770.8705000000001,
+          "peer": "make-att",
+          "peer_us": 769.5647812495,
+          "median": 0.9992164924623583,
+          "wins": 2,
+          "ratios": [
+            0.9934905333331215,
+            0.9990151530577767,
+            1.0021246163853517,
+            0.9859360153690317,
+            1.0147580553323536,
+            0.9994178318669401
+          ],
+          "seed_medians": [
+            0.9990151530577767,
+            0.9994178318669401
+          ],
+          "first_random_ratios": [
+            1.0169581960767762,
+            1.0539303159569755
+          ]
+        },
+        "fresh-thin-tail": {
+          "candidate_us": 118.41748437449999,
+          "peer": "make-att",
+          "peer_us": 119.4254375,
+          "median": 1.0009793518351593,
+          "wins": 4,
+          "ratios": [
+            0.9971845488337899,
+            1.001459768587719,
+            0.9983817385097296,
+            1.0172389051813724,
+            1.0154511736336829,
+            1.0004989350825997
+          ],
+          "seed_medians": [
+            0.9983817385097296,
+            1.0154511736336829
+          ],
+          "first_random_ratios": [
+            0.9966943781684366,
+            1.0637370017160959
+          ]
+        },
+        "fresh-wide-tail": {
+          "candidate_us": 483.7082968745,
+          "peer": "make-att",
+          "peer_us": 482.6837812515,
+          "median": 0.9985169963271037,
+          "wins": 3,
+          "ratios": [
+            1.0135288656770594,
+            1.0010350822214111,
+            0.9935875161850167,
+            0.9959989104327963,
+            1.014118902484347,
+            0.9862017745017594
+          ],
+          "seed_medians": [
+            1.0010350822214111,
+            0.9959989104327963
+          ],
+          "first_random_ratios": [
+            1.2650948610192145,
+            1.4113190304186407
+          ]
+        },
+        "fresh-deeper": {
+          "candidate_us": 498.54778125,
+          "peer": "make-att",
+          "peer_us": 500.81232812549996,
+          "median": 1.0081267063679493,
+          "wins": 4,
+          "ratios": [
+            1.0103305856566025,
+            0.9976428315070516,
+            1.0094045042158055,
+            1.0076325894826015,
+            1.008620823253297,
+            0.9956006707219046
+          ],
+          "seed_medians": [
+            1.0094045042158055,
+            1.0076325894826015
+          ],
+          "first_random_ratios": [
+            0.9968231093733196,
+            0.9709666151581718
+          ]
+        },
+        "fresh-compact-tile": {
+          "candidate_us": 646.6129062495,
+          "peer": "make-att",
+          "peer_us": 644.1833437485,
+          "median": 0.9997323066957668,
+          "wins": 3,
+          "ratios": [
+            1.0029187096727405,
+            0.9871556225327806,
+            1.0364915789925913,
+            0.9877521276012654,
+            1.0052167773049487,
+            0.996545903718793
+          ],
+          "seed_medians": [
+            1.0029187096727405,
+            0.996545903718793
+          ],
+          "first_random_ratios": [
+            0.880601410076386,
+            1.046876687229594
+          ]
+        },
+        "fresh-near-footprint": {
+          "candidate_us": 1121.713625,
+          "peer": "make-att",
+          "peer_us": 1121.853625,
+          "median": 0.9978204581747344,
+          "wins": 2,
+          "ratios": [
+            0.9967062972928364,
+            0.9932051550651368,
+            0.9923253351117219,
+            1.0119542987524983,
+            1.0039006605245586,
+            0.9989346190566324
+          ],
+          "seed_medians": [
+            0.9932051550651368,
+            1.0039006605245586
+          ],
+          "first_random_ratios": [
+            1.0714294728149478,
+            1.0031323469761717
+          ]
+        },
+        "outside-width": {
+          "candidate_us": 113.9596406255,
+          "peer": "make-att",
+          "peer_us": 114.569468751,
+          "median": 1.0257116439734701,
+          "wins": 4,
+          "ratios": [
+            1.0304995309379021,
+            1.0274380489925237,
+            1.0264199707400714,
+            0.9770026678851205,
+            1.0250033172068689,
+            0.9662007655443059
+          ],
+          "seed_medians": [
+            1.0274380489925237,
+            0.9770026678851205
+          ],
+          "first_random_ratios": [
+            1.012352295524076,
+            1.003535084995878
+          ]
+        }
+      }
+    },
+    "research-candidate_vs_research-incumbent": {
+      "holdout_replay": {
+        "geometric_mean": 1.1182634716902053,
+        "minimum": 1.0176358826055312,
+        "faster_layouts": 5,
+        "seed_gms": [
+          1.1182241729885456,
+          1.1209106041144004
+        ],
+        "paired_wins": 30
+      },
+      "layouts": {
+        "repeat-skinny-wide": {
+          "candidate_us": 272.9458281255,
+          "peer": "research-incumbent",
+          "peer_us": 323.94662500050003,
+          "median": 1.1996720365183458,
+          "wins": 6,
+          "ratios": [
+            1.199768004917419,
+            1.208504422762448,
+            1.156812203364507,
+            1.1997000989683793,
+            1.1947742307218734,
+            1.1996439740683122
+          ],
+          "seed_medians": [
+            1.199768004917419,
+            1.1996439740683122
+          ],
+          "first_random_ratios": [
+            1.2082908368398289,
+            1.8586449909926726
+          ]
+        },
+        "repeat-wide": {
+          "candidate_us": 767.6364062499999,
+          "peer": "research-incumbent",
+          "peer_us": 781.7418906234999,
+          "median": 1.0170619775930496,
+          "wins": 5,
+          "ratios": [
+            1.0260922268331973,
+            1.0166526665633353,
+            1.0063713256995546,
+            1.0218543449144448,
+            0.9881565776689042,
+            1.0174712886227637
+          ],
+          "seed_medians": [
+            1.0166526665633353,
+            1.0174712886227637
+          ],
+          "first_random_ratios": [
+            0.944991942190068,
+            1.2742294528720437
+          ]
+        },
+        "fresh-thin-tail": {
+          "candidate_us": 120.609828125,
+          "peer": "research-incumbent",
+          "peer_us": 162.337843749,
+          "median": 1.3496025724578358,
+          "wins": 6,
+          "ratios": [
+            1.3497043100854647,
+            1.3578450304579095,
+            1.3250889600979399,
+            1.3673664361222666,
+            1.3093454139781704,
+            1.3495008348302067
+          ],
+          "seed_medians": [
+            1.3497043100854647,
+            1.3495008348302067
+          ],
+          "first_random_ratios": [
+            1.7261774937389243,
+            1.903303743664954
+          ]
+        },
+        "fresh-wide-tail": {
+          "candidate_us": 476.149156251,
+          "peer": "research-incumbent",
+          "peer_us": 552.3565624995,
+          "median": 1.172389281385439,
+          "wins": 6,
+          "ratios": [
+            1.172673905938682,
+            1.1721046568321962,
+            1.158927297224426,
+            1.1862582725266726,
+            1.233695636560414,
+            1.1555700789442396
+          ],
+          "seed_medians": [
+            1.1721046568321962,
+            1.1862582725266726
+          ],
+          "first_random_ratios": [
+            0.9898819670169517,
+            1.0596359993870006
+          ]
+        },
+        "fresh-deeper": {
+          "candidate_us": 505.3215624995001,
+          "peer": "research-incumbent",
+          "peer_us": 514.711625,
+          "median": 1.0176358826055312,
+          "wins": 6,
+          "ratios": [
+            1.014468964909068,
+            1.0272348484992693,
+            1.0160854036595868,
+            1.0191863615514758,
+            1.0073381370259475,
+            1.0204073550922017
+          ],
+          "seed_medians": [
+            1.0160854036595868,
+            1.0191863615514758
+          ],
+          "first_random_ratios": [
+            1.0612370986321382,
+            1.097919051673573
+          ]
+        },
+        "fresh-compact-tile": {
+          "candidate_us": 649.354453124,
+          "peer": "research-incumbent",
+          "peer_us": 670.1530156245,
+          "median": 1.0312140703294062,
+          "wins": 6,
+          "ratios": [
+            1.0341743338663336,
+            1.032539033874456,
+            1.0282628622101384,
+            1.0287499757373042,
+            1.0348938368955876,
+            1.029889106784356
+          ],
+          "seed_medians": [
+            1.032539033874456,
+            1.029889106784356
+          ],
+          "first_random_ratios": [
+            1.1046158347826487,
+            1.0695624357488038
+          ]
+        },
+        "fresh-near-footprint": {
+          "candidate_us": 1119.15525,
+          "peer": "research-incumbent",
+          "peer_us": 1173.681046875,
+          "median": 1.0531778465980777,
+          "wins": 6,
+          "ratios": [
+            1.0534226791781198,
+            1.0455220906864,
+            1.0606988862122295,
+            1.053072832830467,
+            1.053282860365688,
+            1.033172449290117
+          ],
+          "seed_medians": [
+            1.0534226791781198,
+            1.053072832830467
+          ],
+          "first_random_ratios": [
+            1.0750656932776754,
+            1.0815973328103907
+          ]
+        },
+        "outside-width": {
+          "candidate_us": 104.929312501,
+          "peer": "research-incumbent",
+          "peer_us": 106.6745625005,
+          "median": 1.0098947511988574,
+          "wins": 4,
+          "ratios": [
+            1.0129553881703997,
+            1.006834114227315,
+            0.9753840685331345,
+            0.9701166176547237,
+            1.0166371658287545,
+            1.051038180100909
+          ],
+          "seed_medians": [
+            1.006834114227315,
+            1.0166371658287545
+          ],
+          "first_random_ratios": [
+            0.9652761061220253,
+            1.0427096501636959
+          ]
+        }
+      }
+    }
+  },
+  "leaders": {
+    "cmake-att": {
+      "repeat-skinny-wide": {
+        "best_direct": {
+          "candidate_us": 277.6403437505,
+          "peer": "mkl-jit",
+          "peer_us": 237.683078126,
+          "median": 0.8566292048090178,
+          "wins": 0,
+          "ratios": [
+            0.8345827452550947,
+            0.8040513280486787,
+            0.8175132615773044,
+            0.8786756643629411,
+            0.8941308547131374,
+            0.8897250281482543
+          ],
+          "seed_medians": [
+            0.8175132615773044,
+            0.8897250281482543
+          ],
+          "first_random_ratios": [
+            4.06816628059079,
+            4.708221797278967
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 277.6403437505,
+            "peer": "openblas",
+            "peer_us": 321.114234376,
+            "median": 1.1525354315672427,
+            "wins": 6,
+            "ratios": [
+              1.1273779901630752,
+              1.1030256907151494,
+              1.132019639160664,
+              1.182827200209572,
+              1.2379910112900299,
+              1.1730512239738211
+            ],
+            "seed_medians": [
+              1.1273779901630752,
+              1.182827200209572
+            ],
+            "first_random_ratios": [
+              1.6689944469495193,
+              1.866719862838161
+            ]
+          },
+          "mkl": {
+            "candidate_us": 277.6403437505,
+            "peer": "mkl",
+            "peer_us": 242.19435937500003,
+            "median": 0.8797552831084499,
+            "wins": 0,
+            "ratios": [
+              0.8450009996644744,
+              0.8080831320034578,
+              0.8569554496025765,
+              0.9025551166143231,
+              0.9047306367245963,
+              0.9206423435487777
+            ],
+            "seed_medians": [
+              0.8450009996644744,
+              0.9047306367245963
+            ],
+            "first_random_ratios": [
+              3.7857052898238477,
+              4.217389079169172
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 277.6403437505,
+            "peer": "mkl-jit",
+            "peer_us": 237.683078126,
+            "median": 0.8566292048090178,
+            "wins": 0,
+            "ratios": [
+              0.8345827452550947,
+              0.8040513280486787,
+              0.8175132615773044,
+              0.8786756643629411,
+              0.8941308547131374,
+              0.8897250281482543
+            ],
+            "seed_medians": [
+              0.8175132615773044,
+              0.8897250281482543
+            ],
+            "first_random_ratios": [
+              4.06816628059079,
+              4.708221797278967
+            ]
+          },
+          "aocl": {
+            "candidate_us": 277.6403437505,
+            "peer": "aocl",
+            "peer_us": 312.832546877,
+            "median": 1.129725521878659,
+            "wins": 6,
+            "ratios": [
+              1.0870629285303377,
+              1.0632532977010092,
+              1.0544510774993996,
+              1.1973260646265753,
+              1.1845768696916525,
+              1.1723881152269804
+            ],
+            "seed_medians": [
+              1.0632532977010092,
+              1.1845768696916525
+            ],
+            "first_random_ratios": [
+              1.3467742901583442,
+              1.3409132654415157
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      },
+      "repeat-wide": {
+        "best_direct": {
+          "candidate_us": 770.2620781255,
+          "peer": "mkl-jit",
+          "peer_us": 681.4277812490001,
+          "median": 0.879292141805194,
+          "wins": 0,
+          "ratios": [
+            0.8830892410651827,
+            0.8934446146285906,
+            0.8754950425452053,
+            0.895717505614018,
+            0.8687650556491537,
+            0.8732863975630681
+          ],
+          "seed_medians": [
+            0.8830892410651827,
+            0.8732863975630681
+          ],
+          "first_random_ratios": [
+            1.7745894553208845,
+            2.2683060115542695
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 770.2620781255,
+            "peer": "openblas",
+            "peer_us": 789.719453126,
+            "median": 1.0203598111216372,
+            "wins": 6,
+            "ratios": [
+              1.0260404594712682,
+              1.0107547725962145,
+              1.0171939978687543,
+              1.0414936535758417,
+              1.02352562437452,
+              1.0116682386108742
+            ],
+            "seed_medians": [
+              1.0171939978687543,
+              1.02352562437452
+            ],
+            "first_random_ratios": [
+              1.1081604464973687,
+              1.1378366603947652
+            ]
+          },
+          "mkl": {
+            "candidate_us": 770.2620781255,
+            "peer": "mkl",
+            "peer_us": 685.7806718764999,
+            "median": 0.8872052941579719,
+            "wins": 0,
+            "ratios": [
+              0.890231564382118,
+              0.886942747703577,
+              0.8874678406123668,
+              0.8960565091118685,
+              0.8836792615118205,
+              0.8771218802394422
+            ],
+            "seed_medians": [
+              0.8874678406123668,
+              0.8836792615118205
+            ],
+            "first_random_ratios": [
+              1.8301017284151744,
+              1.949593448493797
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 770.2620781255,
+            "peer": "mkl-jit",
+            "peer_us": 681.4277812490001,
+            "median": 0.879292141805194,
+            "wins": 0,
+            "ratios": [
+              0.8830892410651827,
+              0.8934446146285906,
+              0.8754950425452053,
+              0.895717505614018,
+              0.8687650556491537,
+              0.8732863975630681
+            ],
+            "seed_medians": [
+              0.8830892410651827,
+              0.8732863975630681
+            ],
+            "first_random_ratios": [
+              1.7745894553208845,
+              2.2683060115542695
+            ]
+          },
+          "aocl": {
+            "candidate_us": 770.2620781255,
+            "peer": "aocl",
+            "peer_us": 702.616171875,
+            "median": 0.913226146156521,
+            "wins": 0,
+            "ratios": [
+              0.9120719221506913,
+              0.9173658831463218,
+              0.8879916495138522,
+              0.9240100215985161,
+              0.8939117554609344,
+              0.9143803701623505
+            ],
+            "seed_medians": [
+              0.9120719221506913,
+              0.9143803701623505
+            ],
+            "first_random_ratios": [
+              0.973332139963575,
+              1.0532945725419638
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      },
+      "fresh-thin-tail": {
+        "best_direct": {
+          "candidate_us": 119.783140626,
+          "peer": "mkl-jit",
+          "peer_us": 109.06259374899999,
+          "median": 0.8973380884358871,
+          "wins": 0,
+          "ratios": [
+            0.9420020405644643,
+            0.897271079861769,
+            0.918697286568193,
+            0.889872641444574,
+            0.8947471200430299,
+            0.8974050970100053
+          ],
+          "seed_medians": [
+            0.918697286568193,
+            0.8947471200430299
+          ],
+          "first_random_ratios": [
+            8.928595223233486,
+            8.994904386593062
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 119.783140626,
+            "peer": "openblas",
+            "peer_us": 157.89506249849998,
+            "median": 1.3105463257940289,
+            "wins": 6,
+            "ratios": [
+              1.3444858663140118,
+              1.278388956172079,
+              1.3400080233937601,
+              1.2805715372753037,
+              1.3096234150139545,
+              1.3114692365741032
+            ],
+            "seed_medians": [
+              1.3400080233937601,
+              1.3096234150139545
+            ],
+            "first_random_ratios": [
+              2.208119888532971,
+              1.9687499982925032
+            ]
+          },
+          "mkl": {
+            "candidate_us": 119.783140626,
+            "peer": "mkl",
+            "peer_us": 109.6228906265,
+            "median": 0.9138264469110396,
+            "wins": 0,
+            "ratios": [
+              0.9396725894978916,
+              0.9093246741826169,
+              0.9183282196394624,
+              0.9219151695177418,
+              0.9031457247709447,
+              0.9057865652504492
+            ],
+            "seed_medians": [
+              0.9183282196394624,
+              0.9057865652504492
+            ],
+            "first_random_ratios": [
+              7.8175697209867865,
+              8.641173298349761
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 119.783140626,
+            "peer": "mkl-jit",
+            "peer_us": 109.06259374899999,
+            "median": 0.8973380884358871,
+            "wins": 0,
+            "ratios": [
+              0.9420020405644643,
+              0.897271079861769,
+              0.918697286568193,
+              0.889872641444574,
+              0.8947471200430299,
+              0.8974050970100053
+            ],
+            "seed_medians": [
+              0.918697286568193,
+              0.8947471200430299
+            ],
+            "first_random_ratios": [
+              8.928595223233486,
+              8.994904386593062
+            ]
+          },
+          "aocl": {
+            "candidate_us": 119.783140626,
+            "peer": "aocl",
+            "peer_us": 138.78421875000004,
+            "median": 1.1666750352101067,
+            "wins": 6,
+            "ratios": [
+              1.1948283419173784,
+              1.1852385279429822,
+              1.1816878590393467,
+              1.118760021408741,
+              1.0969253787711313,
+              1.1516622113808668
+            ],
+            "seed_medians": [
+              1.1852385279429822,
+              1.118760021408741
+            ],
+            "first_random_ratios": [
+              1.2835783587226106,
+              1.2728054732157719
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      },
+      "fresh-wide-tail": {
+        "best_direct": {
+          "candidate_us": 481.62864062449995,
+          "peer": "mkl-jit",
+          "peer_us": 402.290328125,
+          "median": 0.8291225328959956,
+          "wins": 0,
+          "ratios": [
+            0.8358121278838513,
+            0.8164245258109353,
+            0.855302909932964,
+            0.8272005265114086,
+            0.8310445392805825,
+            0.8257160330567119
+          ],
+          "seed_medians": [
+            0.8358121278838513,
+            0.8272005265114086
+          ],
+          "first_random_ratios": [
+            2.5145020549434927,
+            2.878096053263849
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 481.62864062449995,
+            "peer": "openblas",
+            "peer_us": 555.8330468745,
+            "median": 1.154947976962485,
+            "wins": 6,
+            "ratios": [
+              1.155015586841109,
+              1.1696202441483021,
+              1.1800404539731355,
+              1.1548803670838614,
+              1.1265414963828386,
+              1.150142015440123
+            ],
+            "seed_medians": [
+              1.1696202441483021,
+              1.150142015440123
+            ],
+            "first_random_ratios": [
+              1.379313942440012,
+              1.567198020997302
+            ]
+          },
+          "mkl": {
+            "candidate_us": 481.62864062449995,
+            "peer": "mkl",
+            "peer_us": 403.1409999995,
+            "median": 0.8322119018663817,
+            "wins": 0,
+            "ratios": [
+              0.8376049134168515,
+              0.8252450588976704,
+              0.8562519137013381,
+              0.831562830239258,
+              0.8297602665466399,
+              0.8328609734935054
+            ],
+            "seed_medians": [
+              0.8376049134168515,
+              0.831562830239258
+            ],
+            "first_random_ratios": [
+              2.5680082198645966,
+              2.8572709352596526
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 481.62864062449995,
+            "peer": "mkl-jit",
+            "peer_us": 402.290328125,
+            "median": 0.8291225328959956,
+            "wins": 0,
+            "ratios": [
+              0.8358121278838513,
+              0.8164245258109353,
+              0.855302909932964,
+              0.8272005265114086,
+              0.8310445392805825,
+              0.8257160330567119
+            ],
+            "seed_medians": [
+              0.8358121278838513,
+              0.8272005265114086
+            ],
+            "first_random_ratios": [
+              2.5145020549434927,
+              2.878096053263849
+            ]
+          },
+          "aocl": {
+            "candidate_us": 481.62864062449995,
+            "peer": "aocl",
+            "peer_us": 584.6153906254999,
+            "median": 1.2079292391908711,
+            "wins": 6,
+            "ratios": [
+              1.2196630028666886,
+              1.2125181601638293,
+              1.2395828175190013,
+              1.1944729033531059,
+              1.2033403182179132,
+              1.1866946792079522
+            ],
+            "seed_medians": [
+              1.2196630028666886,
+              1.1944729033531059
+            ],
+            "first_random_ratios": [
+              1.1570139107292614,
+              1.3320746998020556
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      },
+      "fresh-deeper": {
+        "best_direct": {
+          "candidate_us": 500.3032187485,
+          "peer": "mkl-jit",
+          "peer_us": 441.64740624999996,
+          "median": 0.8814844705809401,
+          "wins": 0,
+          "ratios": [
+            0.875657644497249,
+            0.8849551863657428,
+            0.8805060215239797,
+            0.8824629196379005,
+            0.887910125072108,
+            0.8795602706710187
+          ],
+          "seed_medians": [
+            0.8805060215239797,
+            0.8824629196379005
+          ],
+          "first_random_ratios": [
+            2.749233609732648,
+            2.8292655164680505
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 500.3032187485,
+            "peer": "openblas",
+            "peer_us": 560.070609376,
+            "median": 1.1179941451686246,
+            "wins": 6,
+            "ratios": [
+              1.1045774821110226,
+              1.1220512066983748,
+              1.1133268552858717,
+              1.1215218860670866,
+              1.135213554907197,
+              1.1144664042701624
+            ],
+            "seed_medians": [
+              1.1133268552858717,
+              1.1215218860670866
+            ],
+            "first_random_ratios": [
+              1.4215562040291851,
+              1.4979061149228583
+            ]
+          },
+          "mkl": {
+            "candidate_us": 500.3032187485,
+            "peer": "mkl",
+            "peer_us": 452.1434687505,
+            "median": 0.9008558363682855,
+            "wins": 0,
+            "ratios": [
+              0.8956011079279156,
+              0.8889469021582359,
+              0.9061105648086554,
+              0.8831956054849983,
+              0.9197374581435712,
+              0.9639187143975616
+            ],
+            "seed_medians": [
+              0.8956011079279156,
+              0.9197374581435712
+            ],
+            "first_random_ratios": [
+              2.7627790362542566,
+              2.7209944195238163
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 500.3032187485,
+            "peer": "mkl-jit",
+            "peer_us": 441.64740624999996,
+            "median": 0.8814844705809401,
+            "wins": 0,
+            "ratios": [
+              0.875657644497249,
+              0.8849551863657428,
+              0.8805060215239797,
+              0.8824629196379005,
+              0.887910125072108,
+              0.8795602706710187
+            ],
+            "seed_medians": [
+              0.8805060215239797,
+              0.8824629196379005
+            ],
+            "first_random_ratios": [
+              2.749233609732648,
+              2.8292655164680505
+            ]
+          },
+          "aocl": {
+            "candidate_us": 500.3032187485,
+            "peer": "aocl",
+            "peer_us": 572.1605000005,
+            "median": 1.1407449293606584,
+            "wins": 6,
+            "ratios": [
+              1.13318169497487,
+              1.143032961792064,
+              1.1226354997683128,
+              1.1530437802255395,
+              1.1539560092144945,
+              1.1384568969292528
+            ],
+            "seed_medians": [
+              1.13318169497487,
+              1.1530437802255395
+            ],
+            "first_random_ratios": [
+              1.3327653404255482,
+              1.14293987464593
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      },
+      "fresh-compact-tile": {
+        "best_direct": {
+          "candidate_us": 646.8373593745,
+          "peer": "mkl-jit",
+          "peer_us": 661.0199843739999,
+          "median": 1.0220010494678053,
+          "wins": 6,
+          "ratios": [
+            1.0233484990391246,
+            1.0264039713737687,
+            1.0137534458645534,
+            1.0219930281325664,
+            1.0220090708030443,
+            1.0044591356871306
+          ],
+          "seed_medians": [
+            1.0233484990391246,
+            1.0219930281325664
+          ],
+          "first_random_ratios": [
+            2.558683477576737,
+            2.5872384332557967
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 646.8373593745,
+            "peer": "openblas",
+            "peer_us": 685.0122343740001,
+            "median": 1.0593201414220252,
+            "wins": 6,
+            "ratios": [
+              1.0540124805138358,
+              1.0803297413308819,
+              1.0596032041712398,
+              1.059037078672811,
+              1.0584310351675212,
+              1.0649063038124713
+            ],
+            "seed_medians": [
+              1.0596032041712398,
+              1.059037078672811
+            ],
+            "first_random_ratios": [
+              1.4789061542602542,
+              1.443438716028107
+            ]
+          },
+          "mkl": {
+            "candidate_us": 646.8373593745,
+            "peer": "mkl",
+            "peer_us": 666.4473281235,
+            "median": 1.030269079412974,
+            "wins": 6,
+            "ratios": [
+              1.035210222412159,
+              1.0377600563679639,
+              1.025327936413789,
+              1.020766918880356,
+              1.0405236011983778,
+              1.0101238640621084
+            ],
+            "seed_medians": [
+              1.035210222412159,
+              1.020766918880356
+            ],
+            "first_random_ratios": [
+              2.291362569014173,
+              2.615589365798351
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 646.8373593745,
+            "peer": "mkl-jit",
+            "peer_us": 661.0199843739999,
+            "median": 1.0220010494678053,
+            "wins": 6,
+            "ratios": [
+              1.0233484990391246,
+              1.0264039713737687,
+              1.0137534458645534,
+              1.0219930281325664,
+              1.0220090708030443,
+              1.0044591356871306
+            ],
+            "seed_medians": [
+              1.0233484990391246,
+              1.0219930281325664
+            ],
+            "first_random_ratios": [
+              2.558683477576737,
+              2.5872384332557967
+            ]
+          },
+          "aocl": {
+            "candidate_us": 646.8373593745,
+            "peer": "aocl",
+            "peer_us": 679.015203124,
+            "median": 1.0520854205989472,
+            "wins": 6,
+            "ratios": [
+              1.0419894177566147,
+              1.0513777793414594,
+              1.0244859192466205,
+              1.057823664251683,
+              1.0527930618564352,
+              1.0647523890182968
+            ],
+            "seed_medians": [
+              1.0419894177566147,
+              1.057823664251683
+            ],
+            "first_random_ratios": [
+              1.149295186012397,
+              1.086688045685403
+            ]
+          }
+        },
+        "fastest_method": "cmake-native-on"
+      },
+      "fresh-near-footprint": {
+        "best_direct": {
+          "candidate_us": 1120.5057656249999,
+          "peer": "openblas",
+          "peer_us": 1190.475765625,
+          "median": 1.0626647544671695,
+          "wins": 6,
+          "ratios": [
+            1.0734997724383533,
+            1.0707560787723607,
+            1.0671853860448206,
+            1.058144122889518,
+            1.0537829300291714,
+            1.050098409376373
+          ],
+          "seed_medians": [
+            1.0707560787723607,
+            1.0537829300291714
+          ],
+          "first_random_ratios": [
+            1.1203680758017704,
+            1.2733585622514452
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 1120.5057656249999,
+            "peer": "openblas",
+            "peer_us": 1190.475765625,
+            "median": 1.0626647544671695,
+            "wins": 6,
+            "ratios": [
+              1.0734997724383533,
+              1.0707560787723607,
+              1.0671853860448206,
+              1.058144122889518,
+              1.0537829300291714,
+              1.050098409376373
+            ],
+            "seed_medians": [
+              1.0707560787723607,
+              1.0537829300291714
+            ],
+            "first_random_ratios": [
+              1.1203680758017704,
+              1.2733585622514452
+            ]
+          },
+          "mkl": {
+            "candidate_us": 1120.5057656249999,
+            "peer": "mkl",
+            "peer_us": 1210.4024218749998,
+            "median": 1.0750697253363912,
+            "wins": 6,
+            "ratios": [
+              1.0827520561196764,
+              1.0753235508845769,
+              1.0858113426010458,
+              1.0724274969571683,
+              1.0748158997882056,
+              1.0724219551296579
+            ],
+            "seed_medians": [
+              1.0827520561196764,
+              1.0724274969571683
+            ],
+            "first_random_ratios": [
+              1.667501407216814,
+              1.9104818158126682
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 1120.5057656249999,
+            "peer": "mkl-jit",
+            "peer_us": 1203.4377656249999,
+            "median": 1.0740129265309524,
+            "wins": 6,
+            "ratios": [
+              1.074582488268949,
+              1.0868287597870698,
+              1.07418029795933,
+              1.0738455551025747,
+              1.0673864849367303,
+              1.065625744122798
+            ],
+            "seed_medians": [
+              1.074582488268949,
+              1.0673864849367303
+            ],
+            "first_random_ratios": [
+              1.6831777167280841,
+              2.145335117875795
+            ]
+          },
+          "aocl": {
+            "candidate_us": 1120.5057656249999,
+            "peer": "aocl",
+            "peer_us": 1602.5256875,
+            "median": 1.4281582969068753,
+            "wins": 6,
+            "ratios": [
+              1.434864287652445,
+              1.4096164319212763,
+              1.4276346493364493,
+              1.4327291123609485,
+              1.4209522657853089,
+              1.4286819444773016
+            ],
+            "seed_medians": [
+              1.4276346493364493,
+              1.4286819444773016
+            ],
+            "first_random_ratios": [
+              1.3242316282515292,
+              1.5387386303987476
+            ]
+          }
+        },
+        "fastest_method": "cmake-native-on"
+      },
+      "outside-width": {
+        "best_direct": {
+          "candidate_us": 113.51198437400001,
+          "peer": "mkl-jit",
+          "peer_us": 72.2672500011,
+          "median": 0.6311894930160202,
+          "wins": 0,
+          "ratios": [
+            0.6145745624459903,
+            0.6193042959331435,
+            0.6419598936604649,
+            0.6204190923715757,
+            0.6425101025230676,
+            0.6497121582160477
+          ],
+          "seed_medians": [
+            0.6193042959331435,
+            0.6425101025230676
+          ],
+          "first_random_ratios": [
+            5.3929110452275655,
+            7.126491451661843
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 113.51198437400001,
+            "peer": "openblas",
+            "peer_us": 114.1206249995,
+            "median": 1.0076000756431847,
+            "wins": 4,
+            "ratios": [
+              1.027512836021363,
+              1.0023018574683957,
+              1.0128982938179738,
+              0.9659280709232898,
+              0.9903650161328409,
+              1.0170897763393825
+            ],
+            "seed_medians": [
+              1.0128982938179738,
+              0.9903650161328409
+            ],
+            "first_random_ratios": [
+              1.1779324878527466,
+              1.5650002170121593
+            ]
+          },
+          "mkl": {
+            "candidate_us": 113.51198437400001,
+            "peer": "mkl",
+            "peer_us": 72.75706250095001,
+            "median": 0.6383230352307772,
+            "wins": 0,
+            "ratios": [
+              0.6460388351952262,
+              0.6367668327222247,
+              0.6398792377393298,
+              0.616349765941025,
+              0.6515664471911214,
+              0.6317817684897156
+            ],
+            "seed_medians": [
+              0.6398792377393298,
+              0.6317817684897156
+            ],
+            "first_random_ratios": [
+              6.1886768141993365,
+              6.649730995442695
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 113.51198437400001,
+            "peer": "mkl-jit",
+            "peer_us": 72.2672500011,
+            "median": 0.6311894930160202,
+            "wins": 0,
+            "ratios": [
+              0.6145745624459903,
+              0.6193042959331435,
+              0.6419598936604649,
+              0.6204190923715757,
+              0.6425101025230676,
+              0.6497121582160477
+            ],
+            "seed_medians": [
+              0.6193042959331435,
+              0.6425101025230676
+            ],
+            "first_random_ratios": [
+              5.3929110452275655,
+              7.126491451661843
+            ]
+          },
+          "aocl": {
+            "candidate_us": 113.51198437400001,
+            "peer": "aocl",
+            "peer_us": 95.41175000115,
+            "median": 0.8377061136501667,
+            "wins": 0,
+            "ratios": [
+              0.8228440110105885,
+              0.8401225289652995,
+              0.8480234877265501,
+              0.8084933208762565,
+              0.8352896983350339,
+              0.8522773957522527
+            ],
+            "seed_medians": [
+              0.8401225289652995,
+              0.8352896983350339
+            ],
+            "first_random_ratios": [
+              0.7023430456345745,
+              0.8305655583007613
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      }
+    },
+    "cmake-native-on": {
+      "repeat-skinny-wide": {
+        "best_direct": {
+          "candidate_us": 265.62343750149995,
+          "peer": "mkl-jit",
+          "peer_us": 237.683078126,
+          "median": 0.8903758009909798,
+          "wins": 0,
+          "ratios": [
+            0.9021467354966677,
+            0.9010686206234242,
+            0.8831913214716833,
+            0.8810420523672398,
+            0.8876276589212276,
+            0.893123943060732
+          ],
+          "seed_medians": [
+            0.9010686206234242,
+            0.8876276589212276
+          ],
+          "first_random_ratios": [
+            3.5695162834186958,
+            4.144443678000806
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 265.62343750149995,
+            "peer": "openblas",
+            "peer_us": 321.114234376,
+            "median": 1.2208050569995073,
+            "wins": 6,
+            "ratios": [
+              1.2186453401759973,
+              1.2361174006850553,
+              1.2229647738230172,
+              1.186012707913104,
+              1.2289868505538184,
+              1.1775324975944623
+            ],
+            "seed_medians": [
+              1.2229647738230172,
+              1.186012707913104
+            ],
+            "first_random_ratios": [
+              1.4644197027405,
+              1.6431926249968358
+            ]
+          },
+          "mkl": {
+            "candidate_us": 265.62343750149995,
+            "peer": "mkl",
+            "peer_us": 242.19435937500003,
+            "median": 0.9094976541669315,
+            "wins": 0,
+            "ratios": [
+              0.9134084039872173,
+              0.9055869043466456,
+              0.9258022487813692,
+              0.904985815093634,
+              0.8981503465595211,
+              0.9241593683503156
+            ],
+            "seed_medians": [
+              0.9134084039872173,
+              0.904985815093634
+            ],
+            "first_random_ratios": [
+              3.3216775677832184,
+              3.7123849001620606
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 265.62343750149995,
+            "peer": "mkl-jit",
+            "peer_us": 237.683078126,
+            "median": 0.8903758009909798,
+            "wins": 0,
+            "ratios": [
+              0.9021467354966677,
+              0.9010686206234242,
+              0.8831913214716833,
+              0.8810420523672398,
+              0.8876276589212276,
+              0.893123943060732
+            ],
+            "seed_medians": [
+              0.9010686206234242,
+              0.8876276589212276
+            ],
+            "first_random_ratios": [
+              3.5695162834186958,
+              4.144443678000806
+            ]
+          },
+          "aocl": {
+            "candidate_us": 265.62343750149995,
+            "peer": "aocl",
+            "peer_us": 312.832546877,
+            "median": 1.176414028266917,
+            "wins": 6,
+            "ratios": [
+              1.1750665561068343,
+              1.1915460480089555,
+              1.1391644445829858,
+              1.2005506196603382,
+              1.175961200884827,
+              1.1768668556490074
+            ],
+            "seed_medians": [
+              1.1750665561068343,
+              1.1768668556490074
+            ],
+            "first_random_ratios": [
+              1.1816952472532,
+              1.1803478563644285
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      },
+      "repeat-wide": {
+        "best_direct": {
+          "candidate_us": 767.0273281255,
+          "peer": "mkl-jit",
+          "peer_us": 681.4277812490001,
+          "median": 0.8858503191876769,
+          "wins": 0,
+          "ratios": [
+            0.8861007591129212,
+            0.8902269648578395,
+            0.8850382477188181,
+            0.8956426844024441,
+            0.8855998792624326,
+            0.8855718694987581
+          ],
+          "seed_medians": [
+            0.8861007591129212,
+            0.8855998792624326
+          ],
+          "first_random_ratios": [
+            1.8227001401764653,
+            2.26323210819982
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 767.0273281255,
+            "peer": "openblas",
+            "peer_us": 789.719453126,
+            "median": 1.028910621308634,
+            "wins": 6,
+            "ratios": [
+              1.0295394709162276,
+              1.0071146422410924,
+              1.0282817717010404,
+              1.0414066553687968,
+              1.0433593794708746,
+              1.0259004787881698
+            ],
+            "seed_medians": [
+              1.0282817717010404,
+              1.0414066553687968
+            ],
+            "first_random_ratios": [
+              1.1382036533083852,
+              1.1352914688647933
+            ]
+          },
+          "mkl": {
+            "candidate_us": 767.0273281255,
+            "peer": "mkl",
+            "peer_us": 685.7806718764999,
+            "median": 0.8946245494105015,
+            "wins": 0,
+            "ratios": [
+              0.8932674392384004,
+              0.8837485137442576,
+              0.8971415535134991,
+              0.8959816595826027,
+              0.9008030907928545,
+              0.88946131009193
+            ],
+            "seed_medians": [
+              0.8932674392384004,
+              0.8959816595826027
+            ],
+            "first_random_ratios": [
+              1.879717399941587,
+              1.9452324633852016
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 767.0273281255,
+            "peer": "mkl-jit",
+            "peer_us": 681.4277812490001,
+            "median": 0.8858503191876769,
+            "wins": 0,
+            "ratios": [
+              0.8861007591129212,
+              0.8902269648578395,
+              0.8850382477188181,
+              0.8956426844024441,
+              0.8855998792624326,
+              0.8855718694987581
+            ],
+            "seed_medians": [
+              0.8861007591129212,
+              0.8855998792624326
+            ],
+            "first_random_ratios": [
+              1.8227001401764653,
+              2.26323210819982
+            ]
+          },
+          "aocl": {
+            "candidate_us": 767.0273281255,
+            "peer": "aocl",
+            "peer_us": 702.616171875,
+            "median": 0.9146221802673833,
+            "wins": 0,
+            "ratios": [
+              0.9151822771710733,
+              0.9140620833636932,
+              0.8976710721170111,
+              0.923932837052173,
+              0.9112338687655224,
+              0.9272439558170945
+            ],
+            "seed_medians": [
+              0.9140620833636932,
+              0.923932837052173
+            ],
+            "first_random_ratios": [
+              0.9997200325013047,
+              1.0509384905858163
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      },
+      "fresh-thin-tail": {
+        "best_direct": {
+          "candidate_us": 118.1833437515,
+          "peer": "mkl-jit",
+          "peer_us": 109.06259374899999,
+          "median": 0.9119162228623091,
+          "wins": 0,
+          "ratios": [
+            0.936289942856564,
+            0.9067012808064638,
+            0.9171311649181544,
+            0.9052084622425108,
+            0.9383496159184774,
+            0.8925741597396853
+          ],
+          "seed_medians": [
+            0.9171311649181544,
+            0.9052084622425108
+          ],
+          "first_random_ratios": [
+            8.21721882595024,
+            8.29527892855551
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 118.1833437515,
+            "peer": "openblas",
+            "peer_us": 157.89506249849998,
+            "median": 1.3203712452199041,
+            "wins": 6,
+            "ratios": [
+              1.3363331932787446,
+              1.2918246558315827,
+              1.3377236848990837,
+              1.3026405555819147,
+              1.3734435137573728,
+              1.3044092971610635
+            ],
+            "seed_medians": [
+              1.3363331932787446,
+              1.3044092971610635
+            ],
+            "first_random_ratios": [
+              2.0321902678254933,
+              1.8156202305798166
+            ]
+          },
+          "mkl": {
+            "candidate_us": 118.1833437515,
+            "peer": "mkl",
+            "peer_us": 109.6228906265,
+            "median": 0.9264280869485714,
+            "wins": 0,
+            "ratios": [
+              0.9339746170800914,
+              0.9188815568170513,
+              0.9167627271452031,
+              0.937803202447569,
+              0.9471574984409837,
+              0.9009105086160454
+            ],
+            "seed_medians": [
+              0.9188815568170513,
+              0.937803202447569
+            ],
+            "first_random_ratios": [
+              7.19471310753487,
+              7.969061114939477
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 118.1833437515,
+            "peer": "mkl-jit",
+            "peer_us": 109.06259374899999,
+            "median": 0.9119162228623091,
+            "wins": 0,
+            "ratios": [
+              0.936289942856564,
+              0.9067012808064638,
+              0.9171311649181544,
+              0.9052084622425108,
+              0.9383496159184774,
+              0.8925741597396853
+            ],
+            "seed_medians": [
+              0.9171311649181544,
+              0.9052084622425108
+            ],
+            "first_random_ratios": [
+              8.21721882595024,
+              8.29527892855551
+            ]
+          },
+          "aocl": {
+            "candidate_us": 118.1833437515,
+            "peer": "aocl",
+            "peer_us": 138.78421875000004,
+            "median": 1.1650268825823202,
+            "wins": 6,
+            "ratios": [
+              1.1875831599121345,
+              1.197695228862863,
+              1.1796734120972614,
+              1.1380404244744746,
+              1.1503803530673793,
+              1.1454625498029285
+            ],
+            "seed_medians": [
+              1.1875831599121345,
+              1.1454625498029285
+            ],
+            "first_random_ratios": [
+              1.1813106082389964,
+              1.1738064095327203
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      },
+      "fresh-wide-tail": {
+        "best_direct": {
+          "candidate_us": 475.85409375,
+          "peer": "mkl-jit",
+          "peer_us": 402.290328125,
+          "median": 0.841759141386913,
+          "wins": 0,
+          "ratios": [
+            0.8508182864226482,
+            0.8343535673941417,
+            0.8470357544805996,
+            0.8362497113497706,
+            0.8457187242832079,
+            0.8377995584906179
+          ],
+          "seed_medians": [
+            0.8470357544805996,
+            0.8377995584906179
+          ],
+          "first_random_ratios": [
+            2.1412519803276058,
+            2.1273972922164845
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 475.85409375,
+            "peer": "openblas",
+            "peer_us": 555.8330468745,
+            "median": 1.1680743388045065,
+            "wins": 6,
+            "ratios": [
+              1.1757527195443662,
+              1.1953056190126423,
+              1.1686344622948903,
+              1.1675142153141225,
+              1.146433424612542,
+              1.1669731895239381
+            ],
+            "seed_medians": [
+              1.1757527195443662,
+              1.1669731895239381
+            ],
+            "first_random_ratios": [
+              1.1745700127532903,
+              1.1584230562617173
+            ]
+          },
+          "mkl": {
+            "candidate_us": 475.85409375,
+            "peer": "mkl",
+            "peer_us": 403.1409999995,
+            "median": 0.8447304162192599,
+            "wins": 0,
+            "ratios": [
+              0.8526432596004991,
+              0.843367803266007,
+              0.8479755854032056,
+              0.8406597366293952,
+              0.8444117744786621,
+              0.8450490579598577
+            ],
+            "seed_medians": [
+              0.8479755854032056,
+              0.8444117744786621
+            ],
+            "first_random_ratios": [
+              2.186815745675025,
+              2.1120040256846138
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 475.85409375,
+            "peer": "mkl-jit",
+            "peer_us": 402.290328125,
+            "median": 0.841759141386913,
+            "wins": 0,
+            "ratios": [
+              0.8508182864226482,
+              0.8343535673941417,
+              0.8470357544805996,
+              0.8362497113497706,
+              0.8457187242832079,
+              0.8377995584906179
+            ],
+            "seed_medians": [
+              0.8470357544805996,
+              0.8377995584906179
+            ],
+            "first_random_ratios": [
+              2.1412519803276058,
+              2.1273972922164845
+            ]
+          },
+          "aocl": {
+            "candidate_us": 475.85409375,
+            "peer": "aocl",
+            "peer_us": 584.6153906254999,
+            "median": 1.2260948132887717,
+            "wins": 6,
+            "ratios": [
+              1.241560814317764,
+              1.2391455921268477,
+              1.227601303450129,
+              1.2075398753150828,
+              1.2245883231274142,
+              1.2040607648408146
+            ],
+            "seed_medians": [
+              1.2391455921268477,
+              1.2075398753150828
+            ],
+            "first_random_ratios": [
+              0.9852679669698235,
+              0.9846273567469386
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      },
+      "fresh-deeper": {
+        "best_direct": {
+          "candidate_us": 496.61975000050006,
+          "peer": "mkl-jit",
+          "peer_us": 441.64740624999996,
+          "median": 0.8897005863070988,
+          "wins": 0,
+          "ratios": [
+            0.8888999391144998,
+            0.8881869995300549,
+            0.8836289946867607,
+            0.8905012334996977,
+            0.8958391074812041,
+            0.8964803977104882
+          ],
+          "seed_medians": [
+            0.8881869995300549,
+            0.8958391074812041
+          ],
+          "first_random_ratios": [
+            2.6137112784580543,
+            2.721595903623385
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 496.61975000050006,
+            "peer": "openblas",
+            "peer_us": 560.070609376,
+            "median": 1.1289433299713791,
+            "wins": 6,
+            "ratios": [
+              1.121281659294439,
+              1.1261488829612056,
+              1.117275595902595,
+              1.1317377769815526,
+              1.1453509416237813,
+              1.1359054275756215
+            ],
+            "seed_medians": [
+              1.121281659294439,
+              1.1359054275756215
+            ],
+            "first_random_ratios": [
+              1.3514811801658504,
+              1.4409022845885688
+            ]
+          },
+          "mkl": {
+            "candidate_us": 496.61975000050006,
+            "peer": "mkl",
+            "peer_us": 452.1434687505,
+            "median": 0.9092346766304242,
+            "wins": 0,
+            "ratios": [
+              0.9091450012579703,
+              0.8921932928738694,
+              0.9093243520028782,
+              0.8912405933482409,
+              0.9279506566652289,
+              0.9824616473234499
+            ],
+            "seed_medians": [
+              0.9091450012579703,
+              0.9279506566652289
+            ],
+            "first_random_ratios": [
+              2.6265889887936615,
+              2.6174451365041183
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 496.61975000050006,
+            "peer": "mkl-jit",
+            "peer_us": 441.64740624999996,
+            "median": 0.8897005863070988,
+            "wins": 0,
+            "ratios": [
+              0.8888999391144998,
+              0.8881869995300549,
+              0.8836289946867607,
+              0.8905012334996977,
+              0.8958391074812041,
+              0.8964803977104882
+            ],
+            "seed_medians": [
+              0.8881869995300549,
+              0.8958391074812041
+            ],
+            "first_random_ratios": [
+              2.6137112784580543,
+              2.721595903623385
+            ]
+          },
+          "aocl": {
+            "candidate_us": 496.61975000050006,
+            "peer": "aocl",
+            "peer_us": 572.1605000005,
+            "median": 1.1553379353548952,
+            "wins": 6,
+            "ratios": [
+              1.150318444655561,
+              1.1472072624008134,
+              1.1266172562261432,
+              1.16354680261389,
+              1.1642607648869105,
+              1.1603574260542295
+            ],
+            "seed_medians": [
+              1.1472072624008134,
+              1.16354680261389
+            ],
+            "first_random_ratios": [
+              1.2670672253810387,
+              1.0994445246720326
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      },
+      "fresh-compact-tile": {
+        "best_direct": {
+          "candidate_us": 641.6520781265,
+          "peer": "mkl-jit",
+          "peer_us": 661.0199843739999,
+          "median": 1.0283654059555492,
+          "wins": 6,
+          "ratios": [
+            1.0334626725105125,
+            1.0264992147495346,
+            1.0170041024484502,
+            1.044474438835449,
+            1.0302315971615639,
+            1.0022845320556852
+          ],
+          "seed_medians": [
+            1.0264992147495346,
+            1.0302315971615639
+          ],
+          "first_random_ratios": [
+            2.531435486061383,
+            2.4918142929807963
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 641.6520781265,
+            "peer": "openblas",
+            "peer_us": 685.0122343740001,
+            "median": 1.0656881557250355,
+            "wins": 6,
+            "ratios": [
+              1.0644297187068212,
+              1.0804299886549122,
+              1.0630008805451236,
+              1.0823333701932418,
+              1.0669465927432498,
+              1.062600835094886
+            ],
+            "seed_medians": [
+              1.0644297187068212,
+              1.0669465927432498
+            ],
+            "first_random_ratios": [
+              1.4631569524944097,
+              1.3902009097454828
+            ]
+          },
+          "mkl": {
+            "candidate_us": 641.6520781265,
+            "peer": "mkl",
+            "peer_us": 666.4473281235,
+            "median": 1.0405388558070252,
+            "wins": 6,
+            "ratios": [
+              1.04544163016686,
+              1.0378563535119345,
+              1.0286157072428335,
+              1.043221358102116,
+              1.0488950853485066,
+              1.007936996577951
+            ],
+            "seed_medians": [
+              1.0378563535119345,
+              1.043221358102116
+            ],
+            "first_random_ratios": [
+              2.2669613375268653,
+              2.519119568760876
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 641.6520781265,
+            "peer": "mkl-jit",
+            "peer_us": 661.0199843739999,
+            "median": 1.0283654059555492,
+            "wins": 6,
+            "ratios": [
+              1.0334626725105125,
+              1.0264992147495346,
+              1.0170041024484502,
+              1.044474438835449,
+              1.0302315971615639,
+              1.0022845320556852
+            ],
+            "seed_medians": [
+              1.0264992147495346,
+              1.0302315971615639
+            ],
+            "first_random_ratios": [
+              2.531435486061383,
+              2.4918142929807963
+            ]
+          },
+          "aocl": {
+            "candidate_us": 641.6520781265,
+            "peer": "aocl",
+            "peer_us": 679.015203124,
+            "median": 1.056775543231744,
+            "wins": 6,
+            "ratios": [
+              1.0522878270828964,
+              1.0514753401184072,
+              1.0277709901009724,
+              1.0810932635470174,
+              1.0612632593805915,
+              1.0624472535185183
+            ],
+            "seed_medians": [
+              1.0514753401184072,
+              1.0624472535185183
+            ],
+            "first_random_ratios": [
+              1.1370560850248994,
+              1.046608139955123
+            ]
+          }
+        },
+        "fastest_method": "cmake-native-on"
+      },
+      "fresh-near-footprint": {
+        "best_direct": {
+          "candidate_us": 1106.9530625,
+          "peer": "openblas",
+          "peer_us": 1190.475765625,
+          "median": 1.0756191194127926,
+          "wins": 6,
+          "ratios": [
+            1.0776328445947108,
+            1.0827041280543617,
+            1.080799526929327,
+            1.0668661387914466,
+            1.0710966261240724,
+            1.0736053942308748
+          ],
+          "seed_medians": [
+            1.080799526929327,
+            1.0710966261240724
+          ],
+          "first_random_ratios": [
+            1.1746018279781663,
+            1.162798675539643
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 1106.9530625,
+            "peer": "openblas",
+            "peer_us": 1190.475765625,
+            "median": 1.0756191194127926,
+            "wins": 6,
+            "ratios": [
+              1.0776328445947108,
+              1.0827041280543617,
+              1.080799526929327,
+              1.0668661387914466,
+              1.0710966261240724,
+              1.0736053942308748
+            ],
+            "seed_medians": [
+              1.080799526929327,
+              1.0710966261240724
+            ],
+            "first_random_ratios": [
+              1.1746018279781663,
+              1.162798675539643
+            ]
+          },
+          "mkl": {
+            "candidate_us": 1106.9530625,
+            "peer": "mkl",
+            "peer_us": 1210.4024218749998,
+            "median": 1.0898988674023666,
+            "wins": 6,
+            "ratios": [
+              1.0869207504131295,
+              1.0873225663791195,
+              1.0996630958066924,
+              1.0812672471195406,
+              1.092475168425614,
+              1.0964286638645462
+            ],
+            "seed_medians": [
+              1.0873225663791195,
+              1.092475168425614
+            ],
+            "first_random_ratios": [
+              1.7482202888290643,
+              1.7446034376536204
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 1106.9530625,
+            "peer": "mkl-jit",
+            "peer_us": 1203.4377656249999,
+            "median": 1.0864036806481447,
+            "wins": 6,
+            "ratios": [
+              1.0787197289801285,
+              1.0989561563440147,
+              1.0878836733081798,
+              1.082696993961625,
+              1.0849236879881097,
+              1.089480316231462
+            ],
+            "seed_medians": [
+              1.0878836733081798,
+              1.0849236879881097
+            ],
+            "first_random_ratios": [
+              1.7646554427803338,
+              1.959065504098021
+            ]
+          },
+          "aocl": {
+            "candidate_us": 1106.9530625,
+            "peer": "aocl",
+            "peer_us": 1602.5256875,
+            "median": 1.44441865351203,
+            "wins": 6,
+            "ratios": [
+              1.4403886461923423,
+              1.425345660016459,
+              1.4458470606961125,
+              1.4445387381301151,
+              1.4442985688939451,
+              1.4606637135485192
+            ],
+            "seed_medians": [
+              1.4403886461923423,
+              1.4445387381301151
+            ],
+            "first_random_ratios": [
+              1.3883338206487403,
+              1.4051370089079693
+            ]
+          }
+        },
+        "fastest_method": "cmake-native-on"
+      },
+      "outside-width": {
+        "best_direct": {
+          "candidate_us": 103.41098437650001,
+          "peer": "mkl-jit",
+          "peer_us": 72.2672500011,
+          "median": 0.6927114236880874,
+          "wins": 0,
+          "ratios": [
+            0.6349449708881582,
+            0.6896404128920754,
+            0.6957824344840993,
+            0.6742760245984216,
+            0.7065364138215013,
+            0.7100528806581593
+          ],
+          "seed_medians": [
+            0.6896404128920754,
+            0.7065364138215013
+          ],
+          "first_random_ratios": [
+            4.0245903331748565,
+            3.923193823599242
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 103.41098437650001,
+            "peer": "openblas",
+            "peer_us": 114.1206249995,
+            "median": 1.0934379185439553,
+            "wins": 6,
+            "ratios": [
+              1.0615703083417616,
+              1.1161360761844603,
+              1.0978206702897377,
+              1.0497777191552096,
+              1.0890551667981732,
+              1.111549963234017
+            ],
+            "seed_medians": [
+              1.0978206702897377,
+              1.0890551667981732
+            ],
+            "first_random_ratios": [
+              0.8790606156836266,
+              0.8615458570264367
+            ]
+          },
+          "mkl": {
+            "candidate_us": 103.41098437650001,
+            "peer": "mkl",
+            "peer_us": 72.75706250095001,
+            "median": 0.6919922880271343,
+            "wins": 0,
+            "ratios": [
+              0.6674521440865874,
+              0.7090862187107148,
+              0.693527334350232,
+              0.6698534507574126,
+              0.7164952257669811,
+              0.6904572417040366
+            ],
+            "seed_medians": [
+              0.693527334350232,
+              0.6904572417040366
+            ],
+            "first_random_ratios": [
+              4.618449789490088,
+              3.6607331597701784
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 103.41098437650001,
+            "peer": "mkl-jit",
+            "peer_us": 72.2672500011,
+            "median": 0.6927114236880874,
+            "wins": 0,
+            "ratios": [
+              0.6349449708881582,
+              0.6896404128920754,
+              0.6957824344840993,
+              0.6742760245984216,
+              0.7065364138215013,
+              0.7100528806581593
+            ],
+            "seed_medians": [
+              0.6896404128920754,
+              0.7065364138215013
+            ],
+            "first_random_ratios": [
+              4.0245903331748565,
+              3.923193823599242
+            ]
+          },
+          "aocl": {
+            "candidate_us": 103.41098437650001,
+            "peer": "aocl",
+            "peer_us": 95.41175000115,
+            "median": 0.918824575300668,
+            "wins": 0,
+            "ratios": [
+              0.8501176237057939,
+              0.935537588807733,
+              0.919122600363178,
+              0.8786764769455603,
+              0.9185265502381579,
+              0.9314309611126096
+            ],
+            "seed_medians": [
+              0.919122600363178,
+              0.9185265502381579
+            ],
+            "first_random_ratios": [
+              0.5241404889359194,
+              0.4572333651870098
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      }
+    },
+    "research-candidate": {
+      "repeat-skinny-wide": {
+        "best_direct": {
+          "candidate_us": 272.9458281255,
+          "peer": "mkl-jit",
+          "peer_us": 237.683078126,
+          "median": 0.8752411057124095,
+          "wins": 0,
+          "ratios": [
+            0.8857886437968167,
+            0.8958553612375872,
+            0.8485707050234553,
+            0.8646935676280024,
+            0.864259862393994,
+            0.8864436332822735
+          ],
+          "seed_medians": [
+            0.8857886437968167,
+            0.8646935676280024
+          ],
+          "first_random_ratios": [
+            3.152139619883781,
+            5.183295431694274
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 272.9458281255,
+            "peer": "openblas",
+            "peer_us": 321.114234376,
+            "median": 1.185786795491965,
+            "wins": 6,
+            "ratios": [
+              1.1965483669899,
+              1.2289656694033033,
+              1.1750252239940302,
+              1.1640052332372222,
+              1.1966323893450606,
+              1.1687248937683066
+            ],
+            "seed_medians": [
+              1.1965483669899,
+              1.1687248937683066
+            ],
+            "first_random_ratios": [
+              1.2931879276162714,
+              2.055077469564823
+            ]
+          },
+          "mkl": {
+            "candidate_us": 272.9458281255,
+            "peer": "mkl",
+            "peer_us": 242.19435937500003,
+            "median": 0.8931787092172767,
+            "wins": 0,
+            "ratios": [
+              0.8968461111318189,
+              0.9003475037940997,
+              0.8895113073027346,
+              0.8881930334692699,
+              0.8745055284442601,
+              0.9172469225322274
+            ],
+            "seed_medians": [
+              0.8968461111318189,
+              0.8881930334692699
+            ],
+            "first_random_ratios": [
+              2.933280207888752,
+              4.64293622708439
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 272.9458281255,
+            "peer": "mkl-jit",
+            "peer_us": 237.683078126,
+            "median": 0.8752411057124095,
+            "wins": 0,
+            "ratios": [
+              0.8857886437968167,
+              0.8958553612375872,
+              0.8485707050234553,
+              0.8646935676280024,
+              0.864259862393994,
+              0.8864436332822735
+            ],
+            "seed_medians": [
+              0.8857886437968167,
+              0.8646935676280024
+            ],
+            "first_random_ratios": [
+              3.152139619883781,
+              5.183295431694274
+            ]
+          },
+          "aocl": {
+            "candidate_us": 272.9458281255,
+            "peer": "aocl",
+            "peer_us": 312.832546877,
+            "median": 1.1609120008994576,
+            "wins": 6,
+            "ratios": [
+              1.153759771166088,
+              1.1846521905642897,
+              1.094509821797915,
+              1.178273381665326,
+              1.145002699547008,
+              1.1680642306328273
+            ],
+            "seed_medians": [
+              1.153759771166088,
+              1.1680642306328273
+            ],
+            "first_random_ratios": [
+              1.043521898134525,
+              1.4762154168433803
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      },
+      "repeat-wide": {
+        "best_direct": {
+          "candidate_us": 767.6364062499999,
+          "peer": "mkl-jit",
+          "peer_us": 681.4277812490001,
+          "median": 0.888691622100316,
+          "wins": 0,
+          "ratios": [
+            0.8865655673462955,
+            0.8967675401598221,
+            0.8794416892137001,
+            0.8952287853541098,
+            0.857564982359916,
+            0.8908176768543365
+          ],
+          "seed_medians": [
+            0.8865655673462955,
+            0.8908176768543365
+          ],
+          "first_random_ratios": [
+            1.7497510437824524,
+            2.438680682239459
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 767.6364062499999,
+            "peer": "openblas",
+            "peer_us": 789.719453126,
+            "median": 1.025929465129828,
+            "wins": 6,
+            "ratios": [
+              1.030079520586363,
+              1.0145140015228673,
+              1.0217794096732928,
+              1.0409253951172561,
+              1.0103303859934807,
+              1.0319775420543782
+            ],
+            "seed_medians": [
+              1.0217794096732928,
+              1.0319775420543782
+            ],
+            "first_random_ratios": [
+              1.0926498476159292,
+              1.2233006786184173
+            ]
+          },
+          "mkl": {
+            "candidate_us": 767.6364062499999,
+            "peer": "mkl",
+            "peer_us": 685.7806718764999,
+            "median": 0.8926022331395986,
+            "wins": 0,
+            "ratios": [
+              0.8937360067868346,
+              0.8902414912997986,
+              0.8914684594923628,
+              0.8955676038852979,
+              0.8722869150669966,
+              0.8947301570863851
+            ],
+            "seed_medians": [
+              0.8914684594923628,
+              0.8947301570863851
+            ],
+            "first_random_ratios": [
+              1.8044863277650265,
+              2.0960293085872648
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 767.6364062499999,
+            "peer": "mkl-jit",
+            "peer_us": 681.4277812490001,
+            "median": 0.888691622100316,
+            "wins": 0,
+            "ratios": [
+              0.8865655673462955,
+              0.8967675401598221,
+              0.8794416892137001,
+              0.8952287853541098,
+              0.857564982359916,
+              0.8908176768543365
+            ],
+            "seed_medians": [
+              0.8865655673462955,
+              0.8908176768543365
+            ],
+            "first_random_ratios": [
+              1.7497510437824524,
+              2.438680682239459
+            ]
+          },
+          "aocl": {
+            "candidate_us": 767.6364062499999,
+            "peer": "aocl",
+            "peer_us": 702.616171875,
+            "median": 0.918220058806395,
+            "wins": 0,
+            "ratios": [
+              0.9156623402486551,
+              0.9207777773641349,
+              0.8919946296735306,
+              0.9235058644115872,
+              0.8823874922436569,
+              0.9327366135350889
+            ],
+            "seed_medians": [
+              0.9156623402486551,
+              0.9235058644115872
+            ],
+            "first_random_ratios": [
+              0.9597086936033427,
+              1.1324085523212486
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      },
+      "fresh-thin-tail": {
+        "best_direct": {
+          "candidate_us": 120.609828125,
+          "peer": "mkl-jit",
+          "peer_us": 109.06259374899999,
+          "median": 0.9016044454097588,
+          "wins": 0,
+          "ratios": [
+            0.923071108905742,
+            0.9032010930005155,
+            0.9000077978190021,
+            0.9084844021947088,
+            0.8853039759593159,
+            0.8884596619276336
+          ],
+          "seed_medians": [
+            0.9032010930005155,
+            0.8884596619276336
+          ],
+          "first_random_ratios": [
+            7.306403793885014,
+            8.294575710657528
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 120.609828125,
+            "peer": "openblas",
+            "peer_us": 157.89506249849998,
+            "median": 1.302875580816576,
+            "wins": 6,
+            "ratios": [
+              1.317466423727606,
+              1.286837755511178,
+              1.312747613198585,
+              1.3073547981209344,
+              1.2958016744055156,
+              1.2983963635122175
+            ],
+            "seed_medians": [
+              1.312747613198585,
+              1.2983963635122175
+            ],
+            "first_random_ratios": [
+              1.8069377239712683,
+              1.8154663145206849
+            ]
+          },
+          "mkl": {
+            "candidate_us": 120.609828125,
+            "peer": "mkl",
+            "peer_us": 109.6228906265,
+            "median": 0.9074902939134251,
+            "wins": 0,
+            "ratios": [
+              0.9207884716219898,
+              0.9153343488353651,
+              0.8996462389914851,
+              0.9411971024234776,
+              0.893613941972703,
+              0.8967575827486461
+            ],
+            "seed_medians": [
+              0.9153343488353651,
+              0.8967575827486461
+            ],
+            "first_random_ratios": [
+              6.3972349110135935,
+              7.968385551591409
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 120.609828125,
+            "peer": "mkl-jit",
+            "peer_us": 109.06259374899999,
+            "median": 0.9016044454097588,
+            "wins": 0,
+            "ratios": [
+              0.923071108905742,
+              0.9032010930005155,
+              0.9000077978190021,
+              0.9084844021947088,
+              0.8853039759593159,
+              0.8884596619276336
+            ],
+            "seed_medians": [
+              0.9032010930005155,
+              0.8884596619276336
+            ],
+            "first_random_ratios": [
+              7.306403793885014,
+              8.294575710657528
+            ]
+          },
+          "aocl": {
+            "candidate_us": 120.609828125,
+            "peer": "aocl",
+            "peer_us": 138.78421875000004,
+            "median": 1.1499036054427105,
+            "wins": 6,
+            "ratios": [
+              1.1708164898080256,
+              1.1930717014409327,
+              1.1576482300239277,
+              1.1421589808614934,
+              1.0853484491909386,
+              1.1401823127452861
+            ],
+            "seed_medians": [
+              1.1708164898080256,
+              1.1401823127452861
+            ],
+            "first_random_ratios": [
+              1.0503714812287368,
+              1.1737069021282005
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      },
+      "fresh-wide-tail": {
+        "best_direct": {
+          "candidate_us": 476.149156251,
+          "peer": "mkl-jit",
+          "peer_us": 402.290328125,
+          "median": 0.8464078170891559,
+          "wins": 0,
+          "ratios": [
+            0.853601730966182,
+            0.8375926083856557,
+            0.8507267823868435,
+            0.8308755954032708,
+            0.8529401007120697,
+            0.8420888517914683
+          ],
+          "seed_medians": [
+            0.8507267823868435,
+            0.8420888517914683
+          ],
+          "first_random_ratios": [
+            2.066841125773443,
+            2.105990820873907
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 476.149156251,
+            "peer": "openblas",
+            "peer_us": 555.8330468745,
+            "median": 1.1733373201724402,
+            "wins": 6,
+            "ratios": [
+              1.1795991842289946,
+              1.199945910669165,
+              1.1737268829981624,
+              1.1600112449966111,
+              1.1562225271498816,
+              1.1729477573467177
+            ],
+            "seed_medians": [
+              1.1795991842289946,
+              1.1600112449966111
+            ],
+            "first_random_ratios": [
+              1.1337524166993715,
+              1.1467666768693134
+            ]
+          },
+          "mkl": {
+            "candidate_us": 476.149156251,
+            "peer": "mkl",
+            "peer_us": 403.1409999995,
+            "median": 0.8504987289070192,
+            "wins": 0,
+            "ratios": [
+              0.855432674527739,
+              0.846641838390269,
+              0.8516707086999263,
+              0.8352572798812687,
+              0.8516219911965688,
+              0.8493754666174695
+            ],
+            "seed_medians": [
+              0.8516707086999263,
+              0.8493754666174695
+            ],
+            "first_random_ratios": [
+              2.1108215003068174,
+              2.090752445729784
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 476.149156251,
+            "peer": "mkl-jit",
+            "peer_us": 402.290328125,
+            "median": 0.8464078170891559,
+            "wins": 0,
+            "ratios": [
+              0.853601730966182,
+              0.8375926083856557,
+              0.8507267823868435,
+              0.8308755954032708,
+              0.8529401007120697,
+              0.8420888517914683
+            ],
+            "seed_medians": [
+              0.8507267823868435,
+              0.8420888517914683
+            ],
+            "first_random_ratios": [
+              2.066841125773443,
+              2.105990820873907
+            ]
+          },
+          "aocl": {
+            "candidate_us": 476.149156251,
+            "peer": "aocl",
+            "peer_us": 584.6153906254999,
+            "median": 1.2339977237069384,
+            "wins": 6,
+            "ratios": [
+              1.245622569605851,
+              1.243956074785762,
+              1.2329506770094,
+              1.1997796821432483,
+              1.2350447704044765,
+              1.2102252104055187
+            ],
+            "seed_medians": [
+              1.243956074785762,
+              1.2102252104055187
+            ],
+            "first_random_ratios": [
+              0.9510288246079563,
+              0.9747197586821871
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      },
+      "fresh-deeper": {
+        "best_direct": {
+          "candidate_us": 505.3215624995001,
+          "peer": "mkl-jit",
+          "peer_us": 441.64740624999996,
+          "median": 0.8754425825410601,
+          "wins": 0,
+          "ratios": [
+            0.8710362860134881,
+            0.8797513898039694,
+            0.883113444478895,
+            0.8745517779336569,
+            0.8669049805573869,
+            0.8763333871484632
+          ],
+          "seed_medians": [
+            0.8797513898039694,
+            0.8745517779336569
+          ],
+          "first_random_ratios": [
+            2.468928842742795,
+            2.650748796657825
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 505.3215624995001,
+            "peer": "openblas",
+            "peer_us": 560.070609376,
+            "median": 1.1109226639716738,
+            "wins": 6,
+            "ratios": [
+              1.0987479795080324,
+              1.1154532158605228,
+              1.1166237254126332,
+              1.111467618213285,
+              1.1083579936261954,
+              1.1103777097300627
+            ],
+            "seed_medians": [
+              1.1154532158605228,
+              1.1103777097300627
+            ],
+            "first_random_ratios": [
+              1.2766180004793857,
+              1.4033934986048533
+            ]
+          },
+          "mkl": {
+            "candidate_us": 505.3215624995001,
+            "peer": "mkl",
+            "peer_us": 452.1434687505,
+            "median": 0.8944269378604521,
+            "wins": 0,
+            "ratios": [
+              0.8908744961017097,
+              0.8837196331345384,
+              0.908793809929778,
+              0.8752778953670208,
+              0.8979793796191946,
+              0.9603823411434588
+            ],
+            "seed_medians": [
+              0.8908744961017097,
+              0.8979793796191946
+            ],
+            "first_random_ratios": [
+              2.4810932125177247,
+              2.549309225763104
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 505.3215624995001,
+            "peer": "mkl-jit",
+            "peer_us": 441.64740624999996,
+            "median": 0.8754425825410601,
+            "wins": 0,
+            "ratios": [
+              0.8710362860134881,
+              0.8797513898039694,
+              0.883113444478895,
+              0.8745517779336569,
+              0.8669049805573869,
+              0.8763333871484632
+            ],
+            "seed_medians": [
+              0.8797513898039694,
+              0.8745517779336569
+            ],
+            "first_random_ratios": [
+              2.468928842742795,
+              2.650748796657825
+            ]
+          },
+          "aocl": {
+            "candidate_us": 505.3215624995001,
+            "peer": "aocl",
+            "peer_us": 572.1605000005,
+            "median": 1.1307407092684691,
+            "wins": 6,
+            "ratios": [
+              1.1272012311798885,
+              1.1363115920682543,
+              1.125959935377546,
+              1.142706923533245,
+              1.1266570607593085,
+              1.13428018735705
+            ],
+            "seed_medians": [
+              1.1272012311798885,
+              1.13428018735705
+            ],
+            "first_random_ratios": [
+              1.196880024285948,
+              1.070824381711633
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      },
+      "fresh-compact-tile": {
+        "best_direct": {
+          "candidate_us": 649.354453124,
+          "peer": "mkl-jit",
+          "peer_us": 661.0199843739999,
+          "median": 1.0156884350233593,
+          "wins": 5,
+          "ratios": [
+            1.0223687670082469,
+            1.01704999030893,
+            1.0143268797377885,
+            1.0136508740977253,
+            1.0227784382320881,
+            0.9892686120525592
+          ],
+          "seed_medians": [
+            1.01704999030893,
+            1.0136508740977253
+          ],
+          "first_random_ratios": [
+            2.3841887008382243,
+            2.2774372125108022
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 649.354453124,
+            "peer": "openblas",
+            "peer_us": 685.0122343740001,
+            "median": 1.0561156062283499,
+            "wins": 6,
+            "ratios": [
+              1.0530033914409795,
+              1.0704843157226138,
+              1.060202573151872,
+              1.050392547647937,
+              1.0592278210157204,
+              1.0488016323510472
+            ],
+            "seed_medians": [
+              1.060202573151872,
+              1.050392547647937
+            ],
+            "first_random_ratios": [
+              1.3780490527600486,
+              1.270598412425566
+            ]
+          },
+          "mkl": {
+            "candidate_us": 649.354453124,
+            "peer": "mkl",
+            "peer_us": 666.4473281235,
+            "median": 1.0271052503725033,
+            "wins": 5,
+            "ratios": [
+              1.034219134220266,
+              1.0283025832990322,
+              1.0259079174459744,
+              1.0124347731253798,
+              1.0413069063477975,
+              0.994847672243331
+            ],
+            "seed_medians": [
+              1.0283025832990322,
+              1.0124347731253798
+            ],
+            "first_random_ratios": [
+              2.1350983013112432,
+              2.3023933464147595
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 649.354453124,
+            "peer": "mkl-jit",
+            "peer_us": 661.0199843739999,
+            "median": 1.0156884350233593,
+            "wins": 5,
+            "ratios": [
+              1.0223687670082469,
+              1.01704999030893,
+              1.0143268797377885,
+              1.0136508740977253,
+              1.0227784382320881,
+              0.9892686120525592
+            ],
+            "seed_medians": [
+              1.01704999030893,
+              1.0136508740977253
+            ],
+            "first_random_ratios": [
+              2.3841887008382243,
+              2.2774372125108022
+            ]
+          },
+          "aocl": {
+            "candidate_us": 649.354453124,
+            "peer": "aocl",
+            "peer_us": 679.015203124,
+            "median": 1.0452231241942025,
+            "wins": 6,
+            "ratios": [
+              1.0409918393076598,
+              1.0417962031645964,
+              1.0250654239882762,
+              1.0491890378834265,
+              1.0535856034438396,
+              1.0486500452238086
+            ],
+            "seed_medians": [
+              1.0409918393076598,
+              1.0491890378834265
+            ],
+            "first_random_ratios": [
+              1.0709165945815364,
+              0.9565657968833556
+            ]
+          }
+        },
+        "fastest_method": "cmake-native-on"
+      },
+      "fresh-near-footprint": {
+        "best_direct": {
+          "candidate_us": 1119.15525,
+          "peer": "openblas",
+          "peer_us": 1190.475765625,
+          "median": 1.0653629847626853,
+          "wins": 6,
+          "ratios": [
+            1.0721187005514092,
+            1.0654266869612166,
+            1.07993622054845,
+            1.0599754631653857,
+            1.065299282564154,
+            1.0524103149959019
+          ],
+          "seed_medians": [
+            1.0721187005514092,
+            1.0599754631653857
+          ],
+          "first_random_ratios": [
+            1.1698865089677015,
+            1.1469460966227731
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 1119.15525,
+            "peer": "openblas",
+            "peer_us": 1190.475765625,
+            "median": 1.0653629847626853,
+            "wins": 6,
+            "ratios": [
+              1.0721187005514092,
+              1.0654266869612166,
+              1.07993622054845,
+              1.0599754631653857,
+              1.065299282564154,
+              1.0524103149959019
+            ],
+            "seed_medians": [
+              1.0721187005514092,
+              1.0599754631653857
+            ],
+            "first_random_ratios": [
+              1.1698865089677015,
+              1.1469460966227731
+            ]
+          },
+          "mkl": {
+            "candidate_us": 1119.15525,
+            "peer": "mkl",
+            "peer_us": 1210.4024218749998,
+            "median": 1.078071044751717,
+            "wins": 6,
+            "ratios": [
+              1.0813590810454095,
+              1.0699714257460626,
+              1.0987847218402254,
+              1.074283557606792,
+              1.0865621128454077,
+              1.0747830084580243
+            ],
+            "seed_medians": [
+              1.0813590810454095,
+              1.0747830084580243
+            ],
+            "first_random_ratios": [
+              1.7412022371233342,
+              1.7208190420778244
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 1119.15525,
+            "peer": "mkl-jit",
+            "peer_us": 1203.4377656249999,
+            "median": 1.0773777875140431,
+            "wins": 6,
+            "ratios": [
+              1.0732000234535353,
+              1.08141937065788,
+              1.0870147083489823,
+              1.0757040699991567,
+              1.0790515050289298,
+              1.0679718348550138
+            ],
+            "seed_medians": [
+              1.08141937065788,
+              1.0757040699991567
+            ],
+            "first_random_ratios": [
+              1.7575714138285103,
+              1.9323573205058626
+            ]
+          },
+          "aocl": {
+            "candidate_us": 1119.15525,
+            "peer": "aocl",
+            "peer_us": 1602.5256875,
+            "median": 1.434113532981614,
+            "wins": 6,
+            "ratios": [
+              1.4330183154593108,
+              1.4026004565576358,
+              1.444692166599501,
+              1.4352087505039168,
+              1.4364812582958564,
+              1.4318273428385069
+            ],
+            "seed_medians": [
+              1.4330183154593108,
+              1.4352087505039168
+            ],
+            "first_random_ratios": [
+              1.3827604963941336,
+              1.3859806013618476
+            ]
+          }
+        },
+        "fastest_method": "cmake-native-on"
+      },
+      "outside-width": {
+        "best_direct": {
+          "candidate_us": 104.929312501,
+          "peer": "mkl-jit",
+          "peer_us": 72.2672500011,
+          "median": 0.6833903412869713,
+          "wins": 0,
+          "ratios": [
+            0.6586738837283387,
+            0.6802537759286238,
+            0.6865269066453187,
+            0.6616682956888944,
+            0.6909435113793256,
+            0.7083146843398099
+          ],
+          "seed_medians": [
+            0.6802537759286238,
+            0.6909435113793256
+          ],
+          "first_random_ratios": [
+            3.7612491613987555,
+            3.6587098289010562
+          ]
+        },
+        "direct": {
+          "openblas": {
+            "candidate_us": 104.929312501,
+            "peer": "openblas",
+            "peer_us": 114.1206249995,
+            "median": 1.092080770023728,
+            "wins": 6,
+            "ratios": [
+              1.1012428949048612,
+              1.1009444430476787,
+              1.0832170969997776,
+              1.030148795071407,
+              1.0650202683303334,
+              1.1088289094838175
+            ],
+            "seed_medians": [
+              1.1009444430476787,
+              1.0650202683303334
+            ],
+            "first_random_ratios": [
+              0.8215410091069913,
+              0.8034643295445815
+            ]
+          },
+          "mkl": {
+            "candidate_us": 104.929312501,
+            "peer": "mkl",
+            "peer_us": 72.75706250095001,
+            "median": 0.6905814586602008,
+            "wins": 0,
+            "ratios": [
+              0.6923959021730058,
+              0.6994349065393299,
+              0.6843018045985455,
+              0.6573284158931069,
+              0.7006825373660521,
+              0.6887670151473959
+            ],
+            "seed_medians": [
+              0.6923959021730058,
+              0.6887670151473959
+            ],
+            "first_random_ratios": [
+              4.31625058940555,
+              3.4139430767016155
+            ]
+          },
+          "mkl-jit": {
+            "candidate_us": 104.929312501,
+            "peer": "mkl-jit",
+            "peer_us": 72.2672500011,
+            "median": 0.6833903412869713,
+            "wins": 0,
+            "ratios": [
+              0.6586738837283387,
+              0.6802537759286238,
+              0.6865269066453187,
+              0.6616682956888944,
+              0.6909435113793256,
+              0.7083146843398099
+            ],
+            "seed_medians": [
+              0.6802537759286238,
+              0.6909435113793256
+            ],
+            "first_random_ratios": [
+              3.7612491613987555,
+              3.6587098289010562
+            ]
+          },
+          "aocl": {
+            "candidate_us": 104.929312501,
+            "peer": "aocl",
+            "peer_us": 95.41175000115,
+            "median": 0.9025756301033632,
+            "wins": 0,
+            "ratios": [
+              0.8818878839987436,
+              0.9228040663116038,
+              0.9068961278434724,
+              0.8622468332738816,
+              0.8982551323632538,
+              0.9291508353480301
+            ],
+            "seed_medians": [
+              0.9068961278434724,
+              0.8982551323632538
+            ],
+            "first_random_ratios": [
+              0.4898443844619024,
+              0.426408758407065
+            ]
+          }
+        },
+        "fastest_method": "mkl-jit"
+      }
+    }
+  },
+  "gates": {
+    "generic_speed": true,
+    "matched_native_fidelity": true
+  }
+}
