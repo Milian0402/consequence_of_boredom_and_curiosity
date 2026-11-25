@@ -126,9 +126,9 @@ def engine(vendor,work,out,cpu):
                 first[key,mode,seed]=r.get('c_sha256','')
             ok[key]=not issues[key]
             if obj['trace_worker']:
-                route='';why='';proof={};h='';ordinary=first[key,'random',SEEDS[0]]
+                route='';why='';proof={};trace_digest='';ordinary=first[key,'random',SEEDS[0]]
                 try:
-                    r,s=observe(p,obj,'random',SEEDS[0],0,True);h=r['c_sha256'];need(0<=r['max_abs']<=.002 and h==ordinary,'ordinary and trace full output or FP64 differs')
+                    r,s=observe(p,obj,'random',SEEDS[0],0,True);trace_digest=r['c_sha256'];need(0<=r['max_abs']<=.002 and trace_digest==ordinary,'ordinary and trace full output or FP64 differs')
                     if name.startswith('release-'):
                         provider=name.split('-')[1];proof=vendor_route.validate_release(p,s,provider,method=name);route=proof['route']
                     elif name.startswith('fastmmw-'):
@@ -138,12 +138,13 @@ def engine(vendor,work,out,cpu):
                         proof=dict(cutoff=cutoff,leaves=leaf,padded=pad,core_multiple=split);route='upstream-serial-winograd'
                     else:
                         proof={a:int(b) for a,b in (s.split('=') for s in line(s,'HK'))};rem=(m%2,n%3,k%3);parent=int(name=='ragged-hk15' or not any(rem));finish=int(parent and any(rem));mc=m-m%2;nc=n-n%3
-                        h,w,d=mc//2,nc//3,k//3;surface=h*w+h*d+w*d
-                        lower=int(parent and 960*surface<=3*h*w*d<1024*surface)
+                        child_m,child_n,child_k=mc//2,nc//3,k//3
+                        surface=child_m*child_n+child_m*child_k+child_n*child_k
+                        lower=int(parent and 960*surface<=3*child_m*child_n*child_k<1024*surface)
                         expected=dict(public_calls=1,parents=parent,leaves=15*parent,lowered=lower,fused_leaves=15*parent,finishes=finish,right=int(finish and n%3!=0),bottom=int(finish and m%2!=0),k_terms=finish*(k%3),core_checked=(mc*nc if finish and k%3 else 0),args_ok=1)
                         need(all(proof.get(k)==v for k,v in expected.items()),'Observed HK/edge coordinates or arithmetic differ '+str(proof));route='hk15-ragged' if finish else ('hk15-divisible' if parent else 'released-fallback')
                 except (ValueError,OSError,subprocess.TimeoutExpired) as ex:why=str(ex);ok[key]=False;issues[key].append(why)
-                routes(dict(family=fam,method=name,role=obj['role'],verified=int(not why),route=route,ordinary_sha256=ordinary,trace_sha256=h,receipt=json.dumps(proof,separators=(',',':')),reason=why))
+                routes(dict(family=fam,method=name,role=obj['role'],verified=int(not why),route=route,ordinary_sha256=ordinary,trace_sha256=trace_digest,receipt=json.dumps(proof,separators=(',',':')),reason=why))
         if fam=='repeat-divisible-winner':
             for mode,seed in FIXTURES:
                 a=first.get(((fam,'released-hk15'),mode,seed));b=first.get(((fam,'ragged-hk15'),mode,seed));
