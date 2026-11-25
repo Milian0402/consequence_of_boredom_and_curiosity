@@ -655,7 +655,7 @@ static const char* cob_one_shot_route(bench_shape shape)
         const int smallest = m < n ? (m < k ? m : k) : (n < k ? n : k);
         const int largest = m > n ? (m > k ? m : k) : (n > k ? n : k);
         if (3 * largest <= 4 * smallest) {
-            return "amx_padded_balanced";
+            return "padded_balanced";
         }
     }
 
@@ -667,7 +667,7 @@ static const char* cob_one_shot_route(bench_shape shape)
     if ((use_lower_square_crossover || min_dim >= COB_SGEMM_STRASSEN1_MIN_DIM) &&
         3 * (int64_t)max_dim <= 4 * (int64_t)min_dim &&
         (m % 64) == 0 && (n % 64) == 0 && (k % 64) == 0) {
-        return "amx_strassen1";
+        return "strassen1";
     }
 #endif
 

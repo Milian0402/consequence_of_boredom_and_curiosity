@@ -17,6 +17,36 @@ set(COB_EXTERNAL_CBLAS_LIBRARIES "" CACHE STRING "Libraries for the external CBL
 set(COB_EXTERNAL_FORTRAN_SGEMM_NAME "external_sgemm_" CACHE STRING "Label for the external Fortran SGEMM benchmark row")
 set(COB_EXTERNAL_FORTRAN_SGEMM_LIBRARIES "" CACHE STRING "Libraries for the external Fortran SGEMM benchmark")
 
+set(COB_STRASSEN_SME "AUTO" CACHE STRING "Apple SME2 Strassen leaf (AUTO, ON or OFF)")
+set_property(CACHE COB_STRASSEN_SME PROPERTY STRINGS AUTO ON OFF)
+if(NOT COB_STRASSEN_SME MATCHES "^(AUTO|ON|OFF)$")
+    message(FATAL_ERROR "COB_STRASSEN_SME must be AUTO, ON or OFF")
+endif()
+
+function(cob_configure_strassen_leaf)
+    if(COB_STRASSEN_SME STREQUAL "OFF")
+        return()
+    endif()
+    set(sme_source "${PROJECT_SOURCE_DIR}/third_party/maxmulsk/strassen_leaf.c")
+    set(sme_flags -mcpu=apple-m4 -march=armv8.7-a+sme+sme2)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND
+       (CMAKE_OSX_ARCHITECTURES STREQUAL "arm64" OR
+        (NOT CMAKE_OSX_ARCHITECTURES AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm64|aarch64|ARM64|AARCH64)$")))
+        set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+        try_compile(sme_compiles "${CMAKE_CURRENT_BINARY_DIR}/check_strassen_sme"
+            "${sme_source}" COMPILE_DEFINITIONS ${sme_flags})
+        if(sme_compiles)
+            add_library(cob_strassen_sme_leaf OBJECT "${sme_source}")
+            target_compile_options(cob_strassen_sme_leaf PRIVATE ${sme_flags})
+            return()
+        endif()
+    endif()
+    if(COB_STRASSEN_SME STREQUAL "ON")
+        message(FATAL_ERROR "COB_STRASSEN_SME=ON needs Apple arm64 and a compiler supporting the SME2 leaf")
+    endif()
+endfunction()
+cob_configure_strassen_leaf()
+
 add_library(cob_matmul STATIC
     src/gemm.c
 )
@@ -100,6 +130,15 @@ if(COB_BUILD_TESTS)
     add_executable(cob_gemm_strassen_square_test tests/test_gemm.c)
     target_link_libraries(cob_gemm_strassen_square_test PRIVATE cob_matmul_strassen_square_test)
     add_test(NAME cob_gemm_strassen_square_test COMMAND cob_gemm_strassen_square_test)
+endif()
+
+if(TARGET cob_strassen_sme_leaf)
+    foreach(target cob_matmul cob_matmul_strassen_test cob_matmul_strassen_square_test)
+        if(TARGET ${target})
+            target_sources(${target} PRIVATE $<TARGET_OBJECTS:cob_strassen_sme_leaf>)
+            target_compile_definitions(${target} PRIVATE COB_WITH_STRASSEN_SME_LEAF=1)
+        endif()
+    endforeach()
 endif()
 
 if(COB_BUILD_BENCH)

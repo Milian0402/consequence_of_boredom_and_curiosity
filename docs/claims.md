@@ -5,6 +5,8 @@ evidence needed to re-audit it.
 
 ## Current Claim Status
 
+The November 25 M5 Max comparison covers six prespecified large balanced shapes. COB led the tested single-threaded implementations on each target median, and MaxMulSK led the 4096-square control. [Results and scope](audits/2026-11-25-strassen-sme.md)
+
 The previous broad claim is suspended. COB has verified wins on selected routed
 shapes, including huge balanced inputs, but a July 2026 current-head re-audit
 found losses to current OpenBLAS and MIT-licensed MpGEMM. Do not describe the

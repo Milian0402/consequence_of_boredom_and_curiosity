@@ -3206,6 +3206,11 @@ static void cob_strassen_merge_product(
     }
 }
 
+#if defined(COB_WITH_STRASSEN_SME_LEAF) && defined(COB_USE_APPLE_SME)
+extern int cob_sgemm_strassen_sme_leaf(int m, int n, int k,
+    const float* a, int lda, const float* b, int ldb, float* c, int ldc);
+#endif
+
 static int cob_sgemm_rowmajor_strassen1(
     int m,
     int n,
@@ -3231,6 +3236,13 @@ static int cob_sgemm_rowmajor_strassen1(
     const int mh = m / 2;
     const int nh = n / 2;
     const int kh = k / 2;
+    int (*const multiply_leaf)(int, int, int, const float*, int,
+        const float*, int, float*, int) =
+#if defined(COB_WITH_STRASSEN_SME_LEAF) && defined(COB_USE_APPLE_SME)
+        nh % 64 == 0 && cob_apple_sme2p1_available() ?
+            cob_sgemm_strassen_sme_leaf :
+#endif
+            cob_sgemm_rowmajor_amx;
     const size_t x_values = (size_t)mh * (size_t)kh;
     const size_t y_values = (size_t)kh * (size_t)nh;
     const size_t p_values = (size_t)mh * (size_t)nh;
@@ -3265,33 +3277,33 @@ static int cob_sgemm_rowmajor_strassen1(
        is read once. Every quadrant keeps the previous schedule's
        floating-point evaluation order, so results stay bit-identical. */
     cob_strassen_linear2(x, mh, kh, a21, lda, a22, lda, 1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, b11, ldb, c21, ldc)) {
+    if (!multiply_leaf(mh, nh, kh, x, kh, b11, ldb, c21, ldc)) {
         free(workspace);
         return 0;
     }
 
     cob_strassen_linear2(y, kh, nh, b12, ldb, b22, ldb, -1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, a11, lda, y, nh, c12, ldc)) {
+    if (!multiply_leaf(mh, nh, kh, a11, lda, y, nh, c12, ldc)) {
         free(workspace);
         return 0;
     }
 
     cob_strassen_linear2(y, kh, nh, b21, ldb, b11, ldb, -1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, a22, lda, y, nh, c11, ldc)) {
+    if (!multiply_leaf(mh, nh, kh, a22, lda, y, nh, c11, ldc)) {
         free(workspace);
         return 0;
     }
 
     cob_strassen_linear2(x, mh, kh, a11, lda, a22, lda, 1);
     cob_strassen_linear2(y, kh, nh, b11, ldb, b22, ldb, 1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, y, nh, p, nh)) {
+    if (!multiply_leaf(mh, nh, kh, x, kh, y, nh, p, nh)) {
         free(workspace);
         return 0;
     }
     cob_strassen_merge_m1(c11, c12, c21, c22, ldc, p, mh, nh);
 
     cob_strassen_linear2(x, mh, kh, a11, lda, a12, lda, 1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, b22, ldb, p, nh)) {
+    if (!multiply_leaf(mh, nh, kh, x, kh, b22, ldb, p, nh)) {
         free(workspace);
         return 0;
     }
@@ -3299,7 +3311,7 @@ static int cob_sgemm_rowmajor_strassen1(
 
     cob_strassen_linear2(x, mh, kh, a21, lda, a11, lda, -1);
     cob_strassen_linear2(y, kh, nh, b11, ldb, b12, ldb, 1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, y, nh, p, nh)) {
+    if (!multiply_leaf(mh, nh, kh, x, kh, y, nh, p, nh)) {
         free(workspace);
         return 0;
     }
@@ -3307,7 +3319,7 @@ static int cob_sgemm_rowmajor_strassen1(
 
     cob_strassen_linear2(x, mh, kh, a12, lda, a22, lda, -1);
     cob_strassen_linear2(y, kh, nh, b21, ldb, b22, ldb, 1);
-    if (!cob_sgemm_rowmajor_amx(mh, nh, kh, x, kh, y, nh, p, nh)) {
+    if (!multiply_leaf(mh, nh, kh, x, kh, y, nh, p, nh)) {
         free(workspace);
         return 0;
     }

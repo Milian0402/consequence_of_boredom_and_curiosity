@@ -7,58 +7,20 @@ as possible, especially on Apple Silicon. It is not a full BLAS replacement.
 The deliberately narrow contract leaves more room for specialized AMX, SME,
 and packing strategies.
 
-> **Current status:** COB has verified wins on selected large balanced
-> multiplications on the tested Apple M5 Max. The most recent competitor audit
-> found the July 12 source fastest at the exact `5632 x 5632 x 5632` shape.
-> Current head includes a later Strassen recombination change, so that audit is
-> historical rather than a current-head benchmark. The broader "fastest
-> open-source GEMM" goal is not yet proven.
+## M5 Max benchmark
 
-## Performance snapshot
+On one Apple M5 Max, COB had the fastest median one-thread, one-shot FP32 time on six prespecified large square and near-square products against Apple Accelerate, MpGEMM and MaxMulSK v5.1. Geometric mean paired speedups were 1.067× over previous COB, 1.067× over MaxMulSK, 1.197× over MpGEMM and 1.209× over Accelerate. MaxMulSK led on the 4096-square control. All times include packing and allocation. The public multiply entry point selects the new kernel automatically in supported builds.
 
-The latest cross-implementation snapshot is one single-threaded FP32
-multiplication at `5632^3` on an Apple M5 Max:
+The [November 25 audit](docs/audits/2026-11-25-strassen-sme.md) gives the dimensions, controls and accuracy checks. The [July crossover study](docs/audits/2026-07-12-square-crossover.md) records earlier results at 5632 square.
 
-| Implementation | Throughput |
-| --- | ---: |
-| COB (July 12 source) | **1769 GF/s** |
-| MpGEMM | 1642 GF/s |
-| Apple Accelerate | 1549 GF/s |
-| OpenBLAS | 894 GF/s |
+### Where the change applies
 
-The benchmark reports classical-equivalent throughput using `2 * M * N * K`
-divided by elapsed time. Strassen reduces the arithmetic actually executed.
+One-level Strassen runs seven smaller products on eligible balanced matrices.
+The new leaf uses SME for complete 64-column half-product panels. Below the
+crossover or on unsupported widths, the dispatcher keeps its existing kernels.
+Odd dimensions may reach the new leaf through the existing padding path.
 
-These numbers are a shape-specific historical snapshot, not a universal or
-current-head ranking. The competitors were measured with the best reliable
-harness available for each, so they were not all collected in one perfectly
-paired run. A July 13 fused-recombination change subsequently improved COB by
-`1.0495x` against the audited source in a paired run, but the competitor audit
-has not been repeated on that source. COB still loses to OpenBLAS, Accelerate,
-and MpGEMM at other shapes.
-
-See the [full `5632^3` audit](docs/audits/2026-07-12-square-crossover.md) for
-commands, versions, accuracy, and caveats. The broader publication boundary is
-kept in [docs/claims.md](docs/claims.md).
-
-### Where COB has verified wins
-
-The recorded wins cover large balanced FP32 multiplications: contiguous
-row-major inputs with every dimension a multiple of 64, a largest-to-smallest
-dimension ratio of at most 4:3, and sizes from `6144` (exact squares from
-`5632`). Those inputs route through one level of Strassen on top of AMX
-kernels that run at about 96% of the measured single-core matrix-unit
-ceiling. This figure measures the inner kernels. End-to-end time also
-depends on the number of block products, packing, and recombination.
-
-Huge dense multiplies like these are the expensive core of real workloads:
-covariance and Gram matrices in scientific computing, dense layers in
-CPU-side ML experiments, and blocked solvers that reduce to GEMM. When such a
-multiplication runs on one core of the audited Apple M5 Max, the July 12 COB
-source finished it faster than the other implementations tested there, while
-leaving the GPU and the remaining cores free for other work. The code is also
-a compact single-file reference for combining AMX, SME2.1, and Strassen
-techniques behind one dispatcher.
+Large dense multiplies occur in covariance and Gram matrices, dense layers in CPU-side machine learning, and blocked solvers. Reported throughput uses the classical-equivalent operation count `2*M*N*K` divided by elapsed time.
 
 ## Supported operation
 
@@ -207,10 +169,14 @@ Useful project notes:
 ## Goal
 
 The goal is still to become the fastest open-source single-threaded matrix
-multiplication implementation inside this narrow contract. The current next
-step is deeper M5-specific SME kernel schedule exploration, backed by paired
-measurements rather than isolated peak numbers.
+multiplication implementation inside this narrow contract. The current benchmark covers large balanced matrices on one M5 Max. Coverage across other dimensions and processors remains open.
+
+## Optional Apple SME2 Strassen leaf
+
+On a native Apple arm64 build, Make and CMake probe the compiler for the single-threaded MaxMulSK v5.1 leaf adapted for COB’s strided Strassen subproducts. The dispatcher checks the CPU feature and streaming vector length before using the leaf on full 64-column panels. The existing kernel handles other shapes and CPUs.
+
+Use `make COB_STRASSEN_SME=OFF` or configure CMake with `-DCOB_STRASSEN_SME=OFF` to disable it. Setting either option to `ON` requires a compatible compiler. Make supports a separate leaf compiler through `COB_SME_CC`. Upstream provenance, its Apache-2.0 license and its copyright notice accompany the adapted file in [third_party/maxmulsk](third_party/maxmulsk).
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+COB is MIT-licensed. The optional MaxMulSK-derived leaf is Apache-2.0-licensed. See the [COB license](LICENSE) and [MaxMulSK license and notice](third_party/maxmulsk).
