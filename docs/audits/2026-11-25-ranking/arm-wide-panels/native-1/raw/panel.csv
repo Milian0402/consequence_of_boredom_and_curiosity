@@ -1,0 +1,13 @@
+family,layout,m,n,k,lda,ldb,ldc,ar,ac,br,bc,cr,cc
+repeat-win-ragged,origin,137,2179,347,354,2186,2186,0,0,0,0,0,0
+repeat-intel-gap,compact,79,1793,223,223,1793,1793,0,0,0,0,0,0
+fresh-short-tail,cropped,28,1153,107,127,1185,1201,2,7,3,11,1,13
+fresh-thin-odd,cropped,47,2051,153,178,2112,2107,3,15,2,3,4,19
+fresh-exact,compact,64,2304,224,224,2304,2304,0,0,0,0,0,0
+fresh-minus-one,b-shift,75,2815,263,272,2867,2848,0,0,2,15,0,0
+fresh-middle-plus-one,c-shift,99,1537,311,320,1568,1619,0,0,0,0,3,5
+fresh-long-depth,a-shift,118,3329,359,403,3392,3360,2,13,0,0,0,0
+fresh-upper-irregular,cropped,143,2473,229,267,2509,2563,1,17,3,19,5,7
+fresh-near-row-limit,cropped,157,3889,307,361,3999,3983,3,23,2,31,1,27
+control-below-width,cropped,61,983,177,211,1043,1067,2,9,1,13,3,21
+control-above-rows,cropped,161,2631,283,317,2693,2737,1,5,3,11,2,27

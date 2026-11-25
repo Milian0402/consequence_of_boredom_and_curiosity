@@ -1,0 +1,5 @@
+Native Linux Arm on the local Apple machine, standalone correctness checks only.
+Before/after clean-rebuilt archive digests matched for each option.
+incumbent 1416264e132c32c0fc02770050579375d8e0494dd1a3a2a822e306f407167c7a
+candidate 44fceb8c15118d241e2bb1fcea8982c81fcc76956fe7444d03166d3104e7e3be
+Incumbent and candidate each passed all five CTests. Both installed numerical workers passed explicit SIGSYS probes and random/cancellation/scaled first plus two repeated full products, each with 27,837 output values and full parent guards.

@@ -1,0 +1,7 @@
+family,method,reason
+repeat-win-ragged,blasfeo,"worker rc=-11: affinity_cpu=0
+BLASFEO target=ARMV8A_ARM_CORTEX_A76 API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=1"
+control-below-width,blasfeo,"worker rc=-11: affinity_cpu=0
+BLASFEO target=ARMV8A_ARM_CORTEX_A76 API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=1"
+control-above-rows,blasfeo,"worker rc=-11: affinity_cpu=0
+BLASFEO target=ARMV8A_ARM_CORTEX_A76 API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=1"

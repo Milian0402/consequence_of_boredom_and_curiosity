@@ -1,0 +1,62 @@
+[
+  {
+    "run": 45702348592,
+    "job": 139515547017,
+    "native_url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45702348592",
+    "commit": "9e2483cc4b1839a2e0a392f2cfdb656d807d006e",
+    "artifact": 15063947481,
+    "sha256": "sha256:cd3561e71fd2acca0c576c0b417363f0c24d55b1bc5d7a5f8da12115726dd10a",
+    "observations": 0,
+    "original_members": {
+      "armpl-build.txt": "3bffe69dd6d4e36ac7ce99a37f069c130c0f0539e8fd9b6d8d0f715c0fc53c10",
+      "binaries.csv": "b21858cf66f847cf28c73822fa958bc70f9b563a48f1384e42387447f64fc837",
+      "benchmark-revision.txt": "a84a17d3674eb155fe6ae1783674355444a1d9b2c93cc6535c30398c5d33a2e8",
+      "blasfeo-build.txt": "c84200ec511b1f283de7f6ef6719a5db2acb3015c41bc999f6f5944c8f0e0f1e",
+      "host.txt": "18c10b15807cdb1c01b853f3b2d87031ff9f826ee8bb30ab4b5973bd74a3db15",
+      "incumbent-build.log": "eaa9b9acc5c47857472bdde33152c189688c0c5bc929aab274ba6c7dac692151",
+      "incumbent-configure.log": "48de1c797adc8b86d2c537dbb6846d8187402e9e0d6789f034f04734ef7cf51c",
+      "incumbent-tests.log": "078271eb8974bb4044975a01b9e66f8ef6459a833839d63cfb0b944e289e92cd",
+      "libxsmm-build.txt": "ebe82fb6f0b26e6fd56f1d0f5b381a88820420173c6180536a1b783222e2ca61",
+      "onednn-source.txt": "27fae962d51fc2e586a4b72d940c7906a3dd50f1dfb0818fc598f5d0e3f918ac",
+      "openblas-build.txt": "730d2123be504e67af6ded975d3176dec4fcf89ff5814e15e3b2c780a14d230b",
+      "page-size.txt": "25ac87b7309b7946b51c32e824793ff48b56b735efa16875cf33e4ba67523d91",
+      "panel.csv": "5e470c40de6e63b6debbb96afd146eda58de83e50ef3da1e2f19186a8990b4c4",
+      "peers.sha256": "7447f6b1522cf0399595971f09f4ff321a70d0394d9cfdd22fe2498e91cb29e8",
+      "protocol.md": "8224aa65eeaed83d9f0a4facbb49ca86e29b4a36ea9c2d218271f25671f6d494",
+      "qualified-cached-plan.log": "7d3f001a71fbdfbb3348feebbd6d86cfd9554b5e9b588631ea3c43c351af0092",
+      "qualified-oneshot.log": "a208e6f047e7e7a2c1b184ab7ac797c3c1104e808013e474bfc78501258b7e8b",
+      "score.py": "ce826dba95810921b0ab1fe58533358ba72f7bceb8586cbda5c8a64635b4b79c",
+      "source.json": "a15ae88856888d9b211bf5249278e56a94fa71a711c20701a70f8b7ec6a0625f"
+    }
+  },
+  {
+    "run": 45702761305,
+    "job": 139516944479,
+    "native_url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45702761305",
+    "commit": "620861185a11085c45977388b385e2cbdc9f2b62",
+    "artifact": 15062414054,
+    "sha256": "sha256:a546e3ba2d64533bb10574ef10ca9027b0bd76030964ac2bbd53cae9d11b0dcd",
+    "observations": 0,
+    "original_members": {
+      "armpl-build.txt": "367832e01b203aff4eac6807e5d46b49c4e0c6bdbc197108441f50af8afb36c5",
+      "benchmark-revision.txt": "56a6e8946b9d86fde32d24da3787d964701832171e8b5b6b8b02d7a1f0203e60",
+      "binaries.csv": "b21858cf66f847cf28c73822fa958bc70f9b563a48f1384e42387447f64fc837",
+      "blasfeo-build.txt": "8653f9890d09450eafd694e4e586fdba3e493edda8ac96c862578c33c9d9fb62",
+      "host.txt": "18c10b15807cdb1c01b853f3b2d87031ff9f826ee8bb30ab4b5973bd74a3db15",
+      "incumbent-build.log": "e3a7bb907e1a1110d45fd470a5917a795ec84606920a9f44a1369bde152bfb40",
+      "incumbent-configure.log": "b48852c6b09932ab1c9935a54eecf8dca14a9d1d001de77cbc457212138c225b",
+      "incumbent-tests.log": "d53cb3c8a12e303d05dbfbe3d1c2dd2320f3c723663a729147cf9e6ab9061640",
+      "libxsmm-build.txt": "ebe82fb6f0b26e6fd56f1d0f5b381a88820420173c6180536a1b783222e2ca61",
+      "onednn-source.txt": "27fae962d51fc2e586a4b72d940c7906a3dd50f1dfb0818fc598f5d0e3f918ac",
+      "openblas-build.txt": "730d2123be504e67af6ded975d3176dec4fcf89ff5814e15e3b2c780a14d230b",
+      "page-size.txt": "25ac87b7309b7946b51c32e824793ff48b56b735efa16875cf33e4ba67523d91",
+      "panel.csv": "5e470c40de6e63b6debbb96afd146eda58de83e50ef3da1e2f19186a8990b4c4",
+      "peers.sha256": "65223a0101d9ff05b432f0e88c2d2cca833533c42e140f9ebf8477d7108002f3",
+      "protocol.md": "8224aa65eeaed83d9f0a4facbb49ca86e29b4a36ea9c2d218271f25671f6d494",
+      "qualified-cached-plan.log": "7d3f001a71fbdfbb3348feebbd6d86cfd9554b5e9b588631ea3c43c351af0092",
+      "qualified-oneshot.log": "a208e6f047e7e7a2c1b184ab7ac797c3c1104e808013e474bfc78501258b7e8b",
+      "score.py": "153175a9090d45b7f8c372aba01ffb7921ecc6f2b8279c373abc616328499f81",
+      "source.json": "a15ae88856888d9b211bf5249278e56a94fa71a711c20701a70f8b7ec6a0625f"
+    }
+  }
+]

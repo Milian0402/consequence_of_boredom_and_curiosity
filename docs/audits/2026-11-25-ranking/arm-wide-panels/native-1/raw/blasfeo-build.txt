@@ -1,0 +1,14 @@
+source=https://github.com/giaf/blasfeo revision=e5d1cbbb2f458acd7adb7d9e8a6522416b7e336f tar_sha256=3e9276f686dad725049600b37459197e464fd3445a49fa7d87c690a5527de9b5 target=ARMV8A_ARM_CORTEX_A76
+cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Copyright (C) 2023 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+BLASFEO target=ARMV8A_ARM_CORTEX_A76 API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+ELF dependencies=['libc.so.6', 'ld-linux-aarch64.so.1'], private BLASFEO symbols, no thread-launch imports
+NaN old C survived beta=0 on (1, 17, 3), row 0: 17 nonfinite cells
+Stock kernel retained NaN old C. Retesting with a timed logical output clear.
+BLASFEO target=ARMV8A_ARM_CORTEX_A76 API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=1
+ELF dependencies=['libc.so.6', 'ld-linux-aarch64.so.1'], private BLASFEO symbols, no thread-launch imports
+5 complete rectangular / square FP32 checks, NaN old C, padded strides, one OS thread
+8c151d333c552d279b57775b50dabbfb04653fcfe684dd60ed2a35342d0bdf10  /home/runner/work/_temp/blasfeo-rank.jjIGCz/blasfeo.so

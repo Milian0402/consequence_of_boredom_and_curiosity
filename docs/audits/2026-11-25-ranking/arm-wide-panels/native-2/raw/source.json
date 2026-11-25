@@ -1,0 +1,6 @@
+{
+  "release": "a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6",
+  "patch_sha256": "71e1c7a3ff3c3b807c0d76b89f2c067fdbd9d96261309b7e390110dcfa3f42be",
+  "panel_sha256": "5e470c40de6e63b6debbb96afd146eda58de83e50ef3da1e2f19186a8990b4c4",
+  "test_overlay_sha256": "015032ff2c44413db5558e0e623d1107cc3e24ea4fcfa5219d48b734e1941986"
+}

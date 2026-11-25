@@ -39,6 +39,10 @@ The option remains experimental and off by default. On all six padded thin holdo
 
 The installed option reproduced the default output bit for bit on 108 stress fixtures. Both configurations exceeded the 0.002 absolute-error threshold on some high-magnitude inputs. The speed result applies to the normalized benchmark inputs. The release option requires Apple SME2.1, 1024–4096 output columns and reduction depth 96–384. [Installed timings, accuracy limits and offline replay](m5-wide-release/README.md)
 
+## A standalone 16-column B panel on Linux Arm
+
+On two Neoverse N2 runners, packing 16 columns of B at a time raised the standalone kernel's geometric-mean speed by 4.5% and 3.2% over tuned COB across eight new layouts. Both fell short of the prespecified 5% requirement. Two shapes had a narrower, repeatable result. At 47 × 2051 × 153 and 99 × 1537 × 311 the experimental kernel beat all seven external entries in every paired warm round on both machines. Direct LIBXSMM still beat it on the 28 × 1153 × 107 case in all twelve rounds. The source patch remains available for reproduction. [All layouts, first-call measurements and per-CPU replay](arm-wide-panels/README.md) · [Native run](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45703366648)
+
 ## Why cropped views changed the Intel ranking
 
 A full factorial test independently switched each of the three physical row strides and each of the three starting addresses for three previously measured products. Increasing B's row stride cut oneMKL time by 2.7–6.9%. Changing the start of B cut its time by 2.1–11.5%. Both changes saved time in all eighteen shape-and-round comparisons for each factor. COB's response was smaller and varied by shape. At 43 × 2291 × 137, changing B's stride saved 12.7% at the original B address and 0.7% at the shifted address. Every timed implementation received the same mathematical inputs. [Measurements, interactions and offline replay](intel-layout-factors/RESULTS.md)

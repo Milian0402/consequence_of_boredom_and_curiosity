@@ -1,0 +1,25 @@
+Internal ctest changing into directory: /tmp/tmp.WKQev76mQ1/incumbent-build
+Test project /tmp/tmp.WKQev76mQ1/incumbent-build
+    Start 1: cob_gemm_test
+1/5 Test #1: cob_gemm_test ....................   Passed    0.20 sec
+    Start 2: cob_gemm_strassen_test
+2/5 Test #2: cob_gemm_strassen_test ...........   Passed    0.20 sec
+    Start 3: cob_gemm_strassen_square_test
+3/5 Test #3: cob_gemm_strassen_square_test ....   Passed    0.20 sec
+    Start 4: cob_portable_strassen_test
+4/5 Test #4: cob_portable_strassen_test .......***Failed    0.01 sec
+workspace retry for 128 square made 0 allocations, initial sizes 61440 and 4096
+case 2 failed 2
+
+    Start 5: cob_fused_strassen_test
+5/5 Test #5: cob_fused_strassen_test ..........***Failed    0.00 sec
+Shape 0, pattern 0 failed check 3
+
+
+60% tests passed, 2 tests failed out of 5
+
+Total Test time (real) =   0.66 sec
+
+The following tests FAILED:
+	  4 - cob_portable_strassen_test (Failed)
+	  5 - cob_fused_strassen_test (Failed)
