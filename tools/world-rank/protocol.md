@@ -21,3 +21,7 @@ The additional short-N and short-K discovery controls are 1536×1×1025/3 and 25
 Keep the prior standalone path for matrices with all three dimensions at most 128. The four-row no-pack implementation lost on both native discovery CPUs. Use the new blocked classical kernel on eligible larger matrices, short-N and short-K kernels on their supported shapes, and fused one-level Strassen from harmonic dimension 1024. Compact square matrices eligible for the existing two-level route retain that route. Both discovery CPUs favored two levels at 3072. The confirmation policy uses matrix geometry only.
 
 The small kernel challenger is scored independently on its own nine-layout panel. It has two separately declared seeds, direct-only peers and a wider explicit LIBXSMM JIT range. Main-panel results keep the previously declared LIBXSMM size range. The one-thread whole-call timing contract applies throughout.
+
+## Follow-up replication
+
+On the 13 previously confirmed layouts, compare the frozen 3cd1efc standalone entry to the revised candidate and to the independent libraries on new seeds 59147207 and 81729353. Seven additional layouts test the changed entry for small inputs and for nine to fifteen output rows: 40³, 72³, 29×61×43/3, 57×85×37/5, 9×397×293/1, 13×743×479/5, 15×953×613/3. Distinguish the repeated cases from these seven in the ranking. Retain the original 13-case confirmation scores and CPU model. Use pure standalone candidates here; initial hybrid results remain available in the first confirmation artifacts.

@@ -3987,10 +3987,22 @@ COB_THIN_TARGET static void cob_sgemm_few_rows(int m, int n, int k,
 
 #include "cob_small_direct.inc"
 
+#if defined(COB_ENABLE_SMALL_X86) && COB_ENABLE_SMALL_X86 && defined(COB_USE_X86_SIMD) && \
+    ((defined(__AVX2__) && defined(__FMA__)) || (defined(__AVX512F__) && !defined(COB_DISABLE_X86_AVX512)))
+#define COB_USE_SMALL_X86 1
+#include "cob_small_x86.inc"
+#endif
+
 #if defined(COB_ENABLE_SHORT_AXES) && COB_ENABLE_SHORT_AXES && !defined(COB_USE_APPLE_AMX) && \
     (defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && defined(__aarch64__)))
 #define COB_USE_SHORT_AXES 1
 #include "cob_short_axes.inc"
+#endif
+
+#if defined(COB_ENABLE_FEW_ROW_PANEL) && COB_ENABLE_FEW_ROW_PANEL && !defined(COB_USE_APPLE_AMX) && \
+    (defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && defined(__aarch64__)))
+#define COB_USE_FEW_ROW_PANEL 1
+#include "cob_few_row_panel.inc"
 #endif
 
 void cob_sgemm_rowmajor(
@@ -4004,6 +4016,12 @@ void cob_sgemm_rowmajor(
     float* c,
     int ldc)
 {
+#ifdef COB_USE_FEW_ROW_PANEL
+    if (cob_try_panel_few_rows(m, n, k, a, lda, b, ldb, c, ldc)) return;
+#endif
+#ifdef COB_USE_SMALL_X86
+    if (cob_try_small_x86(m, n, k, a, lda, b, ldb, c, ldc)) return;
+#endif
 #ifdef COB_USE_SHORT_AXES
     if (cob_try_short_axes(m, n, k, a, lda, b, ldb, c, ldc)) return;
 #endif
