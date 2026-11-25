@@ -8,6 +8,10 @@ Scaled positive inputs on the M5 Max exposed errors in that original implementat
 
 ## Lower-precision hardware and FP32 inputs
 
+Across eight layouts per CPU, every BF16 implementation that passed the FP32 accuracy checks lost all its paired warm comparisons against the fastest qualifying FP32 entry. On Intel, fusing six component products in AMX ran **2.06×** as fast as calling oneDNN for those six products. It reached **0.675×** the speed of the best FP32 competitor per shape. On the Arm Neoverse N2, six Arm Compute Library products reached **0.410×**. Using one rounded BF16 product took only 905 ms for the 4096-square case on Arm, but failed the overall accuracy checks. [Complete times, accuracy checks, instruction traces and replay](bf16-components/README.md)
+
+The existing FP32 implementations recorded several wins in the same experiment. On Arm, standalone COB led at 1024 square and on the tall 1793 × 1151 × 2779 rectangle. COB with OpenBLAS led the two large irregular rectangles. On Intel, COB with oneMKL led at 4096 square, taking 590.43 ms against 948.38 ms for fused BF16. The comparison includes prepared competitors and lists exclusions by layout. [Per-layout outcomes for all methods](bf16-components/outcomes.csv)
+
 On Apple M5 Max, three widening FP16 products reached 12.5–28.4% of the fastest accuracy-qualified FP32 competitor’s speed across six layouts. All four FP16 variants lost every matched timing comparison with the fastest qualified FP32 control. The more accurate six- and nine-term variants still exceeded 0.002 on the positive 4096-square matrix. A register-only measurement on this CPU found almost identical arithmetic throughput for the widening FP16 and native FP32 instructions in the tested schedule. [Hardware, accuracy and complete-call timings](fp16-components/README.md)
 
 ## Earlier large odd rectangles

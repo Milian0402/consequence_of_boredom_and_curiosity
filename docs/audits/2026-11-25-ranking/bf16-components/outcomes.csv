@@ -1,0 +1,377 @@
+architecture,processor,family,m,n,k,method,role,strict_qualified,globally_matched_fp32,first_call_ms,warm_call_ms,fastest_fp32_including_prepared,paired_ratio,six_pair_wins,numerical_or_route_exclusion
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,cob-released,standalone,1,,1.514972499875,1.455996000005,aocl,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,cob-released-hk15,standalone,1,,1.52414399986,1.467963000035,aocl,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,openblas,independent-oneshot,1,,1.480233000055,1.36379549991,aocl,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,mkl,independent-oneshot,1,,2.681956999935,1.29626099988,aocl,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,mkl-jit,independent-oneshot,1,,2.660281499855,1.29594400005,aocl,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,aocl,independent-oneshot,1,,1.5581765,1.29367300002,aocl,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,blasfeo,independent-oneshot,1,,2.511408499915,2.36617600001,aocl,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,fastmmw-768,independent-oneshot,1,,1.4834714999100003,1.35030799993,aocl,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,fastmmw-1536,independent-oneshot,1,,1.4800530000249998,1.354503499955,aocl,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,tblis-ab-1,independent-oneshot,0,,2.90925299998,2.71648299997,aocl,,,all-cell historical absolute or componentwise FP64 accuracy failed
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,tblis-ab-2,independent-oneshot,0,,3.35897299999,3.243151499985,aocl,,,all-cell historical absolute or componentwise FP64 accuracy failed
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,onednn-oneshot,independent-oneshot,1,,2.4971829999449997,1.91465950002,aocl,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,onednn-cached-plan,independent-retained,1,,2.390546000015,1.3348335001000002,aocl,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,release-openblas-two,release-assisted,1,,1.507693000005,1.471082000025,aocl,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,release-openblas-aligned-two,release-assisted,1,,1.520339500075,1.455130500065,aocl,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,release-mkl-two,release-assisted,1,,1.520389000005,1.4669334999549999,aocl,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,release-mkl-aligned-two,release-assisted,1,,1.543514499985,1.4588330000149998,aocl,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,mixed1,precision-reference,0,False,3.1679180000350002,2.5142864998900003,aocl,,,all-cell historical absolute or componentwise FP64 accuracy failed; outside registered FP32 accuracy gates
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,mixed3,precision-reference,0,False,5.20981049999,3.9204610001199995,aocl,,,outside registered FP32 accuracy gates
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,mixed6,mixed,1,True,7.670037000025,5.814369999935,aocl,0.22348480298137313,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,mixed6-bands,mixed,1,True,10.76103399995,8.527679500045,aocl,0.15127188164566546,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,mixed9,mixed,1,True,9.10076100007,6.718344499975,aocl,0.19307493124597974,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-512,512,512,512,fused6-amx,mixed,1,True,2.170341500005,1.955207500035,aocl,0.6551713676491695,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,cob-released,standalone,1,,11.0559530001,10.9576515,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,cob-released-hk15,standalone,1,,11.066880999950001,10.9643155,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,openblas,independent-oneshot,1,,10.83602799995,10.220835000049998,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,mkl,independent-oneshot,1,,11.5797340001,10.049233500049999,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,mkl-jit,independent-oneshot,1,,11.670723499900001,10.027241500050001,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,aocl,independent-oneshot,1,,10.994257000100001,10.4652614999,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,blasfeo,independent-oneshot,1,,19.052915999950002,18.7828165,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,fastmmw-768,independent-oneshot,1,,11.89545899995,11.49905349995,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,fastmmw-1536,independent-oneshot,1,,10.80766099995,10.20948899995,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,tblis-ab-1,independent-oneshot,1,,19.9759285,19.4816894999,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,tblis-ab-2,independent-oneshot,1,,23.43356649995,23.210741499949997,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,onednn-oneshot,independent-oneshot,1,,12.609379000049998,11.99929749995,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,onednn-cached-plan,independent-retained,1,,12.5855425001,11.14894800005,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,release-openblas-two,release-assisted,1,,11.395311,11.31620149995,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,release-openblas-aligned-two,release-assisted,1,,11.39190000005,11.3085444999,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,release-mkl-two,release-assisted,1,,11.39889699995,11.333015500100002,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,release-mkl-aligned-two,release-assisted,1,,11.4258695,11.341756000100002,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,mixed1,precision-reference,0,False,10.285948000065,9.061223500055,mkl-jit,,,all-cell historical absolute or componentwise FP64 accuracy failed; outside registered FP32 accuracy gates
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,mixed3,precision-reference,0,False,21.2824895001,20.02467949995,mkl-jit,,,outside registered FP32 accuracy gates
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,mixed6,mixed,1,True,35.512315000049995,34.04937899995,mkl-jit,0.2957457027089053,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,mixed6-bands,mixed,1,True,42.9013354999,33.273958000099995,mkl-jit,0.30109629738574956,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,mixed9,mixed,1,True,45.7009649999,43.8305870001,mkl-jit,0.22904109052014326,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-1024,1024,1024,1024,fused6-amx,mixed,1,True,13.092868499949999,11.529925999949999,mkl-jit,0.8723140659341246,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,cob-released,standalone,1,,85.8676284999,84.8192525,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,cob-released-hk15,standalone,1,,86.14653150005,84.73881449999999,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,openblas,independent-oneshot,1,,80.8102760001,79.831622,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,mkl,independent-oneshot,1,,80.51478949995,78.32026249995,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,mkl-jit,independent-oneshot,1,,80.75608450005001,78.02776899999999,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,aocl,independent-oneshot,1,,81.98703350005,81.64736350005,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,blasfeo,independent-oneshot,1,,152.05302749999998,151.32298350000002,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,fastmmw-768,independent-oneshot,1,,91.67996149995,86.10089699995,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,fastmmw-1536,independent-oneshot,1,,82.16918749995,80.5480049999,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,tblis-ab-1,independent-oneshot,1,,147.5416415,145.7173095,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,tblis-ab-2,independent-oneshot,1,,155.69255900000002,155.8202795,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,onednn-oneshot,independent-oneshot,1,,90.30888449999999,89.6845095,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,onednn-cached-plan,independent-retained,1,,90.50134149995002,88.8161715,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,release-openblas-two,release-assisted,1,,84.07339399989999,81.8832745,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,release-openblas-aligned-two,release-assisted,1,,83.630966,81.4392440001,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,release-mkl-two,release-assisted,1,,83.8736460001,79.67983699995,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,release-mkl-aligned-two,release-assisted,1,,84.7536074999,80.023059,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,mixed1,precision-reference,0,False,54.80864599995,43.411713499950004,mkl-jit,,,all-cell historical absolute or componentwise FP64 accuracy failed; outside registered FP32 accuracy gates
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,mixed3,precision-reference,0,False,123.661357,119.74309899999999,mkl-jit,,,outside registered FP32 accuracy gates
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,mixed6,mixed,1,True,219.958634,214.263274,mkl-jit,0.36507642012054664,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,mixed6-bands,mixed,1,True,254.219474,182.96642899999998,mkl-jit,0.42520358976071115,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,mixed9,mixed,1,True,294.1759625,291.1600345,mkl-jit,0.27069587218714786,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-2048,2048,2048,2048,fused6-amx,mixed,1,True,100.236637,98.15369199989999,mkl-jit,0.7940388208951497,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,cob-released,standalone,1,,659.5501884999999,658.3460375,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,cob-released-hk15,standalone,1,,668.2553250000001,660.1305985,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,openblas,independent-oneshot,1,,641.517467,638.2315295000001,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,mkl,independent-oneshot,1,,633.8965505,629.878161,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,mkl-jit,independent-oneshot,1,,634.0791314999999,629.902559,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,aocl,independent-oneshot,1,,681.2522615,680.4884515,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,blasfeo,independent-oneshot,1,,1250.0349315,1244.6174675,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,fastmmw-768,independent-oneshot,1,,660.1363335,637.2842635,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,fastmmw-1536,independent-oneshot,1,,621.4285445,601.6720600000001,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,tblis-ab-1,independent-oneshot,1,,1149.1592755000001,1141.2799850000001,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,tblis-ab-2,independent-oneshot,1,,1161.086249,1155.4557980000002,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,onednn-oneshot,independent-oneshot,1,,738.4622995,737.5974,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,onednn-cached-plan,independent-retained,1,,736.1090725,728.0528294999999,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,release-openblas-two,release-assisted,1,,613.1931344999999,615.370811,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,release-openblas-aligned-two,release-assisted,1,,620.6330714999999,615.621651,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,release-mkl-two,release-assisted,1,,595.555725,592.7846455,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,release-mkl-aligned-two,release-assisted,1,,598.3639665000001,590.428755,release-mkl-aligned-two,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,mixed1,precision-reference,0,False,316.53866,318.8084025,release-mkl-aligned-two,,,all-cell historical absolute or componentwise FP64 accuracy failed; outside registered FP32 accuracy gates
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,mixed3,precision-reference,0,False,769.8958655000001,780.7894309999999,release-mkl-aligned-two,,,outside registered FP32 accuracy gates
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,mixed6,mixed,1,True,1454.9414860000002,1474.3894795,release-mkl-aligned-two,0.40121468165167634,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,mixed6-bands,mixed,1,True,1494.4745545,1486.040626,release-mkl-aligned-two,0.39742553686650134,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,mixed9,mixed,1,True,2043.828529,2066.7692985,release-mkl-aligned-two,0.2854638729640647,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,square-4096,4096,4096,4096,fused6-amx,mixed,1,True,942.9584045,948.37967,release-mkl-aligned-two,0.6263393978618985,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,cob-released,standalone,1,,61.62831849995,60.988103,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,cob-released-hk15,standalone,1,,61.5609089999,60.94889199995,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,openblas,independent-oneshot,1,,53.19142049995,52.346444500000004,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,mkl,independent-oneshot,1,,54.75989750005,52.5620819999,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,mkl-jit,independent-oneshot,1,,54.81666200005,52.63038099995,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,aocl,independent-oneshot,1,,56.135919999950005,55.274772500100006,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,blasfeo,independent-oneshot,0,,,,openblas,,,worker exit -11 affinity_cpu=0 BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,fastmmw-768,independent-oneshot,1,,78.34226700005,70.899518,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,fastmmw-1536,independent-oneshot,1,,70.56154949999998,67.18324600004999,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,tblis-ab-1,independent-oneshot,1,,104.44081750000001,102.21511199999999,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,tblis-ab-2,independent-oneshot,1,,104.652674,103.665673,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,onednn-oneshot,independent-oneshot,1,,96.76496949999999,96.58974900005,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,onednn-cached-plan,independent-retained,1,,98.18510150000002,95.07163749995,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,release-openblas-two,release-assisted,1,,65.47583550005001,63.90011199994999,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,release-openblas-aligned-two,release-assisted,1,,65.41821900010001,64.00506000015,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,release-mkl-two,release-assisted,1,,66.7029179999,62.68572550005,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,release-mkl-aligned-two,release-assisted,1,,67.156188,63.33180900005001,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,mixed1,precision-reference,0,False,36.17092800005,32.69710999995,openblas,,,all-cell historical absolute or componentwise FP64 accuracy failed; outside registered FP32 accuracy gates
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,mixed3,precision-reference,0,False,70.9813090001,65.64855649990001,openblas,,,outside registered FP32 accuracy gates
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,mixed6,mixed,1,True,115.334463,108.8074785,openblas,0.48259150535582906,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,mixed6-bands,mixed,1,True,160.248251,153.038794,openblas,0.34211388306974255,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,mixed9,mixed,1,True,143.231654,136.1076675,openblas,0.38564836991220947,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,odd-cropped,1537,2053,1789,fused6-amx,mixed,1,True,65.100184,63.754508,openblas,0.8228177644069103,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,cob-released,standalone,1,,214.71791899999997,213.577032,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,cob-released-hk15,standalone,1,,215.4580165,213.5134965,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,openblas,independent-oneshot,1,,189.29092599999998,188.1446545,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,mkl,independent-oneshot,1,,188.6918085,186.8111785,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,mkl-jit,independent-oneshot,1,,188.7759415,186.48692,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,aocl,independent-oneshot,1,,195.88038550000002,194.6928115,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,blasfeo,independent-oneshot,1,,361.18546499999997,360.22598,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,fastmmw-768,independent-oneshot,1,,239.9731905,230.1083075,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,fastmmw-1536,independent-oneshot,1,,226.9576435,223.433528,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,tblis-ab-1,independent-oneshot,1,,359.95128850000003,357.8823255,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,tblis-ab-2,independent-oneshot,1,,357.82188449999995,360.2205695,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,onednn-oneshot,independent-oneshot,1,,314.69455150000005,312.46579399999996,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,onednn-cached-plan,independent-retained,1,,314.79528550000003,309.6460875,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,release-openblas-two,release-assisted,1,,206.2116115,201.467224,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,release-openblas-aligned-two,release-assisted,1,,201.83337350000002,199.04483699999997,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,release-mkl-two,release-assisted,1,,208.359038,202.58253,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,release-mkl-aligned-two,release-assisted,1,,200.440091,195.50824550000002,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,mixed1,precision-reference,0,False,145.1930585,144.40292599999998,mkl-jit,,,all-cell historical absolute or componentwise FP64 accuracy failed; outside registered FP32 accuracy gates
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,mixed3,precision-reference,0,False,245.41352999999998,237.052504,mkl-jit,,,outside registered FP32 accuracy gates
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,mixed6,mixed,1,True,396.46141700000004,383.5519485,mkl-jit,0.4869341613800061,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,mixed6-bands,mixed,1,True,536.003086,517.0803425,mkl-jit,0.3605677386217046,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,mixed9,mixed,1,True,478.24777,479.5013825,mkl-jit,0.387977891210073,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,previous-hk,2039,2969,3367,fused6-amx,mixed,1,True,287.987121,289.007386,mkl-jit,0.6454066249211704,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,cob-released,standalone,1,,3.712983000015,3.63617599987,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,cob-released-hk15,standalone,1,,3.700171499985,3.664773999955,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,openblas,independent-oneshot,1,,3.9221209999599997,3.673146499975,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,mkl,independent-oneshot,1,,4.3835144999799995,3.1338364998449997,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,mkl-jit,independent-oneshot,1,,4.273331000035,3.126097000065,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,aocl,independent-oneshot,1,,4.96894799994,4.8603440001200005,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,blasfeo,independent-oneshot,1,,7.486968499960001,6.575916499970001,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,fastmmw-768,independent-oneshot,1,,3.9217220000850004,3.69116349998,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,fastmmw-1536,independent-oneshot,1,,3.892199999995,3.7080945001,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,tblis-ab-1,independent-oneshot,0,,7.93773800001,7.68006499993,mkl-jit,,,all-cell historical absolute or componentwise FP64 accuracy failed
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,tblis-ab-2,independent-oneshot,0,,10.351097500049999,10.204415,mkl-jit,,,all-cell historical absolute or componentwise FP64 accuracy failed
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,onednn-oneshot,independent-oneshot,1,,5.101067000055,4.44791550001,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,onednn-cached-plan,independent-retained,1,,5.0574265,3.729763000025,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,release-openblas-two,release-assisted,1,,4.101926999965,4.050078999969999,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,release-openblas-aligned-two,release-assisted,1,,4.100510500055,4.04314600007,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,release-mkl-two,release-assisted,1,,4.090732500005001,4.04915050001,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,release-mkl-aligned-two,release-assisted,1,,4.1136195,4.043467000085,mkl-jit,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,mixed1,precision-reference,0,False,8.353757999995,7.239015500090001,mkl-jit,,,all-cell historical absolute or componentwise FP64 accuracy failed; outside registered FP32 accuracy gates
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,mixed3,precision-reference,0,False,15.551355,13.83996000005,mkl-jit,,,outside registered FP32 accuracy gates
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,mixed6,mixed,1,True,24.1623154999,22.370762000000003,mkl-jit,0.13984980383808765,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,mixed6-bands,mixed,1,True,80.2867415,78.55060350005,mkl-jit,0.03968414378330899,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,mixed9,mixed,1,True,28.02282049995,26.24841950015,mkl-jit,0.11908461752535207,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,wide-shallow,159,4093,510,fused6-amx,mixed,1,True,8.309147499975,7.21100349995,mkl-jit,0.43335675950648167,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,cob-released,standalone,1,,62.0985104999,61.02439149989999,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,cob-released-hk15,standalone,1,,61.22209649995,60.58784599995,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,openblas,independent-oneshot,1,,54.36708699995,53.643654499949996,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,mkl,independent-oneshot,1,,57.14985450015,55.304561,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,mkl-jit,independent-oneshot,1,,57.4173545001,55.585568500099996,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,aocl,independent-oneshot,1,,56.51994000005,56.13098900005,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,blasfeo,independent-oneshot,0,,,,openblas,,,worker exit -11 affinity_cpu=0 BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,fastmmw-768,independent-oneshot,1,,75.3622945,71.00063049994999,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,fastmmw-1536,independent-oneshot,1,,55.25758149995,54.358764999950004,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,tblis-ab-1,independent-oneshot,1,,105.08672750000001,104.49755599999999,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,tblis-ab-2,independent-oneshot,1,,108.7160395,108.118076,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,onednn-oneshot,independent-oneshot,1,,75.92471200010002,74.81295349985001,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,onednn-cached-plan,independent-retained,1,,75.62023799994999,73.523571,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,release-openblas-two,release-assisted,1,,61.826903,59.94007699995,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,release-openblas-aligned-two,release-assisted,1,,61.99248399995,60.12644049995,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,release-mkl-two,release-assisted,1,,62.20746449995,58.78457200005,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,release-mkl-aligned-two,release-assisted,1,,62.384399500049994,58.72405549995,openblas,,,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,mixed1,precision-reference,0,False,43.4856465,42.583536999950006,openblas,,,all-cell historical absolute or componentwise FP64 accuracy failed; outside registered FP32 accuracy gates
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,mixed3,precision-reference,0,False,81.152783,74.8449464999,openblas,,,outside registered FP32 accuracy gates
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,mixed6,mixed,1,True,125.32420950000001,125.9799825,openblas,0.43483599452926835,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,mixed6-bands,mixed,1,True,176.89100749999997,171.8043045,openblas,0.31490391204345114,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,mixed9,mixed,1,True,157.72903,151.0747895,openblas,0.3574409893278201,0,
+x86_64,Intel(R) Xeon(R) 6975P-C,tall-deep,1793,1151,2779,fused6-amx,mixed,1,True,84.12880249985,82.248092,openblas,0.6577067232870244,0,
+aarch64,Neoverse-N2,square-512,512,512,512,cob-released,standalone,1,,5.614405499955001,5.484114000065,blasfeo,,,
+aarch64,Neoverse-N2,square-512,512,512,512,cob-released-hk15,standalone,1,,5.61970100011,5.50396750009,blasfeo,,,
+aarch64,Neoverse-N2,square-512,512,512,512,openblas,independent-oneshot,1,,6.048099999930001,5.795850000030001,blasfeo,,,
+aarch64,Neoverse-N2,square-512,512,512,512,armpl,independent-oneshot,1,,5.925090999994999,5.36103249999,blasfeo,,,
+aarch64,Neoverse-N2,square-512,512,512,512,blasfeo,independent-oneshot,1,,5.706943499944999,5.2531424998950005,blasfeo,,,
+aarch64,Neoverse-N2,square-512,512,512,512,fastmmw-768,independent-oneshot,1,,6.03866350002,5.79014699986,blasfeo,,,
+aarch64,Neoverse-N2,square-512,512,512,512,fastmmw-1536,independent-oneshot,1,,6.0508549999,5.785478999885,blasfeo,,,
+aarch64,Neoverse-N2,square-512,512,512,512,onednn-oneshot,independent-oneshot,1,,5.967368000025,5.60881800004,blasfeo,,,
+aarch64,Neoverse-N2,square-512,512,512,512,onednn-cached-plan,independent-retained,1,,5.856815000015,5.303684000064999,blasfeo,,,
+aarch64,Neoverse-N2,square-512,512,512,512,release-openblas-two,release-assisted,1,,5.62951200004,5.512683999880001,blasfeo,,,
+aarch64,Neoverse-N2,square-512,512,512,512,release-openblas-aligned-two,release-assisted,1,,5.615593499895001,5.514156000005,blasfeo,,,
+aarch64,Neoverse-N2,square-512,512,512,512,release-armpl-two,release-assisted,1,,5.64063950003,5.4807655000099995,blasfeo,,,
+aarch64,Neoverse-N2,square-512,512,512,512,release-armpl-aligned-two,release-assisted,1,,5.633931999910001,5.488985999935,blasfeo,,,
+aarch64,Neoverse-N2,square-512,512,512,512,mixed1,precision-reference,0,False,,,blasfeo,,,outside-registered-native-routes; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,square-512,512,512,512,mixed3,precision-reference,0,False,,,blasfeo,,,outside-registered-native-routes; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,square-512,512,512,512,mixed6,mixed,0,True,,,blasfeo,,,outside-registered-native-routes
+aarch64,Neoverse-N2,square-512,512,512,512,mixed6-bands,mixed,0,True,,,blasfeo,,,outside-registered-native-routes / outside-registered-native-routes / outside-registered-native-routes
+aarch64,Neoverse-N2,square-512,512,512,512,mixed9,mixed,0,True,,,blasfeo,,,outside-registered-native-routes
+aarch64,Neoverse-N2,square-512,512,512,512,fused6-amx,mixed,0,,,,blasfeo,,,global admission missing or precision-only control
+aarch64,Neoverse-N2,square-512,512,512,512,arm-mixed1,precision-reference,0,False,3.740737999915,3.178080999985,blasfeo,,,all-cell historical absolute or componentwise FP64 accuracy failed; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,square-512,512,512,512,arm-mixed3,precision-reference,0,False,8.816809,7.965987499914999,blasfeo,,,outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,square-512,512,512,512,arm-mixed6,mixed,1,True,15.698991499899998,14.699963,blasfeo,0.3575067366543745,0,
+aarch64,Neoverse-N2,square-512,512,512,512,arm-mixed6-bands,mixed,1,True,17.628399999800003,15.130198500149998,blasfeo,0.3475121133547734,0,
+aarch64,Neoverse-N2,square-512,512,512,512,arm-mixed9,mixed,1,True,20.3768170002,19.353559999900003,blasfeo,0.27141888526912505,0,
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,cob-released,standalone,1,,40.522331000049995,40.35985249979999,cob-released-hk15,,,
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,cob-released-hk15,standalone,1,,40.68343300005,40.340827,cob-released-hk15,,,
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,openblas,independent-oneshot,1,,42.4153754999,41.93602100005,cob-released-hk15,,,
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,armpl,independent-oneshot,1,,44.9019315001,42.761646999999996,cob-released-hk15,,,
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,blasfeo,independent-oneshot,1,,42.760405499700006,41.93180749995,cob-released-hk15,,,
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,fastmmw-768,independent-oneshot,1,,44.263495999999996,43.79340449995,cob-released-hk15,,,
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,fastmmw-1536,independent-oneshot,1,,42.3842755,41.847497499999996,cob-released-hk15,,,
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,onednn-oneshot,independent-oneshot,1,,46.166526999949994,45.70980450004999,cob-released-hk15,,,
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,onednn-cached-plan,independent-retained,1,,46.321659000100006,45.47949549995,cob-released-hk15,,,
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,release-openblas-two,release-assisted,1,,43.705226000050004,43.63903650015,cob-released-hk15,,,
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,release-openblas-aligned-two,release-assisted,1,,43.5830009999,43.6004070001,cob-released-hk15,,,
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,release-armpl-two,release-assisted,1,,43.553345500099994,43.299023999999996,cob-released-hk15,,,
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,release-armpl-aligned-two,release-assisted,1,,43.56975500025,43.4807434999,cob-released-hk15,,,
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,mixed1,precision-reference,0,False,,,cob-released-hk15,,,outside-registered-native-routes; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,mixed3,precision-reference,0,False,,,cob-released-hk15,,,outside-registered-native-routes; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,mixed6,mixed,0,True,,,cob-released-hk15,,,outside-registered-native-routes
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,mixed6-bands,mixed,0,True,,,cob-released-hk15,,,outside-registered-native-routes / outside-registered-native-routes / outside-registered-native-routes
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,mixed9,mixed,0,True,,,cob-released-hk15,,,outside-registered-native-routes
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,fused6-amx,mixed,0,,,,cob-released-hk15,,,global admission missing or precision-only control
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,arm-mixed1,precision-reference,0,False,20.092975499999998,18.7512240001,cob-released-hk15,,,all-cell historical absolute or componentwise FP64 accuracy failed; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,arm-mixed3,precision-reference,0,False,51.718132499899994,49.964055999900005,cob-released-hk15,,,outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,arm-mixed6,mixed,1,True,96.4720185,94.45224099999999,cob-released-hk15,0.4283437325328693,0,
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,arm-mixed6-bands,mixed,1,True,107.7597465,98.80589299994999,cob-released-hk15,0.409471661281421,0,
+aarch64,Neoverse-N2,square-1024,1024,1024,1024,arm-mixed9,mixed,1,True,132.676814,130.557894,cob-released-hk15,0.310331938943227,0,
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,cob-released,standalone,1,,316.1137205,317.1066045,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,cob-released-hk15,standalone,1,,316.6697835,316.75061500000004,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,openblas,independent-oneshot,1,,333.343443,331.685173,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,armpl,independent-oneshot,1,,346.9618555,344.015034,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,blasfeo,independent-oneshot,1,,336.051235,335.6533425,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,fastmmw-768,independent-oneshot,1,,321.73137099999997,313.72093450000006,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,fastmmw-1536,independent-oneshot,1,,307.94580049999996,306.543698,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,onednn-oneshot,independent-oneshot,1,,374.148698,373.6651915,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,onednn-cached-plan,independent-retained,1,,373.33462949999995,372.917471,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,release-openblas-two,release-assisted,1,,309.61951700000003,307.42108199999996,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,release-openblas-aligned-two,release-assisted,1,,309.80123100000003,307.1684765,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,release-armpl-two,release-assisted,1,,317.5870195,314.2139095,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,release-armpl-aligned-two,release-assisted,1,,318.13374350000004,314.4706405,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,mixed1,precision-reference,0,False,,,fastmmw-1536,,,outside-registered-native-routes; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,mixed3,precision-reference,0,False,,,fastmmw-1536,,,outside-registered-native-routes; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,mixed6,mixed,0,True,,,fastmmw-1536,,,outside-registered-native-routes
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,mixed6-bands,mixed,0,True,,,fastmmw-1536,,,outside-registered-native-routes / outside-registered-native-routes / outside-registered-native-routes
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,mixed9,mixed,0,True,,,fastmmw-1536,,,outside-registered-native-routes
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,fused6-amx,mixed,0,,,,fastmmw-1536,,,global admission missing or precision-only control
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,arm-mixed1,precision-reference,0,False,126.4960155,121.521745,fastmmw-1536,,,all-cell historical absolute or componentwise FP64 accuracy failed; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,arm-mixed3,precision-reference,0,False,345.7141025,339.10836850000004,fastmmw-1536,,,outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,arm-mixed6,mixed,1,True,668.5392830000001,659.0806145,fastmmw-1536,0.46389169974382827,0,
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,arm-mixed6-bands,mixed,1,True,706.9887535,703.056972,fastmmw-1536,0.43469894999914027,0,
+aarch64,Neoverse-N2,square-2048,2048,2048,2048,arm-mixed9,mixed,1,True,949.1564885,940.9464274999999,fastmmw-1536,0.3251739840975977,0,
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,cob-released,standalone,1,,2241.053838,2238.3331175,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,cob-released-hk15,standalone,1,,2237.820287,2234.050941,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,openblas,independent-oneshot,1,,2660.947122,2659.3197929999997,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,armpl,independent-oneshot,1,,2757.924074,2741.644213,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,blasfeo,independent-oneshot,1,,2675.933223,2672.2669779999997,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,fastmmw-768,independent-oneshot,1,,2243.359405,2213.021676,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,fastmmw-1536,independent-oneshot,1,,2191.999899,2166.113844,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,onednn-oneshot,independent-oneshot,1,,3025.3718779999995,3034.216876,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,onednn-cached-plan,independent-retained,1,,3028.308596,3025.7036714999995,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,release-openblas-two,release-assisted,1,,2169.9210230000003,2170.0544685,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,release-openblas-aligned-two,release-assisted,1,,2172.7456665,2169.195883,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,release-armpl-two,release-assisted,1,,2222.9537715,2219.0095644999997,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,release-armpl-aligned-two,release-assisted,1,,2221.092365,2226.580876,fastmmw-1536,,,
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,mixed1,precision-reference,0,False,,,fastmmw-1536,,,outside-registered-native-routes; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,mixed3,precision-reference,0,False,,,fastmmw-1536,,,outside-registered-native-routes; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,mixed6,mixed,0,True,,,fastmmw-1536,,,outside-registered-native-routes
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,mixed6-bands,mixed,0,True,,,fastmmw-1536,,,outside-registered-native-routes / outside-registered-native-routes / outside-registered-native-routes
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,mixed9,mixed,0,True,,,fastmmw-1536,,,outside-registered-native-routes
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,fused6-amx,mixed,0,,,,fastmmw-1536,,,global admission missing or precision-only control
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,arm-mixed1,precision-reference,0,False,918.149655,905.0259005,fastmmw-1536,,,all-cell historical absolute or componentwise FP64 accuracy failed; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,arm-mixed3,precision-reference,0,False,2618.560683,2597.0258035,fastmmw-1536,,,outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,arm-mixed6,mixed,1,True,5122.325919999999,5092.240051499999,fastmmw-1536,0.4245370990115237,0,
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,arm-mixed6-bands,mixed,1,True,5443.545339,5435.5821095,fastmmw-1536,0.3979143420264527,0,
+aarch64,Neoverse-N2,square-4096,4096,4096,4096,arm-mixed9,mixed,1,True,7481.8094285,7469.6159085,fastmmw-1536,0.2899866431132455,0,
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,cob-released,standalone,1,,213.0541765,213.572851,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,cob-released-hk15,standalone,1,,213.361746,213.2783215,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,openblas,independent-oneshot,1,,223.470275,222.949082,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,armpl,independent-oneshot,1,,231.166971,229.473442,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,blasfeo,independent-oneshot,0,,,,release-openblas-aligned-two,,,worker exit -11 affinity_cpu=0 BLASFEO target=ARMV8A_ARM_CORTEX_A76 API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=1
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,fastmmw-768,independent-oneshot,1,,233.93312550000002,226.1136145,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,fastmmw-1536,independent-oneshot,1,,224.031476,222.7075875,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,onednn-oneshot,independent-oneshot,1,,311.47400400000004,311.3172235,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,onednn-cached-plan,independent-retained,1,,311.750204,311.12030550000003,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,release-openblas-two,release-assisted,1,,209.382856,207.561893,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,release-openblas-aligned-two,release-assisted,1,,209.03883699999997,207.269128,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,release-armpl-two,release-assisted,1,,212.2894445,208.9004565,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,release-armpl-aligned-two,release-assisted,1,,211.413525,208.54759249999998,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,mixed1,precision-reference,0,False,,,release-openblas-aligned-two,,,outside-registered-native-routes; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,mixed3,precision-reference,0,False,,,release-openblas-aligned-two,,,outside-registered-native-routes; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,mixed6,mixed,0,True,,,release-openblas-aligned-two,,,outside-registered-native-routes
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,mixed6-bands,mixed,0,True,,,release-openblas-aligned-two,,,outside-registered-native-routes / outside-registered-native-routes / outside-registered-native-routes
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,mixed9,mixed,0,True,,,release-openblas-aligned-two,,,outside-registered-native-routes
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,fused6-amx,mixed,0,,,,release-openblas-aligned-two,,,global admission missing or precision-only control
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,arm-mixed1,precision-reference,0,False,86.3792844999,83.73324799985001,release-openblas-aligned-two,,,all-cell historical absolute or componentwise FP64 accuracy failed; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,arm-mixed3,precision-reference,0,False,236.3432465,230.2554135,release-openblas-aligned-two,,,outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,arm-mixed6,mixed,1,True,451.49948149999994,442.41034099999996,release-openblas-aligned-two,0.4675033090071701,0,
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,arm-mixed6-bands,mixed,1,True,491.27012950000005,475.4692525,release-openblas-aligned-two,0.4357049376154956,0,
+aarch64,Neoverse-N2,odd-cropped,1537,2053,1789,arm-mixed9,mixed,1,True,635.9102340000001,628.459976,release-openblas-aligned-two,0.33053126258817167,0,
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,cob-released,standalone,1,,754.548743,758.248588,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,cob-released-hk15,standalone,1,,754.608562,757.09609,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,openblas,independent-oneshot,1,,794.1194645,793.5002810000001,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,armpl,independent-oneshot,1,,821.939998,817.429591,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,blasfeo,independent-oneshot,1,,801.5622645,798.4319394999999,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,fastmmw-768,independent-oneshot,1,,726.7640184999999,715.774401,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,fastmmw-1536,independent-oneshot,1,,762.481513,762.7192220000001,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,onednn-oneshot,independent-oneshot,1,,1144.3872724999999,1146.4866795,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,onednn-cached-plan,independent-retained,1,,1140.803088,1144.2740735000002,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,release-openblas-two,release-assisted,1,,690.3226305000001,685.7745120000001,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,release-openblas-aligned-two,release-assisted,1,,682.419856,681.2625194999999,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,release-armpl-two,release-assisted,1,,705.6976390000001,700.224171,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,release-armpl-aligned-two,release-assisted,1,,704.466891,699.062816,release-openblas-aligned-two,,,
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,mixed1,precision-reference,0,False,,,release-openblas-aligned-two,,,outside-registered-native-routes; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,mixed3,precision-reference,0,False,,,release-openblas-aligned-two,,,outside-registered-native-routes; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,mixed6,mixed,0,True,,,release-openblas-aligned-two,,,outside-registered-native-routes
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,mixed6-bands,mixed,0,True,,,release-openblas-aligned-two,,,outside-registered-native-routes / outside-registered-native-routes / outside-registered-native-routes
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,mixed9,mixed,0,True,,,release-openblas-aligned-two,,,outside-registered-native-routes
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,fused6-amx,mixed,0,,,,release-openblas-aligned-two,,,global admission missing or precision-only control
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,arm-mixed1,precision-reference,0,False,296.6556505,291.628448,release-openblas-aligned-two,,,all-cell historical absolute or componentwise FP64 accuracy failed; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,arm-mixed3,precision-reference,0,False,818.0990939999999,810.6294315,release-openblas-aligned-two,,,outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,arm-mixed6,mixed,1,True,1584.597757,1577.1363415,release-openblas-aligned-two,0.4309209235213007,0,
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,arm-mixed6-bands,mixed,1,True,1710.4410715,1712.4692420000001,release-openblas-aligned-two,0.39742200401187644,0,
+aarch64,Neoverse-N2,previous-hk,2039,2969,3367,arm-mixed9,mixed,1,True,2262.2454940000002,2274.1582725000003,release-openblas-aligned-two,0.3008790567511058,0,
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,cob-released,standalone,1,,14.0983005,13.908923999899999,blasfeo,,,
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,cob-released-hk15,standalone,1,,14.07063800005,13.89881399995,blasfeo,,,
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,openblas,independent-oneshot,1,,14.57989599995,14.429554000000001,blasfeo,,,
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,armpl,independent-oneshot,1,,14.72568450005,14.504475999799999,blasfeo,,,
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,blasfeo,independent-oneshot,1,,16.023949999950002,13.4999080001,blasfeo,,,
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,fastmmw-768,independent-oneshot,1,,14.57406300005,14.39179600005,blasfeo,,,
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,fastmmw-1536,independent-oneshot,1,,14.550504999899998,14.371351500049999,blasfeo,,,
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,onednn-oneshot,independent-oneshot,1,,23.79363350005,24.19811549995,blasfeo,,,
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,onednn-cached-plan,independent-retained,1,,24.024484499949995,24.136073500000002,blasfeo,,,
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,release-openblas-two,release-assisted,1,,14.1488365,13.97578549995,blasfeo,,,
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,release-openblas-aligned-two,release-assisted,1,,14.1865750002,13.96038649985,blasfeo,,,
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,release-armpl-two,release-assisted,1,,14.117613500049998,13.91457499995,blasfeo,,,
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,release-armpl-aligned-two,release-assisted,1,,14.115823000099999,13.971244,blasfeo,,,
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,mixed1,precision-reference,0,False,,,blasfeo,,,outside-registered-native-routes; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,mixed3,precision-reference,0,False,,,blasfeo,,,outside-registered-native-routes; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,mixed6,mixed,0,True,,,blasfeo,,,outside-registered-native-routes
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,mixed6-bands,mixed,0,True,,,blasfeo,,,outside-registered-native-routes / outside-registered-native-routes / outside-registered-native-routes
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,mixed9,mixed,0,True,,,blasfeo,,,outside-registered-native-routes
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,fused6-amx,mixed,0,,,,blasfeo,,,global admission missing or precision-only control
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,arm-mixed1,precision-reference,0,False,12.24680200005,10.898763500000001,blasfeo,,,all-cell historical absolute or componentwise FP64 accuracy failed; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,arm-mixed3,precision-reference,0,False,28.3358565,26.25596550005,blasfeo,,,outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,arm-mixed6,mixed,1,True,49.851667500000005,47.47934049999999,blasfeo,0.2844856183995965,0,
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,arm-mixed6-bands,mixed,1,True,58.03892200004999,49.36206700005,blasfeo,0.27397651030175957,0,
+aarch64,Neoverse-N2,wide-shallow,159,4093,510,arm-mixed9,mixed,1,True,62.4260359999,59.89868999995,blasfeo,0.22569580416888496,0,
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,cob-released,standalone,1,,213.97477450000002,214.15243099999998,cob-released,,,
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,cob-released-hk15,standalone,1,,213.504246,214.67760349999998,cob-released,,,
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,openblas,independent-oneshot,1,,227.81492450000002,226.975309,cob-released,,,
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,armpl,independent-oneshot,1,,233.373009,231.068493,cob-released,,,
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,blasfeo,independent-oneshot,0,,,,cob-released,,,worker exit -11 affinity_cpu=0 BLASFEO target=ARMV8A_ARM_CORTEX_A76 API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=1
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,fastmmw-768,independent-oneshot,1,,228.504336,227.136138,cob-released,,,
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,fastmmw-1536,independent-oneshot,1,,228.009504,227.23383850000002,cob-released,,,
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,onednn-oneshot,independent-oneshot,1,,354.79043499999995,354.617036,cob-released,,,
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,onednn-cached-plan,independent-retained,1,,355.414283,355.5461735,cob-released,,,
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,release-openblas-two,release-assisted,1,,218.193893,216.48252950000003,cob-released,,,
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,release-openblas-aligned-two,release-assisted,1,,217.84938549999998,216.526206,cob-released,,,
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,release-armpl-two,release-assisted,1,,223.46191650000003,220.69561900000002,cob-released,,,
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,release-armpl-aligned-two,release-assisted,1,,225.31393,220.47261899999998,cob-released,,,
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,mixed1,precision-reference,0,False,,,cob-released,,,outside-registered-native-routes; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,mixed3,precision-reference,0,False,,,cob-released,,,outside-registered-native-routes; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,mixed6,mixed,0,True,,,cob-released,,,outside-registered-native-routes
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,mixed6-bands,mixed,0,True,,,cob-released,,,outside-registered-native-routes / outside-registered-native-routes / outside-registered-native-routes
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,mixed9,mixed,0,True,,,cob-released,,,outside-registered-native-routes
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,fused6-amx,mixed,0,,,,cob-released,,,global admission missing or precision-only control
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,arm-mixed1,precision-reference,0,False,93.43598500005,89.81955850000001,cob-released,,,all-cell historical absolute or componentwise FP64 accuracy failed; outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,arm-mixed3,precision-reference,0,False,249.60778449999998,243.0251175,cob-released,,,outside registered FP32 accuracy gates
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,arm-mixed6,mixed,1,True,474.18434499999995,465.0563365,cob-released,0.45979894637108804,0,
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,arm-mixed6-bands,mixed,1,True,508.3983860000001,488.263291,cob-released,0.43842629613191747,0,
+aarch64,Neoverse-N2,tall-deep,1793,1151,2779,arm-mixed9,mixed,1,True,667.290156,659.8082365,cob-released,0.32567657640262143,0,
