@@ -59,7 +59,15 @@ On the M5 Max, the 48-product formula passed all sixteen accuracy fixtures. At 2
 
 ## Reproduction
 
-The production checkout for these Linux results is [b218bef](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/tree/b218beff1eaf8fd606d0934405cdc1e28ecdfe15). Its library code matches [518e7d7](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/tree/518e7d77ea3d82d029f31dc10a3a705b42a7638b). The only changes between them correct two test fixtures. All ten host/build combinations produced byte-identical libraries before and after the corrections. The benchmark definitions, worker sources, vendor recipes and workflow are pinned at [7885da1](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/tree/7885da100a88fbc3a6f0ef11f486fece4eabee76/tools/world-rank).
+The [public x86 kernel](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/commit/a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6) is opt-in and uses COB's own arithmetic throughout. It dispatches to AVX2/FMA or AVX-512 at runtime. To build the static library and run the correctness tests on Linux x86-64:
+
+```sh
+cmake -S . -B build-stream -DCMAKE_BUILD_TYPE=Release -DCOB_ENABLE_X86_STREAM_B=ON
+cmake --build build-stream --parallel
+ctest --test-dir build-stream --output-on-failure
+```
+
+The production checkout for the large rectangular Winograd results is [b218bef](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/tree/b218beff1eaf8fd606d0934405cdc1e28ecdfe15). Its library code matches [518e7d7](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/tree/518e7d77ea3d82d029f31dc10a3a705b42a7638b). The only changes between them correct two test fixtures. All ten host/build combinations produced byte-identical libraries before and after the corrections. The benchmark definitions, worker sources, vendor recipes and workflow are pinned at [7885da1](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/tree/7885da100a88fbc3a6f0ef11f486fece4eabee76/tools/world-rank).
 
 To build the aligned OpenBLAS configuration on native Linux with OpenBLAS development files installed, run these commands from the production checkout. The hosted runs also selected CPU-specific compiler tuning and used a pinned OpenBLAS build. [Exact build commands](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/blob/7885da100a88fbc3a6f0ef11f486fece4eabee76/tools/world-rank/release-public/build-native.sh)
 
