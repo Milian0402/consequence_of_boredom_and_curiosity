@@ -79,7 +79,7 @@ build_adapter() {
             MKL_VERBOSE=1 MKL_NUM_THREADS=1 python3 "$src/smoke_mkl.py" "$dest/$variant.so"
         fi
     } > "$dest/$variant-build.txt" 2>&1
-    if [[ $(cat "$src/../phase.txt") == prefix-eight ]]; then
+    if [[ $(cat "$src/../phase.txt") == prefix-eight || $(cat "$src/../phase.txt") == explicit-handles ]]; then
         local identity="$dest/$variant-identity.sha256"
         : > "$identity"
         for member in "$dest/$variant.so" "$backend" "$lib/libmkl_intel_lp64.so.3" "$lib/libmkl_sequential.so.3" "$lib/libmkl_core.so.3" "$src/vendor_backend.c" "$src/vendor_adapter.c" "$src/build.sh"; do

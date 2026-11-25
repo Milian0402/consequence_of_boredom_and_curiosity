@@ -96,6 +96,25 @@ int main(int argc,char **argv)
     } else fatal("unknown distribution");
     if (mprotect(a.start,a.bytes,PROT_READ) || mprotect(b.start,b.bytes,PROT_READ)) fatal("read-only parents");
     for(int i=0;i<m;++i) for(int j=0;j<n;++j) c.data[(size_t)i*c.ld+j]=NAN;
+#ifdef RANK_VIEW_HANDLE
+    int (*handle_prepare)(int,int,int,int,int,int)=NULL;
+    int (*handle_status)(void)=NULL;
+    int prepared_status=-1;
+    double prepare_seconds=0;
+    if (trace_lib) {
+        void *entry=dlsym(trace_lib,"rank_handle_last_status");
+        memcpy(&handle_status,&entry,sizeof handle_status);
+        entry=dlsym(trace_lib,"rank_handle_prepare");
+        memcpy(&handle_prepare,&entry,sizeof handle_prepare);
+    }
+    if (handle_prepare) {
+        double prep_start=seconds();
+        prepared_status=handle_prepare(m,n,k,a.ld,b.ld,c.ld);
+        prepare_seconds=seconds()-prep_start;
+        if (!handle_status || (prepared_status!=0 && prepared_status!=1) || !single_task())
+            fatal("explicit prepared handle unavailable");
+    }
+#endif
 #ifdef RANK_VIEW_REFERENCE
     if (getenv("RAGGED_WRITE_REFERENCE")) { generate_reference(a,b,c,trace_lib); return 0; }
     double cpu_start=thread_clock();
@@ -105,6 +124,9 @@ int main(int argc,char **argv)
     double first=seconds()-start;
 #ifdef RANK_VIEW_REFERENCE
     double cpu_first=thread_clock()-cpu_start;
+#endif
+#ifdef RANK_VIEW_HANDLE
+    const int first_status=handle_status ? handle_status() : -1;
 #endif
     if (!single_task()) fatal("thread count after first call");
 #ifdef RANK_VIEW_REFERENCE
@@ -118,6 +140,14 @@ int main(int argc,char **argv)
     report_hashes(a,b,c,cpu_first,calls ? cpu_elapsed/calls : 0,trace_lib);
 #endif
     if (!single_task()) fatal("thread count after batch");
+#ifdef RANK_VIEW_HANDLE
+    if (handle_status) {
+        const int final_status=handle_status();
+        if ((first_status!=0 && first_status!=1) || final_status!=first_status || (handle_prepare && prepared_status!=first_status))
+            fatal("explicit SGEMM status disagreement");
+        printf("HANDLE,%d,%d,%d,%.12g\n",first_status,final_status,prepared_status,prepare_seconds);
+    }
+#endif
     size_t guards;
     double error=verify(a,b,c,&guards);
 #ifdef VIEW_AUDIT_HEADER

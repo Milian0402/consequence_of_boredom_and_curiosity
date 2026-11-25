@@ -57,6 +57,7 @@ for method in "${methods[@]}"; do
     cmp "$obj/libcob_matmul.a" "$lib"
     python3 -B "$shared/stream-release/flags.py" "$obj/compile_commands.json" cmake-native-on "$out/$method-flags.json"
     worker_flags=(-DRANK_VIEW_RECORD_LD=1 -std=c11 -O3 -march=x86-64 -I"$shared" -I"$sdk/include" -Dhybrid_sgemm_rowmajor=cob_sgemm_rowmajor -Drank_hybrid_next=cob_sgemm_rowmajor)
+    if [[ ${RANK_VIEW_HANDLE:-0} == 1 ]]; then worker_flags+=(-DRANK_VIEW_HANDLE=1); fi
     "$cc" "${worker_flags[@]}" "$shared/views/worker.c" "$lib" -lm -ldl -o "$work/$method.worker"
     "$cc" "${worker_flags[@]}" "${witness_defs[@]}" "$shared/views/worker.c" "$here/witness.c" "${wrappers[@]}" "$lib" -lm -ldl -o "$work/$method.trace.worker"
     for type in archive ordinary trace; do

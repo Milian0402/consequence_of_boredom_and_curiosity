@@ -79,7 +79,7 @@ jobs:
       contents: read
       actions: read
     needs: [phase, onednn]
-    if: ${{ !cancelled() && needs.phase.result == 'success' && needs.phase.outputs.label != 'packing-cost' && needs.phase.outputs.label != 'rank48-arm-confirm' && needs.phase.outputs.label != 'stream-release' && needs.phase.outputs.label != 'cropped-views' && needs.phase.outputs.label != 'arm-layout' && needs.phase.outputs.label != 'arm-repeat' && needs.phase.outputs.label != 'arm-confirm' && needs.phase.outputs.label != 'prefix-eight' && needs.phase.outputs.label != 'ragged-hk' }}
+    if: ${{ !cancelled() && needs.phase.result == 'success' && needs.phase.outputs.label != 'packing-cost' && needs.phase.outputs.label != 'rank48-arm-confirm' && needs.phase.outputs.label != 'stream-release' && needs.phase.outputs.label != 'cropped-views' && needs.phase.outputs.label != 'arm-layout' && needs.phase.outputs.label != 'arm-repeat' && needs.phase.outputs.label != 'arm-confirm' && needs.phase.outputs.label != 'prefix-eight' && needs.phase.outputs.label != 'explicit-handles' && needs.phase.outputs.label != 'ragged-hk' }}
     name: ${{ needs.phase.outputs.label == 'grouped-b-x86' && format('Grouped B ranking on x86-64, replica {0}', matrix.replica) || needs.phase.outputs.label == 'frontier-x86' && format('Frontier ranking on x86-64, replica {0}', matrix.replica) || format('Frozen ranking on {0}', matrix.arch) }}
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -537,5 +537,47 @@ jobs:
         with:
           name: ragged-hk-${{ matrix.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ env.OUT_DIR }}
+          if-no-files-found: error
+          retention-days: 30
+
+  explicit-handles:
+    needs: phase
+    if: needs.phase.outputs.label == 'explicit-handles'
+    name: Explicit handles on x86-64, replica ${{ matrix.replica }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        replica: [1, 2]
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      actions: read
+    env:
+      FRONTIER_REPLICA: ${{ matrix.replica }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6
+          path: production-source
+          persist-credentials: false
+      - name: Build the registered single-thread library field
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install --no-install-recommends -y gcc g++ gfortran cmake make pkg-config libopenblas-pthread-dev unzip
+          bash tools/world-rank/prefix/peers.sh "$RUNNER_TEMP/handles-vendors" "$RUNNER_TEMP/handles-result"
+      - name: Check explicit SGEMM handles and measure their full lifecycles
+        run: bash tools/world-rank/handles/run.sh "$PWD/production-source" "$RUNNER_TEMP/handles-vendors" "$RUNNER_TEMP/handles-result"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: ${{ !cancelled() }}
+        with:
+          name: explicit-handles-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.replica }}
+          path: ${{ runner.temp }}/handles-result
           if-no-files-found: error
           retention-days: 30

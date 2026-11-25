@@ -21,6 +21,8 @@ SUBJECTS = globals().get("subject_override", METHODS[-2:])
 ASSISTED = globals().get("assisted_override", ())
 GEOMETRY = "m n k lda ldb ldc ar ac br bc cr cc".split()
 MEASURED = "checked guards a_mod64 b_mod64 c_mod64 cpu threads error first_s per_call_s lda ldb ldc".split()
+HANDLE_METHODS = globals().get("handle_methods", ())
+RETAINED = globals().get("retained_override", ("libxsmm-retained", "onednn-cached-plan"))
 PAGE = os.sysconf("SC_PAGE_SIZE")
 with (OUT / "panel.csv").open() as panel:
     shapes = list(csv.DictReader(panel))
@@ -70,8 +72,18 @@ methods = writer("methods.csv", "method role policy status sha256")
 admit = writer("admissions.csv", "method family layout qualified reason accuracy_records timing_records")
 xsmm = writer("libxsmm-routes.csv", "method family layout m n k lda ldb ldc code_bytes admitted reason")
 dnn = writer("onednn-routes.csv", "method family layout mode seed round implementation plans cached")
+if HANDLE_METHODS:
+    handles = writer("handle-observations.csv","method family layout mode seed round first_status last_status prepared_status prepare_s")
 errors = writer("failures.csv", "method family layout reason")
 failures = {}
+if HANDLE_METHODS:
+    with (OUT/"handle-route-exclusions.csv").open() as proof:
+        for item in csv.DictReader(proof):
+            key=(item["method"],item["family"],item["layout"])
+            check(key[0] in HANDLE_METHODS and any((s["family"],s["layout"])==key[1:] for s in shapes),
+                  "invalid explicit handle exclusion")
+            check(key not in failures and item["reason"], "empty or duplicate route failure")
+            failures[key]="native_route_excluded: "+item["reason"]
 counts = {}
 xsmm_inspect = {}
 paths = {method: source(method) for method in METHODS}
@@ -88,7 +100,7 @@ for method, path in paths.items():
         else:
             available[method] = False
     methods.writerow(dict(method=method, role="standalone" if method in SUBJECTS else ("vendor-assisted" if method in ASSISTED else "independent"),
-        policy="retained" if method in ("libxsmm-retained", "onednn-cached-plan") else "one-shot",
+        policy="retained" if method in RETAINED else "one-shot",
         status="available" if available[method] else "unavailable", sha256=digest(path) if path.is_file() else ""))
 
 receipt = dict(production="a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6",
@@ -118,6 +130,16 @@ def invoke(shape, method, mode, seed, round_id, place, calls):
         values = dict(zip(MEASURED, rows[0], strict=True))
         fp_fields(shape, values, calls)
         ids = dict(method=method, family=shape["family"], layout=shape["layout"], mode=mode, seed=seed, round=round_id)
+        if method in HANDLE_METHODS:
+            receipts = [line.split(",")[1:] for line in lines if line.startswith("HANDLE,")]
+            check(len(receipts)==1 and len(receipts[0])==4,"missing explicit SGEMM observation")
+            fs,ls,ps,elapsed=receipts[0]
+            check(fs in ("0","1") and ls==fs,"unsupported or inconsistent explicit SGEMM status")
+            if method=="mkl-handle-prepared":
+                check(ps==fs and 0<float(elapsed)<math.inf,"missing explicit handle preparation")
+            else:
+                check(ps=="-1" and float(elapsed)==0,"oneshot unexpectedly held a plan")
+            handles.writerow(dict(ids,first_status=fs,last_status=ls,prepared_status=ps,prepare_s=elapsed))
         if method.startswith("onednn-"):
             traits = [line.rsplit(",",2) for line in lines if line.startswith("DNN,")]
             check(len(traits) == 1, "missing oneDNN measured-route receipt")
