@@ -1,0 +1,57 @@
+{
+  "replica": 1,
+  "run": 45710128444,
+  "attempt": 1,
+  "benchmark_sha": "0fcba28139f3d0f64492d5e9938f50d32280625d",
+  "branch": "bench/native-linux-gemm",
+  "url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45710128444",
+  "job": "Explicit handles on x86-64, replica 1",
+  "job_id": 139542168202,
+  "job_url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45710128444/job/139542168202",
+  "status": "success",
+  "steps": [
+    {
+      "name": "Set up job",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "conclusion": "success"
+    },
+    {
+      "name": "Build the registered single-thread library field",
+      "conclusion": "success"
+    },
+    {
+      "name": "Check explicit SGEMM handles and measure their full lifecycles",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "conclusion": "success"
+    }
+  ],
+  "artifact": "explicit-handles-45710128444-1-1",
+  "artifact_id": 15066739506,
+  "source_sha": "0fcba28139f3d0f64492d5e9938f50d32280625d",
+  "artifact_sha256": "8531726a579161323e0435e1721f070cb5c572eaf8ede5fdefa1267016f7b3d1",
+  "bytes": 82862,
+  "members": 68,
+  "zipped_crc_passed": true
+}

@@ -59,6 +59,10 @@ The first two jobs for a follow-up eight-column Intel kernel landed on AMD EPYC 
 
 On the additional Xeon 6973P-C, the eight-column kernel ran on all nine eligible shapes. Across the six fresh layouts it achieved 0.950× the speed of direct oneMKL and won zero layout medians. At 68 × 2176 × 244 it took 415.55 µs versus 354.67 µs for direct oneMKL. The separate explicit JIT API generated a kernel on nine of eleven shapes; this study verified its results without timing those handles. [Intel timings and JIT status per shape](intel-eight-column-prefix/README.md)
 
+## Paying for oneMKL kernel generation
+
+Two Xeon 6975P-C jobs timed explicit oneMKL handles alongside the other libraries. Both generated code for nine of eleven layouts and returned a callable fallback on two. Across the six principal shapes, standalone COB delivered 0.883× and 0.879× the fastest warm speed per shape and lost all 36 paired warm comparisons on each machine. COB led four of six first-execution medians against a previously prepared field, and five of six when the caller paid for handle creation on the first multiplication. At 29 × 1229 × 103, oneMKL setup took 933–965 µs and its prepared handle saved about 1 µs per warm multiplication versus ordinary oneMKL. [Absolute timings, setup costs and replay](intel-explicit-handles/README.md)
+
 ## Packing adjacent B panels on x86
 
 Two Intel Xeon 6975P-C jobs tested packing four adjacent B panels before doing the same arithmetic as the released kernel. Grouped packing reached 97.1% and 96.8% of the incumbent's throughput across eight new rectangles. At 64 × 2304 × 224, the released kernel itself took 382 and 377 µs, while direct oneMKL took 315 and 313 µs. The four-panel implementation stays in the benchmark branch. BLASFEO qualified on nine of the twelve layouts per job and exited on the other three. [Per-layout timings, eligibility and replay](grouped-b-x86/README.md) · [Native benchmark](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45701814927)

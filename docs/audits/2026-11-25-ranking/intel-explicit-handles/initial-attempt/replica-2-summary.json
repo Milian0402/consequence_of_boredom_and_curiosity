@@ -1,0 +1,9 @@
+{
+  "model": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "native_width": 64,
+  "smoke_checked": 576909,
+  "smoke_max_error": 9.55350697e-06,
+  "shape_routes": 11,
+  "shape_outputs": 2173386,
+  "source_list_sha256": "55c74d2e542844691f905d29bd78fdada27a5578d27ca7122881e235d217264d"
+}

@@ -1,0 +1,13 @@
+                 U MKL_Get_Max_Threads
+                 w _ITM_deregisterTMCloneTable
+                 w _ITM_registerTMCloneTable
+                 w __cxa_finalize@GLIBC_2.2.5
+                 w __gmon_start__
+                 U __stack_chk_fail@GLIBC_2.4
+                 U __tls_get_addr@GLIBC_2.3
+                 U dlclose@GLIBC_2.34
+                 U dlopen@GLIBC_2.34
+                 U memset@GLIBC_2.2.5
+                 U mkl_cblas_jit_create_sgemm
+                 U mkl_jit_destroy
+                 U mkl_jit_get_sgemm_ptr

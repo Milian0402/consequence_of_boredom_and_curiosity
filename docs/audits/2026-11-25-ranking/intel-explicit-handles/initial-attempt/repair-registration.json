@@ -1,0 +1,56 @@
+{
+  "registered_utc": "2026-11-25T22:02:47.913742+00:00",
+  "repair_parent": "37ead44b9f3a144dada8a92b17bd447b138e6689",
+  "previous_benchmark": "61f30a237adb45f72a403315e78fafc70dd7295b",
+  "original_attempt": 45708206524,
+  "original_receipts": [
+    {
+      "job": 139535589638,
+      "artifact": 15066497283,
+      "sha": "2e0646df2dfe06bf28b576db2e31d7ceb30d87f5adbf40e6b6f36def07c4bb7c",
+      "reason": "mkl-prefix.txt missing before explicit comparator build",
+      "timed_rows": 0,
+      "observed_handle_statuses": 0
+    },
+    {
+      "job": 139535589668,
+      "artifact": 15067655075,
+      "sha": "0057bbd6bcfb5c2bed02b96d7676c81431de82c8ff31dd6047cdeb9ab4b576fe",
+      "reason": "mkl-prefix.txt missing before explicit comparator build",
+      "timed_rows": 0,
+      "observed_handle_statuses": 0
+    }
+  ],
+  "change": "Permit explicit-handles producer to emit its checked MKL SDK include/library directories. Existing handle source, panel, workflow job, worker, funding limit, and measurement methods are identical.",
+  "replacement_assignments": 2,
+  "resampling": false,
+  "job_sha256": "6efe99d72a74cd3a020eb2f6cc0e4e8ef2a58a271042a88c2f7309c40866acf3",
+  "same_scientific_files": {
+    "tools/world-rank/grouped/build.sh": "8b40db349ee6c0f8e183d980f4b0157bb262a4f323d6c01d32ef82e172dd229d",
+    "tools/world-rank/grouped/study.py": "901a298de9647889e8ad46b962c0d9464ac5f690e742814e60c637077cc91565",
+    "tools/world-rank/views/worker.c": "c0354523724b76a621db6821e9007b8d248ddc420badbaefa2f67fd97e325664",
+    "tools/world-rank/prefix/peers.sh": "3a032022ae51a4e4b3d6dbfbd168fbf137da725d022db1455f651d2de578399f",
+    "tools/world-rank/phase.txt": "3daf09752bd5e28cfa040e9d073fd4736090df46caf2e87506b67f75c751215f",
+    "tools/world-rank/prefix/incumbent.py": "920ea14649882e77c5b2c637bc28c329b27ff00f47ac037d653b2e7d7111198b",
+    "tools/world-rank/handles/panel.csv": "2b4d6871262a4d038533b6cab819e819c3cff1eaf3ef606678b2ad6e30520ed5",
+    "tools/world-rank/handles/run.sh": "efca775dbb18c1c6a895636f7736b68e4aa3ed0be96feee63dfa2b359081b0c6",
+    "tools/world-rank/handles/study.py": "9db9059c50ecf25d4a9d64a8198ddbb924e031245b7aeeb9471d4871937e7f1d",
+    "tools/world-rank/handles/score.py": "9735aef63757590254e976422db6cc3ef5b49ca3aeccb9a6b27494f9b2c4eac9",
+    "tools/world-rank/handles/protocol.md": "b63ad49548f9c8fd0f429427de3c860309d991bc3a791a695c15d5f6623e673e",
+    "tools/world-rank/handles/source/observe.c": "32713054440abb9e6bdff51a5cccd432c488ab0d0e165054d007155cd0434ae7",
+    "tools/world-rank/handles/source/handle.c": "3cd99ee6ca7da943094ef0d1a4c9875c21b2dd5e77eb831b51ed261b127e767a",
+    "tools/world-rank/handles/source/route-worker.py": "2afa8fccdb955f1fe9a5b174d7be75f989cff440a3040f7347e110a2da5a614b",
+    "tools/world-rank/handles/source/README.md": "f5ff99282a3b6da9f69eeff449e73ac901aae435f3fe6edc0875cfc652d1fa96",
+    "tools/world-rank/handles/source/plan-cost.c": "b3af7a306181348fd93fffc93da76d18dda41aca24380799a8197be2540e1896",
+    "tools/world-rank/handles/source/build.sh": "ef9924ddc95d668b7992442045e4be014e609f93b5a07c16eb7ddc9a00439853",
+    "tools/world-rank/handles/source/handle.h": "601cf7ddd3a4ab93d1e0ecba46e00e9894f5fd50910ffe6ff7aafd004153dadc",
+    "tools/world-rank/handles/source/fixture.c": "50f2f7c018dfb7a8583b59c750d0fde6997bbfbab957777689405c738ad314fa",
+    "tools/world-rank/handles/source/routes.py": "2b369a9feabb1a2bea12ed2d183dd599a08562a62fd4af91a44f38dc9b4a8619"
+  },
+  "whole_unrelated_workflow_change": {
+    ".github/workflows/native-gemm.yml": {
+      "original": "fc3cf4a6f4259f49604f313e3cae63f23ecdddfcaf6d81c370e59f44f61c8d8c",
+      "repair": "1109f035d4a64781e89e9fad7e6bb68a5b3e73a49466a36b938a9050b8e79467"
+    }
+  }
+}

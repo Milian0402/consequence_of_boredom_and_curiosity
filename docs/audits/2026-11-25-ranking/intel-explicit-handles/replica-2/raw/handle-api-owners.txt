@@ -1,0 +1,3 @@
+plan-cost create provider=libmkl_intel_lp64.so.3
+plan-cost destroy provider=libmkl_intel_lp64.so.3
+plan-cost get provider=libmkl_intel_lp64.so.3

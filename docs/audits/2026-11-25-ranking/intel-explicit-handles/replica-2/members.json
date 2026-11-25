@@ -1,0 +1,218 @@
+{
+  "admissions.csv": {
+    "member": "admissions.csv",
+    "sha256": "cbf92b44c9e79dea6b1e177b0a1233bb012487aff3ef836ea7e915cccac2aa4a"
+  },
+  "aocl-configuration.txt": {
+    "member": "aocl-configuration.txt",
+    "sha256": "af4f1b28d94cf7a5ae23343ac8754c5de2dd15f0c457916826a44e88f6737202"
+  },
+  "blasfeo-build.txt": {
+    "member": "blasfeo-build.txt",
+    "sha256": "296b4b7d696ec715f2f44e8757725342ba958ad4e419a18f6920a29c405c5368"
+  },
+  "failures.csv": {
+    "member": "failures.csv",
+    "sha256": "5936089be5e1573bac915df5e6f19d5454a999b76811bcc72daf0718486cae6c"
+  },
+  "grouped-builds.csv": {
+    "member": "grouped-builds.csv",
+    "sha256": "492ae0384e67aa61ab3e673bb93461ed75d21f524196c7f06a19bab02f18de19"
+  },
+  "grouped-dispatch-flags.txt": {
+    "member": "grouped-dispatch-flags.txt",
+    "sha256": "3aafdf38d329d66081d16b3508f6dec9ea1516b9da03092b4a5cceb1d3cbc87c"
+  },
+  "grouped-guard-tests.txt": {
+    "member": "grouped-guard-tests.txt",
+    "sha256": "f5c520c3ff900387fe1800e54baf723dc1c8351b4d71e8a6bca48a9c4a7c64fa"
+  },
+  "grouped-native-features.txt": {
+    "member": "grouped-native-features.txt",
+    "sha256": "3f11ad6bbc7ecca0b2416b713dee77f1a635c00aaeaa946e14cde1c2bfae56d5"
+  },
+  "grouped-sources.json": {
+    "member": "grouped-sources.json",
+    "sha256": "62ace1a212786ff0f998492dc1e3255dfed7062535381d8b8b5c70bb449d11cf"
+  },
+  "handle-api-owners.txt": {
+    "member": "handle-api-owners.txt",
+    "sha256": "be5a61da05ba401e0f7a9689b82bdaedffb9f7c0fd3f89befea7c9842a0beb43"
+  },
+  "handle-builds.csv": {
+    "member": "handle-builds.csv",
+    "sha256": "6f74c11bfc6268f429f75c717744b1675852d3048035ec794a8ec4d8618138b7"
+  },
+  "handle-coverage.txt": {
+    "member": "handle-coverage.txt",
+    "sha256": "37a40f08d8548dba289b9b0bb35bcf63b359f6d37ee86044ebc6b6da080b9ec1"
+  },
+  "handle-faults.csv": {
+    "member": "handle-faults.csv",
+    "sha256": "2428b724f99aeb157f6586e086f9d942253c5df35a66c0b2546ea8c43dadb385"
+  },
+  "handle-keys.csv": {
+    "member": "handle-keys.csv",
+    "sha256": "067e9eb7240a344a17541f27cdc0c4864ec4e8ab22740c925877e55fff7813f1"
+  },
+  "handle-observations.csv": {
+    "member": "handle-observations.csv",
+    "sha256": "977fd619a02232c46ea02773621def89509128f7f4c28ee52edc3d7004810a41"
+  },
+  "handle-plan-cost.csv": {
+    "member": "handle-plan-cost.csv",
+    "sha256": "7e624a1128cdfed3057499369228de981ec1773495a7657e0f2e6755ac35be70"
+  },
+  "handle-plan-errors.csv": {
+    "member": "handle-plan-errors.csv",
+    "sha256": "efb855e9b4c700912a0b14cd5960e2b66380acdc2f9f801ea572639155cae047"
+  },
+  "handle-provider.sha256": {
+    "member": "handle-provider.sha256",
+    "sha256": "162fa793fc0893b92f65c14080bfc8100b0bd982ecd18694dc591b38226ce93b"
+  },
+  "handle-route-errors.csv": {
+    "member": "handle-route-errors.csv",
+    "sha256": "32666ce1be0efed8c2f3df9a2bc48eda4acbc8823b9134f7e41e5a89493be65a"
+  },
+  "handle-route-exclusions.csv": {
+    "member": "handle-route-exclusions.csv",
+    "sha256": "911b4c7d6064e83dc622061d6fe85afb7ba4623231d9bfaaa41aae53c16b643f"
+  },
+  "handle-routes.csv": {
+    "member": "handle-routes.csv",
+    "sha256": "9fb7824050dce7a0aebbac336c54ea1a1566bc18d7d6573487ff57ec60b77049"
+  },
+  "handle-score.json": {
+    "member": "handle-score.json",
+    "sha256": "e7e95907d64e6b577612ad6f50af2cb592a7005470d63de58509c0a13d620c8b"
+  },
+  "handle-source.sha256": {
+    "member": "handle-source.sha256",
+    "sha256": "55c74d2e542844691f905d29bd78fdada27a5578d27ca7122881e235d217264d"
+  },
+  "host.txt": {
+    "member": "host.txt",
+    "sha256": "9ecdbbdabcd738f4120b8fde87ae820d667350e6b0b42e3c19330c83c5b63223"
+  },
+  "incumbent-routes.csv": {
+    "member": "incumbent-routes.csv",
+    "sha256": "c2dbe2bd49dd0aa1810f9c4862a5ddf8dda1f526762bf41f845399606f103694"
+  },
+  "libxsmm-build.txt": {
+    "member": "libxsmm-build.txt",
+    "sha256": "312ca90d3d5fb11d9bedf0c2d5e691ac3c5c38adf86fa6d5a67e043bf5712ae9"
+  },
+  "libxsmm-routes.csv": {
+    "member": "libxsmm-routes.csv",
+    "sha256": "4a918e7dbd4b376cd3e73843813fcce631c6048a7d99c65734964432af25633b"
+  },
+  "methods.csv": {
+    "member": "methods.csv",
+    "sha256": "5074b9dab10ba9a7bb78a8bcde124ca876915d695c402fbd36640b943ac0a4da"
+  },
+  "mkl-backend-imports.txt": {
+    "member": "mkl-backend-imports.txt",
+    "sha256": "82a091c9800bcd3247e12201a42a8f3a15cadb23807aa49c5db98b565a39e177"
+  },
+  "mkl-build.txt": {
+    "member": "mkl-build.txt",
+    "sha256": "b068ef3caa757e2ffea039855028fb23d650cce06d4b28d8bb50c33b8b0f356e"
+  },
+  "mkl-handle-oneshot.dependencies": {
+    "member": "mkl-handle-oneshot.dependencies",
+    "sha256": "aaaa40e45c76fef18d45d56783dcac100bca17b5f641b7e576bebd2e669d3594"
+  },
+  "mkl-handle-oneshot.dynamic": {
+    "member": "mkl-handle-oneshot.dynamic",
+    "sha256": "3a75f28550107192e52f1e04994b77af55ddc41068e8379096bd95fac4f8f2bf"
+  },
+  "mkl-handle-oneshot.imports": {
+    "member": "mkl-handle-oneshot.imports",
+    "sha256": "52e8b2336b53ce389163cda980b1504c7f5359b5736f48036467db1191416460"
+  },
+  "mkl-handle-oneshot.symbols": {
+    "member": "mkl-handle-oneshot.symbols",
+    "sha256": "9f1c6de1beaee91c99fa325661220d19716dbb366929b38ef5b276e954e24d78"
+  },
+  "mkl-handle-prepared.dependencies": {
+    "member": "mkl-handle-prepared.dependencies",
+    "sha256": "3f918e52284b297ac8a79f7d074c495b46ace0f8851439ee65c7ccc7f2edb16b"
+  },
+  "mkl-handle-prepared.dynamic": {
+    "member": "mkl-handle-prepared.dynamic",
+    "sha256": "3c680254415953c42b46dc24561fd335701c4391ac6ab9b93ea24aeab13cf6d7"
+  },
+  "mkl-handle-prepared.imports": {
+    "member": "mkl-handle-prepared.imports",
+    "sha256": "52e8b2336b53ce389163cda980b1504c7f5359b5736f48036467db1191416460"
+  },
+  "mkl-handle-prepared.symbols": {
+    "member": "mkl-handle-prepared.symbols",
+    "sha256": "ebe70853fe1f32075de4463df43bd404c0f9042abcbdcf1e720e7bc1a6b64638"
+  },
+  "mkl-identity.sha256": {
+    "member": "mkl-identity.sha256",
+    "sha256": "01a24e64975b1e878f99e05333cd4829d8bc4d530bac2f17cc64eb45ff5aa7f2"
+  },
+  "mkl-jit-backend-imports.txt": {
+    "member": "mkl-jit-backend-imports.txt",
+    "sha256": "f0219018d936aee5e6246549f54366b29a42198510cdbd422cb58fa432e2af80"
+  },
+  "mkl-jit-build.txt": {
+    "member": "mkl-jit-build.txt",
+    "sha256": "27a596196fa4d02e40f0fa7dad647a8a33e911f99e8e7046441167d1d1620dee"
+  },
+  "mkl-jit-identity.sha256": {
+    "member": "mkl-jit-identity.sha256",
+    "sha256": "b4b1ade1fdcea7ece6a42cc80112990050845a1d765a62668c071760cfc5f3f5"
+  },
+  "onednn-qualified-cached-plan.log": {
+    "member": "onednn-qualified-cached-plan.log",
+    "sha256": "cfaba38419f9db82a50c4c777d240bbc9cb0b167f0c91b796f9475fa7f7e6d3e"
+  },
+  "onednn-qualified-oneshot.log": {
+    "member": "onednn-qualified-oneshot.log",
+    "sha256": "a2d5ee1bfa6b196dd31e361f33cce0899da3f78c11f219e4613233a182f7317f"
+  },
+  "onednn-routes.csv": {
+    "member": "onednn-routes.csv",
+    "sha256": "5017409a4dbe6aab34140c9f0355c79bb2b491aa7dbb0fb0243e1eddc2abfd2f"
+  },
+  "openblas-build.txt": {
+    "member": "openblas-build.txt",
+    "sha256": "ea04e5d90493f31903682870e51b4bbd963ddb948d1752f43088fd981d0066a7"
+  },
+  "page-size.txt": {
+    "member": "page-size.txt",
+    "sha256": "25ac87b7309b7946b51c32e824793ff48b56b735efa16875cf33e4ba67523d91"
+  },
+  "panel.csv": {
+    "member": "panel.csv",
+    "sha256": "2b4d6871262a4d038533b6cab819e819c3cff1eaf3ef606678b2ad6e30520ed5"
+  },
+  "peer-build-status.csv": {
+    "member": "peer-build-status.csv",
+    "sha256": "f9db5753781c34f26cc74091be6996cad7a788b86a777669413863faf6614d00"
+  },
+  "protocol.md": {
+    "member": "protocol.md",
+    "sha256": "b63ad49548f9c8fd0f429427de3c860309d991bc3a791a695c15d5f6623e673e"
+  },
+  "raw.csv": {
+    "member": "raw.csv",
+    "sha256": "e266be07daa202895e1a7b27baf99c934c1361f84e03319c53629499550cc84c"
+  },
+  "run.json": {
+    "member": "run.json",
+    "sha256": "18eaa338bcc0301c398e9e7c1b44891c51638cd90bbc39ef643808b81fdfe737"
+  },
+  "stream-incumbent-flags.json": {
+    "member": "stream-incumbent-flags.json",
+    "sha256": "d213b17e308c72e34b1cc82d851ec1e003d4215dc259651a2b70d3108bf6438d"
+  },
+  "stream-incumbent-tests.txt": {
+    "member": "stream-incumbent-tests.txt",
+    "sha256": "24359dd3dc5e62ffddcf396d58a2e23b79b7a3d01ee8027d6b18a8cde48a99d8"
+  }
+}

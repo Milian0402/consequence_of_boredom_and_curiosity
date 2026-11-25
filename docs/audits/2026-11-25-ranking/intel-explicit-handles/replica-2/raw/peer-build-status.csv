@@ -1,0 +1,7 @@
+family,status
+vendors,ready
+openblas,ready
+aocl,ready
+blasfeo,ready
+libxsmm,ready
+onednn,restored_and_qualified

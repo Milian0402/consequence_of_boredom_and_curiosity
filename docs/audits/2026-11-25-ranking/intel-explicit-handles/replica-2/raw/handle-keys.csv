@@ -1,0 +1,13 @@
+method,cpu,key,step,status,creates,gets,calls,destroys
+mkl-handle-prepared,0,m,change,0,1,1,0,1
+mkl-handle-prepared,0,m,restore,0,1,1,0,1
+mkl-handle-prepared,0,n,change,0,1,1,0,1
+mkl-handle-prepared,0,n,restore,0,1,1,0,1
+mkl-handle-prepared,0,k,change,0,1,1,0,1
+mkl-handle-prepared,0,k,restore,0,1,1,0,1
+mkl-handle-prepared,0,lda,change,0,1,1,0,1
+mkl-handle-prepared,0,lda,restore,0,1,1,0,1
+mkl-handle-prepared,0,ldb,change,0,1,1,0,1
+mkl-handle-prepared,0,ldb,restore,0,1,1,0,1
+mkl-handle-prepared,0,ldc,change,0,1,1,0,1
+mkl-handle-prepared,0,ldc,restore,0,1,1,0,1

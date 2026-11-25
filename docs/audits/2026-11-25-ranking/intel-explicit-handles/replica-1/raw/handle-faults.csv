@@ -1,0 +1,5 @@
+method,cpu,scenario,status,creates,gets,calls,destroys,recovered
+mkl-handle-oneshot,0,create-error,-2,1,0,0,0,1
+mkl-handle-oneshot,0,null-callable,-3,1,1,0,1,1
+mkl-handle-prepared,0,create-error,-2,1,0,0,0,1
+mkl-handle-prepared,0,null-callable,-3,1,1,0,1,1

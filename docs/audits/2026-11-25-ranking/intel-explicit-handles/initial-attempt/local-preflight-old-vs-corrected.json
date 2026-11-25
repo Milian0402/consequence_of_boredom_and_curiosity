@@ -1,0 +1,48 @@
+{
+  "previous_run_id": 45708206524,
+  "previous_benchmark": "61f30a237adb45f72a403315e78fafc70dd7295b",
+  "previous_job_ids": [
+    139535589638,
+    139535589668
+  ],
+  "previous_artifact_sha256": [
+    "2e0646df2dfe06bf28b576db2e31d7ceb30d87f5adbf40e6b6f36def07c4bb7c",
+    "0057bbd6bcfb5c2bed02b96d7676c81431de82c8ff31dd6047cdeb9ab4b576fe"
+  ],
+  "initial_result": "both stopped before timing at mkl-prefix.txt",
+  "error_line": "/home/runner/work/consequence_of_boredom_and_curiosity/consequence_of_boredom_and_curiosity/tools/world-rank/handles/source/build.sh: line 6: /home/runner/work/_temp/handles-vendors/mkl-prefix.txt: No such file or directory",
+  "recovery_benchmark": "0fcba28139f3d0f64492d5e9938f50d32280625d",
+  "intervening_benchmark": "37ead44b9f3a144dada8a92b17bd447b138e6689",
+  "source_sha256": {
+    "tools/world-rank/vendors/build.sh": {
+      "failed_run": "d1762e872d93a2215927065ad114b0525fd13239a398c4f3d7379ae4eba4b63b",
+      "intervening_bench": "d1762e872d93a2215927065ad114b0525fd13239a398c4f3d7379ae4eba4b63b",
+      "recovery": "6b3622b8e4e2e3e5d2f42efed78caf8e5997cb8219c5d3767b695f79335a80c0"
+    },
+    "tools/world-rank/phase.txt": {
+      "failed_run": "3daf09752bd5e28cfa040e9d073fd4736090df46caf2e87506b67f75c751215f",
+      "intervening_bench": "7919fce3766d2f813182b3b0226ee5004c609748a63906e4159e44fbb2a4e8e4",
+      "recovery": "3daf09752bd5e28cfa040e9d073fd4736090df46caf2e87506b67f75c751215f"
+    },
+    "tools/world-rank/handles/source/build.sh": {
+      "failed_run": "ef9924ddc95d668b7992442045e4be014e609f93b5a07c16eb7ddc9a00439853",
+      "intervening_bench": "ef9924ddc95d668b7992442045e4be014e609f93b5a07c16eb7ddc9a00439853",
+      "recovery": "ef9924ddc95d668b7992442045e4be014e609f93b5a07c16eb7ddc9a00439853"
+    },
+    "tools/world-rank/views/worker.c": {
+      "failed_run": "c0354523724b76a621db6821e9007b8d248ddc420badbaefa2f67fd97e325664",
+      "intervening_bench": "c0354523724b76a621db6821e9007b8d248ddc420badbaefa2f67fd97e325664",
+      "recovery": "c0354523724b76a621db6821e9007b8d248ddc420badbaefa2f67fd97e325664"
+    },
+    "tools/world-rank/handles/panel.csv": {
+      "failed_run": "2b4d6871262a4d038533b6cab819e819c3cff1eaf3ef606678b2ad6e30520ed5",
+      "intervening_bench": "2b4d6871262a4d038533b6cab819e819c3cff1eaf3ef606678b2ad6e30520ed5",
+      "recovery": "2b4d6871262a4d038533b6cab819e819c3cff1eaf3ef606678b2ad6e30520ed5"
+    },
+    "tools/world-rank/handles/protocol.md": {
+      "failed_run": "b63ad49548f9c8fd0f429427de3c860309d991bc3a791a695c15d5f6623e673e",
+      "intervening_bench": "b63ad49548f9c8fd0f429427de3c860309d991bc3a791a695c15d5f6623e673e",
+      "recovery": "b63ad49548f9c8fd0f429427de3c860309d991bc3a791a695c15d5f6623e673e"
+    }
+  }
+}
