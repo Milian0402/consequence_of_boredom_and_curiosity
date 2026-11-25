@@ -77,6 +77,9 @@ On three fresh large rectangles, including a cropped view, it averaged 1.108×
 the previous standalone kernel on Neoverse N2 and 1.004× on Xeon 6975P-C.
 FastMMW led the tested independent Arm field and lost all 18 paired calls to
 the candidate. The comparison omitted four BLAS-backed COB modes on Arm.
+On M5 Max, scaled positive inputs exposed large errors in this kernel,
+including a 55% error with entries equal to 1 or 1/256.
+[Exact-input accuracy study](docs/audits/2026-11-25-ranking/hk15-input-scale/README.md)
 The new option defaults to off. Run `python3 tests/check_hk15_ragged.py` to
 exercise all 18 combinations of remainders, output guards and allocation
 failure. [Native comparison](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45709409988)
