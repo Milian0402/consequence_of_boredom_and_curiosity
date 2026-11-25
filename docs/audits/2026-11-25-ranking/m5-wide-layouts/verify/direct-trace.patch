@@ -1,0 +1,19 @@
+--- a/third_party/maxmulsk/strassen_leaf.c
++++ b/third_party/maxmulsk/strassen_leaf.c
+@@ -1762,6 +1762,8 @@
+     return 1;
+ }
+ 
++uint64_t compact_completed;
++uint64_t compact_observed(void){return compact_completed;}
+ int cob_sgemm_sme_medium_wide(int m, int n, int k, const float *a, int lda,
+                              const float *b, int ldb, float *c, int ldc)
+ {
+@@ -1773,6 +1775,7 @@
+         if (!packed) return 0;
+         const int done = compact_run(m, n, k, a, lda, b, ldb, c, ldc, packed, depth, packed + a_size);
+         free(packed);
++        compact_completed += done;
+         return done;
+     }
+     float *packed = aligned_alloc(64, (a_size + (size_t)k * 64) * sizeof(*packed));

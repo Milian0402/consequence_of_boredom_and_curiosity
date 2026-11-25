@@ -1,0 +1,26 @@
+{
+  "fresh_gm": {
+    "vs_incumbent": 1.0535675683412893,
+    "vs_field": 0.9587840176246091,
+    "vs_accelerate": 1.0146184687671418,
+    "vs_prepared": 1.0820193831296658,
+    "vs_mpgemm": 1.052323640097787,
+    "vs_maxmulsk": 1.3122609151631093,
+    "cold_incumbent": 1.1950894931177445,
+    "cold_field": 1.160178520750954
+  },
+  "seed_wins": [
+    6,
+    5
+  ],
+  "min_incumbent": 0.9022556563413869,
+  "min_field": 0.8046123660741518,
+  "field_wins_onepct": 3,
+  "field_paired_wins": 32,
+  "incumbent_paired_wins": 40,
+  "warm_obs": 880,
+  "first_processes": 220,
+  "cells_warm_and_first": 128628360,
+  "max_abs_fp64": 2.64543357282e-05,
+  "gate": false
+}

@@ -13,6 +13,7 @@ independent implementation on each layout.
 
 | CPU and workload | Result |
 |---|---|
+| Apple M5 Max, eight compact rectangles with 24–32 rows | The integrated two-tile kernel beat the previous opt-in on all eight. It averaged 1.019× the fastest measured peer per shape. Five external leads exceeded 1% in both builds, and two sizes favored prepared LIBXSMM. [Timings and counterexamples](docs/audits/2026-11-25-ranking/m5-two-row-tiles/README.md) |
 | Apple M5 Max, nine wide rectangles with 24–55 rows | The installed Apple SME kernel averaged 4.807× the speed of its matched default. A clean rebuild still beat prior COB on all nine but missed the external performance floor on one layout. [Timings and accuracy](docs/audits/2026-11-25-ranking/m5-wide-release/README.md) |
 | Arm Neoverse N2, two odd large rectangles | Released COB with OpenBLAS leaves beat FastMMW in all twelve paired calls. |
 | Intel Xeon 6975P-C, the same two rectangles | Direct oneMKL beat every released build. At 2039 × 2969 × 3367 it took 221.63 ms versus 233.14 ms for COB. |

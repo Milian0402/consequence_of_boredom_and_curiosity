@@ -1,0 +1,13 @@
+family,mode,seed,a_hash,b_hash
+repeat-win-deeper,random,73194513,a94751a5309c0f55,fdefd8b7cce5c9f4
+repeat-win-deeper,random,38641729,3ac3fb8723778709,d64f6042a0eace45
+repeat-win-deeper,cancel,73194513,6ebaad6ecd0cc83a,d8e4269757fdb9fb
+repeat-win-deeper,scaled,38641729,d078e2f174645979,bb015da855b79235
+repeat-win-ragged,random,73194513,d8c8a1003c88bb69,2277b60ef1dad869
+repeat-win-ragged,random,38641729,35e81eb719c1ae3e,4a64223b9762a31e
+repeat-win-ragged,cancel,73194513,ce858a0b6b9ef182,770f8a9f0a037e63
+repeat-win-ragged,scaled,38641729,577121296e57b15a,503cf6845d9f93e2
+fresh-short,random,73194513,7ce3dc559c1b09b5,5de794e8202dcaf8
+fresh-short,random,38641729,d4d618b11b218919,bc533da35549a525
+fresh-short,cancel,73194513,ec9ab0fb6422e854,b38b9ca73d9b3367
+fresh-short,scaled,38641729,aecf832d99e320b9,538255d2f33ad7d5

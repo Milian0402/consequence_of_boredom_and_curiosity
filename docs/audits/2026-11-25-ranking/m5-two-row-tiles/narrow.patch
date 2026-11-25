@@ -1,0 +1,44 @@
+--- a/third_party/maxmulsk/strassen_leaf.c
++++ b/third_party/maxmulsk/strassen_leaf.c
+@@ -1740,12 +1740,41 @@
+     return 1;
+ }
+ 
++__arm_locally_streaming __arm_new("za") static int
++compact_run(int m, int n, int k, const float *a, int lda, const float *b, int ldb,
++             float *c, int ldc, float *ap, size_t depth, float *bp)
++{
++    if (svcntsw() != 16) return 0;
++    _Alignas(64) float stage[16 * 64];
++    pack_A_block(a, lda, 0, m, 0, k, depth, ap, stage);
++    for (int j = 0; j < n; j += 64) {
++        const int w = n-j < 64 ? n-j : 64;
++        for (int i = 0; i < m; i += 16) {
++            const int h = m-i < 16 ? m-i : 16;
++            svzero_za();
++            if (w == 64) cob_sme_short_k_tile(k, ap + i*depth, b + j, ldb, svptrue_c32());
++            else cob_sme_short_k_tile(k, ap + i*depth, b+j, ldb, svwhilelt_c32_u64(0,(unsigned)w,4));
++            float *dst = c+(size_t)i*ldc+j;
++            if (w == 64 && h == 16) store_za(dst, ldc);
++            else cob_sme_transfer_short_c(h, w, dst, ldc, 1);
++        }
++    }
++    return 1;
++}
++
+ int cob_sgemm_sme_medium_wide(int m, int n, int k, const float *a, int lda,
+                              const float *b, int ldb, float *c, int ldc)
+ {
+     const size_t depth = ((size_t)k + 63) & ~(size_t)63;
+     const size_t rows = ((size_t)m + 15) & ~(size_t)15;
+     const size_t a_size = rows * depth;
++    if (m <= 32 && lda == k && ldb == n && ldc == n) {
++        float *packed = aligned_alloc(64, (a_size) * sizeof(*packed));
++        if (!packed) return 0;
++        const int done = compact_run(m, n, k, a, lda, b, ldb, c, ldc, packed, depth, packed + a_size);
++        free(packed);
++        return done;
++    }
+     float *packed = aligned_alloc(64, (a_size + (size_t)k * 64) * sizeof(*packed));
+     if (!packed) return 0;
+     const int done = cob_wide_run(m, n, k, a, lda, b, ldb, c, ldc, packed, depth, packed + a_size);

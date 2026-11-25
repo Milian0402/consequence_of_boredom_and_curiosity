@@ -1,0 +1,39 @@
+{
+  "panel_sha256": "abd135230c984f65f65b76bd9786db1ac44253b39027eaaeafa8fe6d4bb868f0",
+  "seeds": [
+    427297853,
+    1670820329
+  ],
+  "scanner_scope": "Distinct saved CSV/TSV tables with m,n,k columns and JSON objects with m,n,k fields under work/ and outputs/, including ZIP members. Geometry matches ignore pad. Layout-wave outputs are excluded.",
+  "generation": "Performance-blind fixed design. Four compact N/64 and K/8 integer layouts, four odd N/K compact layouts, three historical compact anchors, three untreated controls.",
+  "file_counts": {
+    "csv_tables": 805,
+    "tsv_tables": 0,
+    "json_documents": 91,
+    "csv_tsv_rows": 229253,
+    "json_dimension_objects": 703,
+    "zip_archives": 78
+  },
+  "inventory_sha256": "df4a25d27f03fa6a3fa5106da35fbe7991d101880e2ab577098cfeaa0f4a6f05",
+  "matching_prior_files_or_members": {
+    "repeat-mpgemm-loss": 11,
+    "repeat-low-compact": 10,
+    "repeat-upper-compact": 11,
+    "fresh-aligned-1": 0,
+    "fresh-aligned-2": 0,
+    "fresh-aligned-3": 0,
+    "fresh-aligned-4": 0,
+    "fresh-odd-1": 0,
+    "fresh-odd-2": 0,
+    "fresh-odd-3": 0,
+    "fresh-odd-4": 0,
+    "control-padded": 0,
+    "control-outside-m": 0,
+    "control-outside-n": 0
+  },
+  "repeat_example": {
+    "repeat-mpgemm-loss": "outputs/m5-frontier-thin.zip!clean-rebuild/panel.csv",
+    "repeat-low-compact": "outputs/m5-frontier-thin.zip!clean-rebuild/panel.csv",
+    "repeat-upper-compact": "outputs/m5-frontier-thin.zip!clean-rebuild/panel.csv"
+  }
+}

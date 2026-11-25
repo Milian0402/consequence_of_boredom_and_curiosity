@@ -1,0 +1,80 @@
+--- a/third_party/maxmulsk/strassen_leaf.c
++++ b/third_party/maxmulsk/strassen_leaf.c
+@@ -1740,12 +1740,77 @@
+     return 1;
+ }
+ 
++__attribute__((always_inline)) static inline void
++compact_strip(int tiles,int m,int k,size_t depth,const float *ap,const float *b,int ldb,
++              float *c,int ldc,svbool_t cols) __arm_streaming __arm_inout("za")
++{
++    const svbool_t full=svptrue_b32();
++    const svcount_t four=svptrue_c32();
++    svzero_za();
++    int p=0;
++#define STRIP_STEP(q) do {                                                                            \
++    svfloat32_t bv=svld1_f32(cols,b+(size_t)(p+q)*ldb);                                              \
++    svmopa_za32_f32_m(0,full,full,svget4_f32(a0,q),bv);                                              \
++    svmopa_za32_f32_m(1,full,full,svget4_f32(a1,q),bv);                                              \
++    if (tiles>=3) svmopa_za32_f32_m(2,full,full,svget4_f32(a2,q),bv);                                \
++    if (tiles>=4) svmopa_za32_f32_m(3,full,full,svget4_f32(a3,q),bv);                                \
++} while(0)
++    for (;p+4<=k;p+=4) {
++        const float *left=ap+(size_t)p*16;
++        svfloat32x4_t a0=svld1_f32_x4(four,left);
++        svfloat32x4_t a1=svld1_f32_x4(four,left+16*depth);
++        svfloat32x4_t a2=tiles>=3?svld1_f32_x4(four,left+32*depth):a0;
++        svfloat32x4_t a3=tiles>=4?svld1_f32_x4(four,left+48*depth):a0;
++        STRIP_STEP(0); STRIP_STEP(1); STRIP_STEP(2); STRIP_STEP(3);
++    }
++#undef STRIP_STEP
++    for (;p<k;++p) {
++        const float *left=ap+(size_t)p*16;
++        svfloat32_t bv=svld1_f32(cols,b+(size_t)p*ldb);
++        svmopa_za32_f32_m(0,full,full,svld1_f32(full,left),bv);
++        svmopa_za32_f32_m(1,full,full,svld1_f32(full,left+16*depth),bv);
++        if (tiles>=3) svmopa_za32_f32_m(2,full,full,svld1_f32(full,left+32*depth),bv);
++        if (tiles>=4) svmopa_za32_f32_m(3,full,full,svld1_f32(full,left+48*depth),bv);
++    }
++#define STORE_STRIP(tile) do {                                                                         \
++    const int rows=m-(tile)*16<16?m-(tile)*16:16;                                                      \
++    for (int i=0;i<rows;++i) svst1_hor_za32(tile,i,cols,c+(size_t)((tile)*16+i)*ldc);                \
++} while(0)
++    STORE_STRIP(0);
++    STORE_STRIP(1);
++    if (tiles>=3) STORE_STRIP(2);
++    if (tiles>=4) STORE_STRIP(3);
++#undef STORE_STRIP
++}
++__arm_locally_streaming __arm_new("za") static int
++compact_run(int m, int n, int k, const float *a, int lda, const float *b, int ldb,
++             float *c, int ldc, float *ap, size_t depth, float *bp)
++{
++    if (svcntsw() != 16) return 0;
++    _Alignas(64) float stage[16 * 64];
++    pack_A_block(a, lda, 0, m, 0, k, depth, ap, stage);
++    for (int j = 0; j < n; j += 16) {
++        svbool_t cols = svwhilelt_b32_s32(j,n);
++        if (m<=32) compact_strip(2,m,k,depth,ap,b+j,ldb,c+j,ldc,cols);
++        else if (m<=48) compact_strip(3,m,k,depth,ap,b+j,ldb,c+j,ldc,cols);
++        else compact_strip(4,m,k,depth,ap,b+j,ldb,c+j,ldc,cols);
++    }
++    return 1;
++}
++
+ int cob_sgemm_sme_medium_wide(int m, int n, int k, const float *a, int lda,
+                              const float *b, int ldb, float *c, int ldc)
+ {
+     const size_t depth = ((size_t)k + 63) & ~(size_t)63;
+     const size_t rows = ((size_t)m + 15) & ~(size_t)15;
+     const size_t a_size = rows * depth;
++    if (lda == k && ldb == n && ldc == n) {
++        float *packed = aligned_alloc(64, (a_size) * sizeof(*packed));
++        if (!packed) return 0;
++        const int done = compact_run(m, n, k, a, lda, b, ldb, c, ldc, packed, depth, packed + a_size);
++        free(packed);
++        return done;
++    }
+     float *packed = aligned_alloc(64, (a_size + (size_t)k * 64) * sizeof(*packed));
+     if (!packed) return 0;
+     const int done = cob_wide_run(m, n, k, a, lda, b, ldb, c, ldc, packed, depth, packed + a_size);

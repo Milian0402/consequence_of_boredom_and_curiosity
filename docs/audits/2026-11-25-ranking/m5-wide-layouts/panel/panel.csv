@@ -1,0 +1,15 @@
+family,m,n,k,pad
+repeat-mpgemm-loss,39,2304,160,0
+repeat-low-compact,24,1280,131,0
+repeat-upper-compact,55,1536,384,0
+fresh-aligned-1,28,1920,168,0
+fresh-aligned-2,32,2496,184,0
+fresh-aligned-3,40,3520,288,0
+fresh-aligned-4,48,3776,360,0
+fresh-odd-1,25,1761,315,0
+fresh-odd-2,31,2237,281,0
+fresh-odd-3,43,3301,167,0
+fresh-odd-4,53,3757,129,0
+control-padded,37,2657,211,7
+control-outside-m,56,2112,248,0
+control-outside-n,33,991,183,0

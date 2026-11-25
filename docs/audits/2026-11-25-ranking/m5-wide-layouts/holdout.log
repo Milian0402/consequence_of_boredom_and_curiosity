@@ -1,0 +1,56 @@
+1 repeat-mpgemm-loss
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+1 repeat-low-compact
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+1 repeat-upper-compact
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+1 fresh-aligned-1
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+1 fresh-aligned-2
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+1 fresh-aligned-3
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+1 fresh-aligned-4
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+1 fresh-odd-1
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+1 fresh-odd-2
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+1 fresh-odd-3
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+1 fresh-odd-4
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+1 control-padded
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+1 control-outside-m
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+1 control-outside-n
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+2 control-outside-n
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+2 control-outside-m
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+2 control-padded
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+2 fresh-odd-4
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+2 fresh-odd-3
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+2 fresh-odd-2
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+2 fresh-odd-1
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+2 fresh-aligned-4
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+2 fresh-aligned-3
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+2 fresh-aligned-2
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+2 fresh-aligned-1
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+2 repeat-upper-compact
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+2 repeat-low-compact
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+2 repeat-mpgemm-loss
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1

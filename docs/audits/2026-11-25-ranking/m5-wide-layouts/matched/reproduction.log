@@ -1,0 +1,50 @@
+HEAD is now at 602a9dd Add opt-in Apple SME2 kernel for thin medium-wide SGEMM
+-- The C compiler identification is AppleClang 21.0.0.21000401
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Configuring done (1.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: $PROJECT/work/world-rank/layout-wave/apple/matched/reproduction/incumbent-build
+[ 33%] Building C object CMakeFiles/cob_strassen_sme_leaf.dir/third_party/maxmulsk/strassen_leaf.c.o
+[ 33%] Built target cob_strassen_sme_leaf
+[ 66%] Building C object CMakeFiles/cob_matmul.dir/src/gemm.c.o
+[100%] Linking C static library libcob_matmul.a
+[100%] Built target cob_matmul
+-- Install configuration: "Release"
+-- Installing: $PROJECT/work/world-rank/layout-wave/apple/matched/reproduction/incumbent-install/lib/libcob_matmul.a
+-- Installing: $PROJECT/work/world-rank/layout-wave/apple/matched/reproduction/incumbent-install/include/cob_gemm.h
+-- The C compiler identification is AppleClang 21.0.0.21000401
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Configuring done (0.9s)
+-- Generating done (0.0s)
+-- Build files have been written to: $PROJECT/work/world-rank/layout-wave/apple/matched/reproduction/candidate-build
+[ 33%] Building C object CMakeFiles/cob_strassen_sme_leaf.dir/third_party/maxmulsk/strassen_leaf.c.o
+[ 33%] Built target cob_strassen_sme_leaf
+[ 66%] Building C object CMakeFiles/cob_matmul.dir/src/gemm.c.o
+[100%] Linking C static library libcob_matmul.a
+[100%] Built target cob_matmul
+-- Install configuration: "Release"
+-- Installing: $PROJECT/work/world-rank/layout-wave/apple/matched/reproduction/candidate-install/lib/libcob_matmul.a
+-- Installing: $PROJECT/work/world-rank/layout-wave/apple/matched/reproduction/candidate-install/include/cob_gemm.h
+{"fresh_gm": {"vs_incumbent": 1.0535675683412893, "vs_field": 0.9587840176246091, "vs_accelerate": 1.0146184687671418, "vs_prepared": 1.0820193831296658, "vs_mpgemm": 1.052323640097787, "vs_maxmulsk": 1.3122609151631093, "cold_incumbent": 1.1950894931177445, "cold_field": 1.160178520750954}, "seed_wins": [6, 5], "min_incumbent": 0.9022556563413869, "min_field": 0.8046123660741518, "field_wins_onepct": 3, "field_paired_wins": 32, "incumbent_paired_wins": 40, "warm_obs": 880, "first_processes": 220, "cells_warm_and_first": 128628360, "max_abs_fp64": 2.64543357282e-05, "gate": false}
+repeat-mpgemm-loss MpGEMM 1.077 1.169
+repeat-low-compact OpenBLAS 1.295 1.004
+repeat-upper-compact MpGEMM 0.964 0.882
+fresh-aligned-1 Accelerate 1.107 0.982
+fresh-aligned-2 Accelerate 0.962 1.011
+fresh-aligned-3 MpGEMM 1.196 1.052
+fresh-aligned-4 Accelerate 0.902 1.185
+fresh-odd-1 Accelerate 1.062 0.913
+fresh-odd-2 Accelerate 1.027 0.867
+fresh-odd-3 MpGEMM 1.136 0.805
+fresh-odd-4 MpGEMM 1.064 0.906
+control-padded Accelerate 1.135 1.076
+control-outside-m MpGEMM 1.086 0.593
+control-outside-n prepared-LIBXSMM 0.979 0.173

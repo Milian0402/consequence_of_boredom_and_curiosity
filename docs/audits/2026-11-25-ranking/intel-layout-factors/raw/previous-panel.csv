@@ -1,0 +1,13 @@
+family,layout,m,n,k,lda,ldb,ldc,ar,ac,br,bc,cr,cc
+repeat-win-deeper,aligned,108,1728,320,324,1732,1732,0,0,0,0,0,0
+repeat-win-deeper,cropped,108,1728,320,359,1799,1821,1,26,2,25,3,22
+repeat-win-ragged,aligned,137,2179,347,354,2186,2186,0,0,0,0,0,0
+repeat-win-ragged,cropped,137,2179,347,388,2252,2274,2,27,3,21,4,22
+repeat-loss-thin,aligned,49,2861,157,168,2872,2872,0,0,0,0,0,0
+repeat-loss-thin,cropped,49,2861,157,200,2936,2958,3,29,4,27,1,31
+fresh-short,aligned,43,2291,137,140,2294,2294,0,0,0,0,0,0
+fresh-short,cropped,43,2291,137,182,2368,2390,4,25,1,23,2,18
+fresh-mid,aligned,87,2809,239,244,2814,2814,0,0,0,0,0,0
+fresh-mid,cropped,87,2809,239,286,2888,2910,1,21,2,25,3,19
+fresh-upper,aligned,127,1847,281,288,1854,1854,0,0,0,0,0,0
+fresh-upper,cropped,127,1847,281,330,1928,1950,2,17,3,19,4,22

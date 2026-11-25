@@ -1,0 +1,36 @@
+{
+  "panel_sha256": "498df612b73a0eb6e22799f5b0ab142fc370f60985a8bd1e44dc28373d8239dc",
+  "seeds": [
+    804162307,
+    2065108391
+  ],
+  "scanner_scope": "Distinct saved CSV/TSV tables with m,n,k columns and JSON objects with m,n,k fields under work/ and outputs/, including ZIP members. Geometry matches ignore pad. Only this second Apple compact study directory is excluded; the preceding compact wave is included.",
+  "generation": "Performance-blind fixed design. Four compact N/64 and K/8 integer layouts, four odd N/K compact layouts, two historical positive compact controls and two untreated controls.",
+  "file_counts": {
+    "csv_tables": 823,
+    "tsv_tables": 0,
+    "json_documents": 93,
+    "csv_tsv_rows": 237525,
+    "json_dimension_objects": 710,
+    "zip_archives": 78
+  },
+  "inventory_sha256": "1debfb43f6809c2616a2388f0e2330305930e598875f7e9896c9316f0aa1d372",
+  "matching_prior_files_or_members": {
+    "repeat-positive-24": 22,
+    "repeat-positive-32": 11,
+    "fresh-aligned-1": 0,
+    "fresh-aligned-2": 0,
+    "fresh-aligned-3": 0,
+    "fresh-aligned-4": 0,
+    "fresh-odd-1": 0,
+    "fresh-odd-2": 0,
+    "fresh-odd-3": 0,
+    "fresh-odd-4": 0,
+    "control-above-32": 0,
+    "control-padded": 0
+  },
+  "repeat_example": {
+    "repeat-positive-24": "outputs/m5-frontier-thin.zip!clean-rebuild/panel.csv",
+    "repeat-positive-32": "work/world-rank/layout-wave/apple/first.csv"
+  }
+}

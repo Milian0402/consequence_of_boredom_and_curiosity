@@ -1,0 +1,23 @@
+{
+  "release": "a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6",
+  "tree": "18f22622de1a4b1b7aebbdb66985741aa38c6e9e",
+  "historical_benchmark": "bce9e5367a2b1b414207460f635ac498663b213f",
+  "benchmark": "9e2483cc4b1839a2e0a392f2cfdb656d807d006e",
+  "cpu": 0,
+  "trace_worker_sha256": "8b9db8dbc8ac4b700814ed27ab8c16fbad94595ad03dedf078a5338f0db4f176",
+  "reference_panel_sha256": "ab9115f17a698938d14e3fb0010f05e450b214eca8876d7fd6d59e2323b17c80",
+  "panel_sha256": "5742b14e8e2fd71993ce98070fabf85b648f1ad69efb7f16ff07f2a8eb246631",
+  "run": "45702348592",
+  "attempt": "1",
+  "source_sha256": {
+    "historical-endpoints.csv": "97804ff015e676a2ff5ad8fe752a79a8d12ab6a0852a345bcbc8c7f903abe4df",
+    "panel.csv": "5742b14e8e2fd71993ce98070fabf85b648f1ad69efb7f16ff07f2a8eb246631",
+    "factors.json": "5e374c1097205d7c811ca6e711cf7d3aaf4c6311bf4f5a58561226facdaa056f",
+    "protocol.md": "3c84e7a469eadcbee3da33e0761c2aea278e792db6f8c83b1b8a907b73e4cbf8",
+    "score.py": "9ba03ae023845a3b89202797b14069d2da8a4cefe206f766ffaa79b38772e26b",
+    "run.sh": "35f10d215f4e5df2ea72df222b591e3f716221b2cbd870ba70c63a1a2e8c8569",
+    "study.py": "8c5501b58a36bd06d4c08424207c5898988b71f2c8f99fa7469d6846bc1cb930",
+    "estimands.md": "9d5ba6c367cf1b4ab0dd39c062851bcbb86f7e5d18feb416dedafc7024ba3241",
+    "worker.c": "fcae22c3ba6174dd830ab4af682ee49235ee63b3c5eb320bde152fa6a43d7226"
+  }
+}

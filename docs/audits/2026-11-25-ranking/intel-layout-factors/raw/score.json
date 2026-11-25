@@ -1,0 +1,7299 @@
+{
+  "model": "Intel(R) Xeon(R) 6975P-C",
+  "seeds": [
+    73194513,
+    38641729
+  ],
+  "families": [
+    "repeat-win-deeper",
+    "repeat-win-ragged",
+    "fresh-short"
+  ],
+  "methods": [
+    "stream",
+    "mkl"
+  ],
+  "panel_sha256": "5742b14e8e2fd71993ce98070fabf85b648f1ad69efb7f16ff07f2a8eb246631",
+  "coverage": {
+    "warm_observations": 2304,
+    "warm_complete_calls": 36864,
+    "preflight_fixtures": 1536,
+    "independent_fp64_checked_positions": 747084800,
+    "checked_parent_guard_positions": 48849920,
+    "logical_cpu": 0,
+    "page_bytes": 4096,
+    "max_abs": {
+      "stream": 2.38291975272e-05,
+      "mkl": 2.38291975272e-05
+    }
+  },
+  "inputs": {
+    "repeat-win-deeper": {
+      "random/73194513": [
+        "a94751a5309c0f55",
+        "fdefd8b7cce5c9f4"
+      ],
+      "random/38641729": [
+        "3ac3fb8723778709",
+        "d64f6042a0eace45"
+      ],
+      "cancel/73194513": [
+        "6ebaad6ecd0cc83a",
+        "d8e4269757fdb9fb"
+      ],
+      "scaled/38641729": [
+        "d078e2f174645979",
+        "bb015da855b79235"
+      ]
+    },
+    "repeat-win-ragged": {
+      "random/73194513": [
+        "d8c8a1003c88bb69",
+        "2277b60ef1dad869"
+      ],
+      "random/38641729": [
+        "35e81eb719c1ae3e",
+        "4a64223b9762a31e"
+      ],
+      "cancel/73194513": [
+        "ce858a0b6b9ef182",
+        "770f8a9f0a037e63"
+      ],
+      "scaled/38641729": [
+        "577121296e57b15a",
+        "503cf6845d9f93e2"
+      ]
+    },
+    "fresh-short": {
+      "random/73194513": [
+        "7ce3dc559c1b09b5",
+        "5de794e8202dcaf8"
+      ],
+      "random/38641729": [
+        "d4d618b11b218919",
+        "bc533da35549a525"
+      ],
+      "cancel/73194513": [
+        "ec9ab0fb6422e854",
+        "b38b9ca73d9b3367"
+      ],
+      "scaled/38641729": [
+        "aecf832d99e320b9",
+        "538255d2f33ad7d5"
+      ]
+    }
+  },
+  "native": {
+    "release": "a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6",
+    "benchmark": "9e2483cc4b1839a2e0a392f2cfdb656d807d006e",
+    "run": "45702348592",
+    "attempt": "1",
+    "binaries": {
+      "stream": {
+        "method": "stream",
+        "worker_sha256": "c8224188dd7caaa5178aa4746ba206484dbf415cf1f01c1d60652486ab51dfa8",
+        "archive_sha256": "236718b48d45167e22b530a38ef0bb94c77ce16c1da3a3ea60b517a4a963f7d0",
+        "adapter_sha256": "none"
+      },
+      "mkl": {
+        "method": "mkl",
+        "worker_sha256": "c8224188dd7caaa5178aa4746ba206484dbf415cf1f01c1d60652486ab51dfa8",
+        "archive_sha256": "none",
+        "adapter_sha256": "fc7cb9a819277604d76b509964efacaccbcae7d16f2c7a6def92c1d56f888f14"
+      }
+    },
+    "trace_worker_sha256": "8b9db8dbc8ac4b700814ed27ab8c16fbad94595ad03dedf078a5338f0db4f176",
+    "actual_isa": "avx512",
+    "matched_trace_cells": 192
+  },
+  "c_digest_variation_within_same_method_mask_and_input": [],
+  "effects": [
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "main",
+      "factor": "A_stride",
+      "other": "",
+      "ratio": 1.0013667453768458,
+      "round_ratios": [
+        1.0020606175325875,
+        0.9969153811994745,
+        1.0011379031335204,
+        1.0071364145960549,
+        0.9983668362970839,
+        1.002615347787237
+      ],
+      "seed_ratios": [
+        1.0000354564758192,
+        1.0026998065451724
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9969153811994745,
+      "max_ratio": 1.0071364145960549
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "main",
+      "factor": "B_stride",
+      "other": "",
+      "ratio": 1.0024597030475086,
+      "round_ratios": [
+        1.000696223797451,
+        1.0078323510754204,
+        1.003684132333657,
+        0.999060716567305,
+        0.996417578912152,
+        1.0071187126349428
+      ],
+      "seed_ratios": [
+        1.0040666402741125,
+        1.0008553376096156
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.996417578912152,
+      "max_ratio": 1.0078323510754204
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "main",
+      "factor": "C_stride",
+      "other": "",
+      "ratio": 0.9993615638208319,
+      "round_ratios": [
+        1.0022315758282332,
+        1.0010901283736016,
+        0.9971628406010955,
+        0.9883560263017768,
+        1.0071727004445328,
+        1.0002559566016669
+      ],
+      "seed_ratios": [
+        1.0001591568013661,
+        0.9985646068936279
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9883560263017768,
+      "max_ratio": 1.0071727004445328
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "main",
+      "factor": "A_origin",
+      "other": "",
+      "ratio": 1.0041225337110637,
+      "round_ratios": [
+        1.0079098596832645,
+        1.003817218957215,
+        1.01422477129903,
+        0.9921989165833104,
+        1.0059645844534695,
+        1.0007562050508674
+      ],
+      "seed_ratios": [
+        1.0086415380856635,
+        0.9996237757766179
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9921989165833104,
+      "max_ratio": 1.01422477129903
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "main",
+      "factor": "B_origin",
+      "other": "",
+      "ratio": 1.0023196789462911,
+      "round_ratios": [
+        0.9957391654900327,
+        0.9996684451227534,
+        1.00354774273477,
+        1.0104666325334115,
+        1.004048327444535,
+        1.0005097774217848
+      ],
+      "seed_ratios": [
+        0.9996467013427027,
+        1.0049998038842924
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9957391654900327,
+      "max_ratio": 1.0104666325334115
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "main",
+      "factor": "C_origin",
+      "other": "",
+      "ratio": 1.0027897730040665,
+      "round_ratios": [
+        1.0053977924591049,
+        0.9984328934273924,
+        1.0085229602459982,
+        1.0015335400424794,
+        1.004623854631088,
+        0.998269483403825
+      ],
+      "seed_ratios": [
+        1.0041090141786102,
+        1.001472265104747
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.998269483403825,
+      "max_ratio": 1.0085229602459982
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_stride",
+      "ratio": 0.9960949585899377,
+      "round_ratios": [
+        0.9968661296805544,
+        0.9897143587498954,
+        0.9707052955929188,
+        1.0072882583058127,
+        1.017172680859738,
+        0.9954555750459237
+      ],
+      "seed_ratios": [
+        0.985699879388269,
+        1.0065996631186136
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9707052955929188,
+      "max_ratio": 1.017172680859738
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_stride",
+      "ratio": 0.9891884864458901,
+      "round_ratios": [
+        1.0138920808141256,
+        1.003003960069007,
+        0.9671552745952292,
+        0.9493491631091849,
+        0.9924497613229767,
+        1.0109955172578684
+      ],
+      "seed_ratios": [
+        0.9944818494434782,
+        0.9839232986149375
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9493491631091849,
+      "max_ratio": 1.0138920808141256
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "A_origin",
+      "ratio": 0.9931987427951627,
+      "round_ratios": [
+        0.9960010125944937,
+        1.0051619058832255,
+        0.9711460154682074,
+        0.9898686454322408,
+        0.9990722237558085,
+        0.9983025496991231
+      ],
+      "seed_ratios": [
+        0.990664904604132,
+        0.9957390618213865
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9711460154682074,
+      "max_ratio": 1.0051619058832255
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_origin",
+      "ratio": 0.995583974500734,
+      "round_ratios": [
+        0.9761654367940843,
+        1.00116808010221,
+        0.9806942445117204,
+        1.009075876650489,
+        0.9981664409937505,
+        1.0087337414390025
+      ],
+      "seed_ratios": [
+        0.9859495260417919,
+        1.0053125683440556
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9761654367940843,
+      "max_ratio": 1.009075876650489
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_origin",
+      "ratio": 1.012956670572295,
+      "round_ratios": [
+        1.001796064229261,
+        1.0009040160302116,
+        1.0203544872233885,
+        1.0244472899619694,
+        1.0206202278402015,
+        1.0098772559533258
+      ],
+      "seed_ratios": [
+        1.007645130679911,
+        1.0182962088692455
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.0009040160302116,
+      "max_ratio": 1.0244472899619694
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_stride",
+      "ratio": 1.0097274077383955,
+      "round_ratios": [
+        0.9926581230699849,
+        1.007171466868208,
+        1.0290318152235935,
+        1.0203391519940925,
+        1.015498381546788,
+        0.9941894830550111
+      ],
+      "seed_ratios": [
+        1.0095100316785843,
+        1.0099448306054202
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9926581230699849,
+      "max_ratio": 1.0290318152235935
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "A_origin",
+      "ratio": 0.9898935329451065,
+      "round_ratios": [
+        1.016734465179358,
+        0.9898321829898081,
+        0.9605465413569741,
+        0.9694600603597681,
+        1.0080641758875415,
+        0.9959219186138194
+      ],
+      "seed_ratios": [
+        0.9887712786338756,
+        0.9910170610137435
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9605465413569741,
+      "max_ratio": 1.016734465179358
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "B_origin",
+      "ratio": 1.0018394330439473,
+      "round_ratios": [
+        0.9883190716171966,
+        1.0027337013266482,
+        1.0133739229781298,
+        1.002771291891055,
+        1.0122948369707403,
+        0.991807309725839
+      ],
+      "seed_ratios": [
+        1.001422866879178,
+        1.0022561724895307
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9883190716171966,
+      "max_ratio": 1.0133739229781298
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_origin",
+      "ratio": 0.9861199591128527,
+      "round_ratios": [
+        0.9981954104258931,
+        1.003881370812071,
+        0.9617100587876632,
+        1.0019502586118434,
+        0.9620292017861473,
+        0.9899242319358537
+      ],
+      "seed_ratios": [
+        0.9877507635491168,
+        0.9844918471808187
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9617100587876632,
+      "max_ratio": 1.003881370812071
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "A_origin",
+      "ratio": 1.0052582269707888,
+      "round_ratios": [
+        0.9875732635267254,
+        0.99471784094019,
+        1.0259502752924612,
+        1.009546271463313,
+        0.9961240712038881,
+        1.018194176042894
+      ],
+      "seed_ratios": [
+        1.0026095750012967,
+        1.007913876038085
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9875732635267254,
+      "max_ratio": 1.0259502752924612
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "B_origin",
+      "ratio": 1.0023603550048423,
+      "round_ratios": [
+        1.0067221863586469,
+        0.9917728306831091,
+        1.0101273553880064,
+        0.9819889539014297,
+        1.0174070642622335,
+        1.00656994158412
+      ],
+      "seed_ratios": [
+        1.002842335566954,
+        1.001878606089575
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9819889539014297,
+      "max_ratio": 1.0174070642622335
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "C_origin",
+      "ratio": 0.9917498153132325,
+      "round_ratios": [
+        0.9866538037793794,
+        0.9985944461636068,
+        0.9597927759600521,
+        1.002762275427613,
+        1.007863480103215,
+        0.9955925908455885
+      ],
+      "seed_ratios": [
+        0.9815455818922046,
+        1.0020601328343082
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9597927759600521,
+      "max_ratio": 1.007863480103215
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "B_origin",
+      "ratio": 1.0022453424504916,
+      "round_ratios": [
+        0.9932616301694658,
+        1.0100172436019117,
+        1.0273127466182563,
+        0.996315066062956,
+        0.9935269180647628,
+        0.99351132133611
+      ],
+      "seed_ratios": [
+        1.0101015588947235,
+        0.9944502289085124
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9932616301694658,
+      "max_ratio": 1.0273127466182563
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "C_origin",
+      "ratio": 1.0051620285760423,
+      "round_ratios": [
+        1.0066009269267606,
+        0.9964821139052055,
+        1.0227015310765801,
+        0.9935178110682171,
+        1.0106812144555233,
+        1.0012691931947286
+      ],
+      "seed_ratios": [
+        1.0085371802101835,
+        1.0017981721611326
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9935178110682171,
+      "max_ratio": 1.0227015310765801
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_origin",
+      "other": "C_origin",
+      "ratio": 1.0032047647834614,
+      "round_ratios": [
+        0.9928253282169356,
+        1.0092413514761087,
+        1.0331343886008304,
+        0.9888258499798372,
+        0.9825217777601047,
+        1.013563163803825
+      ],
+      "seed_ratios": [
+        1.011598633540804,
+        0.9948805452233196
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9825217777601047,
+      "max_ratio": 1.0331343886008304
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "A_stride",
+      "other": "",
+      "ratio": 1.0039413649609632,
+      "round_ratios": [
+        0.9994694006367295,
+        1.0080847641843158,
+        1.0025418834213151,
+        1.0042109456309396,
+        1.0012400871160625,
+        1.0081330044923913
+      ],
+      "seed_ratios": [
+        1.0033590208038903,
+        1.00452404710744
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9994694006367295,
+      "max_ratio": 1.0081330044923913
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "B_stride",
+      "other": "",
+      "ratio": 0.9346331037628057,
+      "round_ratios": [
+        0.9361394987937722,
+        0.9364382912845977,
+        0.9393482849248698,
+        0.9286071411213225,
+        0.9307183916634786,
+        0.9365916029126182
+      ],
+      "seed_ratios": [
+        0.9373075749726647,
+        0.9319662637686154
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.9286071411213225,
+      "max_ratio": 0.9393482849248698
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "C_stride",
+      "other": "",
+      "ratio": 1.0005212514828945,
+      "round_ratios": [
+        0.9989311326726452,
+        0.9978785828151046,
+        1.001604775512299,
+        0.9887612292010179,
+        1.015308578458061,
+        1.0008264742511854
+      ],
+      "seed_ratios": [
+        0.9994702669197321,
+        1.0015733412000458
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9887612292010179,
+      "max_ratio": 1.015308578458061
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "A_origin",
+      "other": "",
+      "ratio": 1.002040881297461,
+      "round_ratios": [
+        1.0055177486624214,
+        0.9968818826830247,
+        1.0169192693477869,
+        0.9877027946514861,
+        1.0035147953012353,
+        1.0019421759074563
+      ],
+      "seed_ratios": [
+        1.0064062077394915,
+        0.9976944896302749
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9877027946514861,
+      "max_ratio": 1.0169192693477869
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "B_origin",
+      "other": "",
+      "ratio": 0.9641588919961697,
+      "round_ratios": [
+        0.9536097743708194,
+        0.9604839335563796,
+        0.9713471294509779,
+        0.9694888979846507,
+        0.9634158703190315,
+        0.9667179208505978
+      ],
+      "seed_ratios": [
+        0.9617859308488163,
+        0.9665377078191075
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.9536097743708194,
+      "max_ratio": 0.9713471294509779
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "C_origin",
+      "other": "",
+      "ratio": 1.0046031519110352,
+      "round_ratios": [
+        1.0035539547294274,
+        0.997654950241915,
+        1.0132800530154111,
+        1.0076741204924902,
+        1.0055923173646826,
+        0.9999414811599169
+      ],
+      "seed_ratios": [
+        1.0048090253460717,
+        1.0043973206570205
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.997654950241915,
+      "max_ratio": 1.0132800530154111
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_stride",
+      "ratio": 0.9913115031610491,
+      "round_ratios": [
+        0.9983717100615354,
+        0.9895432858016816,
+        0.9768150519464704,
+        0.9962087897050775,
+        0.9952539526120324,
+        0.9918298814194588
+      ],
+      "seed_ratios": [
+        0.9882036840291711,
+        0.9944290961279295
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.9768150519464704,
+      "max_ratio": 0.9983717100615354
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_stride",
+      "ratio": 0.9893124025681574,
+      "round_ratios": [
+        1.0096380691192006,
+        1.0204115365654125,
+        0.973836239853531,
+        0.9467787624264139,
+        0.9827791889080985,
+        1.0043133909120436
+      ],
+      "seed_ratios": [
+        1.0010958704704842,
+        0.9776676327864611
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9467787624264139,
+      "max_ratio": 1.0204115365654125
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "A_origin",
+      "ratio": 0.9984896115740802,
+      "round_ratios": [
+        1.0118713744994952,
+        0.9935121464057398,
+        0.98038166123999,
+        1.004143281528374,
+        0.994250574379937,
+        1.0071081193364564
+      ],
+      "seed_ratios": [
+        0.995171408116449,
+        1.0018188789289422
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.98038166123999,
+      "max_ratio": 1.0118713744994952
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_origin",
+      "ratio": 0.9941262988029157,
+      "round_ratios": [
+        0.9700885111488269,
+        0.9885247714793757,
+        0.9852235357381478,
+        1.0246095727508209,
+        0.9884174885351967,
+        1.0088273576112552
+      ],
+      "seed_ratios": [
+        0.981245998429691,
+        1.0071756721078722
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9700885111488269,
+      "max_ratio": 1.0246095727508209
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_origin",
+      "ratio": 1.0126073153204835,
+      "round_ratios": [
+        1.0056463050902975,
+        0.9947765133707964,
+        1.0128287298281666,
+        1.0242223916324928,
+        1.029335593646284,
+        1.009225717690337
+      ],
+      "seed_ratios": [
+        1.004389735608566,
+        1.0208921285115253
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9947765133707964,
+      "max_ratio": 1.029335593646284
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_stride",
+      "ratio": 1.0021260136187293,
+      "round_ratios": [
+        0.9943123846251727,
+        0.9920605298027192,
+        1.0199982207785194,
+        1.010149518103049,
+        0.9920151385894237,
+        1.0045455183884004
+      ],
+      "seed_ratios": [
+        1.0020440448492485,
+        1.0022079890933835
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9920151385894237,
+      "max_ratio": 1.0199982207785194
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "A_origin",
+      "ratio": 0.9893079186963387,
+      "round_ratios": [
+        1.0150197277103759,
+        0.9961401983405911,
+        0.9442668634907018,
+        0.975561993814926,
+        1.008792742408115,
+        0.9977974537434723
+      ],
+      "seed_ratios": [
+        0.9846832859520713,
+        0.9939542713462087
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9442668634907018,
+      "max_ratio": 1.0150197277103759
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "B_origin",
+      "ratio": 1.0917741285887774,
+      "round_ratios": [
+        1.0852292807312156,
+        1.0879163975873787,
+        1.0956695134984242,
+        1.0952195337249422,
+        1.0938526581520396,
+        1.092798729779209
+      ],
+      "seed_ratios": [
+        1.0895960859380585,
+        1.0939565250269683
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.0852292807312156,
+      "max_ratio": 1.0956695134984242
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_origin",
+      "ratio": 0.9876970485086684,
+      "round_ratios": [
+        0.9967733698442731,
+        1.0182240638141762,
+        0.9487045800299181,
+        0.992582426328181,
+        0.9706635680099277,
+        1.0007749915115145
+      ],
+      "seed_ratios": [
+        0.9874692795676215,
+        0.9879248699867322
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9487045800299181,
+      "max_ratio": 1.0182240638141762
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "A_origin",
+      "ratio": 1.0075278136008998,
+      "round_ratios": [
+        0.9823935250176561,
+        1.0150955568613529,
+        1.0401284817149272,
+        1.0032816083063028,
+        1.0039007836268357,
+        1.0012654093416906
+      ],
+      "seed_ratios": [
+        1.0122624703225553,
+        1.0028153022960005
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9823935250176561,
+      "max_ratio": 1.0401284817149272
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "B_origin",
+      "ratio": 1.0085307063302709,
+      "round_ratios": [
+        1.0209359778951002,
+        1.0077095140007917,
+        1.015715634718624,
+        0.9873879994174546,
+        1.0165958370856243,
+        1.003211672743254
+      ],
+      "seed_ratios": [
+        1.0147724506338904,
+        1.0023273542513589
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9873879994174546,
+      "max_ratio": 1.0209359778951002
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "C_origin",
+      "ratio": 0.9915009503864045,
+      "round_ratios": [
+        0.9904101287547384,
+        0.9925755800570121,
+        0.9569487234411775,
+        0.9950392012376351,
+        1.01687195425295,
+        0.998125203071675
+      ],
+      "seed_ratios": [
+        0.9798413783329837,
+        1.003299264917409
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9569487234411775,
+      "max_ratio": 1.01687195425295
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "B_origin",
+      "ratio": 1.0024414081109747,
+      "round_ratios": [
+        0.9927749930815969,
+        1.0075185939712277,
+        1.00937383705574,
+        0.989865292527162,
+        1.0177710842039505,
+        0.9976353732088507
+      ],
+      "seed_ratios": [
+        1.0031948967799798,
+        1.0016884853790333
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.989865292527162,
+      "max_ratio": 1.0177710842039505
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "C_origin",
+      "ratio": 1.004960337817654,
+      "round_ratios": [
+        1.0058646550487584,
+        1.0173435878088828,
+        1.0164912236253578,
+        0.9854275856595762,
+        1.0086314494849686,
+        0.9963810932179125
+      ],
+      "seed_ratios": [
+        1.0132196670994358,
+        0.9967683350223193
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9854275856595762,
+      "max_ratio": 1.0173435878088828
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_origin",
+      "other": "C_origin",
+      "ratio": 1.0053564566772621,
+      "round_ratios": [
+        1.0032043160086597,
+        1.008944472249243,
+        1.0313627597264836,
+        0.9929435736798733,
+        0.9898542396939018,
+        1.0063672807981465
+      ],
+      "seed_ratios": [
+        1.0144314407599622,
+        0.9963626563323608
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9898542396939018,
+      "max_ratio": 1.0313627597264836
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "A_stride",
+      "other": "",
+      "ratio": 0.9974354880932539,
+      "round_ratios": [
+        1.0025925925238004,
+        0.988920194628793,
+        0.9985995794180654,
+        1.0029132016314333,
+        0.9971303078492846,
+        0.9945268563963615
+      ],
+      "seed_ratios": [
+        0.9966875622193456,
+        0.9981839752193881
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.988920194628793,
+      "max_ratio": 1.0029132016314333
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "B_stride",
+      "other": "",
+      "ratio": 1.0725702941738688,
+      "round_ratios": [
+        1.068960582356434,
+        1.076240004766235,
+        1.0684898758440091,
+        1.0758701633081431,
+        1.0705897593054425,
+        1.0753018813141169
+      ],
+      "seed_ratios": [
+        1.0712242886796202,
+        1.0739179909393197
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.0684898758440091,
+      "max_ratio": 1.076240004766235
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "C_stride",
+      "other": "",
+      "ratio": 0.9988409165119242,
+      "round_ratios": [
+        1.0033039746661592,
+        1.003218373070436,
+        0.9955651819761627,
+        0.99959019135533,
+        0.9919867927976299,
+        0.9994299534792528
+      ],
+      "seed_ratios": [
+        1.00068925500281,
+        0.9969959920230975
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9919867927976299,
+      "max_ratio": 1.0033039746661592
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "A_origin",
+      "other": "",
+      "ratio": 1.0020774126609557,
+      "round_ratios": [
+        1.0023789843829463,
+        1.006957029107124,
+        0.9973503323911985,
+        1.0045521000407929,
+        1.002441208803004,
+        0.9988163280425691
+      ],
+      "seed_ratios": [
+        1.0022211015084979,
+        1.001933744414142
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9973503323911985,
+      "max_ratio": 1.006957029107124
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "B_origin",
+      "other": "",
+      "ratio": 1.0395793548832126,
+      "round_ratios": [
+        1.0441788583249472,
+        1.0407966340689172,
+        1.033150469391918,
+        1.0422673582275612,
+        1.0421754077105334,
+        1.0349552396230062
+      ],
+      "seed_ratios": [
+        1.0393650700010475,
+        1.0397936839442827
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.033150469391918,
+      "max_ratio": 1.0441788583249472
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "C_origin",
+      "other": "",
+      "ratio": 0.9981949301039726,
+      "round_ratios": [
+        1.00183730802015,
+        1.000779771789123,
+        0.9953052537102093,
+        0.9939061842264941,
+        0.9990369230980874,
+        0.9983279043948128
+      ],
+      "seed_ratios": [
+        0.9993033390925002,
+        0.9970877505424247
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9939061842264941,
+      "max_ratio": 1.00183730802015
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_stride",
+      "ratio": 1.0048253807341438,
+      "round_ratios": [
+        0.9984919640993352,
+        1.000172880712414,
+        0.9937452270607656,
+        1.0111216330504524,
+        1.0220232516436434,
+        1.0036555599850208
+      ],
+      "seed_ratios": [
+        0.9974663071172803,
+        1.0122387478786303
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9937452270607656,
+      "max_ratio": 1.0220232516436434
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_stride",
+      "ratio": 0.9998747452049063,
+      "round_ratios": [
+        1.0042134026291583,
+        0.9829406314289649,
+        0.9931395392932731,
+        1.0027148905159042,
+        1.0098400256375215,
+        1.0066534275120604
+      ],
+      "seed_ratios": [
+        0.9933932191490336,
+        1.006398560838766
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9829406314289649,
+      "max_ratio": 1.0098400256375215
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "A_origin",
+      "ratio": 0.9947011278659408,
+      "round_ratios": [
+        0.984315830741974,
+        1.011725834978094,
+        0.9905795404617205,
+        0.9857842637014848,
+        1.0048495313959245,
+        0.9912565796380086
+      ],
+      "seed_ratios": [
+        0.9954716308411167,
+        0.9939312212662077
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.984315830741974,
+      "max_ratio": 1.011725834978094
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_origin",
+      "ratio": 1.00146628823679,
+      "round_ratios": [
+        1.006264300190568,
+        1.0127900776870904,
+        0.9954027780882904,
+        0.9848393997933986,
+        1.0098631930046091,
+        0.9999072029802261
+      ],
+      "seed_ratios": [
+        1.0047934234836402,
+        0.9981501700096495
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9848393997933986,
+      "max_ratio": 1.0127900776870904
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_origin",
+      "ratio": 1.00034500565671,
+      "round_ratios": [
+        0.9961713767141114,
+        1.0061596776532773,
+        1.0074304343603073,
+        1.0002195795867324,
+        0.9915330181333675,
+        1.0006455823029163
+      ],
+      "seed_ratios": [
+        1.0032411672042552,
+        0.9974572047625985
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9915330181333675,
+      "max_ratio": 1.0074304343603073
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_stride",
+      "ratio": 1.0075852677371555,
+      "round_ratios": [
+        0.9983362758215956,
+        1.01523187004375,
+        1.0088564805908968,
+        1.0100872531327623,
+        1.0236722626942527,
+        0.9896908252101871
+      ],
+      "seed_ratios": [
+        1.0074507571475653,
+        1.007719796286034
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9896908252101871,
+      "max_ratio": 1.0236722626942527
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "A_origin",
+      "ratio": 1.0005919433552493,
+      "round_ratios": [
+        1.0016893636864086,
+        0.9936675426197124,
+        1.0172405476626498,
+        0.9937452119969369,
+        0.9992777837409553,
+        0.9981203247987692
+      ],
+      "seed_ratios": [
+        1.0041515812648851,
+        0.9970449240803734
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9936675426197124,
+      "max_ratio": 1.0172405476626498
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "B_origin",
+      "ratio": 0.9176251816288417,
+      "round_ratios": [
+        0.9107007055239774,
+        0.9217010641170257,
+        0.924890133834674,
+        0.9155893051692912,
+        0.9254398473382296,
+        0.9075846106869336
+      ],
+      "seed_ratios": [
+        0.9190771514354605,
+        0.9161755056626432
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.9075846106869336,
+      "max_ratio": 0.9254398473382296
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_origin",
+      "ratio": 0.9984032660640254,
+      "round_ratios": [
+        1.001426643833635,
+        0.9859140109610269,
+        1.0137086707827794,
+        1.0094378381433937,
+        0.991104676730082,
+        0.9891576431588559
+      ],
+      "seed_ratios": [
+        1.000285055937759,
+        0.9965250163142875
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9859140109610269,
+      "max_ratio": 1.0137086707827794
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "A_origin",
+      "ratio": 0.9977473707430473,
+      "round_ratios": [
+        1.0052725698787317,
+        0.979925322514296,
+        0.9863687932099605,
+        1.0062441722295556,
+        0.9922535049779997,
+        1.0169073719547883
+      ],
+      "seed_ratios": [
+        0.9904640391160774,
+        1.005084260013196
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.979925322514296,
+      "max_ratio": 1.0169073719547883
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "B_origin",
+      "ratio": 0.9938818408931935,
+      "round_ratios": [
+        0.9860776857274063,
+        0.9841852407898669,
+        0.9944981851813618,
+        0.9945319919634327,
+        1.0007979839647336,
+        1.0033475177094808
+      ],
+      "seed_ratios": [
+        0.9882435564155451,
+        0.9995522938091227
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9841852407898669,
+      "max_ratio": 1.0033475177094808
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "C_origin",
+      "ratio": 1.000250998172751,
+      "round_ratios": [
+        0.996207303554052,
+        1.0060638869497969,
+        1.0029720009538727,
+        1.0077615778155997,
+        0.9911409945843641,
+        0.9974626307217848
+      ],
+      "seed_ratios": [
+        1.0017392647390748,
+        0.9987649426981261
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9911409945843641,
+      "max_ratio": 1.0077615778155997
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "B_origin",
+      "ratio": 0.9998044118500127,
+      "round_ratios": [
+        1.0004901786318756,
+        1.0024800034913852,
+        1.0177723147796682,
+        1.0065158093575817,
+        0.9761791560838554,
+        0.9958661731695861
+      ],
+      "seed_ratios": [
+        1.0068846663164979,
+        0.9927739446183392
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9761791560838554,
+      "max_ratio": 1.0177723147796682
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "C_origin",
+      "ratio": 1.0002006952421887,
+      "round_ratios": [
+        1.0007319790732347,
+        0.9794941707465734,
+        1.0061095534392053,
+        1.0082098629329785,
+        1.0020322239323405,
+        1.0049058538044209
+      ],
+      "seed_ratios": [
+        0.9953786063957314,
+        1.0050461445875492
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9794941707465734,
+      "max_ratio": 1.0082098629329785
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_origin",
+      "other": "C_origin",
+      "ratio": 0.9978597721439895,
+      "round_ratios": [
+        0.989654163537675,
+        1.0002942473397012,
+        1.0017177553267644,
+        0.9958530133945319,
+        0.9925923821510685,
+        1.0071503546895635
+      ],
+      "seed_ratios": [
+        0.9972074926847341,
+        0.998512478263189
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.989654163537675,
+      "max_ratio": 1.0071503546895635
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "main",
+      "factor": "A_stride",
+      "other": "",
+      "ratio": 0.9993635024234379,
+      "round_ratios": [
+        1.0036342462272472,
+        0.9968008993325331,
+        1.0005526633145863,
+        0.9943410237569216,
+        0.9995719208877077,
+        1.0013079326809755
+      ],
+      "seed_ratios": [
+        1.0003253663313965,
+        0.9984025633967316
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9943410237569216,
+      "max_ratio": 1.0036342462272472
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "main",
+      "factor": "B_stride",
+      "other": "",
+      "ratio": 1.0022950485988888,
+      "round_ratios": [
+        1.0013285047953777,
+        1.0023628748393074,
+        0.9910545871961651,
+        1.0107895877240596,
+        1.0055972149522858,
+        1.0027428169099375
+      ],
+      "seed_ratios": [
+        0.9982355742749619,
+        1.0063710313825536
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9910545871961651,
+      "max_ratio": 1.0107895877240596
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "main",
+      "factor": "C_stride",
+      "other": "",
+      "ratio": 1.0046301003632423,
+      "round_ratios": [
+        1.0023082462639867,
+        1.0026741267525543,
+        1.0014553960114614,
+        1.0184313323055878,
+        1.0066414476793148,
+        0.9964094416812808
+      ],
+      "seed_ratios": [
+        1.002145792906221,
+        1.007120566388792
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9964094416812808,
+      "max_ratio": 1.0184313323055878
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "main",
+      "factor": "A_origin",
+      "other": "",
+      "ratio": 0.9993040593656233,
+      "round_ratios": [
+        0.9995476858283731,
+        0.9992927925341534,
+        1.009532175128569,
+        0.9918077755034271,
+        0.9953500045490069,
+        1.0003826247287755
+      ],
+      "seed_ratios": [
+        1.0027795746917993,
+        0.995840589764238
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9918077755034271,
+      "max_ratio": 1.009532175128569
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "main",
+      "factor": "B_origin",
+      "other": "",
+      "ratio": 0.9959504315614872,
+      "round_ratios": [
+        1.005729602462317,
+        0.9955590613779111,
+        0.9985536424666455,
+        0.9890896065332971,
+        0.9908248559152839,
+        0.9960339706284093
+      ],
+      "seed_ratios": [
+        0.9999383410074644,
+        0.9919784265179088
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9890896065332971,
+      "max_ratio": 1.005729602462317
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "main",
+      "factor": "C_origin",
+      "other": "",
+      "ratio": 0.9978009430895465,
+      "round_ratios": [
+        0.9987366210925475,
+        1.000561890545011,
+        0.9963668713851296,
+        1.0086014642189525,
+        0.9795423046715451,
+        1.0032437386750197
+      ],
+      "seed_ratios": [
+        0.9985536505212563,
+        0.9970488030469574
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9795423046715451,
+      "max_ratio": 1.0086014642189525
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_stride",
+      "ratio": 1.002861999496918,
+      "round_ratios": [
+        0.9936454391418368,
+        1.0044134670733127,
+        1.0149655407050568,
+        0.9903222274119098,
+        1.012427525201149,
+        1.0016392007158819
+      ],
+      "seed_ratios": [
+        1.004303761742515,
+        1.0014223070218942
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9903222274119098,
+      "max_ratio": 1.0149655407050568
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_stride",
+      "ratio": 0.9872557750500467,
+      "round_ratios": [
+        1.000290265991377,
+        1.007951086555055,
+        0.965699157371257,
+        0.9666084465685936,
+        0.9810537001735848,
+        1.0028301414322687
+      ],
+      "seed_ratios": [
+        0.9911417814419904,
+        0.983385004667684
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.965699157371257,
+      "max_ratio": 1.007951086555055
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "A_origin",
+      "ratio": 0.9925764291114878,
+      "round_ratios": [
+        1.0133979767339105,
+        0.9986033293817967,
+        0.9881861610279918,
+        0.9939721746364455,
+        0.9746102179362717,
+        0.9871127216915563
+      ],
+      "seed_ratios": [
+        1.0000090646353397,
+        0.9851990371577036
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9746102179362717,
+      "max_ratio": 1.0133979767339105
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_origin",
+      "ratio": 1.003212514412057,
+      "round_ratios": [
+        1.0070038191590414,
+        0.9970507512752392,
+        1.0300940277328345,
+        0.9746604593756969,
+        1.011141168591128,
+        1.0001548692257132
+      ],
+      "seed_ratios": [
+        1.011288535755582,
+        0.995200987145578
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9746604593756969,
+      "max_ratio": 1.0300940277328345
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_origin",
+      "ratio": 0.9988389494391753,
+      "round_ratios": [
+        1.00250687813328,
+        0.9993000962215747,
+        0.9974429167763985,
+        0.970237630633476,
+        1.0326576173651876,
+        0.9918979821187089
+      ],
+      "seed_ratios": [
+        0.9997477765421952,
+        0.9979309485112393
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.970237630633476,
+      "max_ratio": 1.0326576173651876
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_stride",
+      "ratio": 1.00285895380407,
+      "round_ratios": [
+        0.9903233329549359,
+        0.9901222195447466,
+        1.0233003235257836,
+        1.0171697982705363,
+        1.0112698902000743,
+        0.9856203804064052
+      ],
+      "seed_ratios": [
+        1.0011280810223215,
+        1.0045928191305722
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9856203804064052,
+      "max_ratio": 1.0233003235257836
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "A_origin",
+      "ratio": 0.991014799523598,
+      "round_ratios": [
+        1.0239811124936486,
+        0.9877527596730725,
+        0.9714341914415152,
+        0.94386149456069,
+        1.0090453033467934,
+        1.012297871114257
+      ],
+      "seed_ratios": [
+        0.9941483460910749,
+        0.9878911298664727
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.94386149456069,
+      "max_ratio": 1.0239811124936486
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "B_origin",
+      "ratio": 0.9967405364783156,
+      "round_ratios": [
+        1.0097015466452128,
+        0.9977041302693848,
+        1.001020741523552,
+        0.9919525259161329,
+        0.9857606315342453,
+        0.9944718642120546
+      ],
+      "seed_ratios": [
+        1.0027960685465722,
+        0.9907215716342235
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9857606315342453,
+      "max_ratio": 1.0097015466452128
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_origin",
+      "ratio": 1.0044697534532403,
+      "round_ratios": [
+        0.9668188298445395,
+        1.007376855496482,
+        1.0147107747701498,
+        1.0376636919613977,
+        0.9831481391133745,
+        1.0187468047385937
+      ],
+      "seed_ratios": [
+        0.9960774622005506,
+        1.0129327526128373
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9668188298445395,
+      "max_ratio": 1.0376636919613977
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "A_origin",
+      "ratio": 0.9978982993588666,
+      "round_ratios": [
+        0.9866349579046756,
+        1.0063198230198156,
+        1.0163087793035694,
+        1.0227595369346028,
+        0.9717250031708328,
+        0.9846515649557593
+      ],
+      "seed_ratios": [
+        1.003011859292498,
+        0.9928108094013305
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9717250031708328,
+      "max_ratio": 1.0227595369346028
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "B_origin",
+      "ratio": 0.9982647619053258,
+      "round_ratios": [
+        0.9858622493382644,
+        1.0001854279705933,
+        0.9996386225868726,
+        1.0080926206633465,
+        0.9909090869497259,
+        1.0050794941148926
+      ],
+      "seed_ratios": [
+        0.9952066341427729,
+        1.0013322868574583
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9858622493382644,
+      "max_ratio": 1.0080926206633465
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "C_origin",
+      "ratio": 0.9966693222153543,
+      "round_ratios": [
+        0.9831059372804571,
+        1.002000897511279,
+        1.0063592820367022,
+        0.9793478083190262,
+        1.0200559521496781,
+        0.9897468045766729
+      ],
+      "seed_ratios": [
+        0.9971040846824251,
+        0.9962347493156575
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9793478083190262,
+      "max_ratio": 1.0200559521496781
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "B_origin",
+      "ratio": 0.9961088955015249,
+      "round_ratios": [
+        0.9780503491270182,
+        1.0008831535720004,
+        1.0060560765828828,
+        1.0031897857927086,
+        0.9865968379500183,
+        1.0021928720262134
+      ],
+      "seed_ratios": [
+        0.9949217539546343,
+        0.9972974535467951
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9780503491270182,
+      "max_ratio": 1.0060560765828828
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "C_origin",
+      "ratio": 1.01089243776889,
+      "round_ratios": [
+        1.0403620327866416,
+        1.0068441939452286,
+        0.9938533617599152,
+        1.002380787482757,
+        1.0158371792547276,
+        1.0067085863963439
+      ],
+      "seed_ratios": [
+        1.013498301537493,
+        1.0082932740864838
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9938533617599152,
+      "max_ratio": 1.0403620327866416
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_origin",
+      "other": "C_origin",
+      "ratio": 0.9918835485011271,
+      "round_ratios": [
+        0.9777426281052592,
+        0.9877134107696569,
+        1.011010997964453,
+        0.9838282043235504,
+        0.997652831260428,
+        0.9936971257608874
+      ],
+      "seed_ratios": [
+        0.9920581444651251,
+        0.9917089832649154
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9777426281052592,
+      "max_ratio": 1.011010997964453
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "A_stride",
+      "other": "",
+      "ratio": 1.0017618689077716,
+      "round_ratios": [
+        1.00666221933292,
+        0.9992923565709644,
+        1.0058212177838244,
+        0.9971964508709384,
+        0.9976654751726395,
+        1.0039779726854
+      ],
+      "seed_ratios": [
+        1.0039198528938325,
+        0.999608523633527
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9971964508709384,
+      "max_ratio": 1.00666221933292
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "B_stride",
+      "other": "",
+      "ratio": 0.9728040722804091,
+      "round_ratios": [
+        0.975202627298825,
+        0.9762930081642082,
+        0.9617446458264305,
+        0.9791530929396179,
+        0.9746732291507556,
+        0.9698572641114999
+      ],
+      "seed_ratios": [
+        0.9710574837830542,
+        0.9745538022718877
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.9617446458264305,
+      "max_ratio": 0.9791530929396179
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "C_stride",
+      "other": "",
+      "ratio": 0.9987658770975868,
+      "round_ratios": [
+        0.9962702432119956,
+        1.0004817185539165,
+        0.992219203884134,
+        1.005089497978146,
+        0.9957178831220743,
+        1.0028758898015335
+      ],
+      "seed_ratios": [
+        0.9963180113518774,
+        1.0012197570341876
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.992219203884134,
+      "max_ratio": 1.005089497978146
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "A_origin",
+      "other": "",
+      "ratio": 0.9982358154163965,
+      "round_ratios": [
+        1.0034524643384546,
+        0.9978963586151863,
+        1.0075830138727362,
+        0.9756055841815713,
+        1.0058214979273308,
+        0.9994029246420627
+      ],
+      "seed_ratios": [
+        1.0029694228500614,
+        0.9935245486830817
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9756055841815713,
+      "max_ratio": 1.0075830138727362
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "B_origin",
+      "other": "",
+      "ratio": 0.885517502939257,
+      "round_ratios": [
+        0.8941426629203916,
+        0.8871865763552649,
+        0.8892285443143285,
+        0.8778462816216316,
+        0.8751257939053061,
+        0.8897310885033467
+      ],
+      "seed_ratios": [
+        0.8901811455187121,
+        0.8808782930971368
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.8751257939053061,
+      "max_ratio": 0.8941426629203916
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "C_origin",
+      "other": "",
+      "ratio": 0.9983749580747098,
+      "round_ratios": [
+        0.9973400805989971,
+        1.006436896522113,
+        0.9968758521791152,
+        1.002616646924575,
+        0.9903363246445683,
+        0.9967208811350695
+      ],
+      "seed_ratios": [
+        1.0002079438663285,
+        0.9965453314214909
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9903363246445683,
+      "max_ratio": 1.006436896522113
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_stride",
+      "ratio": 1.0037476073068263,
+      "round_ratios": [
+        0.9963689950352611,
+        1.0045347332655203,
+        1.0076135914890292,
+        1.0054137831955134,
+        1.0054051223095173,
+        1.0031873117775791
+      ],
+      "seed_ratios": [
+        1.0028278654411538,
+        1.0046681927121819
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9963689950352611,
+      "max_ratio": 1.0076135914890292
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_stride",
+      "ratio": 0.9898233913039042,
+      "round_ratios": [
+        1.005477594703583,
+        1.005587495786941,
+        0.9807129102325867,
+        0.9742760617162318,
+        0.9701741100975797,
+        1.0034145848331277
+      ],
+      "seed_ratios": [
+        0.997190314080392,
+        0.9825108929942693
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9701741100975797,
+      "max_ratio": 1.005587495786941
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "A_origin",
+      "ratio": 0.9984832714849369,
+      "round_ratios": [
+        0.9960723649858692,
+        1.0040528018520811,
+        1.001040668613774,
+        0.9850372291636692,
+        0.9963848468536397,
+        1.0084766209222127
+      ],
+      "seed_ratios": [
+        1.000383196880454,
+        0.996586954423226
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9850372291636692,
+      "max_ratio": 1.0084766209222127
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_origin",
+      "ratio": 0.9986203920557719,
+      "round_ratios": [
+        1.0165678811406984,
+        0.9825052559705137,
+        1.0159832509868008,
+        0.9809935117739089,
+        1.0022242628453044,
+        0.9940625650219383
+      ],
+      "seed_ratios": [
+        1.0048917287112886,
+        0.9923881936101967
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9809935117739089,
+      "max_ratio": 1.0165678811406984
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_origin",
+      "ratio": 0.990406027835084,
+      "round_ratios": [
+        0.9910878971667201,
+        0.9890057208036525,
+        0.9835572709806054,
+        0.9588721838980868,
+        1.031966008572033,
+        0.989333936993341
+      ],
+      "seed_ratios": [
+        0.9878785218545482,
+        0.9929400004877261
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9588721838980868,
+      "max_ratio": 1.031966008572033
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_stride",
+      "ratio": 1.0091528222524309,
+      "round_ratios": [
+        0.9986293472248023,
+        1.0021692431480356,
+        1.024374606478217,
+        1.008620619290298,
+        1.0193635560524934,
+        1.002029461774924
+      ],
+      "seed_ratios": [
+        1.0083270072957304,
+        1.0099793135475985
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9986293472248023,
+      "max_ratio": 1.024374606478217
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "A_origin",
+      "ratio": 0.9875352483523948,
+      "round_ratios": [
+        1.0287132041025566,
+        0.9918932896329847,
+        0.9668671249895745,
+        0.9314252405643451,
+        1.0051429091964341,
+        1.0041850689050675
+      ],
+      "seed_ratios": [
+        0.9955017322745521,
+        0.9796325160682553
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9314252405643451,
+      "max_ratio": 1.0287132041025566
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "B_origin",
+      "ratio": 1.013301553486539,
+      "round_ratios": [
+        1.0136471768022348,
+        1.0205294225558896,
+        1.013222216738541,
+        1.0044868354309247,
+        1.0081729151388497,
+        1.0198491220167378
+      ],
+      "seed_ratios": [
+        1.015794093193799,
+        1.010815129934348
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.0044868354309247,
+      "max_ratio": 1.0205294225558896
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_origin",
+      "ratio": 1.0029989053749517,
+      "round_ratios": [
+        0.9723365592031529,
+        1.009937149232283,
+        1.0139613736165265,
+        1.0310139329076704,
+        0.9888105246725046,
+        1.0029811384167135
+      ],
+      "seed_ratios": [
+        0.9985675707966198,
+        1.0074499048479983
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9723365592031529,
+      "max_ratio": 1.0310139329076704
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "A_origin",
+      "ratio": 1.0012890876443308,
+      "round_ratios": [
+        0.9870010936020894,
+        1.0070668595660826,
+        1.00556892599873,
+        1.031727830131831,
+        0.9889338303135595,
+        0.9881815398906298
+      ],
+      "seed_ratios": [
+        0.9998371304821111,
+        1.0027431533295654
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9870010936020894,
+      "max_ratio": 1.031727830131831
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "B_origin",
+      "ratio": 1.0016704304173638,
+      "round_ratios": [
+        0.9927063582474074,
+        1.003282834294318,
+        1.006240131383747,
+        1.007417351179846,
+        0.9992034764494199,
+        1.0012440274640644
+      ],
+      "seed_ratios": [
+        1.0007262067394889,
+        1.0026155450066068
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9927063582474074,
+      "max_ratio": 1.007417351179846
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "C_origin",
+      "ratio": 1.0048635135544852,
+      "round_ratios": [
+        0.983753223404479,
+        0.9983675994482021,
+        0.9979660518135206,
+        1.0086795142458298,
+        1.0399010829769961,
+        1.0013936159894596
+      ],
+      "seed_ratios": [
+        0.9933389648900741,
+        1.0165217680601173
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.983753223404479,
+      "max_ratio": 1.0399010829769961
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "B_origin",
+      "ratio": 0.9957575485541921,
+      "round_ratios": [
+        0.9866643799106761,
+        0.9967744465062168,
+        1.004595703672376,
+        0.9986006504526078,
+        0.9923258506825791,
+        0.9956755263250626
+      ],
+      "seed_ratios": [
+        0.9959844409628861,
+        0.9955307078332183
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9866643799106761,
+      "max_ratio": 1.004595703672376
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "C_origin",
+      "ratio": 1.0035083467667203,
+      "round_ratios": [
+        1.027362033233746,
+        1.0008041779305112,
+        0.9823439045955638,
+        1.0139421436047513,
+        0.9959335029136692,
+        1.001258559076497
+      ],
+      "seed_ratios": [
+        1.0033336828384574,
+        1.0036830411011066
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9823439045955638,
+      "max_ratio": 1.027362033233746
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_origin",
+      "other": "C_origin",
+      "ratio": 0.9996486975626434,
+      "round_ratios": [
+        0.9956491032269034,
+        0.9996439497796048,
+        1.0107280945762083,
+        0.9991220440068218,
+        0.992081451580468,
+        1.0007660627988517
+      ],
+      "seed_ratios": [
+        1.0019867889778056,
+        0.9973160619793603
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.992081451580468,
+      "max_ratio": 1.0107280945762083
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "A_stride",
+      "other": "",
+      "ratio": 0.9976058516911323,
+      "round_ratios": [
+        0.9969920664076583,
+        0.9975067784497217,
+        0.9947619374337253,
+        0.9971365450493501,
+        1.0019109067743759,
+        0.9973405392577661
+      ],
+      "seed_ratios": [
+        0.9964195482815936,
+        0.9987935674733825
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9947619374337253,
+      "max_ratio": 1.0019109067743759
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "B_stride",
+      "other": "",
+      "ratio": 1.0303154326331594,
+      "round_ratios": [
+        1.026790204174201,
+        1.0267029124013909,
+        1.030475804047288,
+        1.0323100595939114,
+        1.0317275419870457,
+        1.033907621271017
+      ],
+      "seed_ratios": [
+        1.0279881376188225,
+        1.032647996484641
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.0267029124013909,
+      "max_ratio": 1.033907621271017
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "C_stride",
+      "other": "",
+      "ratio": 1.0058714693804889,
+      "round_ratios": [
+        1.0060606076444925,
+        1.0021913525834403,
+        1.0093086206063855,
+        1.013274274932014,
+        1.0109705416990098,
+        0.9935520953429916
+      ],
+      "seed_ratios": [
+        1.00584931867932,
+        1.005893620569458
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9935520953429916,
+      "max_ratio": 1.013274274932014
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "A_origin",
+      "other": "",
+      "ratio": 1.0010701318593556,
+      "round_ratios": [
+        0.9961086562155629,
+        1.0013993777078263,
+        1.0019344919763395,
+        1.0166073171213423,
+        0.9895891135754186,
+        1.0009802853909635
+      ],
+      "seed_ratios": [
+        0.9998107139121725,
+        1.0023311362403942
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9895891135754186,
+      "max_ratio": 1.0166073171213423
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "B_origin",
+      "other": "",
+      "ratio": 1.124710046109394,
+      "round_ratios": [
+        1.1247976907594,
+        1.122152981019913,
+        1.122943757092971,
+        1.1267230120359655,
+        1.1322084925570108,
+        1.1194775404598698
+      ],
+      "seed_ratios": [
+        1.1232975962715952,
+        1.1261242719810336
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.1194775404598698,
+      "max_ratio": 1.1322084925570108
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "C_origin",
+      "other": "",
+      "ratio": 0.9994250506981163,
+      "round_ratios": [
+        1.0014002650858187,
+        0.9941625689624418,
+        0.9994894240914022,
+        1.0059691980107606,
+        0.9891006522689176,
+        1.0065443171337216
+      ],
+      "seed_ratios": [
+        0.9983460505835642,
+        1.000505216982702
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9891006522689176,
+      "max_ratio": 1.0065443171337216
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_stride",
+      "ratio": 0.999117698708857,
+      "round_ratios": [
+        0.9972665188228504,
+        0.9998792812351908,
+        1.0072963974266793,
+        0.9849897066900773,
+        1.0069846500040707,
+        0.9984568075736983
+      ],
+      "seed_ratios": [
+        1.0014717344344157,
+        0.9967691963238877
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9849897066900773,
+      "max_ratio": 1.0072963974266793
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_stride",
+      "ratio": 0.9974059854753733,
+      "round_ratios": [
+        0.9948409305791291,
+        1.0023504575961977,
+        0.9846909807093607,
+        0.9921299358067657,
+        1.0112140593763226,
+        0.9994175454396488
+      ],
+      "seed_ratios": [
+        0.9939344250009291,
+        1.0008896712287338
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9846909807093607,
+      "max_ratio": 1.0112140593763226
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "A_origin",
+      "ratio": 0.9940841849411614,
+      "round_ratios": [
+        1.0173939287516396,
+        0.994572524014442,
+        0.9871588557899621,
+        1.0090706677963455,
+        0.9781463668519975,
+        0.9788156722848768
+      ],
+      "seed_ratios": [
+        0.9996260110662785,
+        0.9885730821430297
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9781463668519975,
+      "max_ratio": 1.0173939287516396
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_origin",
+      "ratio": 1.0045984664371128,
+      "round_ratios": [
+        0.9905918117628062,
+        1.0148044961758067,
+        1.0138887887495474,
+        0.9935442463969409,
+        1.0088971162207834,
+        1.0061286929194848
+      ],
+      "seed_ratios": [
+        1.0063656679237443,
+        1.0028343681973368
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9905918117628062,
+      "max_ratio": 1.0148044961758067
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_origin",
+      "ratio": 1.008514610540613,
+      "round_ratios": [
+        1.0115216632139328,
+        1.0104088128120807,
+        1.0141177806371653,
+        1.011852931940507,
+        1.0006701856334506,
+        1.00259168823538
+      ],
+      "seed_ratios": [
+        1.0120148929499597,
+        1.0050264346496884
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.0006701856334506,
+      "max_ratio": 1.0141177806371653
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_stride",
+      "ratio": 0.993763215729494,
+      "round_ratios": [
+        0.9916825854427882,
+        0.987979052754157,
+        0.9989512792042681,
+        1.008476109665747,
+        0.9920600792481125,
+        0.9836241527874312
+      ],
+      "seed_ratios": [
+        0.9928605241937177,
+        0.9946667279767285
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9836241527874312,
+      "max_ratio": 1.008476109665747
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "A_origin",
+      "ratio": 1.0035234703541047,
+      "round_ratios": [
+        0.9953999894333658,
+        0.9958256296285216,
+        1.0047235719716812,
+        1.0133518541851088,
+        1.0038824271799114,
+        1.0080789910748575
+      ],
+      "seed_ratios": [
+        0.9986404984144178,
+        1.0084303181680445
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9953999894333658,
+      "max_ratio": 1.0133518541851088
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "B_origin",
+      "ratio": 0.9836563785467014,
+      "round_ratios": [
+        0.9961074915934071,
+        0.9776338714180925,
+        0.9879577500242105,
+        0.9875216786595171,
+        0.977769405160505,
+        0.975116654751342
+      ],
+      "seed_ratios": [
+        0.9872040753787421,
+        0.9801214310064496
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.975116654751342,
+      "max_ratio": 0.9961074915934071
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_origin",
+      "ratio": 1.0014664503325041,
+      "round_ratios": [
+        0.9943252885984918,
+        0.9974648979515732,
+        1.0007390825460643,
+        1.0064497276336253,
+        0.9942735383394048,
+        1.015718806384303
+      ],
+      "seed_ratios": [
+        0.9975063193829912,
+        1.0054423031244082
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9942735383394048,
+      "max_ratio": 1.015718806384303
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "A_origin",
+      "ratio": 0.9966135771104413,
+      "round_ratios": [
+        0.9996290422576154,
+        0.9992582056105106,
+        1.010680375086345,
+        0.9913075009364803,
+        0.982598606079367,
+        0.996427807247582
+      ],
+      "seed_ratios": [
+        1.0031752459611656,
+        0.9900948274787467
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.982598606079367,
+      "max_ratio": 1.010680375086345
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "B_origin",
+      "ratio": 0.996600010933118,
+      "round_ratios": [
+        0.9931056058498245,
+        0.9969127286764521,
+        0.9934394300217423,
+        1.000670297650432,
+        0.9916989985571634,
+        1.0038307011533867
+      ],
+      "seed_ratios": [
+        0.9944844328453238,
+        0.9987200895143313
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9916989985571634,
+      "max_ratio": 1.0038307011533867
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "C_origin",
+      "ratio": 0.9918454683361468,
+      "round_ratios": [
+        0.9993420238850331,
+        1.0036392387584343,
+        1.0084103364116739,
+        0.9709206883727243,
+        0.9809163283391281,
+        0.9883693971812684
+      ],
+      "seed_ratios": [
+        1.0037903675637727,
+        0.9800427109562301
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9709206883727243,
+      "max_ratio": 1.0084103364116739
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "B_origin",
+      "ratio": 1.0003528438703206,
+      "round_ratios": [
+        0.9912695431607272,
+        1.004122002806337,
+        1.0014536921720532,
+        1.0045955661435038,
+        0.9942266819627645,
+        1.0065456522017828
+      ],
+      "seed_ratios": [
+        0.9989330285047181,
+        1.0017746772647749
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9912695431607272,
+      "max_ratio": 1.0065456522017828
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "C_origin",
+      "ratio": 1.0073582756196908,
+      "round_ratios": [
+        1.012653766766109,
+        1.006035162670091,
+        1.0117163216573222,
+        0.9885976175318135,
+        1.0199849450619232,
+        1.00544317676033
+      ],
+      "seed_ratios": [
+        1.0101308456726776,
+        1.004593315615176
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9885976175318135,
+      "max_ratio": 1.0199849450619232
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_origin",
+      "other": "C_origin",
+      "ratio": 0.9922321220640317,
+      "round_ratios": [
+        0.9820152751972466,
+        0.9880652116060141,
+        1.0002799005882619,
+        0.9846927211995665,
+        1.0056158490526,
+        0.992936474066482
+      ],
+      "seed_ratios": [
+        0.9900910424948722,
+        0.9943778317343887
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9820152751972466,
+      "max_ratio": 1.0056158490526
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "main",
+      "factor": "A_stride",
+      "other": "",
+      "ratio": 1.0047314636974118,
+      "round_ratios": [
+        0.9991038491257526,
+        1.0156257928639956,
+        1.0086326453440158,
+        1.002965437359263,
+        1.0047168998719278,
+        0.9974542081213096
+      ],
+      "seed_ratios": [
+        1.0077646603912276,
+        1.0017073963991237
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9974542081213096,
+      "max_ratio": 1.0156257928639956
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "main",
+      "factor": "B_stride",
+      "other": "",
+      "ratio": 0.9923856283788447,
+      "round_ratios": [
+        0.9921295753950111,
+        1.0015943989304636,
+        0.9849464326785755,
+        0.9942801021994944,
+        0.9891906946354962,
+        0.9922500555802701
+      ],
+      "seed_ratios": [
+        0.9928667456312011,
+        0.9919047442633231
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9849464326785755,
+      "max_ratio": 1.0015943989304636
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "main",
+      "factor": "C_stride",
+      "other": "",
+      "ratio": 1.0005795283350034,
+      "round_ratios": [
+        0.9976598875390075,
+        1.0055264186366035,
+        1.0037335141861936,
+        1.0020408797410363,
+        0.9997635678538516,
+        0.9947925180240651
+      ],
+      "seed_ratios": [
+        1.0023009468351656,
+        0.9988610663137929
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9947925180240651,
+      "max_ratio": 1.0055264186366035
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "main",
+      "factor": "A_origin",
+      "other": "",
+      "ratio": 0.9958401828953475,
+      "round_ratios": [
+        0.9963540346440662,
+        0.9771411503952676,
+        0.9987421162843036,
+        0.996827079492902,
+        0.9996687126263302,
+        1.0065552075113127
+      ],
+      "seed_ratios": [
+        0.9906983743659337,
+        1.001008677846822
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9771411503952676,
+      "max_ratio": 1.0065552075113127
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "main",
+      "factor": "B_origin",
+      "other": "",
+      "ratio": 1.0180755160255959,
+      "round_ratios": [
+        1.0184567843585408,
+        1.0275006292298696,
+        1.0145958174877023,
+        1.0136621227934113,
+        1.0220257426814698,
+        1.0122951016566928
+      ],
+      "seed_ratios": [
+        1.020170098098491,
+        1.0159852344846103
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.0122951016566928,
+      "max_ratio": 1.0275006292298696
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "main",
+      "factor": "C_origin",
+      "other": "",
+      "ratio": 0.9970288270456721,
+      "round_ratios": [
+        0.9911594908448179,
+        0.9875461911614214,
+        0.9971548592379952,
+        1.0025309657962251,
+        0.997680843809969,
+        1.0062207982998934
+      ],
+      "seed_ratios": [
+        0.9919456046685615,
+        1.002138098381126
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9875461911614214,
+      "max_ratio": 1.0062207982998934
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_stride",
+      "ratio": 1.002556215764642,
+      "round_ratios": [
+        1.01208431430574,
+        1.011773711381774,
+        1.0121330290455368,
+        0.9974737188015903,
+        0.9934962017062594,
+        0.9886601925542071
+      ],
+      "seed_ratios": [
+        1.0119970057293701,
+        0.9932034977157925
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9886601925542071,
+      "max_ratio": 1.0121330290455368
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_stride",
+      "ratio": 1.0003541297510012,
+      "round_ratios": [
+        0.9981410791617874,
+        1.030131059508232,
+        0.9765014809363531,
+        1.0149904553353273,
+        0.9939610902770722,
+        0.9893135479090623
+      ],
+      "seed_ratios": [
+        1.0013497012017512,
+        0.999359548126795
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9765014809363531,
+      "max_ratio": 1.030131059508232
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "A_origin",
+      "ratio": 0.9974994366207467,
+      "round_ratios": [
+        1.010949172829965,
+        0.982291227492733,
+        1.0011587817704406,
+        0.9912224616718153,
+        1.017957341437941,
+        0.9819801135604909
+      ],
+      "seed_ratios": [
+        0.9980619892398901,
+        0.9969372010815569
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9819801135604909,
+      "max_ratio": 1.017957341437941
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_origin",
+      "ratio": 0.9952402678594268,
+      "round_ratios": [
+        0.9892258603978363,
+        1.0043515234002902,
+        0.9815156438968152,
+        1.0088315575121618,
+        0.9779892017625288,
+        1.0100351507588292
+      ],
+      "seed_ratios": [
+        0.9916524212608575,
+        0.998841095461157
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9779892017625288,
+      "max_ratio": 1.0100351507588292
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_origin",
+      "ratio": 0.9982897693444698,
+      "round_ratios": [
+        0.9920120858595736,
+        0.9855830431497722,
+        1.0146539833976862,
+        1.0139173752231538,
+        0.9807097890260713,
+        1.0033870597392986
+      ],
+      "seed_ratios": [
+        0.9973388045832596,
+        0.9992416408526881
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9807097890260713,
+      "max_ratio": 1.0146539833976862
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_stride",
+      "ratio": 1.0019496294657468,
+      "round_ratios": [
+        1.0089165436621053,
+        1.0284531756321378,
+        0.9964767603703204,
+        0.9935039982479541,
+        0.9978284592845971,
+        0.9870584865278611
+      ],
+      "seed_ratios": [
+        1.0111967082646693,
+        0.9927871123209661
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9870584865278611,
+      "max_ratio": 1.0284531756321378
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "A_origin",
+      "ratio": 0.9955144054711609,
+      "round_ratios": [
+        0.9987223778853903,
+        0.9843472544182698,
+        1.0079393872133895,
+        0.9781427423010464,
+        1.0011398279576982,
+        1.0031382377188724
+      ],
+      "seed_ratios": [
+        0.9969556613539667,
+        0.9940752331499418
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9781427423010464,
+      "max_ratio": 1.0079393872133895
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "B_origin",
+      "ratio": 1.0248959587606306,
+      "round_ratios": [
+        1.0263730298954379,
+        1.0532452189805057,
+        1.0070278091419371,
+        1.0159594375749104,
+        1.01886113639391,
+        1.0285161764153925
+      ],
+      "seed_ratios": [
+        1.0287078736496462,
+        1.0210981690625394
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.0070278091419371,
+      "max_ratio": 1.0532452189805057
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_origin",
+      "ratio": 1.0017237423186673,
+      "round_ratios": [
+        1.0133480166342217,
+        0.9819079165944966,
+        1.0044019041685015,
+        1.0054644517780706,
+        1.0059077086402977,
+        0.9995995135535064
+      ],
+      "seed_ratios": [
+        0.9997980919054458,
+        1.0036531016102552
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9819079165944966,
+      "max_ratio": 1.0133480166342217
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "A_origin",
+      "ratio": 0.9955995704196514,
+      "round_ratios": [
+        0.9946292012727114,
+        0.9869751055501638,
+        0.9863023695445277,
+        1.005131936395044,
+        1.0085460181121877,
+        0.992229035058505
+      ],
+      "seed_ratios": [
+        0.9892950290663031,
+        1.001944289111921
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9863023695445277,
+      "max_ratio": 1.0085460181121877
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "B_origin",
+      "ratio": 1.0060706531175865,
+      "round_ratios": [
+        1.0156756392496462,
+        1.0264521255047918,
+        1.0109451193455716,
+        0.9788679320469773,
+        0.9964781463550891,
+        1.0086899439408379
+      ],
+      "seed_ratios": [
+        1.0176703109609213,
+        0.9946032110425936
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9788679320469773,
+      "max_ratio": 1.0264521255047918
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "C_origin",
+      "ratio": 1.0041258175756707,
+      "round_ratios": [
+        0.9955368239892518,
+        0.9844465269714481,
+        1.030812375461384,
+        1.013397041732861,
+        0.9977912258792364,
+        1.003414574542791
+      ],
+      "seed_ratios": [
+        1.0034052321435156,
+        1.004846920489047
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9844465269714481,
+      "max_ratio": 1.030812375461384
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "B_origin",
+      "ratio": 0.9954031079071508,
+      "round_ratios": [
+        0.9975450582411851,
+        0.9902081607890986,
+        0.976571987097186,
+        1.0156600033758902,
+        0.9967198680010124,
+        0.9961143660293745
+      ],
+      "seed_ratios": [
+        0.9880701100532793,
+        1.0027905278682976
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.976571987097186,
+      "max_ratio": 1.0156600033758902
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "C_origin",
+      "ratio": 1.003968815191767,
+      "round_ratios": [
+        0.9966692765664746,
+        1.0213052612390792,
+        1.00774373607642,
+        1.0222555747818358,
+        0.9877189717605006,
+        0.9887163327120079
+      ],
+      "seed_ratios": [
+        1.0085224785281939,
+        0.999435712477659
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9877189717605006,
+      "max_ratio": 1.0222555747818358
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_origin",
+      "other": "C_origin",
+      "ratio": 0.9949352625620321,
+      "round_ratios": [
+        0.9970237019091793,
+        0.9803846974282554,
+        0.9763575583274664,
+        1.0037766941648858,
+        0.9998066025625675,
+        1.012756252194863
+      ],
+      "seed_ratios": [
+        0.9845481634998627,
+        1.0054319467424588
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9763575583274664,
+      "max_ratio": 1.012756252194863
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "A_stride",
+      "other": "",
+      "ratio": 0.9970510237843979,
+      "round_ratios": [
+        0.9991670705282659,
+        0.9941950428901217,
+        0.9919881945501284,
+        0.9968189307893645,
+        1.0073667745970987,
+        0.9928512640248887
+      ],
+      "seed_ratios": [
+        0.9951122440334413,
+        0.9989935808649425
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9919881945501284,
+      "max_ratio": 1.0073667745970987
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "B_stride",
+      "other": "",
+      "ratio": 0.9310127726783441,
+      "round_ratios": [
+        0.926335573136946,
+        0.9351204963295358,
+        0.919687485867874,
+        0.9306526933805109,
+        0.938664388772817,
+        0.935749619483938
+      ],
+      "seed_ratios": [
+        0.9270263208158244,
+        0.9350163673102712
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.919687485867874,
+      "max_ratio": 0.938664388772817
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "C_stride",
+      "other": "",
+      "ratio": 1.0003291024701157,
+      "round_ratios": [
+        0.9938416860435522,
+        0.995617457762952,
+        1.0020745692800284,
+        1.0068958355322546,
+        1.0033474700061034,
+        1.0002573833598176
+      ],
+      "seed_ratios": [
+        0.9971716380478884,
+        1.0034965647514849
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9938416860435522,
+      "max_ratio": 1.0068958355322546
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "A_origin",
+      "other": "",
+      "ratio": 0.9914517466043967,
+      "round_ratios": [
+        0.986729319353208,
+        0.9938578851665303,
+        0.9907551041157145,
+        1.000576781301592,
+        0.9904013485267034,
+        0.9864593882973246
+      ],
+      "seed_ratios": [
+        0.9904431354277106,
+        0.9924613848935635
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9864593882973246,
+      "max_ratio": 1.000576781301592
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "B_origin",
+      "other": "",
+      "ratio": 0.9793515148443015,
+      "round_ratios": [
+        0.9804390505937967,
+        0.9765897645623149,
+        0.982019339229037,
+        0.9749084164069096,
+        0.9827411276892529,
+        0.9794354876527059
+      ],
+      "seed_ratios": [
+        0.9796800626087967,
+        0.979023077262342
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.9749084164069096,
+      "max_ratio": 0.9827411276892529
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "main",
+      "factor": "C_origin",
+      "other": "",
+      "ratio": 0.9993439048419589,
+      "round_ratios": [
+        0.9979880301375385,
+        1.0036478299535372,
+        0.9867038347343088,
+        1.0086460128960038,
+        0.9859964589423831,
+        1.0134029825675577
+      ],
+      "seed_ratios": [
+        0.9960882859180465,
+        1.0026101644437386
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9859964589423831,
+      "max_ratio": 1.0134029825675577
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_stride",
+      "ratio": 0.9965630988581934,
+      "round_ratios": [
+        0.9812629229179102,
+        0.9974931413970305,
+        1.022790471486719,
+        0.9809456174055069,
+        1.0175787891695274,
+        0.9802432343115515
+      ],
+      "seed_ratios": [
+        1.0003700024779154,
+        0.9927706823933579
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9802432343115515,
+      "max_ratio": 1.022790471486719
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_stride",
+      "ratio": 0.99017454185224,
+      "round_ratios": [
+        0.9716543420634455,
+        1.0018197865608383,
+        0.973277157014151,
+        1.0066468853191155,
+        0.9829658140695932,
+        1.0053494324622732
+      ],
+      "seed_ratios": [
+        0.9821533683815699,
+        0.9982612236497335
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9716543420634455,
+      "max_ratio": 1.0066468853191155
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "A_origin",
+      "ratio": 1.0059683363039347,
+      "round_ratios": [
+        0.9954373139374697,
+        1.0083915806714552,
+        1.0248052494079396,
+        0.9914869963494314,
+        1.0040614393298357,
+        1.0119850278321671
+      ],
+      "seed_ratios": [
+        1.009473268075202,
+        1.002475573796688
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9914869963494314,
+      "max_ratio": 1.0248052494079396
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_origin",
+      "ratio": 0.9858565901550265,
+      "round_ratios": [
+        0.9927739282813918,
+        1.0006172048985638,
+        0.9490326398633188,
+        0.9792641829858019,
+        0.9790694090224897,
+        1.015709777777664
+      ],
+      "seed_ratios": [
+        0.9805426596400715,
+        0.9911993188637573
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9490326398633188,
+      "max_ratio": 1.015709777777664
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_origin",
+      "ratio": 0.9950054165654504,
+      "round_ratios": [
+        1.0168704291816053,
+        0.9924684239817236,
+        0.9917141260799416,
+        1.0046327086451212,
+        0.9703667224776136,
+        0.9945821156078193
+      ],
+      "seed_ratios": [
+        1.0002831166954793,
+        0.9897555626703499
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9703667224776136,
+      "max_ratio": 1.0168704291816053
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_stride",
+      "ratio": 0.997571507970603,
+      "round_ratios": [
+        1.012524503908669,
+        1.0063355906152927,
+        0.9988515063882484,
+        0.9812712294959712,
+        0.9967517118559004,
+        0.9900083555539647
+      ],
+      "seed_ratios": [
+        1.005888325966693,
+        0.9893234545279872
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9812712294959712,
+      "max_ratio": 1.012524503908669
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "A_origin",
+      "ratio": 0.9963599958618352,
+      "round_ratios": [
+        1.0335645246957905,
+        0.9890160037454209,
+        0.98875964665885,
+        0.9539681384885622,
+        1.0141348101506356,
+        1.0005446764453207
+      ],
+      "seed_ratios": [
+        1.003561246924744,
+        0.9892104187919487
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9539681384885622,
+      "max_ratio": 1.0335645246957905
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "B_origin",
+      "ratio": 1.1379335876855952,
+      "round_ratios": [
+        1.122365616157796,
+        1.1420262797678784,
+        1.1519323791447706,
+        1.1448961282355972,
+        1.1239755195255432,
+        1.1427234042801724
+      ],
+      "seed_ratios": [
+        1.1387082812395415,
+        1.1371594211762945
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.122365616157796,
+      "max_ratio": 1.1519323791447706
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_origin",
+      "ratio": 1.00357395038289,
+      "round_ratios": [
+        0.990001843321769,
+        0.987382986836759,
+        1.0286794272483537,
+        1.0067210355637293,
+        0.9948906809937966,
+        1.0144019504035577
+      ],
+      "seed_ratios": [
+        1.0018450709472257,
+        1.0053058133378525
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.987382986836759,
+      "max_ratio": 1.0286794272483537
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "A_origin",
+      "ratio": 1.0094521846031999,
+      "round_ratios": [
+        1.0015762288114363,
+        1.0133297229176834,
+        1.0326940894664562,
+        1.0238127126685233,
+        1.0114339709689493,
+        0.9748773449713728
+      ],
+      "seed_ratios": [
+        1.0157858540151836,
+        1.0031580071452157
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9748773449713728,
+      "max_ratio": 1.0326940894664562
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "B_origin",
+      "ratio": 0.992537826213426,
+      "round_ratios": [
+        1.008579718534618,
+        0.9733842786658864,
+        1.014317954541672,
+        0.9790850356873774,
+        1.0001879037767887,
+        0.9804190015197224
+      ],
+      "seed_ratios": [
+        0.9985953906944743,
+        0.986517007433173
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9733842786658864,
+      "max_ratio": 1.014317954541672
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "C_origin",
+      "ratio": 1.0164469549208741,
+      "round_ratios": [
+        0.9759405424854921,
+        1.0003566566361835,
+        1.052383234280828,
+        1.0206029521301323,
+        1.0051735599298963,
+        1.0463049775680744
+      ],
+      "seed_ratios": [
+        1.0090609098020946,
+        1.0238870638349773
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9759405424854921,
+      "max_ratio": 1.052383234280828
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "B_origin",
+      "ratio": 0.9867185501635399,
+      "round_ratios": [
+        0.9840867552592459,
+        0.994871769082672,
+        0.9724137375159291,
+        1.0026960096609785,
+        0.9710494512544637,
+        0.9956290145506107
+      ],
+      "seed_ratios": [
+        0.9837479942078766,
+        0.989698076102103
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9710494512544637,
+      "max_ratio": 1.0026960096609785
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "C_origin",
+      "ratio": 0.993378879745914,
+      "round_ratios": [
+        0.9963156290484336,
+        0.9901370184597912,
+        0.9943377472625469,
+        1.0211835344961981,
+        0.9873066349286628,
+        0.9716447458431878
+      ],
+      "seed_ratios": [
+        0.9935934559858612,
+        0.9931643498458077
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9716447458431878,
+      "max_ratio": 1.0211835344961981
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_origin",
+      "other": "C_origin",
+      "ratio": 0.992389654922911,
+      "round_ratios": [
+        1.021238842546915,
+        1.0038450744915133,
+        0.9800004592530916,
+        0.9937515720096689,
+        0.9805535552255492,
+        0.9757171228474565
+      ],
+      "seed_ratios": [
+        1.001551837601412,
+        0.9833112877677634
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9757171228474565,
+      "max_ratio": 1.021238842546915
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "A_stride",
+      "other": "",
+      "ratio": 1.0077031563378394,
+      "round_ratios": [
+        0.9999367258946195,
+        1.0215558809381855,
+        1.0167788799154365,
+        1.006166121428925,
+        0.9973695035492602,
+        1.0046360862530015
+      ],
+      "seed_ratios": [
+        1.0127145620342313,
+        1.002716549521601
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9973695035492602,
+      "max_ratio": 1.0215558809381855
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "B_stride",
+      "other": "",
+      "ratio": 1.0659205303101726,
+      "round_ratios": [
+        1.0710260991438125,
+        1.0710859219339608,
+        1.0709577414213907,
+        1.0683685861240704,
+        1.0538278712466507,
+        1.0603798654254244
+      ],
+      "seed_ratios": [
+        1.071023252886104,
+        1.0608421188569146
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.0538278712466507,
+      "max_ratio": 1.0710859219339608
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "C_stride",
+      "other": "",
+      "ratio": 1.0002503434762313,
+      "round_ratios": [
+        1.0038418608809372,
+        1.00995257846916,
+        1.001655510435074,
+        0.995178293901025,
+        0.996428054827078,
+        0.9945365408677153
+      ],
+      "seed_ratios": [
+        1.0051438574780551,
+        0.9953806534067807
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9945365408677153,
+      "max_ratio": 1.00995257846916
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "A_origin",
+      "other": "",
+      "ratio": 1.004426273195827,
+      "round_ratios": [
+        1.0097541596282626,
+        0.9831799545782529,
+        1.0080615402690434,
+        0.9962524597024806,
+        1.0093571804131858,
+        1.0203716640060312
+      ],
+      "seed_ratios": [
+        1.0002577017590342,
+        1.0086122171435163
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9831799545782529,
+      "max_ratio": 1.0203716640060312
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "B_origin",
+      "other": "",
+      "ratio": 1.0395404516094007,
+      "round_ratios": [
+        1.0387762337105186,
+        1.052131269971247,
+        1.0331729498160807,
+        1.0397511250639635,
+        1.039974530306458,
+        1.033549544016153
+      ],
+      "seed_ratios": [
+        1.0413298555672075,
+        1.0377541225336855
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.0331729498160807,
+      "max_ratio": 1.052131269971247
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "C_origin",
+      "other": "",
+      "ratio": 0.9976834022951758,
+      "round_ratios": [
+        0.9931576941942084,
+        0.9839568837678241,
+        1.0105918555657591,
+        0.9939373704732929,
+        1.0118503314708849,
+        0.9929128052796258
+      ],
+      "seed_ratios": [
+        0.9958410501277335,
+        0.9995291628996458
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9839568837678241,
+      "max_ratio": 1.0118503314708849
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_stride",
+      "ratio": 1.0060137856933646,
+      "round_ratios": [
+        1.0314099215082728,
+        1.0143164593239637,
+        0.9895800335080451,
+        1.016849151576617,
+        0.9763334419706975,
+        1.0085866017209157
+      ],
+      "seed_ratios": [
+        1.0116227028226101,
+        1.0004359670668268
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9763334419706975,
+      "max_ratio": 1.0314099215082728
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_stride",
+      "ratio": 1.0102805994988713,
+      "round_ratios": [
+        1.0272594233892822,
+        1.0282598460593237,
+        1.0033128527665172,
+        1.0082884774570844,
+        1.011185817502602,
+        0.9840494418801867
+      ],
+      "seed_ratios": [
+        1.0195451478742203,
+        1.0011002375440827
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9840494418801867,
+      "max_ratio": 1.0282598460593237
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "A_origin",
+      "ratio": 0.991581345677038,
+      "round_ratios": [
+        1.0155829590425316,
+        0.9741168473844823,
+        0.9769258913816452,
+        0.9997331940019485,
+        1.0138396930345022,
+        0.970350436571229
+      ],
+      "seed_ratios": [
+        0.9886958087983149,
+        0.9944753040773298
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.970350436571229,
+      "max_ratio": 1.0155829590425316
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_origin",
+      "ratio": 1.0095182989068672,
+      "round_ratios": [
+        0.9964261069086517,
+        1.0037320150837352,
+        1.0342274887807597,
+        1.0301934606003953,
+        0.9988967000194201,
+        0.9944131412899748
+      ],
+      "seed_ratios": [
+        1.0113302175194132,
+        1.0077096265624554
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9944131412899748,
+      "max_ratio": 1.0342274887807597
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_origin",
+      "ratio": 1.003300839095285,
+      "round_ratios": [
+        0.9755540700086655,
+        0.9930623678642312,
+        1.023131522194225,
+        1.0092418517714343,
+        1.0106589254442373,
+        1.0088529081644488
+      ],
+      "seed_ratios": [
+        0.9970565212357612,
+        1.0095842635698302
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9755540700086655,
+      "max_ratio": 1.023131522194225
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_stride",
+      "ratio": 1.004388779611449,
+      "round_ratios": [
+        0.9964366687101043,
+        1.0219783392569095,
+        0.99762252346546,
+        1.012466246216417,
+        1.001080256412795,
+        0.9970203594650946
+      ],
+      "seed_ratios": [
+        1.0052773077894854,
+        1.0035010367712665
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9964366687101043,
+      "max_ratio": 1.0219783392569095
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "A_origin",
+      "ratio": 0.9991513204121139,
+      "round_ratios": [
+        0.9662893356168011,
+        0.9952793996159106,
+        1.0193977784382182,
+        1.0253411019059668,
+        0.9871861392954185,
+        1.0025921493908356
+      ],
+      "seed_ratios": [
+        0.9934178550726037,
+        1.0049178761824347
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9662893356168011,
+      "max_ratio": 1.0253411019059668
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "B_origin",
+      "ratio": 0.9006641247360769,
+      "round_ratios": [
+        0.9144729802121252,
+        0.9222600544661566,
+        0.8742073991266613,
+        0.8873813200334676,
+        0.9064798286923506,
+        0.9000569801607227
+      ],
+      "seed_ratios": [
+        0.9033989570444204,
+        0.8979375715027716
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.8742073991266613,
+      "max_ratio": 0.9222600544661566
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_origin",
+      "ratio": 0.9981563809388269,
+      "round_ratios": [
+        1.0235819493366993,
+        0.9944549680162075,
+        0.9763993306011834,
+        0.9987518053748077,
+        1.0110736062332961,
+        0.985407720436497
+      ],
+      "seed_ratios": [
+        0.9979567908241095,
+        0.9983560109713184
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9763993306011834,
+      "max_ratio": 1.0235819493366993
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "A_origin",
+      "ratio": 0.9862770972267559,
+      "round_ratios": [
+        0.9930639053335273,
+        0.9739920612496823,
+        0.9550769967649404,
+        0.9817537172157313,
+        0.9971446946220376,
+        1.0177988443127086
+      ],
+      "seed_ratios": [
+        0.973920856601647,
+        0.9987901028306112
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9550769967649404,
+      "max_ratio": 1.0177988443127086
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "B_origin",
+      "ratio": 1.013634570438276,
+      "round_ratios": [
+        1.007035557610992,
+        1.0545189068716416,
+        0.9966747752211244,
+        0.9997782586471178,
+        0.9962909395247721,
+        1.0288355717068858
+      ],
+      "seed_ratios": [
+        1.0191017507633209,
+        1.0081967199232176
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9962909395247721,
+      "max_ratio": 1.0545189068716416
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "C_origin",
+      "ratio": 0.9878782288780011,
+      "round_ratios": [
+        1.0200793805059605,
+        0.9840955427654823,
+        0.9795028482811351,
+        0.9929395556007048,
+        0.9926556623204705,
+        0.9590077425370053
+      ],
+      "seed_ratios": [
+        0.9943951077644181,
+        0.9814040590818528
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9590077425370053,
+      "max_ratio": 1.0200793805059605
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "B_origin",
+      "ratio": 1.008801453810888,
+      "round_ratios": [
+        1.0136759314257753,
+        0.995312352366905,
+        1.0042762143528323,
+        1.0129291366376285,
+        1.0264357461027203,
+        1.0004874822566143
+      ],
+      "seed_ratios": [
+        1.0043935193472826,
+        1.0132287331685628
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.995312352366905,
+      "max_ratio": 1.0264357461027203
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "C_origin",
+      "ratio": 1.0106605200309489,
+      "round_ratios": [
+        1.0003549553050561,
+        1.0314787167818165,
+        1.0134823291691182,
+        1.0010498017735534,
+        1.000417638064255,
+        1.0175697825175862
+      ],
+      "seed_ratios": [
+        1.0150252826771287,
+        1.006314526526073
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.0003549553050561,
+      "max_ratio": 1.0314787167818165
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_origin",
+      "other": "C_origin",
+      "ratio": 1.0025651291571744,
+      "round_ratios": [
+        0.9762884649223248,
+        0.9766294843104735,
+        0.9962827558995211,
+        1.010088157279533,
+        1.0196348758662035,
+        1.0379609299458787
+      ],
+      "seed_ratios": [
+        0.9830226719544832,
+        1.022496089742763
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9762884649223248,
+      "max_ratio": 1.0379609299458787
+    }
+  ],
+  "endpoints": [
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "ratio": 1.0481211903631404,
+      "round_ratios": [
+        1.1186350284092066,
+        1.035252557068245,
+        0.9941928689036137,
+        1.0143609305235983,
+        1.117873571604215,
+        1.015496512144692
+      ],
+      "seed_ratios": [
+        1.0480977533083358,
+        1.0481446279420332
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9941928689036137,
+      "max_ratio": 1.1186350284092066
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "ratio": 0.9499489592146628,
+      "round_ratios": [
+        0.9632320901069906,
+        0.9400323442812141,
+        0.9285975469891832,
+        0.9230121374639454,
+        1.0462281664088624,
+        0.9050374199711193
+      ],
+      "seed_ratios": [
+        0.9438444444957044,
+        0.9560929561811157
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9050374199711193,
+      "max_ratio": 1.0462281664088624
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "ratio": 1.1033447431003431,
+      "round_ratios": [
+        1.1613348848094904,
+        1.1012946132825248,
+        1.070639129003853,
+        1.098968138502102,
+        1.0684797135994462,
+        1.1220491990011834
+      ],
+      "seed_ratios": [
+        1.1104560284489822,
+        1.0962789979424132
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.0684797135994462,
+      "max_ratio": 1.1613348848094904
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "ratio": 0.9770161604342491,
+      "round_ratios": [
+        1.0005965345868324,
+        1.0050736489953918,
+        0.9965287485887239,
+        1.0132137732873854,
+        0.8632756141445332,
+        0.9922319616994231
+      ],
+      "seed_ratios": [
+        1.0007268933777198,
+        0.9538672179857045
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.8632756141445332,
+      "max_ratio": 1.0132137732873854
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "ratio": 0.8375695580435345,
+      "round_ratios": [
+        0.8698642284076676,
+        0.8642673709439533,
+        0.8624161342869981,
+        0.8152579693890577,
+        0.7563248267569511,
+        0.863585684589854
+      ],
+      "seed_ratios": [
+        0.865510127254979,
+        0.8105309718167784
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.7563248267569511,
+      "max_ratio": 0.8698642284076676
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "ratio": 1.166489578150913,
+      "round_ratios": [
+        1.1502904728229568,
+        1.1629198125316818,
+        1.1555080070627426,
+        1.2428136998730266,
+        1.14140853718392,
+        1.1489675887467583
+      ],
+      "seed_ratios": [
+        1.15622782664784,
+        1.1768424047358026
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.14140853718392,
+      "max_ratio": 1.2428136998730266
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "ratio": 1.0042148024310669,
+      "round_ratios": [
+        0.9393004653298048,
+        1.0055687202381183,
+        0.9853323876822165,
+        1.0815316430017332,
+        0.9914703074159361,
+        1.0276416985579675
+      ],
+      "seed_ratios": [
+        0.9763368555650498,
+        1.0328887654640806
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9393004653298048,
+      "max_ratio": 1.0815316430017332
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "ratio": 0.9095452202561963,
+      "round_ratios": [
+        0.7597175728859442,
+        0.9129772287761921,
+        0.9190289177668511,
+        1.0615668828165468,
+        0.9193022910604518,
+        0.9101202490073497
+      ],
+      "seed_ratios": [
+        0.8606246180963605,
+        0.9612466228548747
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.7597175728859442,
+      "max_ratio": 1.0615668828165468
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "ratio": 1.1040845249543552,
+      "round_ratios": [
+        1.2363811222131902,
+        1.1014170874623468,
+        1.0721451399771798,
+        1.0188068792540097,
+        1.0785030311109478,
+        1.1291273869346343
+      ],
+      "seed_ratios": [
+        1.1344514612243333,
+        1.074530449216488
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.0188068792540097,
+      "max_ratio": 1.2363811222131902
+    }
+  ],
+  "descriptive_equal_geometry_means": [
+    {
+      "method": "stream",
+      "kind": "main",
+      "factor": "A_stride",
+      "other": "",
+      "geometric_mean": 1.0018181232885581,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0013667453768458,
+        "repeat-win-ragged": 0.9993635024234379,
+        "fresh-short": 1.0047314636974118
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "stream",
+      "kind": "main",
+      "factor": "B_stride",
+      "other": "",
+      "geometric_mean": 0.9990356629306418,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0024597030475086,
+        "repeat-win-ragged": 1.0022950485988888,
+        "fresh-short": 0.9923856283788447
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "stream",
+      "kind": "main",
+      "factor": "C_stride",
+      "other": "",
+      "geometric_mean": 1.0015212007963885,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9993615638208319,
+        "repeat-win-ragged": 1.0046301003632423,
+        "fresh-short": 1.0005795283350034
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "stream",
+      "kind": "main",
+      "factor": "A_origin",
+      "other": "",
+      "geometric_mean": 0.999749825707207,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0041225337110637,
+        "repeat-win-ragged": 0.9993040593656233,
+        "fresh-short": 0.9958401828953475
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "stream",
+      "kind": "main",
+      "factor": "B_origin",
+      "other": "",
+      "geometric_mean": 1.0054056576764463,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0023196789462911,
+        "repeat-win-ragged": 0.9959504315614872,
+        "fresh-short": 1.0180755160255959
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "stream",
+      "kind": "main",
+      "factor": "C_origin",
+      "other": "",
+      "geometric_mean": 0.9992032558265667,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0027897730040665,
+        "repeat-win-ragged": 0.9978009430895465,
+        "fresh-short": 0.9970288270456721
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_stride",
+      "geometric_mean": 1.000499518045482,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9960949585899377,
+        "repeat-win-ragged": 1.002861999496918,
+        "fresh-short": 1.002556215764642
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_stride",
+      "geometric_mean": 0.9922493772503415,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9891884864458901,
+        "repeat-win-ragged": 0.9872557750500467,
+        "fresh-short": 1.0003541297510012
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "A_origin",
+      "geometric_mean": 0.9944224629084145,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9931987427951627,
+        "repeat-win-ragged": 0.9925764291114878,
+        "fresh-short": 0.9974994366207467
+      },
+      "geometries_above_one": 0,
+      "geometries_below_one": 3
+    },
+    {
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_origin",
+      "geometric_mean": 0.9980054799148428,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.995583974500734,
+        "repeat-win-ragged": 1.003212514412057,
+        "fresh-short": 0.9952402678594268
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_origin",
+      "geometric_mean": 1.0033389054702186,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.012956670572295,
+        "repeat-win-ragged": 0.9988389494391753,
+        "fresh-short": 0.9982897693444698
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_stride",
+      "geometric_mean": 1.0048393410597412,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0097274077383955,
+        "repeat-win-ragged": 1.00285895380407,
+        "fresh-short": 1.0019496294657468
+      },
+      "geometries_above_one": 3,
+      "geometries_below_one": 0
+    },
+    {
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "A_origin",
+      "geometric_mean": 0.9921379422784877,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9898935329451065,
+        "repeat-win-ragged": 0.991014799523598,
+        "fresh-short": 0.9955144054711609
+      },
+      "geometries_above_one": 0,
+      "geometries_below_one": 3
+    },
+    {
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "B_origin",
+      "geometric_mean": 1.0077512398555746,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0018394330439473,
+        "repeat-win-ragged": 0.9967405364783156,
+        "fresh-short": 1.0248959587606306
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_origin",
+      "geometric_mean": 0.9974049671871187,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9861199591128527,
+        "repeat-win-ragged": 1.0044697534532403,
+        "fresh-short": 1.0017237423186673
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "A_origin",
+      "geometric_mean": 0.9995768890318875,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0052582269707888,
+        "repeat-win-ragged": 0.9978982993588666,
+        "fresh-short": 0.9955995704196514
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "B_origin",
+      "geometric_mean": 1.0022268521996256,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0023603550048423,
+        "repeat-win-ragged": 0.9982647619053258,
+        "fresh-short": 1.0060706531175865
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "C_origin",
+      "geometric_mean": 0.9975020208483105,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9917498153132325,
+        "repeat-win-ragged": 0.9966693222153543,
+        "fresh-short": 1.0041258175756707
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "B_origin",
+      "geometric_mean": 0.9979143914442582,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0022453424504916,
+        "repeat-win-ragged": 0.9961088955015249,
+        "fresh-short": 0.9954031079071508
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "C_origin",
+      "geometric_mean": 1.0066698965629601,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0051620285760423,
+        "repeat-win-ragged": 1.01089243776889,
+        "fresh-short": 1.003968815191767
+      },
+      "geometries_above_one": 3,
+      "geometries_below_one": 0
+    },
+    {
+      "method": "stream",
+      "kind": "interaction",
+      "factor": "B_origin",
+      "other": "C_origin",
+      "geometric_mean": 0.9966630681625435,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0032047647834614,
+        "repeat-win-ragged": 0.9918835485011271,
+        "fresh-short": 0.9949352625620321
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "mkl",
+      "kind": "main",
+      "factor": "A_stride",
+      "other": "",
+      "geometric_mean": 1.0009139519847234,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0039413649609632,
+        "repeat-win-ragged": 1.0017618689077716,
+        "fresh-short": 0.9970510237843979
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "mkl",
+      "kind": "main",
+      "factor": "B_stride",
+      "other": "",
+      "geometric_mean": 0.9459628029299686,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9346331037628057,
+        "repeat-win-ragged": 0.9728040722804091,
+        "fresh-short": 0.9310127726783441
+      },
+      "geometries_above_one": 0,
+      "geometries_below_one": 3
+    },
+    {
+      "method": "mkl",
+      "kind": "main",
+      "factor": "C_stride",
+      "other": "",
+      "geometric_mean": 0.9998717678714745,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0005212514828945,
+        "repeat-win-ragged": 0.9987658770975868,
+        "fresh-short": 1.0003291024701157
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "mkl",
+      "kind": "main",
+      "factor": "A_origin",
+      "other": "",
+      "geometric_mean": 0.9972331879215413,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.002040881297461,
+        "repeat-win-ragged": 0.9982358154163965,
+        "fresh-short": 0.9914517466043967
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "mkl",
+      "kind": "main",
+      "factor": "B_origin",
+      "other": "",
+      "geometric_mean": 0.9420951905491511,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9641588919961697,
+        "repeat-win-ragged": 0.885517502939257,
+        "fresh-short": 0.9793515148443015
+      },
+      "geometries_above_one": 0,
+      "geometries_below_one": 3
+    },
+    {
+      "method": "mkl",
+      "kind": "main",
+      "factor": "C_origin",
+      "other": "",
+      "geometric_mean": 1.0007702683666786,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0046031519110352,
+        "repeat-win-ragged": 0.9983749580747098,
+        "fresh-short": 0.9993439048419589
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_stride",
+      "geometric_mean": 0.9971943830449259,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9913115031610491,
+        "repeat-win-ragged": 1.0037476073068263,
+        "fresh-short": 0.9965630988581934
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_stride",
+      "geometric_mean": 0.9897700486071949,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9893124025681574,
+        "repeat-win-ragged": 0.9898233913039042,
+        "fresh-short": 0.99017454185224
+      },
+      "geometries_above_one": 0,
+      "geometries_below_one": 3
+    },
+    {
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "A_origin",
+      "geometric_mean": 1.000974202964644,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9984896115740802,
+        "repeat-win-ragged": 0.9984832714849369,
+        "fresh-short": 1.0059683363039347
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_origin",
+      "geometric_mean": 0.9928536704053016,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9941262988029157,
+        "repeat-win-ragged": 0.9986203920557719,
+        "fresh-short": 0.9858565901550265
+      },
+      "geometries_above_one": 0,
+      "geometries_below_one": 3
+    },
+    {
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_origin",
+      "geometric_mean": 0.9992939546876569,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0126073153204835,
+        "repeat-win-ragged": 0.990406027835084,
+        "fresh-short": 0.9950054165654504
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_stride",
+      "geometric_mean": 1.0029388099514305,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0021260136187293,
+        "repeat-win-ragged": 1.0091528222524309,
+        "fresh-short": 0.997571507970603
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "A_origin",
+      "geometric_mean": 0.9910604027063614,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9893079186963387,
+        "repeat-win-ragged": 0.9875352483523948,
+        "fresh-short": 0.9963599958618352
+      },
+      "geometries_above_one": 0,
+      "geometries_below_one": 3
+    },
+    {
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "B_origin",
+      "geometric_mean": 1.0797655683684015,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0917741285887774,
+        "repeat-win-ragged": 1.013301553486539,
+        "fresh-short": 1.1379335876855952
+      },
+      "geometries_above_one": 3,
+      "geometries_below_one": 0
+    },
+    {
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_origin",
+      "geometric_mean": 0.9980627912514662,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9876970485086684,
+        "repeat-win-ragged": 1.0029989053749517,
+        "fresh-short": 1.00357395038289
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "A_origin",
+      "geometric_mean": 1.0060836542842253,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0075278136008998,
+        "repeat-win-ragged": 1.0012890876443308,
+        "fresh-short": 1.0094521846031999
+      },
+      "geometries_above_one": 3,
+      "geometries_below_one": 0
+    },
+    {
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "B_origin",
+      "geometric_mean": 1.0008915329067207,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0085307063302709,
+        "repeat-win-ragged": 1.0016704304173638,
+        "fresh-short": 0.992537826213426
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "C_origin",
+      "geometric_mean": 1.0042187141837817,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9915009503864045,
+        "repeat-win-ragged": 1.0048635135544852,
+        "fresh-short": 1.0164469549208741
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "B_origin",
+      "geometric_mean": 0.9949516259079145,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0024414081109747,
+        "repeat-win-ragged": 0.9957575485541921,
+        "fresh-short": 0.9867185501635399
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "C_origin",
+      "geometric_mean": 1.0006025633484166,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.004960337817654,
+        "repeat-win-ragged": 1.0035083467667203,
+        "fresh-short": 0.993378879745914
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "mkl",
+      "kind": "interaction",
+      "factor": "B_origin",
+      "other": "C_origin",
+      "geometric_mean": 0.999117505030478,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0053564566772621,
+        "repeat-win-ragged": 0.9996486975626434,
+        "fresh-short": 0.992389654922911
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "A_stride",
+      "other": "",
+      "geometric_mean": 1.000903345689249,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9974354880932539,
+        "repeat-win-ragged": 0.9976058516911323,
+        "fresh-short": 1.0077031563378394
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "B_stride",
+      "other": "",
+      "geometric_mean": 1.0561045950604915,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0725702941738688,
+        "repeat-win-ragged": 1.0303154326331594,
+        "fresh-short": 1.0659205303101726
+      },
+      "geometries_above_one": 3,
+      "geometries_below_one": 0
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "C_stride",
+      "other": "",
+      "geometric_mean": 1.0016496444623346,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9988409165119242,
+        "repeat-win-ragged": 1.0058714693804889,
+        "fresh-short": 1.0002503434762313
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "A_origin",
+      "other": "",
+      "geometric_mean": 1.002523620168429,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0020774126609557,
+        "repeat-win-ragged": 1.0010701318593556,
+        "fresh-short": 1.004426273195827
+      },
+      "geometries_above_one": 3,
+      "geometries_below_one": 0
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "B_origin",
+      "other": "",
+      "geometric_mean": 1.0672017729868586,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0395793548832126,
+        "repeat-win-ragged": 1.124710046109394,
+        "fresh-short": 1.0395404516094007
+      },
+      "geometries_above_one": 3,
+      "geometries_below_one": 0
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "main",
+      "factor": "C_origin",
+      "other": "",
+      "geometric_mean": 0.9984341935510639,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9981949301039726,
+        "repeat-win-ragged": 0.9994250506981163,
+        "fresh-short": 0.9976834022951758
+      },
+      "geometries_above_one": 0,
+      "geometries_below_one": 3
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_stride",
+      "geometric_mean": 1.0033144340328752,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0048253807341438,
+        "repeat-win-ragged": 0.999117698708857,
+        "fresh-short": 1.0060137856933646
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_stride",
+      "geometric_mean": 1.0025049542028832,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9998747452049063,
+        "repeat-win-ragged": 0.9974059854753733,
+        "fresh-short": 1.0102805994988713
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "A_origin",
+      "geometric_mean": 0.9934546364563394,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9947011278659408,
+        "repeat-win-ragged": 0.9940841849411614,
+        "fresh-short": 0.991581345677038
+      },
+      "geometries_above_one": 0,
+      "geometries_below_one": 3
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "B_origin",
+      "geometric_mean": 1.005188891035109,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.00146628823679,
+        "repeat-win-ragged": 1.0045984664371128,
+        "fresh-short": 1.0095182989068672
+      },
+      "geometries_above_one": 3,
+      "geometries_below_one": 0
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_stride",
+      "other": "C_origin",
+      "geometric_mean": 1.004047808718933,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.00034500565671,
+        "repeat-win-ragged": 1.008514610540613,
+        "fresh-short": 1.003300839095285
+      },
+      "geometries_above_one": 3,
+      "geometries_below_one": 0
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_stride",
+      "geometric_mean": 1.0018949621746145,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0075852677371555,
+        "repeat-win-ragged": 0.993763215729494,
+        "fresh-short": 1.004388779611449
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "A_origin",
+      "geometric_mean": 1.0010872592318125,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0005919433552493,
+        "repeat-win-ragged": 1.0035234703541047,
+        "fresh-short": 0.9991513204121139
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "B_origin",
+      "geometric_mean": 0.9333055890811137,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9176251816288417,
+        "repeat-win-ragged": 0.9836563785467014,
+        "fresh-short": 0.9006641247360769
+      },
+      "geometries_above_one": 0,
+      "geometries_below_one": 3
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_stride",
+      "other": "C_origin",
+      "geometric_mean": 0.9993408991196607,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9984032660640254,
+        "repeat-win-ragged": 1.0014664503325041,
+        "fresh-short": 0.9981563809388269
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "A_origin",
+      "geometric_mean": 0.993532580293269,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9977473707430473,
+        "repeat-win-ragged": 0.9966135771104413,
+        "fresh-short": 0.9862770972267559
+      },
+      "geometries_above_one": 0,
+      "geometries_below_one": 3
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "B_origin",
+      "geometric_mean": 1.0013341298722218,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9938818408931935,
+        "repeat-win-ragged": 0.996600010933118,
+        "fresh-short": 1.013634570438276
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "C_stride",
+      "other": "C_origin",
+      "geometric_mean": 0.9933115234354795,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.000250998172751,
+        "repeat-win-ragged": 0.9918454683361468,
+        "fresh-short": 0.9878782288780011
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "B_origin",
+      "geometric_mean": 1.002977798577534,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9998044118500127,
+        "repeat-win-ragged": 1.0003528438703206,
+        "fresh-short": 1.008801453810888
+      },
+      "geometries_above_one": 2,
+      "geometries_below_one": 1
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "A_origin",
+      "other": "C_origin",
+      "geometric_mean": 1.0060636794635422,
+      "geometry_ratios": {
+        "repeat-win-deeper": 1.0002006952421887,
+        "repeat-win-ragged": 1.0073582756196908,
+        "fresh-short": 1.0106605200309489
+      },
+      "geometries_above_one": 3,
+      "geometries_below_one": 0
+    },
+    {
+      "method": "stream_over_mkl",
+      "kind": "interaction",
+      "factor": "B_origin",
+      "other": "C_origin",
+      "geometric_mean": 0.9975433951906791,
+      "geometry_ratios": {
+        "repeat-win-deeper": 0.9978597721439895,
+        "repeat-win-ragged": 0.9922321220640317,
+        "fresh-short": 1.0025651291571744
+      },
+      "geometries_above_one": 1,
+      "geometries_below_one": 2
+    }
+  ],
+  "conditional_stride_effects": [
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 0,
+      "ratio": 1.0047894909315203,
+      "round_ratios": [
+        1.0040702608434904,
+        0.9943523080133672,
+        1.0159015847072406,
+        1.012277339199274,
+        0.9988302893244126,
+        1.0034673775112701
+      ],
+      "seed_ratios": [
+        1.0047361061506892,
+        1.004842878548852
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9943523080133672,
+      "max_ratio": 1.0159015847072406
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 1,
+      "ratio": 0.9979556591669774,
+      "round_ratios": [
+        1.0000549965161338,
+        0.9994850610421002,
+        0.9865887760962744,
+        1.0020215985549386,
+        0.9979035983099985,
+        1.0017640415093934
+      ],
+      "seed_ratios": [
+        0.9953567987520996,
+        1.0005613051641353
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9865887760962744,
+      "max_ratio": 1.0020215985549386
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 0,
+      "ratio": 1.001538994288067,
+      "round_ratios": [
+        1.0065924599708536,
+        1.006457612709681,
+        0.9970391138761998,
+        0.9976792428240993,
+        0.9903480935751522,
+        1.011269742034865
+      ],
+      "seed_ratios": [
+        1.0033530750816282,
+        0.9997281933859093
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9903480935751522,
+      "max_ratio": 1.011269742034865
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 1,
+      "ratio": 1.0033812582089623,
+      "round_ratios": [
+        0.9948345255352641,
+        1.0092089672207605,
+        1.010373438191363,
+        1.0004441032196114,
+        1.0025242619299422,
+        1.0029847222547426
+      ],
+      "seed_ratios": [
+        1.0047807129402833,
+        1.0019837526328348
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9948345255352641,
+      "max_ratio": 1.010373438191363
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 0,
+      "ratio": 1.0035097074893262,
+      "round_ratios": [
+        1.0089872632243708,
+        1.0017944139293276,
+        1.0178349224987553,
+        0.9869937920201616,
+        1.0032359613966173,
+        1.0024675384320783
+      ],
+      "seed_ratios": [
+        1.009517563446572,
+        0.9975376055739216
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9869937920201616,
+      "max_ratio": 1.0178349224987553
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 1,
+      "ratio": 0.9952305670675752,
+      "round_ratios": [
+        0.9955211212252714,
+        1.000386337947552,
+        0.9769106057341649,
+        0.9897201407190657,
+        1.0111248874178893,
+        0.9980492538261924
+      ],
+      "seed_ratios": [
+        0.9908875042435662,
+        0.9995926655486215
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9769106057341649,
+      "max_ratio": 1.0111248874178893
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 0,
+      "ratio": 1.0047003956015577,
+      "round_ratios": [
+        0.9935891662190458,
+        1.0113709160922348,
+        1.0125230900681403,
+        1.0021370237113507,
+        1.0041308359188315,
+        1.0045690283023418
+      ],
+      "seed_ratios": [
+        1.005790234471256,
+        1.0036117376428697
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9935891662190458,
+      "max_ratio": 1.0125230900681403
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 1,
+      "ratio": 1.003182907752524,
+      "round_ratios": [
+        1.0053844353098733,
+        1.0048092896591356,
+        0.9926590690848517,
+        1.0062891595305938,
+        0.9983576603649045,
+        1.011709624837223
+      ],
+      "seed_ratios": [
+        1.0009336839085332,
+        1.0054371858853073
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9926590690848517,
+      "max_ratio": 1.011709624837223
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 0,
+      "ratio": 0.8944884967584164,
+      "round_ratios": [
+        0.8986277350452131,
+        0.8978037240241628,
+        0.8974016379554405,
+        0.8873223661157166,
+        0.8898952378537999,
+        0.8959425633081246
+      ],
+      "seed_ratios": [
+        0.8979442206750324,
+        0.8910460721398111
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.8873223661157166,
+      "max_ratio": 0.8986277350452131
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 1,
+      "ratio": 0.9765793990811055,
+      "round_ratios": [
+        0.9752171305482381,
+        0.9767353931809002,
+        0.9832556160713266,
+        0.9718127880809676,
+        0.9734142714032206,
+        0.979084895138247
+      ],
+      "seed_ratios": [
+        0.9783965082382156,
+        0.9747656647169971
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.9718127880809676,
+      "max_ratio": 0.9832556160713266
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 0,
+      "ratio": 1.004800286560093,
+      "round_ratios": [
+        1.0037556710360458,
+        1.0016036729972158,
+        1.0238870563274394,
+        0.9912229146825103,
+        1.0068503395509072,
+        1.0017659686785725
+      ],
+      "seed_ratios": [
+        1.0096991510086921,
+        0.9999251904516591
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9912229146825103,
+      "max_ratio": 1.0238870563274394
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "mkl",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 1,
+      "ratio": 0.9962604390728638,
+      "round_ratios": [
+        0.994129783389109,
+        0.9941673467124452,
+        0.9798074115004881,
+        0.9863056572741257,
+        1.0238378724193775,
+        0.9998878609175933
+      ],
+      "seed_ratios": [
+        0.9893450078260003,
+        1.0032242085525498
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9798074115004881,
+      "max_ratio": 1.0238378724193775
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 0,
+      "ratio": 1.0000886785059033,
+      "round_ratios": [
+        1.0105487207195796,
+        0.9831727333581781,
+        1.0033367087350795,
+        1.0101186916040377,
+        0.994721259018434,
+        0.9989033597890893
+      ],
+      "seed_ratios": [
+        0.9989519401914646,
+        1.001226710350034
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9831727333581781,
+      "max_ratio": 1.0105487207195796
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 1,
+      "ratio": 0.9947893364757803,
+      "round_ratios": [
+        0.994699103540332,
+        0.9947012545844979,
+        0.9938848158671701,
+        0.9957591106539935,
+        0.9995451909942376,
+        0.9901695278134477
+      ],
+      "seed_ratios": [
+        0.994428317034295,
+        0.995150486982557
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.9901695278134477,
+      "max_ratio": 0.9995451909942376
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 0,
+      "ratio": 1.119677891798046,
+      "round_ratios": [
+        1.1201439936863382,
+        1.12102187346529,
+        1.1110288545358178,
+        1.1243706694687226,
+        1.1128816645469628,
+        1.1287216206147337
+      ],
+      "seed_ratios": [
+        1.1173890894106477,
+        1.1219713824506319
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.1110288545358178,
+      "max_ratio": 1.1287216206147337
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 1,
+      "ratio": 1.0274446288269807,
+      "round_ratios": [
+        1.0201159253385939,
+        1.0332470536714193,
+        1.0275796259658172,
+        1.0294617600115985,
+        1.029905037743856,
+        1.024410372619548
+      ],
+      "seed_ratios": [
+        1.0269667813406014,
+        1.0279226986557224
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.0201159253385939,
+      "max_ratio": 1.0332470536714193
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 0,
+      "ratio": 0.9987155864821804,
+      "round_ratios": [
+        1.005212017564917,
+        1.0001904355357853,
+        0.994089061101727,
+        0.9957334292824502,
+        0.9964102131048571,
+        1.0007003329873856
+      ],
+      "seed_ratios": [
+        0.9998201567645782,
+        0.9976122364947532
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.994089061101727,
+      "max_ratio": 1.005212017564917
+    },
+    {
+      "family": "repeat-win-deeper",
+      "method": "stream_over_mkl",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 1,
+      "ratio": 0.9989662622694855,
+      "round_ratios": [
+        1.0013995535184745,
+        1.0062554772651424,
+        0.9970434947395559,
+        1.0034618917774198,
+        0.9875830096307663,
+        0.9981611867057636
+      ],
+      "seed_ratios": [
+        1.001559108708655,
+        0.9963801282176316
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9875830096307663,
+      "max_ratio": 1.0062554772651424
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 0,
+      "ratio": 1.003093706798706,
+      "round_ratios": [
+        0.9969777258320197,
+        0.9974977306145301,
+        1.0065157347374285,
+        0.9973514975935658,
+        1.0125082432345132,
+        1.0078230392419334
+      ],
+      "seed_ratios": [
+        1.0003208325698856,
+        1.0058742673929788
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9969777258320197,
+      "max_ratio": 1.0125082432345132
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 1,
+      "ratio": 0.9956471695584653,
+      "round_ratios": [
+        1.010335210206944,
+        0.9961045548424563,
+        0.9946249199244479,
+        0.9913396369399922,
+        0.9868008796010603,
+        0.9948349432495611
+      ],
+      "seed_ratios": [
+        1.0003299001134556,
+        0.9909863597372732
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9868008796010603,
+      "max_ratio": 1.010335210206944
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 0,
+      "ratio": 1.00393252473269,
+      "round_ratios": [
+        0.9965063457681185,
+        1.0035155072315485,
+        0.9905491688047945,
+        1.014881452742326,
+        1.0128341287684228,
+        1.005526010872376
+      ],
+      "seed_ratios": [
+        0.9968429265037515,
+        1.0110725445493345
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9905491688047945,
+      "max_ratio": 1.014881452742326
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 1,
+      "ratio": 1.0006602432900913,
+      "round_ratios": [
+        1.0061739985638385,
+        1.0012115663542926,
+        0.9915602634725134,
+        1.0067142205531847,
+        0.9984120104141977,
+        0.9999673265459625
+      ],
+      "seed_ratios": [
+        0.9996301676564215,
+        1.0016913803721301
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9915602634725134,
+      "max_ratio": 1.0067142205531847
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 0,
+      "ratio": 1.0063073408673764,
+      "round_ratios": [
+        1.0108835839453374,
+        1.001672505525818,
+        0.9982862345650677,
+        1.0291134971712812,
+        0.9966962195432046,
+        1.001557252173331
+      ],
+      "seed_ratios": [
+        1.0036000168276082,
+        1.0090219682185566
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9966962195432046,
+      "max_ratio": 1.0291134971712812
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 1,
+      "ratio": 1.0029556553626235,
+      "round_ratios": [
+        0.9938056532760086,
+        1.0036767495492414,
+        1.0046346182840244,
+        1.0078600479662227,
+        1.016685911230128,
+        0.9912880899391471
+      ],
+      "seed_ratios": [
+        1.0006936761661587,
+        1.005222747562205
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9912880899391471,
+      "max_ratio": 1.016685911230128
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 0,
+      "ratio": 1.0025224345918913,
+      "round_ratios": [
+        1.008644962757737,
+        0.9972735239922399,
+        1.0052982626294995,
+        1.0047416409455685,
+        0.9994737362486948,
+        0.9997496647551379
+      ],
+      "seed_ratios": [
+        1.003727558679048,
+        1.0013187574352815
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9972735239922399,
+      "max_ratio": 1.008644962757737
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 1,
+      "ratio": 1.0010018802283553,
+      "round_ratios": [
+        1.004683373485183,
+        1.0013152759773072,
+        1.0063444449788994,
+        0.989707922022381,
+        0.9958604856263908,
+        1.0082241636803764
+      ],
+      "seed_ratios": [
+        1.0041121839483595,
+        0.9979012108792762
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.989707922022381,
+      "max_ratio": 1.0082241636803764
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 0,
+      "ratio": 0.9663980071716489,
+      "round_ratios": [
+        0.9686155906462366,
+        0.9664233487761762,
+        0.9554488130568461,
+        0.9769638080171732,
+        0.9707145175566428,
+        0.9603728187024029
+      ],
+      "seed_ratios": [
+        0.9634786558846884,
+        0.9693262041262167
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.9554488130568461,
+      "max_ratio": 0.9769638080171732
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 1,
+      "ratio": 0.9792526019533273,
+      "round_ratios": [
+        0.9818344588651868,
+        0.9862634620710803,
+        0.9680819643456654,
+        0.9813472838457158,
+        0.9786480849326826,
+        0.9794353759623853
+      ],
+      "seed_ratios": [
+        0.9786959275659675,
+        0.97980959297261
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.9680819643456654,
+      "max_ratio": 0.9862634620710803
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 0,
+      "ratio": 0.996345944868117,
+      "round_ratios": [
+        1.0044633026246559,
+        1.0012993131262835,
+        0.993229807006657,
+        1.0007558438632116,
+        0.9764281510056279,
+        1.0021778074231935
+      ],
+      "seed_ratios": [
+        0.9996529357945765,
+        0.9930498939275227
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9764281510056279,
+      "max_ratio": 1.0044633026246559
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "mkl",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 1,
+      "ratio": 1.0011916868759394,
+      "round_ratios": [
+        0.9881440117485139,
+        0.9996647915750213,
+        0.9912096290419385,
+        1.00944191846662,
+        1.0153886916799784,
+        1.0035744584399
+      ],
+      "seed_ratios": [
+        0.9929942124915083,
+        1.0094568339471175
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9881440117485139,
+      "max_ratio": 1.0153886916799784
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 0,
+      "ratio": 1.0005698348357135,
+      "round_ratios": [
+        0.988432761421008,
+        1.0002248195875016,
+        1.00121105561721,
+        0.9926447326846651,
+        1.0130413701862147,
+        1.0080753960430413
+      ],
+      "seed_ratios": [
+        0.9966059255026875,
+        1.0045495102572186
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.988432761421008,
+      "max_ratio": 1.0130413701862147
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 1,
+      "ratio": 0.9946506487393727,
+      "round_ratios": [
+        1.0056254904489514,
+        0.9947961233990313,
+        0.9883543600673452,
+        1.0016486832946399,
+        0.9909027357184154,
+        0.9867199964917128
+      ],
+      "seed_ratios": [
+        0.9962332059152681,
+        0.9930706055202497
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9867199964917128,
+      "max_ratio": 1.0056254904489514
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 0,
+      "ratio": 1.0388396057136884,
+      "round_ratios": [
+        1.0287944519902614,
+        1.0383808591776509,
+        1.0367370342275573,
+        1.038811718933693,
+        1.043390317595948,
+        1.0470163162582853
+      ],
+      "seed_ratios": [
+        1.0346289670407147,
+        1.0430673804601716
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.0287944519902614,
+      "max_ratio": 1.0470163162582853
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 1,
+      "ratio": 1.02186120444721,
+      "round_ratios": [
+        1.0247898609372332,
+        1.015156299364292,
+        1.0242523877022305,
+        1.025849092492579,
+        1.0201951301860204,
+        1.0209630477798524
+      ],
+      "seed_ratios": [
+        1.0213899327674918,
+        1.0223326935727721
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.015156299364292,
+      "max_ratio": 1.025849092492579
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 0,
+      "ratio": 1.0099979289829677,
+      "round_ratios": [
+        1.0063917529927726,
+        1.0003727081349625,
+        1.005090893892572,
+        1.0283362355383314,
+        1.020757357842154,
+        0.9993807932631654
+      ],
+      "seed_ratios": [
+        1.0039484513991794,
+        1.0160838588158587
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9993807932631654,
+      "max_ratio": 1.0283362355383314
+    },
+    {
+      "family": "repeat-win-ragged",
+      "method": "stream_over_mkl",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 1,
+      "ratio": 1.00176186889065,
+      "round_ratios": [
+        1.0057295712570038,
+        1.004013303267287,
+        1.0135440464345185,
+        0.9984329256874928,
+        1.0012775595796755,
+        0.9877573921920526
+      ],
+      "seed_ratios": [
+        1.0077537850450626,
+        0.9958055795527616
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9877573921920526,
+      "max_ratio": 1.0135440464345185
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 0,
+      "ratio": 1.0059900218702846,
+      "round_ratios": [
+        0.9936786791801522,
+        1.0247397640890767,
+        1.0080487601804071,
+        1.007396412363833,
+        0.9958155828485564,
+        1.0065645256428195
+      ],
+      "seed_ratios": [
+        1.0087426114585343,
+        1.0032449433649966
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9936786791801522,
+      "max_ratio": 1.0247397640890767
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 1,
+      "ratio": 1.0034744800617015,
+      "round_ratios": [
+        1.004558638775947,
+        1.0065928807276727,
+        1.0092168687074197,
+        0.9985539517426337,
+        1.0136977832789902,
+        0.9884263471966975
+      ],
+      "seed_ratios": [
+        1.006787657423346,
+        1.0001722058375246
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9884263471966975,
+      "max_ratio": 1.0136977832789902
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 0,
+      "ratio": 0.9802584076042573,
+      "round_ratios": [
+        0.9793000583688043,
+        0.9759490351108543,
+        0.981503561198818,
+        0.986439748490379,
+        0.9799919852966665,
+        0.9783980277722489
+      ],
+      "seed_ratios": [
+        0.9789148867301963,
+        0.9816037724060832
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.9759490351108543,
+      "max_ratio": 0.986439748490379
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 1,
+      "ratio": 1.0046628804947342,
+      "round_ratios": [
+        1.0051271680847689,
+        1.027913655199145,
+        0.9884013808990549,
+        1.0021827720778216,
+        0.9984757477962856,
+        1.0062981985366743
+      ],
+      "seed_ratios": [
+        1.0070174516122046,
+        1.0023138147487332
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9884013808990549,
+      "max_ratio": 1.027913655199145
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 0,
+      "ratio": 0.9985217892404445,
+      "round_ratios": [
+        0.9998937337012885,
+        1.0134385490488822,
+        0.988618227307661,
+        0.9953953864117583,
+        1.0008695262484402,
+        0.9930984585572395
+      ],
+      "seed_ratios": [
+        1.0005987591609602,
+        0.9964491305425955
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.988618227307661,
+      "max_ratio": 1.0134385490488822
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 1,
+      "ratio": 1.0026415079881827,
+      "round_ratios": [
+        0.9954310319757356,
+        0.9976760599101556,
+        1.0190799033154327,
+        1.008730739944214,
+        0.9986588315406016,
+        0.996489467272314
+      ],
+      "seed_ratios": [
+        1.004006030218417,
+        1.0012788402497153
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9954310319757356,
+      "max_ratio": 1.0190799033154327
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 0,
+      "ratio": 0.9940889084735984,
+      "round_ratios": [
+        1.0014543434256644,
+        0.9900496803770207,
+        0.9799091953630072,
+        1.0010891762739378,
+        1.005327305365209,
+        0.9869545406803838
+      ],
+      "seed_ratios": [
+        0.9904319883669663,
+        0.9977593308346239
+      ],
+      "rounds_above_one": 3,
+      "rounds_below_one": 3,
+      "min_ratio": 0.9799091953630072,
+      "max_ratio": 1.005327305365209
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 1,
+      "ratio": 1.0000219653953801,
+      "round_ratios": [
+        0.9968850216506557,
+        0.9983577621386529,
+        1.0042160873511201,
+        0.9925669004617729,
+        1.009410381222577,
+        0.998783218319522
+      ],
+      "seed_ratios": [
+        0.9998146161030221,
+        1.000229357689439
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9925669004617729,
+      "max_ratio": 1.009410381222577
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 0,
+      "ratio": 0.8727647172270481,
+      "round_ratios": [
+        0.8743819128487416,
+        0.8750432664901908,
+        0.8568933731385631,
+        0.8697703429919613,
+        0.8853845019602988,
+        0.8753648386226691
+      ],
+      "seed_ratios": [
+        0.8687320128522265,
+        0.8768161416494036
+      ],
+      "rounds_above_one": 0,
+      "rounds_below_one": 6,
+      "min_ratio": 0.8568933731385631,
+      "max_ratio": 0.8853845019602988
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 1,
+      "ratio": 0.9931482858795788,
+      "round_ratios": [
+        0.9813761943717101,
+        0.9993224062657248,
+        0.9870832219928928,
+        0.9957966981456439,
+        0.9951505055706912,
+        1.0002998883780603
+      ],
+      "seed_ratios": [
+        0.989232337212726,
+        0.9970797361160676
+      ],
+      "rounds_above_one": 1,
+      "rounds_below_one": 5,
+      "min_ratio": 0.9813761943717101,
+      "max_ratio": 1.0002998883780603
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 0,
+      "ratio": 0.9922030193702625,
+      "round_ratios": [
+        1.0060174851792898,
+        0.9954399584545651,
+        0.9768167102203452,
+        0.9966808973472738,
+        1.00076205839537,
+        0.9778733717124463
+      ],
+      "seed_ratios": [
+        0.9926844673785423,
+        0.9917218048623468
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9768167102203452,
+      "max_ratio": 1.0060174851792898
+    },
+    {
+      "family": "fresh-short",
+      "method": "mkl",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 1,
+      "ratio": 1.0085217377022004,
+      "round_ratios": [
+        0.9818132502357665,
+        0.99579498872167,
+        1.0279855288012452,
+        1.0172154661643371,
+        1.005939560880045,
+        1.0231537762540084
+      ],
+      "seed_ratios": [
+        1.0016790917993996,
+        1.0154111269216326
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9818132502357665,
+      "max_ratio": 1.0279855288012452
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 0,
+      "ratio": 1.0119718802767452,
+      "round_ratios": [
+        0.9922356278181248,
+        1.0350387302775006,
+        1.0287165024581442,
+        1.006300373872157,
+        0.9905386808197781,
+        1.0198691876415271
+      ],
+      "seed_ratios": [
+        1.0184875118197247,
+        1.0054979315761285
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.9905386808197781,
+      "max_ratio": 1.0350387302775006
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "stride": "A_stride",
+      "origin": "A_origin",
+      "origin_level": 1,
+      "ratio": 1.0034524388321375,
+      "round_ratios": [
+        1.0076975949669553,
+        1.0082486648587563,
+        1.004979786142931,
+        1.0060318868965663,
+        1.0042474321011248,
+        0.9896305114735006
+      ],
+      "seed_ratios": [
+        1.006974334249586,
+        0.9999428612532966
+      ],
+      "rounds_above_one": 5,
+      "rounds_below_one": 1,
+      "min_ratio": 0.9896305114735006,
+      "max_ratio": 1.0082486648587563
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 0,
+      "ratio": 1.1231645691621663,
+      "round_ratios": [
+        1.119991212053139,
+        1.1153151763859606,
+        1.145420879617545,
+        1.1341381738736704,
+        1.1068546864406374,
+        1.1177031388554468
+      ],
+      "seed_ratios": [
+        1.1268318333477971,
+        1.1195092400552304
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.1068546864406374,
+      "max_ratio": 1.145420879617545
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "stride": "B_stride",
+      "origin": "B_origin",
+      "origin_level": 1,
+      "ratio": 1.0115940336190155,
+      "round_ratios": [
+        1.0242017014976244,
+        1.028610635320647,
+        1.0013354080758265,
+        1.0064130298323641,
+        1.0033414465520343,
+        1.005996511874394
+      ],
+      "seed_ratios": [
+        1.017978703010852,
+        1.0052494082901071
+      ],
+      "rounds_above_one": 6,
+      "rounds_below_one": 0,
+      "min_ratio": 1.0013354080758265,
+      "max_ratio": 1.028610635320647
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 0,
+      "ratio": 1.0063684243514925,
+      "round_ratios": [
+        0.993912877690282,
+        1.0180810408919692,
+        1.012081608518607,
+        0.9987102081128102,
+        1.000107386018653,
+        1.015569589361178
+      ],
+      "seed_ratios": [
+        1.0079726157127427,
+        1.0047667860654783
+      ],
+      "rounds_above_one": 4,
+      "rounds_below_one": 2,
+      "min_ratio": 0.993912877690282,
+      "max_ratio": 1.0180810408919692
+    },
+    {
+      "family": "fresh-short",
+      "method": "stream_over_mkl",
+      "stride": "C_stride",
+      "origin": "C_origin",
+      "origin_level": 1,
+      "ratio": 0.9941694566470971,
+      "round_ratios": [
+        1.0138700325511996,
+        1.0018890145158297,
+        0.9913368182369283,
+        0.9916588702174212,
+        0.9927622596599405,
+        0.9739390992824967
+      ],
+      "seed_ratios": [
+        1.0023230378252552,
+        0.9860822022752879
+      ],
+      "rounds_above_one": 2,
+      "rounds_below_one": 4,
+      "min_ratio": 0.9739390992824967,
+      "max_ratio": 1.0138700325511996
+    }
+  ],
+  "historical_endpoints": {
+    "repeat-win-deeper": {
+      "stream": {
+        "historical_model": "Intel(R) Xeon(R) 6975P-C",
+        "same_model": true,
+        "prior": {
+          "ratio": 1.007347815384387,
+          "round_ratios": [
+            1.012009313838779,
+            0.9992807337899642,
+            1.0138817555828552,
+            1.0092510443204532,
+            1.0103269892103177,
+            0.9994387863662181
+          ],
+          "seed_ratios": [
+            1.0083696767714738,
+            1.0063269895309128
+          ],
+          "rounds_above_one": 4,
+          "rounds_below_one": 2,
+          "min_ratio": 0.9992807337899642,
+          "max_ratio": 1.0138817555828552
+        },
+        "current": {
+          "ratio": 1.0481211903631407,
+          "round_ratios": [
+            1.1186350284092068,
+            1.0352525570682456,
+            0.994192868903613,
+            1.0143609305235985,
+            1.1178735716042154,
+            1.0154965121446928
+          ],
+          "seed_ratios": [
+            1.0480977533083358,
+            1.0481446279420337
+          ],
+          "rounds_above_one": 5,
+          "rounds_below_one": 1,
+          "min_ratio": 0.994192868903613,
+          "max_ratio": 1.1186350284092068
+        },
+        "current_over_prior_effect": 1.0404759650599882,
+        "direction_repeated": true,
+        "corresponding_round_direction_matches": 3
+      },
+      "mkl": {
+        "historical_model": "Intel(R) Xeon(R) 6975P-C",
+        "same_model": true,
+        "prior": {
+          "ratio": 0.9030420377049971,
+          "round_ratios": [
+            0.8991117247867904,
+            0.8993302276119888,
+            0.9027318262639349,
+            0.9013709488039519,
+            0.9208841126387237,
+            0.8950507551228739
+          ],
+          "seed_ratios": [
+            0.9003897353638607,
+            0.9057021530047141
+          ],
+          "rounds_above_one": 0,
+          "rounds_below_one": 6,
+          "min_ratio": 0.8950507551228739,
+          "max_ratio": 0.9208841126387237
+        },
+        "current": {
+          "ratio": 0.9499489592146629,
+          "round_ratios": [
+            0.9632320901069904,
+            0.9400323442812148,
+            0.9285975469891834,
+            0.9230121374639448,
+            1.0462281664088624,
+            0.9050374199711196
+          ],
+          "seed_ratios": [
+            0.9438444444957047,
+            0.9560929561811157
+          ],
+          "rounds_above_one": 1,
+          "rounds_below_one": 5,
+          "min_ratio": 0.9050374199711196,
+          "max_ratio": 1.0462281664088624
+        },
+        "current_over_prior_effect": 1.051943231379212,
+        "direction_repeated": true,
+        "corresponding_round_direction_matches": 5
+      }
+    },
+    "repeat-win-ragged": {
+      "stream": {
+        "historical_model": "Intel(R) Xeon(R) 6975P-C",
+        "same_model": true,
+        "prior": {
+          "ratio": 1.0056621958312308,
+          "round_ratios": [
+            1.0039080627691424,
+            1.0067631276369786,
+            1.0094025760215215,
+            1.0047054718920665,
+            1.0067957469905353,
+            1.002413614102691
+          ],
+          "seed_ratios": [
+            1.0066887549241494,
+            1.00463668355995
+          ],
+          "rounds_above_one": 6,
+          "rounds_below_one": 0,
+          "min_ratio": 1.002413614102691,
+          "max_ratio": 1.0094025760215215
+        },
+        "current": {
+          "ratio": 0.9770161604342492,
+          "round_ratios": [
+            1.0005965345868328,
+            1.0050736489953913,
+            0.9965287485887241,
+            1.0132137732873856,
+            0.8632756141445332,
+            0.9922319616994232
+          ],
+          "seed_ratios": [
+            1.00072689337772,
+            0.9538672179857046
+          ],
+          "rounds_above_one": 3,
+          "rounds_below_one": 3,
+          "min_ratio": 0.8632756141445332,
+          "max_ratio": 1.0132137732873856
+        },
+        "current_over_prior_effect": 0.9715152508310166,
+        "direction_repeated": false,
+        "corresponding_round_direction_matches": 3
+      },
+      "mkl": {
+        "historical_model": "Intel(R) Xeon(R) 6975P-C",
+        "same_model": true,
+        "prior": {
+          "ratio": 0.8642715066549179,
+          "round_ratios": [
+            0.8718783185040259,
+            0.8748379036536151,
+            0.8447100149364175,
+            0.864413091405247,
+            0.8668141880945939,
+            0.8633019325211632
+          ],
+          "seed_ratios": [
+            0.8637015602496511,
+            0.8648418291610509
+          ],
+          "rounds_above_one": 0,
+          "rounds_below_one": 6,
+          "min_ratio": 0.8447100149364175,
+          "max_ratio": 0.8748379036536151
+        },
+        "current": {
+          "ratio": 0.8375695580435347,
+          "round_ratios": [
+            0.8698642284076679,
+            0.8642673709439533,
+            0.8624161342869986,
+            0.815257969389058,
+            0.7563248267569513,
+            0.8635856845898539
+          ],
+          "seed_ratios": [
+            0.8655101272549792,
+            0.8105309718167786
+          ],
+          "rounds_above_one": 0,
+          "rounds_below_one": 6,
+          "min_ratio": 0.7563248267569513,
+          "max_ratio": 0.8698642284076679
+        },
+        "current_over_prior_effect": 0.9691046755495497,
+        "direction_repeated": true,
+        "corresponding_round_direction_matches": 6
+      }
+    },
+    "fresh-short": {
+      "stream": {
+        "historical_model": "Intel(R) Xeon(R) 6975P-C",
+        "same_model": true,
+        "prior": {
+          "ratio": 0.9977168439088713,
+          "round_ratios": [
+            0.988075346613337,
+            1.018931432123611,
+            0.9927573335956202,
+            0.9808994883142814,
+            1.0048435804838864,
+            1.0012504589845974
+          ],
+          "seed_ratios": [
+            0.9998297206208822,
+            0.9956084322051595
+          ],
+          "rounds_above_one": 3,
+          "rounds_below_one": 3,
+          "min_ratio": 0.9808994883142814,
+          "max_ratio": 1.018931432123611
+        },
+        "current": {
+          "ratio": 1.0042148024310673,
+          "round_ratios": [
+            0.9393004653298059,
+            1.005568720238119,
+            0.985332387682217,
+            1.0815316430017337,
+            0.991470307415936,
+            1.0276416985579682
+          ],
+          "seed_ratios": [
+            0.9763368555650506,
+            1.032888765464081
+          ],
+          "rounds_above_one": 3,
+          "rounds_below_one": 3,
+          "min_ratio": 0.9393004653298059,
+          "max_ratio": 1.0815316430017337
+        },
+        "current_over_prior_effect": 1.0065128283258586,
+        "direction_repeated": false,
+        "corresponding_round_direction_matches": 4
+      },
+      "mkl": {
+        "historical_model": "Intel(R) Xeon(R) 6975P-C",
+        "same_model": true,
+        "prior": {
+          "ratio": 0.9089205613193273,
+          "round_ratios": [
+            0.9071813394622797,
+            0.9108760675658246,
+            0.9156061998336598,
+            0.903496809011313,
+            0.9084774926423788,
+            0.9079305892172914
+          ],
+          "seed_ratios": [
+            0.9112146808833673,
+            0.906632217545213
+          ],
+          "rounds_above_one": 0,
+          "rounds_below_one": 6,
+          "min_ratio": 0.903496809011313,
+          "max_ratio": 0.9156061998336598
+        },
+        "current": {
+          "ratio": 0.9095452202561966,
+          "round_ratios": [
+            0.7597175728859448,
+            0.9129772287761917,
+            0.9190289177668519,
+            1.0615668828165468,
+            0.9193022910604517,
+            0.91012024900735
+          ],
+          "seed_ratios": [
+            0.8606246180963608,
+            0.9612466228548748
+          ],
+          "rounds_above_one": 1,
+          "rounds_below_one": 5,
+          "min_ratio": 0.7597175728859448,
+          "max_ratio": 1.0615668828165468
+        },
+        "current_over_prior_effect": 1.0006872536098892,
+        "direction_repeated": true,
+        "corresponding_round_direction_matches": 5
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+mkdir -p $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make
+cc -O3 -std=c11 -Wall -Wextra -Wpedantic -Iinclude -D_DARWIN_C_SOURCE -DCOB_USE_NEON=1 -DCOB_WITH_STRASSEN_SME_LEAF=1 -DCOB_ENABLE_APPLE_MEDIUM_WIDE=1 -c src/gemm.c -o $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/gemm.o
+cc -O3 -std=c11 -Wall -Wextra -Wpedantic -Iinclude -D_DARWIN_C_SOURCE -DCOB_USE_NEON=1 -mcpu=apple-m4 -march=armv8.7-a+sme+sme2 -DCOB_ENABLE_APPLE_MEDIUM_WIDE=1 -c third_party/maxmulsk/strassen_leaf.c -o $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/strassen_sme_leaf.o
+cc -O3 -std=c11 -Wall -Wextra -Wpedantic -Iinclude -D_DARWIN_C_SOURCE -DCOB_USE_NEON=1 -DCOB_WITH_STRASSEN_SME_LEAF=1 -DCOB_ENABLE_APPLE_MEDIUM_WIDE=1 -DCOB_SGEMM_STRASSEN1_MIN_DIM=1024 -c src/gemm.c -o $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/gemm_strassen_test.o
+cc -O3 -std=c11 -Wall -Wextra -Wpedantic -Iinclude -D_DARWIN_C_SOURCE -DCOB_USE_NEON=1 -DCOB_WITH_STRASSEN_SME_LEAF=1 -DCOB_ENABLE_APPLE_MEDIUM_WIDE=1 -DCOB_SGEMM_STRASSEN1_MIN_DIM=8192 -DCOB_SGEMM_STRASSEN1_SQUARE_MIN_DIM=128 -c src/gemm.c -o $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/gemm_strassen_square_test.o
+cc -O3 -std=c11 -Wall -Wextra -Wpedantic -Iinclude -D_DARWIN_C_SOURCE -DCOB_USE_NEON=1 tests/test_gemm.c $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/gemm_strassen_test.o $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/strassen_sme_leaf.o   -o $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/cob_gemm_strassen_test
+cc -O3 -std=c11 -Wall -Wextra -Wpedantic -Iinclude -D_DARWIN_C_SOURCE -DCOB_USE_NEON=1 tests/test_apple_medium_wide.c $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/gemm.o $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/strassen_sme_leaf.o   -o $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/cob_apple_medium_wide_test
+cc -O3 -std=c11 -Wall -Wextra -Wpedantic -Iinclude -D_DARWIN_C_SOURCE -DCOB_USE_NEON=1 tests/test_gemm.c $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/gemm.o $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/strassen_sme_leaf.o   -o $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/cob_gemm_test
+cc -O3 -std=c11 -Wall -Wextra -Wpedantic -Iinclude -D_DARWIN_C_SOURCE -DCOB_USE_NEON=1 tests/test_gemm.c $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/gemm_strassen_square_test.o $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/strassen_sme_leaf.o   -o $PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/cob_gemm_strassen_square_test
+$PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/cob_gemm_test
+all GEMM tests passed (667 shapes)
+$PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/cob_gemm_strassen_test
+all GEMM tests passed (667 shapes)
+$PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/cob_gemm_strassen_square_test
+all GEMM tests passed (667 shapes)
+$PROJECT/work/world-rank/layout-wave/apple/compact2/ship-make/cob_apple_medium_wide_test

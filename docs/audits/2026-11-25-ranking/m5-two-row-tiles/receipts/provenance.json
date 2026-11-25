@@ -1,0 +1,18 @@
+{
+  "base": "602a9dddce7e940a282b0716a7b2ca40bd2ad35e",
+  "production": "69b239d6ab9b9a86425ef6874634e3a1952a7f73",
+  "research_sha256": "b0feb6acd5af08080b418301852fc423071c356f398be34866b5d1347682d3c5",
+  "patch_sha256": "b00c71b60213583eb04f08f7379a5d1db8103239933943418f6c3f3c403e1fd1",
+  "panel_sha256": "498df612b73a0eb6e22799f5b0ab142fc370f60985a8bd1e44dc28373d8239dc",
+  "study_protocol_sha256": "1a34b1bea379c194b3d8e947bc476d38fea21c4840af53565ce1262730f16af3",
+  "env": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_THREAD_LIMIT": "1",
+    "OMP_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  },
+  "seeds": [
+    804162307,
+    2065108391
+  ]
+}

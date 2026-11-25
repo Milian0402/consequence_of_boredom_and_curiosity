@@ -1,0 +1,25 @@
+{
+  "observations": 5040,
+  "gm_corrected_wall": 1.0376139788673095,
+  "gm_corrected_cpu": 1.0367990618420013,
+  "wall_AA_range": [
+    0.9960578120431023,
+    1.0052698850253505
+  ],
+  "cpu_AA_range": [
+    0.9964912708047126,
+    1.0070248741848182
+  ],
+  "AA_alerts": [],
+  "wins_over_3pct_both_seeds": [
+    "fresh-aligned-1",
+    "fresh-aligned-2",
+    "fresh-odd-2"
+  ],
+  "wall_corrected_range": [
+    0.9157277020870296,
+    1.1601418331642193
+  ],
+  "max_abs_error": 2.64543357282e-05,
+  "fp64_checked": 57311688
+}

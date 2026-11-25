@@ -19,6 +19,12 @@ A subsequent M5 Max experiment improved the 49 × 35 × 39 case from 393.9 ns to
 
 Checking the input magnitudes and switching to double accumulation fixed that failing value, from 0.00283442 to 0.00088130 absolute error. The successor passed all 350 stronger numerical fixtures. It improved on the released kernel by 1.175× across eight fresh ordinary layouts, but beat both the fastest independent public entry and a direct prepared LIBXSMM call on only four. The performance rule required six. [Follow-up results, numerical criteria and replay](m5-numerical/README.md)
 
+## Compact M5 Max products with two output row tiles
+
+The installed opt-in kernel now reads B directly for compact matrices with 24–32 rows. The build gained 5.7% over the previous opt-in across eight previously unmeasured shapes, winning all eight on both seeds. It averaged 1.9% above the fastest measured competitor on each shape. Five leads of at least 1% repeated in both the initial build and the integrated build. Prepared LIBXSMM remained faster at 24 × 1088 × 280 and 30 × 1043 × 275. The integrated result at 32 × 3904 × 368 was within 0.001% of MpGEMM. The timed entries shared the same output address. Two labels calling the exact same incumbent function gave per-layout median ratios between 0.998 and 1.004 in the integrated run. [Matched timings, controls and replay](m5-two-row-tiles/README.md) · [Kernel commit](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/commit/69b239d6ab9b9a86425ef6874634e3a1952a7f73)
+
+An earlier trial removed the B copy throughout the 24–55-row range. At 53 × 3757 × 129 the direct path was slower than the previous packed implementation even in the same-address crossover. The shipping kernel retains B packing for 33–55 rows and for padded layouts. [Broad trial, identical-function controls and observations](m5-wide-layouts/README.md)
+
 ## Apple M5 Max wide rectangles
 
 A new opt-in SME kernel packs A once and computes the first 16 rows while packing each panel of B. The broad prototype improved on released COB across eight fresh wide layouts by 2.773×, with a geometric mean of 0.978× the strongest external entry. A subsequent nine-layout confirmation supported a narrower range of 24–55 rows. [Broad test and raw timings](m5-wide-experiment/README.md)
@@ -30,6 +36,10 @@ A clean reconstruction repeated all nine wins against the prior release, averagi
 The option remains experimental and off by default. On all six padded thin holdouts, COB also beat MaxMulSK and MpGEMM when the adapters compacted the inputs and copied the result back inside every call. The paired geometric means were 3.079× against adapted MaxMulSK and 2.769× against adapted MpGEMM. [Whole-call compact adapters](m5-compact-adapters/README.md)
 
 The installed option reproduced the default output bit for bit on 108 stress fixtures. Both configurations exceeded the 0.002 absolute-error threshold on some high-magnitude inputs. The speed result applies to the normalized benchmark inputs. The release option requires Apple SME2.1, 1024–4096 output columns and reduction depth 96–384. [Installed timings, accuracy limits and offline replay](m5-wide-release/README.md)
+
+## Why cropped views changed the Intel ranking
+
+A full factorial test independently switched each of the three physical row strides and each of the three starting addresses for three previously measured products. Increasing B's row stride cut oneMKL time by 2.7–6.9%. Changing the start of B cut its time by 2.1–11.5%. Both changes saved time in all eighteen shape-and-round comparisons for each factor. COB's response was smaller and varied by shape. At 43 × 2291 × 137, changing B's stride saved 12.7% at the original B address and 0.7% at the shifted address. Every timed implementation received the same mathematical inputs. [Measurements, interactions and offline replay](intel-layout-factors/RESULTS.md)
 
 ## Packing adjacent B panels on x86
 

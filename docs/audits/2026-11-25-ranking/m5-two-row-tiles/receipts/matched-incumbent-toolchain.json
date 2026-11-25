@@ -1,0 +1,44 @@
+{
+  "incumbent": {
+    "dylib_sha": "a1220a1aff05fc050dea45451908e318a0820d2b6838b8e0324d83dd2c9894f7",
+    "archive_sha": "8d7daedbeb045ebfd0808129fca60b4f6f46568dabeb58db9b1463206ef2c5be",
+    "dylib_text_sha": "615d2b310b55b977918cfe9271476f9b7e7483eceb17b3ea742dc56d3946c629",
+    "dylib_text_length": 205576,
+    "objects": {
+      "gemm": {
+        "sha": "6228cfe2e4cc6353b4379432df59a11d919db272446300629c70ff909ec7b676",
+        "text_sha": "cd2c8f95c37211fcd90119fb6344c99aef8f4702fba60bb06f3a09899ac2a0d7",
+        "text_bytes": 97628
+      },
+      "sme": {
+        "sha": "112acaf1490573c160c3da18cc8f9c4cc1fb398794bef076d9f62bce3eced8ac",
+        "text_sha": "4b72e1f72439ba83bc62164abe75b00571fa46eb33f88751c8982faca24e2b0d",
+        "text_bytes": 107692
+      }
+    },
+    "driver_flags": "-O3 -DNDEBUG -std=c11 -Wall -Wextra -Wpedantic",
+    "sme_flags": "-O3 -DNDEBUG -std=c11 -mcpu=apple-m4 -march=armv8.7-a+sme+sme2"
+  },
+  "candidate": {
+    "dylib_sha": "942a5fc50501ffb699b6c42cce79866f127244585e46d97778dcd9f42e5d9732",
+    "archive_sha": "f2bc1bff6029d776868d352276746c8928d34eaaabffd650b3b11db17175d561",
+    "dylib_text_sha": "982447e1d88db5074b4b5bfcf5c098e55a247571b138813cb542b5c9237aaa58",
+    "dylib_text_length": 211444,
+    "objects": {
+      "gemm": {
+        "sha": "6228cfe2e4cc6353b4379432df59a11d919db272446300629c70ff909ec7b676",
+        "text_sha": "cd2c8f95c37211fcd90119fb6344c99aef8f4702fba60bb06f3a09899ac2a0d7",
+        "text_bytes": 97628
+      },
+      "sme": {
+        "sha": "68d62a61cacaf6569249dfe2c5a6d9f860357a04821c6663e24ee507fe53433f",
+        "text_sha": "e7e0d4cddaf38da8dbdb4a746903d29d346c0c944446cfa03b415654e16a9f20",
+        "text_bytes": 113560
+      }
+    },
+    "driver_flags": "-O3 -DNDEBUG -std=c11 -Wall -Wextra -Wpedantic",
+    "sme_flags": "-O3 -DNDEBUG -std=c11 -mcpu=apple-m4 -march=armv8.7-a+sme+sme2"
+  },
+  "compiler": "Apple clang version 21.0.0 (clang-2100.4.1.1)",
+  "sdk": "27.2"
+}
