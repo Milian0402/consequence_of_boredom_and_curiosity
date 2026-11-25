@@ -1,0 +1,32 @@
+{
+  "host": "cpu=Apple M5 Max lanes=16 svl_bytes=64 cells_checked_per_call=1024 qos_result=0 cpu_affinity=unavailable",
+  "work_units": "one FP32 FMA equals two arithmetic operations",
+  "lanes_fp32": 16,
+  "fmopa_per_observation": 186179584,
+  "fp16_over_fp32_gflops_ratios": [
+    0.9870046731166993,
+    0.9973693108716912,
+    1.000510688915649,
+    0.9887909946566678,
+    0.9991004681395192,
+    1.006968782017328
+  ],
+  "paired_median_fp16_over_fp32": 0.9982348895056052,
+  "fp16_over_fp32_min": 0.9870046731166993,
+  "fp16_over_fp32_max": 1.006968782017328,
+  "median_gflops": {
+    "fp16": 2134.510565,
+    "fp32": 2146.1292999999996
+  },
+  "median_seconds": {
+    "fp16": 0.089317479,
+    "fp32": 0.044416687499999996
+  },
+  "checksums": {
+    "rings.S": "58d209b132c9c5537c12e97fc1c2ac10d5205fa97409102ff1c6a60b86e488fb",
+    "trial.c": "239b6ef13610c97b756ce78de4f7b9a06ee9b91a99c9c073e7e240009e2b5299",
+    "disassembly.txt": "ab5b18f62c91a45427b0c09db12ebc34330b6355a9af1fb0a801185cb3218279",
+    "trials.csv": "790c68f4a494fcf0d51247a16922d5c42a225b0d7b205a8413df94fd411f61a2",
+    "platform.txt": "c3300d24345a5a4a1927dbdc2361b937c8824b40a0affd7504ed363324981e89"
+  }
+}

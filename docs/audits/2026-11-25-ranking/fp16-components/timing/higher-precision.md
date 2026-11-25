@@ -1,0 +1,3 @@
+# Six and nine FP16 products on Apple SME
+
+Before timing the six- and nine-term variants, add a second complete six-method run with the same frozen shapes, inputs, error criteria, order and four FP32 controls. Substitute the two variants that passed the earlier 19-family and direct max/RMS screen for the raw and three-term variants. These general frontends pack each plane for its actual SME call and charge all work. The variants use row/column power-of-two normalization. Count the set of genuinely mixed calls with their executed component product count. Record any exceptional FP64 fallback as a fallback. Keep all timings and numerical exclusions in both original and supplemental comparisons.

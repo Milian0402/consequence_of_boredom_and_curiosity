@@ -1,0 +1,37 @@
+{
+  "lanes": 16,
+  "modes": [
+    {
+      "calls": 43,
+      "cells": 13966,
+      "guards": 162162,
+      "max_abs": 3.459613442709181e+25,
+      "max_componentwise": 0.000223400332164751,
+      "max_abs_by_fixture": {
+        "dyadic": 0,
+        "random": 0.002573191798038943,
+        "cancel": 0.0019294336054613836,
+        "scaled": 0.002100170427314474,
+        "axis-scaled": 3.459613442709181e+25
+      }
+    },
+    {
+      "calls": 43,
+      "cells": 13966,
+      "guards": 162162,
+      "max_abs": 1.4089525859821153e+22,
+      "max_componentwise": 1.0716121879578344e-07,
+      "max_abs_by_fixture": {
+        "dyadic": 0,
+        "random": 2.1246277883690823e-06,
+        "cancel": 7.350661697103078e-07,
+        "scaled": 1.3563838017205399e-06,
+        "axis-scaled": 1.4089525859821153e+22
+      }
+    }
+  ],
+  "range_rejections": 8,
+  "invalid_or_empty_shapes": 22,
+  "output_overflow_rejections": 2,
+  "library_sha256": "657642d458d1d9814b476d620d2fd2226bdedd37ba4bd48786d5df1ee450e88b"
+}

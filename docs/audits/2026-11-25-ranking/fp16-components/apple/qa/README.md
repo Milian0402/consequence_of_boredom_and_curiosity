@@ -1,0 +1,5 @@
+# Protected whole-output check
+
+Run `python3 -B check.py /path/to/native-kernel.dylib --output qa.json` with the actual native macOS arm64 library exporting cob_half_sgemm and cob_half_svl. The runner uses only Python's standard library. It generates small test cases sized from the actual FP32 streaming vector length, protects both inputs read-only, guards both ends of all parent allocations, and checks all C padding. No elapsed-time values are collected.
+
+Each grid shape receives both raw-half and compensated calls. Exact dyadic small integers exercise every tile-edge combination. Distinct signed random inputs, deliberately cancelled dots, opposing depth scales and very different row/column scales are compared to full binary64 dot references. The componentwise ratio divides absolute error by the sum of absolute products; representable exact outputs are also required for every dyadic grid. The default rejection fixtures contain NaN, infinity or a single depth value introducing over 26 exponent bands in a row. A rejected operation must preserve every initial C bit.

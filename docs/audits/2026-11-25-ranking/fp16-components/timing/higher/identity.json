@@ -1,0 +1,17 @@
+{
+  "machine": "arm64",
+  "system": "macOS-27.2.1-arm64-arm-64bit-Mach-O",
+  "streaming_fp32_lanes": 16,
+  "libraries": {
+    "accelerate.dylib": "bfc2d766ea76c6f3441aad2de9b008274e857b7cd9de151ae678865a5d4ca7ea",
+    "coherence.dylib": "fce58407d850a250eb191405f0d3f6a44b80794cac173123af68edb163052365",
+    "maxmulsk.dylib": "e0b36cd0c80ba6269e0531ec33e33572daaeda72e0b35bdda09dc6772d674546",
+    "MaxMulSK-adapted.dylib": "0886114eb4cc9b8c4094dba8842a3c32d2a734634f92caacb22d875306ad9bb2",
+    "kleidiai-elastic.dylib": "297a46e46210c2ba5f4e99bff377bb2e0d2d75234fb6afb2903c5c59b2aa4fdc",
+    "apple-fp16.dylib": "657642d458d1d9814b476d620d2fd2226bdedd37ba4bd48786d5df1ee450e88b",
+    "libopenblasp-r0.3.34.dylib": "07bc71aac2823e9202ea4088429a4f5d05146aded15e8aa44600e285eb700415"
+  },
+  "qualified_dylib_sha256": "34c55c71c550604b2d177ba2825212bf9ab0f1156426b0c04e30cb4caafb4cf3",
+  "numpy": "2.4.4",
+  "one_thread_openblas": 1
+}

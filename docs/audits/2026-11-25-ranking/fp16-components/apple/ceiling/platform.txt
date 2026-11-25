@@ -1,0 +1,1 @@
+cpu=Apple M5 Max lanes=16 svl_bytes=64 cells_checked_per_call=1024 qos_result=0 cpu_affinity=unavailable

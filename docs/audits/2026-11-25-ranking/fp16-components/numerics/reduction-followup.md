@@ -1,0 +1,3 @@
+# Exploratory reduction and truncation checks
+
+The serial-FMA result was already observed. Two further arithmetic models retain identical inputs and the original gates. A native FMLAL implementation reduces contiguous depth products using a balanced binary tree with zero padding. An independent integer control forms exact sums of the chosen stored half-component products, including component weights, and rounds the result to binary32 once. The latter measures input-splitting and omitted-term errors without finite accumulation error. An extra K=1 witness uses A=B=1+2^-11 and a second witness multiplies an input whose two planes cannot reconstruct it by 1. These new scalar cases sit outside the original score.

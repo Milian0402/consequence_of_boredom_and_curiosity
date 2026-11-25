@@ -1,0 +1,67 @@
+0000000000000118	smstart	sm
+0000000000000158	smstart	za
+0000000000000378	fmopa	za0.s, p0/m, p0/m, z1.h, z3.h
+000000000000037c	fmopa	za1.s, p0/m, p0/m, z1.h, z4.h
+0000000000000380	fmopa	za2.s, p0/m, p0/m, z2.h, z3.h
+0000000000000384	fmopa	za3.s, p0/m, p0/m, z2.h, z4.h
+0000000000000398	fmopa	za0.s, p0/m, p0/m, z1.h, z3.h
+000000000000039c	fmopa	za1.s, p0/m, p0/m, z1.h, z4.h
+00000000000003a0	fmopa	za2.s, p0/m, p0/m, z2.h, z3.h
+00000000000003a4	fmopa	za3.s, p0/m, p0/m, z2.h, z4.h
+00000000000003b8	fmopa	za0.s, p0/m, p0/m, z1.h, z3.h
+00000000000003bc	fmopa	za1.s, p0/m, p0/m, z1.h, z4.h
+00000000000003c0	fmopa	za2.s, p0/m, p0/m, z2.h, z3.h
+00000000000003c4	fmopa	za3.s, p0/m, p0/m, z2.h, z4.h
+00000000000003d8	fmopa	za0.s, p0/m, p0/m, z1.h, z3.h
+00000000000003dc	fmopa	za1.s, p0/m, p0/m, z1.h, z4.h
+00000000000003e0	fmopa	za2.s, p0/m, p0/m, z2.h, z3.h
+00000000000003e4	fmopa	za3.s, p0/m, p0/m, z2.h, z4.h
+0000000000000434	fmopa	za0.s, p0/m, p0/m, z1.h, z3.h
+0000000000000438	fmopa	za1.s, p0/m, p0/m, z1.h, z4.h
+000000000000043c	fmopa	za2.s, p0/m, p0/m, z2.h, z3.h
+0000000000000440	fmopa	za3.s, p0/m, p0/m, z2.h, z4.h
+0000000000000578	fmopa	za0.s, p0/m, p0/m, z1.h, z3.h
+000000000000057c	fmopa	za1.s, p0/m, p0/m, z1.h, z4.h
+0000000000000580	fmopa	za2.s, p0/m, p0/m, z2.h, z3.h
+0000000000000584	fmopa	za3.s, p0/m, p0/m, z2.h, z4.h
+0000000000000598	fmopa	za0.s, p0/m, p0/m, z1.h, z3.h
+000000000000059c	fmopa	za1.s, p0/m, p0/m, z1.h, z4.h
+00000000000005a0	fmopa	za2.s, p0/m, p0/m, z2.h, z3.h
+00000000000005a4	fmopa	za3.s, p0/m, p0/m, z2.h, z4.h
+00000000000005b8	fmopa	za0.s, p0/m, p0/m, z1.h, z3.h
+00000000000005bc	fmopa	za1.s, p0/m, p0/m, z1.h, z4.h
+00000000000005c0	fmopa	za2.s, p0/m, p0/m, z2.h, z3.h
+00000000000005c4	fmopa	za3.s, p0/m, p0/m, z2.h, z4.h
+00000000000005d8	fmopa	za0.s, p0/m, p0/m, z1.h, z3.h
+00000000000005dc	fmopa	za1.s, p0/m, p0/m, z1.h, z4.h
+00000000000005e0	fmopa	za2.s, p0/m, p0/m, z2.h, z3.h
+00000000000005e4	fmopa	za3.s, p0/m, p0/m, z2.h, z4.h
+0000000000000630	fmopa	za0.s, p0/m, p0/m, z1.h, z3.h
+0000000000000634	fmopa	za1.s, p0/m, p0/m, z1.h, z4.h
+0000000000000638	fmopa	za2.s, p0/m, p0/m, z2.h, z3.h
+000000000000063c	fmopa	za3.s, p0/m, p0/m, z2.h, z4.h
+0000000000000790	fmopa	za0.s, p0/m, p0/m, z1.h, z3.h
+0000000000000794	fmopa	za1.s, p0/m, p0/m, z1.h, z4.h
+0000000000000798	fmopa	za2.s, p0/m, p0/m, z2.h, z3.h
+000000000000079c	fmopa	za3.s, p0/m, p0/m, z2.h, z4.h
+00000000000007b0	fmopa	za0.s, p0/m, p0/m, z1.h, z3.h
+00000000000007b4	fmopa	za1.s, p0/m, p0/m, z1.h, z4.h
+00000000000007b8	fmopa	za2.s, p0/m, p0/m, z2.h, z3.h
+00000000000007bc	fmopa	za3.s, p0/m, p0/m, z2.h, z4.h
+00000000000007d0	fmopa	za0.s, p0/m, p0/m, z1.h, z3.h
+00000000000007d4	fmopa	za1.s, p0/m, p0/m, z1.h, z4.h
+00000000000007d8	fmopa	za2.s, p0/m, p0/m, z2.h, z3.h
+00000000000007dc	fmopa	za3.s, p0/m, p0/m, z2.h, z4.h
+00000000000007f0	fmopa	za0.s, p0/m, p0/m, z1.h, z3.h
+00000000000007f4	fmopa	za1.s, p0/m, p0/m, z1.h, z4.h
+00000000000007f8	fmopa	za2.s, p0/m, p0/m, z2.h, z3.h
+00000000000007fc	fmopa	za3.s, p0/m, p0/m, z2.h, z4.h
+0000000000000848	fmopa	za0.s, p0/m, p0/m, z1.h, z3.h
+000000000000084c	fmopa	za1.s, p0/m, p0/m, z1.h, z4.h
+0000000000000850	fmopa	za2.s, p0/m, p0/m, z2.h, z3.h
+0000000000000854	fmopa	za3.s, p0/m, p0/m, z2.h, z4.h
+0000000000000a40	smstop	za
+0000000000000a44	smstop	sm
+0000000000000aa0	smstop	sm
+0000000000000aa8	smstart	sm
+0000000000000aac	smstart	za

@@ -1,0 +1,15 @@
+{
+  "source": {
+    "pack.c": "7ff7075218cd8503463123249be727e124718d05bfc44f212ee509e3e6caa922",
+    "tiles.c": "f0ddb1f0510a2ff2b7a164d3a1a6e67cf4273c7c8f1f33f62cbbb7809fcbf00e",
+    "plane.c": "3956c33fa5fdedd0ff9c95fcf4e3e4a115b1d092db599b1af60ecb40693ba2e9"
+  },
+  "objects": {
+    "pack.o": "fcf3a8ee4cf48b76ea0a1c6e6c0891aa1c9cc1ac66683e783b38f57f2c78f71e",
+    "tiles.o": "9d7750887a34c0d83b82660a05ec390c42ca8e2afa9aa6f40200070dce958f20",
+    "plane.o": "65d7339c913bdea620a3193e553562902994212a33afca09d5a04beaf103069b"
+  },
+  "measured_library_sha256": "657642d458d1d9814b476d620d2fd2226bdedd37ba4bd48786d5df1ee450e88b",
+  "all_objects_rebuild_exact": true,
+  "rebuild_same_macho_install_name_exact": true
+}
