@@ -292,7 +292,9 @@ static void measure(shape s,const char* variant,const char* file,const float* a,
     fflush(stdout);
     if (nonfinite || guards || maximum>0.002) fatal("FP64 or guard rejection");
     const double work=2.0*s.m*s.n*s.k;
-    int calls=(int)fmin(512.0,fmax(1.0,ceil(8e7/work)));
+    const char *batch = getenv("RANK_MEDIUM_BATCH");
+    const int minimum_calls = batch && strcmp(batch,"1")==0 ? 32 : 1;
+    int calls=(int)fmin(512.0,fmax((double)minimum_calls,ceil(8e7/work)));
     char request[16];
     while (fgets(request,sizeof request,stdin)) {
         if (!strcmp(request,"quit\n")) break;
