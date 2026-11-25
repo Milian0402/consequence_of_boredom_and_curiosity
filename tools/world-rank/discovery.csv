@@ -2,6 +2,8 @@ family,m,n,k,pad
 small,64,64,64,0
 medium,192,512,384,0
 short-row,5,3073,1537,5
+short-column,1536,1,1025,3
+short-inner,257,1025,4,5
 tall-wide,64,3072,256,0
 square,1024,1024,1024,0
 square,3072,3072,3072,0

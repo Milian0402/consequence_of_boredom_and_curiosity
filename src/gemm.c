@@ -3565,6 +3565,11 @@ static void cob_strassen_merge_product(
     }
 }
 
+#if defined(COB_ENABLE_FUSED_STRASSEN) && COB_ENABLE_FUSED_STRASSEN && defined(COB_USE_BLOCKED_LEAF)
+#define COB_USE_FUSED_STRASSEN 1
+#include "cob_fused_strassen.inc"
+#endif
+
 #if defined(COB_USE_PORTABLE_STRASSEN) && defined(__linux__) && defined(COB_ENABLE_OPENBLAS_LEAF) && COB_ENABLE_OPENBLAS_LEAF
 #define COB_USE_OPENBLAS_LEAF 1
 #include <cblas.h>
@@ -3982,6 +3987,12 @@ COB_THIN_TARGET static void cob_sgemm_few_rows(int m, int n, int k,
 
 #include "cob_small_direct.inc"
 
+#if defined(COB_ENABLE_SHORT_AXES) && COB_ENABLE_SHORT_AXES && !defined(COB_USE_APPLE_AMX) && \
+    (defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && defined(__aarch64__)))
+#define COB_USE_SHORT_AXES 1
+#include "cob_short_axes.inc"
+#endif
+
 void cob_sgemm_rowmajor(
     int m,
     int n,
@@ -3993,6 +4004,9 @@ void cob_sgemm_rowmajor(
     float* c,
     int ldc)
 {
+#ifdef COB_USE_SHORT_AXES
+    if (cob_try_short_axes(m, n, k, a, lda, b, ldb, c, ldc)) return;
+#endif
 #if defined(COB_USE_DIRECT_SMALL_GEMM)
     if (m >= 4 && m <= 128 && n >= 16 && n <= 128 && k > 0 && k <= 128 &&
         m % 4 == 0 && n % 16 == 0 && a && b && c && lda >= k && ldb >= n && ldc >= n &&
@@ -4047,6 +4061,10 @@ void cob_sgemm_rowmajor(
         cob_sgemm_vector_matrix(n, k, a, b, ldb, c);
         return;
     }
+#endif
+
+#if defined(COB_USE_FUSED_STRASSEN)
+    if (cob_sgemm_strassen_fused(m,n,k,a,lda,b,ldb,c,ldc)) return;
 #endif
 
 #if COB_SGEMM_STRASSEN1 && defined(COB_USE_PORTABLE_STRASSEN)

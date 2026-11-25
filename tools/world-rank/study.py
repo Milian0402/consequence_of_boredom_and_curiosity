@@ -16,6 +16,7 @@ from contextlib import ExitStack, contextmanager
 
 SEEDS = {"discovery": (19473017, 37292229), "confirm": (6191231, 89743091)}
 SHAPE_KEYS = ("family", "m", "n", "k", "pad", "mode")
+SMALL_VENDOR_MAX_MNK = 64 ** 3
 
 
 def read_panel(path):
@@ -51,6 +52,13 @@ def implementations(args):
             if label in entries:
                 raise ValueError(f"duplicate implementation {label}")
             entries[label] = (variant, str(Path(lib).resolve()))
+    small_peers = set()
+    for spec in args.small_vendor:
+        name, sep, lib = spec.partition("=")
+        if not sep or name in entries:
+            raise ValueError(f"invalid or duplicate small vendor {spec}")
+        entries[name] = ("direct", str(Path(lib).resolve()))
+        small_peers.add(name)
     for spec in args.candidate:
         name, sep, value = spec.partition("=")
         variant, colon, lib = value.partition(":")
@@ -62,7 +70,13 @@ def implementations(args):
             raise ValueError(f"invalid implementation {name}")
         if lib != "-" and not Path(lib).is_file():
             raise FileNotFoundError(lib)
-    return entries
+    return entries, small_peers
+
+
+def eligible_entries(case, entries, small_peers):
+    if case["m"] * case["n"] * case["k"] <= SMALL_VENDOR_MAX_MNK:
+        return entries
+    return {name: spec for name, spec in entries.items() if name not in small_peers}
 
 
 def case_args(case, seed):
@@ -216,13 +230,14 @@ def run_block(args, trace, case, index, block, seed, entries, accuracy, timings,
                 raise ValueError("implementations used different time batches for the same shape")
 
 
-def summarize(args, cases, entries, results, errors, comparisons):
+def summarize(args, cases, entries, small_peers, results, errors, comparisons):
     ranking = []
     group_ratios = {}
     strongest_ratios = {}
-    names = list(entries)
-    independents = ["openblas", *(spec.partition("=")[0] for spec in args.vendor)]
+    full_peers = ["openblas", *(spec.partition("=")[0] for spec in args.vendor)]
     for i, case in enumerate(cases):
+        names = list(eligible_entries(case, entries, small_peers))
+        independents = [*full_peers, *(name for name in names if name in small_peers)]
         labels = {name: results.get((i, name), {}) for name in names}
         required = {(block, r) for block in (1, 2) for r in range(args.rounds)}
         if any(set(v) != required for v in labels.values()):
@@ -236,7 +251,8 @@ def summarize(args, cases, entries, results, errors, comparisons):
                 ratio = median(labels[fastest_peer][j] / labels[name][j] for j in sorted(required))
                 vs_fastest[name] = ratio
                 strongest_ratios.setdefault(name, []).append(ratio)
-        ranking.append({**case, "median_seconds": elapsed, "fastest_median": min(names, key=elapsed.__getitem__),
+        ranking.append({**case, "eligible_independents": independents, "median_seconds": elapsed,
+                        "fastest_median": min(names, key=elapsed.__getitem__),
                         "fastest_independent_median": fastest_peer, "speedups_vs_fastest_independent": vs_fastest})
         for name, peer in itertools.permutations(names, 2):
             values = [labels[peer][key] / labels[name][key] for key in sorted(required)]
@@ -251,6 +267,7 @@ def summarize(args, cases, entries, results, errors, comparisons):
               for (group, name, peer), ratios in group_ratios.items()]
     data = dict(phase=args.phase, panel_sha256=hashlib.sha256(args.panel.read_bytes()).hexdigest(),
                 implementations=entries, seeds=SEEDS[args.phase], rounds_per_seed=args.rounds,
+                small_vendor_max_mnk=SMALL_VENDOR_MAX_MNK, small_vendors=sorted(small_peers),
                 full_output_tolerance=args.tolerance, completed_cases=len(ranking),
                 expected_cases=len(cases), errors=errors, shape_rankings=ranking, families=family,
                 portfolios_vs_fastest_independent={name: dict(geometric_mean_speedup=geometric_mean(values),
@@ -265,6 +282,8 @@ def main():
         cli.add_argument(name, type=Path)
     cli.add_argument("--phase", choices=tuple(SEEDS), required=True)
     cli.add_argument("--vendor", action="append", default=[], metavar="NAME=SO")
+    cli.add_argument("--small-vendor", action="append", default=[], metavar="NAME=SO",
+                     help="independent direct peer only on shapes with m*n*k <= 64**3")
     cli.add_argument("--candidate", action="append", default=[], metavar="NAME=VARIANT:SO")
     cli.add_argument("--rounds", type=int, help="rounds per seed")
     cli.add_argument("--stress", action="store_true", help="validate cancellation and scaled input on one representative rectangle")
@@ -278,7 +297,8 @@ def main():
         cli.error("invalid timing or validation configuration")
     args.out.mkdir(parents=True, exist_ok=True)
     args.worker, args.openblas = args.worker.resolve(), args.openblas.resolve()
-    entries, cases = implementations(args), read_panel(args.panel)
+    entries, small_peers = implementations(args)
+    cases = read_panel(args.panel)
     seeds, results, errors = SEEDS[args.phase], {}, []
     keys = ["phase", *SHAPE_KEYS, "block", "seed", "stress"]
     with ExitStack() as files:
@@ -297,11 +317,12 @@ def main():
             jobs.extend((dict(cases[index], mode=mode), index, 0, seeds[0], True) for mode in ("cancel","scaled"))
         for case, index, block, seed, stress in jobs:
             try:
-                run_block(args, trace, case, index, block, seed, entries, accuracy, timings, results, errors, stress)
+                methods = eligible_entries(case, entries, small_peers)
+                run_block(args, trace, case, index, block, seed, methods, accuracy, timings, results, errors, stress)
             except (RuntimeError, TimeoutError, OSError, ValueError, subprocess.SubprocessError) as exc:
                 errors.append(dict(**case, block=block, seed=seed, error=str(exc)))
                 print(f"measurement failed: {errors[-1]}", file=trace, flush=True)
-        summarize(args, cases, entries, results, errors, comps)
+        summarize(args, cases, entries, small_peers, results, errors, comps)
     if errors:
         raise SystemExit(f"{len(errors)} incomplete/failed checks, see ranking.json and worker.log")
     print(f"{len(cases)} cases, {len(entries)} methods, {args.rounds * len(seeds)} paired rounds per case")

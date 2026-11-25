@@ -228,7 +228,9 @@ static void measure(shape s,const char* variant,const char* file,const float* a,
     set_guards(c,s.m,s.n,ldc,output_guard);
     rank_sgemm_fn multiply=choose(variant,lib);
     rank_bridge=traced_sgemm;
+    double start_first=seconds();
     multiply(s.m,s.n,s.k,a,lda,b,ldb,c,ldc);
+    double first_seconds=seconds()-start_first;
     rank_bridge=selected_sgemm;
     if (!single_task()) fatal("warm multiply launched multiple threads");
     FILE* ref=fopen(file,"rb");
@@ -257,8 +259,9 @@ static void measure(shape s,const char* variant,const char* file,const float* a,
     int actual_cpu=-1;
 #endif
     printf("READY,%.12g,%zu,%zu,%zu,cpu=%d,threads=1,signed_min_error=%.12g,signed_max_error=%.12g,"
-           "checksum=%.12g,hybrid_vendor_calls=%d\n",maximum,nonfinite,guards,(size_t)s.m*s.n,
-           actual_cpu,min_signed,max_signed,checksum,vendor_calls);
+           "checksum=%.12g,hybrid_vendor_calls=%d,first_sgemm_seconds=%.12g\n",
+           maximum,nonfinite,guards,(size_t)s.m*s.n,
+           actual_cpu,min_signed,max_signed,checksum,vendor_calls,first_seconds);
     fflush(stdout);
     if (nonfinite || guards || maximum>0.002) fatal("FP64 or guard rejection");
     const double work=2.0*s.m*s.n*s.k;

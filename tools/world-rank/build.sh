@@ -27,9 +27,12 @@ extra=()
 while IFS= read -r definition; do
     case "$definition" in
         ''|'#'*) ;;
-        COB_ENABLE_BLOCKED_LEAF=[01]|COB_ENABLE_DIRECT_SMALL_GEMM=[01]) extra+=("-D$definition") ;;
+        COB_ENABLE_BLOCKED_LEAF=[01]|COB_ENABLE_DIRECT_SMALL_GEMM=[01]|COB_ENABLE_SHORT_AXES=[01]|COB_ENABLE_FUSED_STRASSEN=[01]) extra+=("-D$definition") ;;
         *) echo "Invalid challenger flag $definition" >&2; exit 1 ;;
     esac
 done < "$rank_dir/challenger-flags.txt"
+if [[ $(cat "$rank_dir/phase.txt") == discovery ]]; then
+    "$cc" "${flags[@]}" "${extra[@]}" -UCOB_ENABLE_FUSED_STRASSEN -DCOB_ENABLE_FUSED_STRASSEN=0 -fPIC -shared "$repo/src/gemm.c" "$rank_dir/cob_adapter.c" -o "$build/unfused.so"
+fi
 "$cc" "${flags[@]}" "${extra[@]}" -fPIC -shared "$repo/src/gemm.c" "$rank_dir/cob_adapter.c" -o "$build/challenger.so"
 printf 'baseline_revision=%s\nchallenger_revision=%s\nflags=%s\nchallenger_flags=%s\n' "$base" "$(git -C "$repo" rev-parse HEAD)" "${flags[*]}" "${extra[*]}" > "$build/build.txt"

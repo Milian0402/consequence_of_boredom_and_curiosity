@@ -21,5 +21,11 @@ peers=()
 for name in aocl mkl armpl; do
     if test -f "$vendors/$name.so"; then peers+=(--vendor "$name=$vendors/$name.so"); fi
 done
+if test -f "$vendors/libxsmm.so"; then
+    peers+=(--small-vendor "libxsmm=$vendors/libxsmm.so")
+fi
+if [[ -f "$build/unfused.so" ]]; then
+    peers+=(--candidate "cob-unfused=direct:$build/unfused.so")
+fi
 python3 "$rank_dir/study.py" "$build/worker" "$rank_dir/$phase.csv" "$out" "$vendors/openblas.so" \
     --phase "$phase" --stress "${peers[@]}" --candidate "cob-challenger=direct:$build/challenger.so"

@@ -27,6 +27,15 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install --no-install-recommends -y gcc gfortran make pkg-config libopenblas-pthread-dev unzip
           mkdir -p "$VENDOR_DIR" "$RUNNER_TEMP/rank-result"
+      - name: Verify standalone fused kernels against FP64
+        run: |
+          if [[ $(uname -m) == aarch64 ]]; then
+            flags=(-mcpu=native -DCOB_USE_NEON=1)
+          else
+            flags=(-march=native)
+          fi
+          cc -O3 -std=c11 -Iinclude "${flags[@]}" tests/test_fused_strassen.c -lm -o "$RUNNER_TEMP/test-fused"
+          "$RUNNER_TEMP/test-fused" | tee "$RUNNER_TEMP/rank-result/fused-validation.txt"
       - name: Build pinned OpenBLAS
         id: openblas
         continue-on-error: true
@@ -40,12 +49,17 @@ jobs:
         id: vendor
         continue-on-error: true
         run: bash tools/world-rank/vendors/build.sh "$VENDOR_DIR"
+      - name: Build LIBXSMM small-shape JIT kernels
+        id: libxsmm
+        continue-on-error: true
+        run: bash tools/world-rank/libxsmm/build.sh "$VENDOR_DIR"
       - name: Compare installed candidates against an independent FP64 product
         run: bash tools/world-rank/run.sh "$RUNNER_TEMP/rank-result" "$VENDOR_DIR"
       - name: Record incomplete installation as a failed comparison
         if: >-
           ${{ !cancelled() && (steps.openblas.outcome == 'failure' ||
-          steps.aocl.outcome == 'failure' || steps.vendor.outcome == 'failure') }}
+          steps.aocl.outcome == 'failure' || steps.vendor.outcome == 'failure' ||
+          steps.libxsmm.outcome == 'failure') }}
         run: |
           echo "At least one requested vendor build was unavailable." > "$RUNNER_TEMP/rank-result/missing-vendor.txt"
           exit 1
