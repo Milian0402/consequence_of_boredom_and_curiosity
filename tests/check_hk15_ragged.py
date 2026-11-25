@@ -9,7 +9,7 @@ import subprocess
 import sys
 import tempfile
 
-from hk15_guard_cases import check_guard_cases, regular_inputs
+from hk15_guard_cases import check_coherent_dots, check_guard_cases, regular_inputs
 
 repo = Path(__file__).resolve().parents[1]
 with tempfile.TemporaryDirectory() as td:
@@ -145,4 +145,5 @@ static void counted_leaf({spec}) {{ ++leaf_count; cob_sgemm_rowmajor_base({value
         assert dll.attempt_hk(*args)==0 and all(counter.value==0 for counter in early)
     assert saved==(bytes(a),bytes(b),bytes(c))
     check_guard_cases(dll)
+    check_coherent_dots(dll)
     print(f'PASS 11 actual size boundaries, 18 residue classes x 6 fixtures, {calls} one-shot calls, {cells} FP64 outputs, max_abs_error={worst:.9g}. Uniform-input routes {uniform_routes}.')

@@ -153,3 +153,44 @@ def check_guard_cases(lib):
                     assert result==oracle,(test,i,j,result,oracle)
             cells+=1
     print(f'PASS {len(cases)} guard cases, {cells} FP64-referenced outputs, complete parent guards and route counters.')
+
+
+def check_coherent_dots(lib):
+    from random import Random
+
+    m,n,k = 57,89,88
+    lda,ldb,ldc = k+3,n+7,n+11
+    scalar = ct.c_float
+    leaves = ct.c_int.in_dll(lib,'leaf_count')
+    classical = ct.c_int.in_dll(lib,'classical')
+    ct.c_int.in_dll(lib,'refuse').value = 0
+    cases = ('independent', 'positive', 'opposite', 'two-depth-profiles', 'one-sided')
+    for case in cases:
+        rng = Random(92741)
+        signs = [[rng.choice((-1,1)) for p in range(k)] for profile in range(2)]
+        a = (scalar*(m*lda))(*([513.25]*(m*lda)))
+        b = (scalar*(k*ldb))(*([513.25]*(k*ldb)))
+        c = (scalar*(m*ldc))(*([513.25]*(m*ldc)))
+        for i in range(m):
+            for p in range(k):
+                sign = rng.choice((-1,1)) if case in ('independent','one-sided') else 1
+                if case == 'two-depth-profiles': sign = signs[i%2][p]
+                a[i*lda+p] = sign*rng.uniform(.5,1)
+        for p in range(k):
+            for j in range(n):
+                sign = rng.choice((-1,1)) if case == 'independent' else 1
+                if case == 'opposite': sign = -1
+                if case == 'two-depth-profiles': sign = -signs[j%2][p]
+                b[p*ldb+j] = sign*rng.uniform(.5,1)
+        original = bytes(a),bytes(b)
+        leaves.value = classical.value = 0
+        lib.cob_sgemm_rowmajor(m,n,k,a,lda,b,ldb,c,ldc)
+        coherent = case in ('positive','opposite','two-depth-profiles')
+        assert (leaves.value,classical.value) == ((0,1) if coherent else (15,0)),case
+        assert (bytes(a),bytes(b)) == original
+        for i in range(m):
+            for j in range(n):
+                ref = sum(a[i*lda+p]*b[p*ldb+j] for p in range(k))
+                assert abs(c[i*ldc+j]-ref) < .002,(case,i,j)
+            assert all(c[i*ldc+j]==513.25 for j in range(n,ldc))
+    print(f'PASS {len(cases)} correlation fixtures and {len(cases)*m*n} FP64-referenced outputs.')

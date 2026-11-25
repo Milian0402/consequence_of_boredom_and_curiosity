@@ -76,8 +76,13 @@ of the entries in each A row and each B column to have a magnitude of at least
 one eighth of that operand's global maximum. These two sets then overlap in
 at least half the reduction positions of every output entry. This catches
 complementary sparse or near-zero patterns even when all axis maxima agree.
-Both checks ignore padding. Failure to allocate HK workspace selects classical
-multiplication.
+For dense operands that pass those checks, COB samples 16 rows, 16 columns
+and 64 shared depth positions. It uses classical multiplication when four
+sampled products have absolute cosine similarity above one half. On biased
+inputs this avoids large absolute errors from forming and recombining the
+fifteen transformed products. A finite sample can miss structured rows or
+columns. All checks ignore padding. Failure to allocate HK workspace also
+selects classical multiplication.
 
 A nonzero input outside the inclusive interval [2⁻⁴⁸, 2⁴⁸] takes a separate
 classical path. If each operand's nonzero exponents span at most 24 powers of

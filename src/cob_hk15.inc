@@ -90,6 +90,44 @@ static int cob_hk15_supported_depth(int m, int n, int k, const float* a, int lda
     return 1;
 }
 
+/* Dense operands can have similarly directed rows and columns even when
+   their norms are well balanced. A large dot then accumulates systematic
+   absolute error in the signed HK forms. Compare sixteen rows and columns
+   at sixty-four shared depth positions. The scale-free cosine test also
+   detects different sign profiles in different parts of the output. */
+static int cob_hk15_has_coherent_dots(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb)
+{
+    enum { lines = 16, depths = 64 };
+    if (m < lines || n < lines || k < depths) return 0;
+    double rhs[depths][lines], norm_b[lines] = {0};
+    for (int t = 0; t < depths; ++t) {
+        const int p = (2*t+1)*k/(2*depths);
+        for (int j = 0; j < lines; ++j) {
+            const int col = (2*j+1)*n/(2*lines);
+            const double y = b[(size_t)p*ldb+col];
+            rhs[t][j] = y;
+            norm_b[j] += y*y;
+        }
+    }
+    int hits = 0;
+    for (int i = 0; i < lines; ++i) {
+        const int row = (2*i+1)*m/(2*lines);
+        const float* lhs = a+(size_t)row*lda;
+        double dot[lines] = {0}, norm_a = 0.;
+        for (int t = 0; t < depths; ++t) {
+            const double x = lhs[(2*t+1)*k/(2*depths)];
+            norm_a += x*x;
+            for (int j = 0; j < lines; ++j) dot[j] += x*rhs[t][j];
+        }
+        for (int j = 0; j < lines; ++j) {
+            /* Absolute cosine exceeds 1/2; test squared values to avoid sqrt. */
+            if (4.*dot[j]*dot[j] > norm_a*norm_b[j] && ++hits == 4) return 1;
+        }
+    }
+    return 0;
+}
+
 /* Keep the scan's bounded scratch and stack probing off ordinary SGEMM calls. */
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__((noinline))
@@ -110,8 +148,9 @@ static enum cob_hk15_policy cob_hk15_policy_for(int m, int n, int k,
     enum cob_hk15_policy right = cob_hk15_axis_policy(k, n, b, ldb, columns, &max_b);
     if (left != COB_HK15_REGULAR || right != COB_HK15_REGULAR)
         return left > right ? left : right;
-    return cob_hk15_supported_depth(m,n,k,a,lda,b,ldb,max_a,max_b,columns)
-        ? COB_HK15_REGULAR : COB_HK15_CLASSICAL;
+    if (!cob_hk15_supported_depth(m,n,k,a,lda,b,ldb,max_a,max_b,columns) ||
+        cob_hk15_has_coherent_dots(m,n,k,a,lda,b,ldb)) return COB_HK15_CLASSICAL;
+    return COB_HK15_REGULAR;
 }
 
 static void cob_hk15_classical(int m, int n, int k, const float* a, int lda,
