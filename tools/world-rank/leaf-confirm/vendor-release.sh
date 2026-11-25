@@ -192,3 +192,9 @@ if [[ -f $here/dyad.c ]]; then
         cat "$out/$label-dyad-build.log" >&2
     fi
 fi
+
+# Other registered studies can build their own independently guarded worker against this verified archive.
+if [[ -n ${PRECISION_VENDOR_WORKER_SOURCE:-} ]]; then
+    "$cc" "${common[@]}" "$PRECISION_VENDOR_WORKER_SOURCE" "$archive" "${libs[@]}" -o "$work/$label.precision.worker"
+    sha256sum "$work/$label.precision.worker" >> "$out/$label-configuration.txt"
+fi

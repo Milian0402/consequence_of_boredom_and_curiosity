@@ -1,0 +1,274 @@
+{
+  "emulation": "QEMU -cpu neoverse-n2",
+  "physical_host_qualification": false,
+  "registration": "ec4bea33f96d3d7d6c13ff87a7f8cfa8e95a221662b1c708263867b70a4cbfc5",
+  "ordinary_dso": "02a362259caf89a9473ad70f2ce4c970e7c7d815667dc4d8dea01f7701296691",
+  "trace_dso": "2551b1bf2fac96bb5a9b9f013b22ea391c60f22ccccf6b5316c66317ffd4302c",
+  "matrix_methods": 228,
+  "mixed": 108,
+  "rescues": 72,
+  "trace_events": 414,
+  "confirmed_kernel_calls": 414,
+  "counts": {
+    "fp32-control": {
+      "normal_gamma_exceeded": 0,
+      "verdict": {
+        "complete": true,
+        "normal_envelope": true,
+        "hk_exact": true,
+        "zero_overwrite": false,
+        "range_classes": false,
+        "exceptional_classes": true,
+        "accuracy_gate": false,
+        "direct_quality": true,
+        "direct_quality_breaches": [],
+        "matched_direct_accuracy": false,
+        "ordinary_route_counts": {
+          "direct-fp32": 18
+        },
+        "ordinary_component_route": null
+      }
+    },
+    "1": {
+      "normal_gamma_exceeded": 713,
+      "verdict": {
+        "complete": true,
+        "normal_envelope": false,
+        "hk_exact": true,
+        "zero_overwrite": true,
+        "range_classes": false,
+        "exceptional_classes": true,
+        "accuracy_gate": false,
+        "direct_quality": false,
+        "direct_quality_breaches": [
+          {
+            "case": "signed-full-mantissa",
+            "seed": 1373217915,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "signed-full-mantissa",
+            "seed": 2742815085,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "positive-correlated",
+            "seed": 1373217915,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "positive-correlated",
+            "seed": 2742815085,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "positive-correlated-scale12",
+            "seed": 1373217915,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "positive-correlated-scale12",
+            "seed": 2742815085,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "bf16-rounding-boundaries",
+            "seed": 1373217915,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "bf16-rounding-boundaries",
+            "seed": 2742815085,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "same-sign-ulp-residue",
+            "seed": 1373217915,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "same-sign-ulp-residue",
+            "seed": 2742815085,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "omitted-component-products",
+            "seed": 1373217915,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "omitted-component-products",
+            "seed": 2742815085,
+            "max": false,
+            "rms": false
+          }
+        ],
+        "matched_direct_accuracy": false,
+        "ordinary_route_counts": {
+          "1": 18
+        },
+        "ordinary_component_route": true
+      }
+    },
+    "3": {
+      "normal_gamma_exceeded": 42,
+      "verdict": {
+        "complete": true,
+        "normal_envelope": false,
+        "hk_exact": true,
+        "zero_overwrite": true,
+        "range_classes": true,
+        "exceptional_classes": true,
+        "accuracy_gate": false,
+        "direct_quality": false,
+        "direct_quality_breaches": [
+          {
+            "case": "signed-full-mantissa",
+            "seed": 1373217915,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "signed-full-mantissa",
+            "seed": 2742815085,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "positive-correlated",
+            "seed": 1373217915,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "positive-correlated",
+            "seed": 2742815085,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "positive-correlated-scale12",
+            "seed": 1373217915,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "positive-correlated-scale12",
+            "seed": 2742815085,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "bf16-rounding-boundaries",
+            "seed": 1373217915,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "bf16-rounding-boundaries",
+            "seed": 2742815085,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "same-sign-ulp-residue",
+            "seed": 1373217915,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "same-sign-ulp-residue",
+            "seed": 2742815085,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "omitted-component-products",
+            "seed": 1373217915,
+            "max": false,
+            "rms": false
+          },
+          {
+            "case": "omitted-component-products",
+            "seed": 2742815085,
+            "max": false,
+            "rms": false
+          }
+        ],
+        "matched_direct_accuracy": false,
+        "ordinary_route_counts": {
+          "1": 18
+        },
+        "ordinary_component_route": true
+      }
+    },
+    "6": {
+      "normal_gamma_exceeded": 0,
+      "verdict": {
+        "complete": true,
+        "normal_envelope": true,
+        "hk_exact": true,
+        "zero_overwrite": true,
+        "range_classes": true,
+        "exceptional_classes": true,
+        "accuracy_gate": true,
+        "direct_quality": true,
+        "direct_quality_breaches": [],
+        "matched_direct_accuracy": true,
+        "ordinary_route_counts": {
+          "1": 18
+        },
+        "ordinary_component_route": true
+      }
+    },
+    "9": {
+      "normal_gamma_exceeded": 0,
+      "verdict": {
+        "complete": true,
+        "normal_envelope": true,
+        "hk_exact": true,
+        "zero_overwrite": true,
+        "range_classes": true,
+        "exceptional_classes": true,
+        "accuracy_gate": true,
+        "direct_quality": true,
+        "direct_quality_breaches": [],
+        "matched_direct_accuracy": true,
+        "ordinary_route_counts": {
+          "1": 18
+        },
+        "ordinary_component_route": true
+      }
+    },
+    "16": {
+      "normal_gamma_exceeded": 0,
+      "verdict": {
+        "complete": true,
+        "normal_envelope": true,
+        "hk_exact": true,
+        "zero_overwrite": true,
+        "range_classes": true,
+        "exceptional_classes": true,
+        "accuracy_gate": true,
+        "direct_quality": true,
+        "direct_quality_breaches": [],
+        "matched_direct_accuracy": true,
+        "ordinary_route_counts": {
+          "1": 18
+        },
+        "ordinary_component_route": true
+      }
+    }
+  }
+}

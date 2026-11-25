@@ -1,0 +1,6 @@
+fp32-control ordinary complete 18 / 18 class failures 0 finite pairs outside gamma 0 routes {'direct-fp32': 18}
+1 ordinary complete 18 / 18 class failures 0 finite pairs outside gamma 713 routes {1: 18}
+3 ordinary complete 18 / 18 class failures 0 finite pairs outside gamma 42 routes {1: 18}
+6 ordinary complete 18 / 18 class failures 0 finite pairs outside gamma 0 routes {1: 18}
+9 ordinary complete 18 / 18 class failures 0 finite pairs outside gamma 0 routes {1: 18}
+16 ordinary complete 18 / 18 class failures 0 finite pairs outside gamma 0 routes {1: 18}
