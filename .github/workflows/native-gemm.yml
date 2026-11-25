@@ -5,7 +5,37 @@ on:
 permissions:
   contents: read
 jobs:
+  phase:
+    runs-on: ubuntu-24.04
+    outputs:
+      label: ${{ steps.read.outputs.label }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - id: read
+        run: echo "label=$(cat tools/world-rank/phase.txt)" >> "$GITHUB_OUTPUT"
+  packing-cost:
+    needs: phase
+    if: needs.phase.outputs.label == 'packing-cost'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Measure cumulative packing and computation time
+        run: python3 tools/world-rank/phase-cost/run.py "$PWD" "$RUNNER_TEMP/packing-cost"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: ${{ !cancelled() }}
+        with:
+          name: packing-cost-${{ github.run_id }}
+          path: ${{ runner.temp }}/packing-cost
+          retention-days: 14
   benchmark:
+    needs: phase
+    if: needs.phase.outputs.label != 'packing-cost'
     name: Frozen ranking on ${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
     strategy:
