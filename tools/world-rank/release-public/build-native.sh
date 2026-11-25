@@ -47,14 +47,18 @@ mkdir -p "$native_root"
 ln -sfn "${paths[0]}" "$native_root/include"
 ln -sfn "${paths[1]}" "$native_root/lib"
 export OPENBLAS_NUM_THREADS=1
+# The replay compares archive bytes, including member-header timestamps.
+export ZERO_AR_DATE=1
 
 build_release() {
-    local name=$1 src=$2 provider=$3 mode=$4
+    local name=$1 original=$2 provider=$3 mode=$4
+    local src=$scratch/$name/source
     local home=$scratch/$name logs=$plugins/$name-tests.txt
     local align=OFF add=0 root selector
     local archive build make_build dependency resolved
     local -a library cmake_opts make_opts proof pinned_dsos=()
     mkdir -p "$home"
+    cp -a "$original" "$src"
     build=$home/cmake
     make_build=$home/make
     [[ $mode != aligned-two ]] || { align=ON; add=1; }
@@ -88,7 +92,14 @@ build_release() {
     fi
     {
         cmake -G "Unix Makefiles" -S "$src" -B "$build" "${cmake_opts[@]}" &&
+        cmake --build "$build" --target cob_matmul --parallel 2 &&
+        cp "$build/libcob_matmul.a" "$home/original-production.a" &&
+        python3 "$dir/apply-test-backport.py" "$src" &&
+        cmake --build "$build" --target clean &&
         cmake --build "$build" --parallel 2 &&
+        cmp "$home/original-production.a" "$build/libcob_matmul.a" &&
+        echo "Byte-identical production archive before and after fixture-only correction" &&
+        sha256sum "$home/original-production.a" "$build/libcob_matmul.a" &&
         ctest --test-dir "$build" --output-on-failure &&
         env CFLAGS="-O3 -fPIC $tuning" make -j2 -C "$src" "${make_opts[@]}" test
     } > "$logs" 2>&1 || { tail -100 "$logs" >&2; return 1; }
@@ -153,9 +164,38 @@ build_release() {
             mkl) sha256sum "$root/lib"/{libmkl_intel_lp64.so.3,libmkl_sequential.so.3,libmkl_core.so.3} ;;
             armpl) sha256sum "$root/lib/libarmpl_lp64.so" ;;
         esac
+        sha256sum "$home/original-production.a" "$src/tests/test_portable_strassen.c" "$src/tests/test_fused_strassen.c"
     } > "$plugins/$name-build.txt"
 }
-build_release release-previous "$previous" openblas two
-for provider in openblas "$vendor_leaf"; do
-    for mode in two aligned-two; do build_release "release-$provider-$mode" "$release" "$provider" "$mode"; done
+if [[ $# -eq 6 ]]; then
+    # A fresh shell keeps errexit active throughout this single method's build.
+    requested=$6
+    if [[ $requested == release-previous ]]; then
+        build_release release-previous "$previous" openblas two
+    else
+        match=0
+        for provider in openblas "$vendor_leaf"; do
+            for mode in two aligned-two; do
+                if [[ $requested == "release-$provider-$mode" ]]; then
+                    match=1
+                    build_release "$requested" "$release" "$provider" "$mode"
+                fi
+            done
+        done
+        [[ $match == 1 ]]
+    fi
+    exit 0
+fi
+failed=0
+status="$plugins/release-build-status.csv"
+printf 'implementation,qualified\n' > "$status"
+for item in release-previous release-openblas-{two,aligned-two} "release-$vendor_leaf-two" "release-$vendor_leaf-aligned-two"; do
+    if bash "$0" "$release" "$repo" "$vendor" "$plugins" "$previous" "$item"; then
+        printf '%s,1\n' "$item" >> "$status"
+        touch "$plugins/$item.qualified"
+    else
+        printf '%s,0\n' "$item" >> "$status"
+        failed=1
+    fi
 done
+exit "$failed"
