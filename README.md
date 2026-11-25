@@ -13,6 +13,12 @@ On one Apple M5 Max, COB had the fastest median one-thread, one-shot FP32 time o
 
 The [November 25 audit](docs/audits/2026-11-25-strassen-sme.md) gives the dimensions, controls and accuracy checks. The [July crossover study](docs/audits/2026-07-12-square-crossover.md) records earlier results at 5632 square.
 
+## Native Linux benchmarks
+
+COB selects AVX-512 or AVX2/FMA at runtime on supported x86-64 CPUs. On Arm64, the NEON path handles ragged output tiles and one-row products directly. On an Intel Xeon 6975P-C, the vector kernel improved on COB's preceding C kernel by 32–36× across five medium shapes. On an Arm Neoverse-N2, the ragged 383 × 385 × 389 product improved by 1.26×. The [native Linux audit](docs/audits/2026-11-25-linux-native.md) includes the comparisons against single-thread OpenBLAS.
+
+For large balanced, contiguous products on native Linux x86-64 or Arm64, enable the experimental one-level Strassen path with `make COB_ENABLE_PORTABLE_STRASSEN=ON` or configure CMake with `-DCOB_ENABLE_PORTABLE_STRASSEN=ON`. It uses the native single-thread kernels for each subproduct. The default crossover is 1536 in each dimension, with dimensions divisible by 64 and a largest-to-smallest ratio of at most 4:3.
+
 ### Where the change applies
 
 One-level Strassen runs seven smaller products on eligible balanced matrices.
@@ -169,7 +175,7 @@ Useful project notes:
 ## Goal
 
 The goal is still to become the fastest open-source single-threaded matrix
-multiplication implementation inside this narrow contract. The current benchmark covers large balanced matrices on one M5 Max. Coverage across other dimensions and processors remains open.
+multiplication implementation inside this narrow contract. Measurements cover one M5 Max, one Intel Xeon 6975P-C and one Arm Neoverse-N2 runner type. Additional processors and workloads remain open.
 
 ## Optional Apple SME2 Strassen leaf
 

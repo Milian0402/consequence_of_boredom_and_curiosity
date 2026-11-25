@@ -640,7 +640,7 @@ static const char* cob_one_shot_route(bench_shape shape)
     const int n = shape.n;
     const int k = shape.k;
     if (!is_apple_amx_build()) {
-        return "fallback";
+        return "cpu_one_shot";
     }
 
     if (n == 1) {

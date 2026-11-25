@@ -23,6 +23,7 @@ endif
 # Strassen half-products can use a separately compiled SME2 leaf on Apple arm64.
 # AUTO retains the native C path when the target compiler lacks SME intrinsics.
 COB_STRASSEN_SME ?= AUTO
+COB_ENABLE_PORTABLE_STRASSEN ?= OFF
 COB_SME_CC ?= $(CC)
 SME_SRC := third_party/maxmulsk/strassen_leaf.c
 SME_FLAGS := -mcpu=apple-m4 -march=armv8.7-a+sme+sme2
@@ -40,6 +41,12 @@ SME_DEFINE := -DCOB_WITH_STRASSEN_SME_LEAF=1
 else ifeq ($(COB_STRASSEN_SME),ON)
 $(error COB_STRASSEN_SME=ON needs Apple arm64 and a compiler supporting the SME2 leaf)
 endif
+endif
+
+ifeq ($(COB_ENABLE_PORTABLE_STRASSEN),ON)
+SME_DEFINE += -DCOB_ENABLE_PORTABLE_STRASSEN=1
+else ifneq ($(COB_ENABLE_PORTABLE_STRASSEN),OFF)
+$(error COB_ENABLE_PORTABLE_STRASSEN must be ON or OFF)
 endif
 
 LIB_OBJ := $(BUILD_DIR)/gemm.o
@@ -62,6 +69,7 @@ FORTRAN_BLAS_LDFLAGS ?=
 FORTRAN_BLAS_BENCH_CFLAGS := -DCOB_HAVE_EXTERNAL_FORTRAN_SGEMM=1 -DCOB_EXTERNAL_FORTRAN_SGEMM_NAME=\"$(FORTRAN_BLAS_NAME)\"
 
 .PHONY: all test bench bench-cblas bench-fortran-blas clean FORCE
+.PHONY: test-portable-strassen
 
 all: $(TEST_BIN) $(BENCH_BIN)
 
@@ -70,7 +78,7 @@ $(BUILD_DIR):
 
 # Track each output separately so reconfiguring a partially built directory
 # works even on versions of Make with one-second file timestamps.
-SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF)
+SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN)
 SME_OUTPUTS := $(LIB_OBJ) $(STRASSEN_TEST_OBJ) $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) \
                $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN) \
                $(BENCH_BIN) $(CBLAS_BENCH_BIN) $(FORTRAN_BLAS_BENCH_BIN)
@@ -126,6 +134,13 @@ test: $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN)
 	$(TEST_BIN)
 	$(STRASSEN_TEST_BIN)
 	$(STRASSEN_SQUARE_TEST_BIN)
+
+test-portable-strassen: $(BUILD_DIR)/cob_portable_strassen_test
+	$<
+
+$(BUILD_DIR)/cob_portable_strassen_test: tests/test_portable_strassen.c src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -DCOB_ENABLE_PORTABLE_STRASSEN=1 -DCOB_PORTABLE_STRASSEN_MIN_DIM=128 \
+	    -DCOB_DISABLE_APPLE_AMX=1 -DCOB_DISABLE_APPLE_SME=1 $< -lm -o $@
 
 bench: $(BENCH_BIN)
 	$(BENCH_BIN)
