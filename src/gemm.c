@@ -242,6 +242,7 @@ enum {
     (defined(COB_USE_NEON) && defined(__aarch64__)))
 #define COB_USE_PORTABLE_STRASSEN 1
 #ifndef COB_PORTABLE_STRASSEN_MIN_DIM
+#define COB_PORTABLE_STRASSEN_MIN_DIM_DEFAULTED 1
 #define COB_PORTABLE_STRASSEN_MIN_DIM 1536
 #endif
 #if COB_PORTABLE_STRASSEN_MIN_DIM <= 0
@@ -3160,6 +3161,13 @@ static int cob_sgemm_one_shot_x86(int m, int n, int k, const float* a, int lda,
 
 #endif
 
+#if defined(COB_USE_PORTABLE_STRASSEN) && defined(__linux__) && \
+    (defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && defined(__aarch64__)))
+#define COB_USE_NATIVE_PANELS 1
+#include "cob_blocked_leaf.inc"
+#include "cob_short_axes.inc"
+#endif
+
 static void cob_sgemm_rowmajor_fallback(
     int m,
     int n,
@@ -3175,6 +3183,10 @@ static void cob_sgemm_rowmajor_fallback(
         lda < k || ldb < n || ldc < n) {
         return;
     }
+
+#if defined(COB_USE_NATIVE_PANELS)
+    if (cob_sgemm_one_shot_blocked(m, n, k, a, lda, b, ldb, c, ldc)) return;
+#endif
 
 #if defined(COB_USE_X86_SIMD)
     if (cob_sgemm_one_shot_x86(m, n, k, a, lda, b, ldb, c, ldc)) {
@@ -3639,6 +3651,14 @@ static void cob_strassen_merge_product(
         }
     }
 }
+
+/* Explicit crossover or external-leaf configurations keep their selected schedule. */
+#if defined(COB_USE_NATIVE_PANELS) && COB_ENABLE_RECTANGULAR_STRASSEN && \
+    defined(COB_PORTABLE_STRASSEN_MIN_DIM_DEFAULTED) && !defined(COB_RECTANGULAR_MIN_HARMONIC_DIM) && \
+    (!defined(COB_ENABLE_OPENBLAS_LEAF) || !COB_ENABLE_OPENBLAS_LEAF)
+#define COB_USE_FUSED_STRASSEN 1
+#include "cob_fused_strassen.inc"
+#endif
 
 #if defined(COB_WITH_STRASSEN_SME_LEAF) && defined(COB_USE_APPLE_SME)
 extern int cob_sgemm_strassen_fused_square(int n, const float* a, int lda,
@@ -4188,6 +4208,9 @@ void cob_sgemm_rowmajor(
     float* c,
     int ldc)
 {
+#if defined(COB_USE_NATIVE_PANELS)
+    if (cob_try_short_axes(m, n, k, a, lda, b, ldb, c, ldc)) return;
+#endif
 #if defined(COB_USE_APPLE_AMX) && defined(COB_USE_APPLE_SME) && defined(COB_WITH_STRASSEN_SME_LEAF) && COB_SGEMM_STRASSEN1
 #if defined(COB_SGEMM_STRASSEN1_MIN_DIM_DEFAULTED) && defined(COB_SGEMM_STRASSEN1_SQUARE_MIN_DIM_DEFAULTED)
     const int fused_min_dim = 4096;
@@ -4263,6 +4286,14 @@ void cob_sgemm_rowmajor(
         cob_sgemm_vector_matrix(n, k, a, b, ldb, c);
         return;
     }
+#endif
+
+#if defined(COB_USE_FUSED_STRASSEN)
+    if (
+#if defined(COB_USE_RECURSIVE_STRASSEN)
+        !(lda == k && ldb == n && cob_recursive_square_is_eligible(m, n, k)) &&
+#endif
+        cob_sgemm_strassen_fused(m, n, k, a, lda, b, ldb, c, ldc)) return;
 #endif
 
 #if COB_SGEMM_STRASSEN1 && defined(COB_USE_PORTABLE_STRASSEN)

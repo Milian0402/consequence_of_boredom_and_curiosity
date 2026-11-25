@@ -74,6 +74,7 @@ else ifneq ($(COB_ENABLE_OPENBLAS_LEAF),OFF)
 $(error COB_ENABLE_OPENBLAS_LEAF must be ON or OFF)
 endif
 
+NATIVE_KERNEL_HEADERS := src/cob_blocked_leaf.inc src/cob_short_axes.inc src/cob_fused_strassen.inc
 LIB_OBJ := $(BUILD_DIR)/gemm.o
 TEST_BIN := $(BUILD_DIR)/cob_gemm_test
 STRASSEN_TEST_OBJ := $(BUILD_DIR)/gemm_strassen_test.o
@@ -119,7 +120,7 @@ $(BUILD_DIR)/strassen_sme_leaf.o: $(SME_SRC) | $(BUILD_DIR)
 	$(COB_SME_CC) $(CFLAGS) $(SME_FLAGS) -c $(SME_SRC) -o $@
 	$(save_sme_config)
 
-$(LIB_OBJ): src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
+$(LIB_OBJ): src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(SME_DEFINE) -c src/gemm.c -o $@
 	$(save_sme_config)
 
@@ -127,7 +128,7 @@ $(TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) | $(BUIL
 	$(CC) $(CFLAGS) tests/test_gemm.c $(LIB_OBJ) $(SME_OBJ) $(OPENBLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
-$(STRASSEN_TEST_OBJ): src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
+$(STRASSEN_TEST_OBJ): src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(SME_DEFINE) -DCOB_SGEMM_STRASSEN1_MIN_DIM=1024 -c src/gemm.c -o $@
 	$(save_sme_config)
 
@@ -135,7 +136,7 @@ $(STRASSEN_TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(STRASSEN_TEST_OBJ) 
 	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_TEST_OBJ) $(SME_OBJ) $(OPENBLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
-$(STRASSEN_SQUARE_TEST_OBJ): src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
+$(STRASSEN_SQUARE_TEST_OBJ): src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(SME_DEFINE) -DCOB_SGEMM_STRASSEN1_MIN_DIM=8192 -DCOB_SGEMM_STRASSEN1_SQUARE_MIN_DIM=128 -c src/gemm.c -o $@
 	$(save_sme_config)
 
@@ -167,7 +168,7 @@ test-recursive-strassen: $(BUILD_DIR)/cob_recursive_strassen_test
 	$<
 
 $(BUILD_DIR)/cob_recursive_strassen_test: RECURSIVE_TEST_FLAGS := -DCOB_ENABLE_RECURSIVE_STRASSEN=1 -DCOB_RECURSIVE_MIN_DIM=128 -DCOB_RECURSIVE_MAX_DIM=256
-$(BUILD_DIR)/cob_recursive_strassen_test $(BUILD_DIR)/cob_portable_strassen_test: tests/test_portable_strassen.c src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
+$(BUILD_DIR)/cob_recursive_strassen_test $(BUILD_DIR)/cob_portable_strassen_test: tests/test_portable_strassen.c src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(RECURSIVE_TEST_FLAGS) -DCOB_ENABLE_PORTABLE_STRASSEN=1 -DCOB_PORTABLE_STRASSEN_MIN_DIM=128 -DCOB_RECTANGULAR_MIN_HARMONIC_DIM=192 \
 	    -DCOB_DISABLE_APPLE_AMX=1 -DCOB_DISABLE_APPLE_SME=1 $< -lm -o $@
 
