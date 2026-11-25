@@ -40,6 +40,7 @@ fi
 provider=$6
 [[ $provider == openblas || $provider == "$native" ]]
 mode=$7
+trap 'printf "Release proof failed for %s/%s at line %d: %s\n" "$provider" "$mode" "$LINENO" "$BASH_COMMAND" >&2' ERR
 case "$mode" in aligned-two) align=ON; align_bit=1 ;; two) align=OFF; align_bit=0 ;; *) exit 2 ;; esac
 label=release-$provider-$mode
 build=$work/$label-build
@@ -124,7 +125,12 @@ common=(-std=c11 -O3 "$tuning" -ffunction-sections -fdata-sections "-Wl,--gc-sec
         "-I$install/include" "-I$here/..")
 timed=$work/$label.worker
 trace=$work/$label.trace.worker
-"$cc" "${common[@]}" "$here/worker.c" "$archive" "${libs[@]}" -o "$timed"
+link_proof=()
+if [[ $provider == openblas ]]; then
+    link_proof=(-Wl,--trace-symbol=cblas_sgemm,--trace-symbol=openblas_get_num_threads)
+fi
+LC_ALL=C "$cc" "${common[@]}" "${link_proof[@]}" "$here/worker.c" "$archive" "${libs[@]}" -o "$timed" \
+    2> "$build/ordinary-link.log" || { cat "$build/ordinary-link.log" >&2; exit 1; }
 "$cc" "${common[@]}" "-D$selector=1" "-DRAGGED_ALIGNED=$align_bit" "-I$inc" "$here/worker.c" "$here/vendor-witness.c" \
     "$archive" -Wl,--wrap=cblas_sgemm,--wrap=cob_sgemm_rowmajor "${libs[@]}" -o "$trace"
 
@@ -150,9 +156,8 @@ for symbol in __wrap_cob_sgemm_rowmajor __wrap_cblas_sgemm; do
     grep -F " T $symbol" "$build/$(basename "$trace").symbols" >/dev/null
 done
 if [[ $provider == openblas ]]; then
-    for s in cblas_sgemm sgemm_; do
-        grep -E " [Tt] $s\$" "$build/$(basename "$timed").symbols" >/dev/null
-    done
+    python3 "$here/check-openblas-link.py" "$archive" "$lib/libopenblas.a" \
+        "$build/ordinary-link.log" "$build/$(basename "$timed").symbols" > "$out/$label-static-openblas.txt"
 fi
 identity=$out/$label-identity.sha256
 : > "$identity"
