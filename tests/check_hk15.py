@@ -23,7 +23,8 @@ with tempfile.TemporaryDirectory() as folder:
     tmp=Path(folder)
     code=(src/'gemm.c').read_text()
     hk=(src/'cob_hk15.inc').read_text()
-    original_predicate=hk[hk.index('static int cob_hk15_shape'):hk.index('static int cob_hk15_try')]
+    shape_start=hk.index('static int cob_hk15_shape')
+    original_predicate=hk[shape_start:hk.index('\n}',shape_start)+2]
     gate=original_predicate.replace('static int cob_hk15_shape','int hk_test_shape')
     schedule=next((repo/p for p in ('third_party/fast-matmul/hk233.inc','tools/world-rank/finite/hk233.inc')
                    if (repo/p).is_file()))
@@ -34,7 +35,9 @@ with tempfile.TemporaryDirectory() as folder:
     alloc='cob_aligned_alloc(128, (ac+bc+pc)*sizeof(float))'
     assert hk.count(alloc)==1
     hk=hk.replace(alloc,'hk_test_noalloc ? NULL : '+alloc)
-    hk=hk[:hk.index('#include "')]+f'#include "{schedule}"'+hk[hk.index('\n',hk.index('#include "')):]
+    schedule_include='#include "../third_party/fast-matmul/hk233.inc"'
+    assert hk.count(schedule_include)==1
+    hk=hk.replace(schedule_include,f'#include "{schedule}"')
     inspector='''
 int hk_test_leaves, hk_test_entries, hk_test_noalloc;
 static void hk_test_leaf(int m,int n,int k,const float* a,int lda,const float* b,int ldb,float* c,int ldc)

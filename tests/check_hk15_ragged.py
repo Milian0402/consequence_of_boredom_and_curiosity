@@ -9,13 +9,16 @@ import subprocess
 import sys
 import tempfile
 
+from hk15_guard_cases import check_guard_cases
+
 repo = Path(__file__).resolve().parents[1]
 with tempfile.TemporaryDirectory() as td:
     tmp=Path(td)
     src=repo/'src'
     schedule=repo/'third_party/fast-matmul/hk233.inc'
     hk=(src/'cob_hk15.inc').read_text()
-    geometry=hk[hk.index('static int cob_hk15_shape'):hk.index('static int cob_hk15_try')]
+    shape_start=hk.index('static int cob_hk15_shape')
+    geometry=hk[shape_start:hk.index('\n}',shape_start)+2]
     exported=geometry.replace('static int cob_hk15_shape','int full_geometry')
     hk=hk.replace(geometry,geometry.replace('768','8').replace('1280','32'))
     hk=hk.replace('#include "../third_party/fast-matmul/hk233.inc"',f'#include "{schedule}"')
@@ -28,9 +31,16 @@ with tempfile.TemporaryDirectory() as td:
     code=(src/'gemm.c').read_text()
     spec='int m,int n,int k,const float *a,int lda,const float *b,int ldb,float *c,int ldc'
     values='m,n,k,a,lda,b,ldb,c,ldc'
-    before=f'''int leaf_count, parent_count, attempts, refuse;
+    before=f'''int leaf_count, parent_count, attempts, refuse, classical, wide, scans;
 static void counted_leaf({spec}) {{ ++leaf_count; cob_sgemm_rowmajor_base({values}); }}
 '''
+    # Count the production decisions at the caller. All three operations forward
+    # to their original implementations and preserve each argument and return value.
+    hook=hk.index('static int cob_hk15_try')
+    counters={'cob_hk15_classical':'classical','cob_hk15_wide':'wide','cob_hk15_policy_for':'scans'}
+    define=''.join(f'#define {name}(...) (++{counter}, {name}(__VA_ARGS__))\n' for name,counter in counters.items())
+    undef=''.join(f'#undef {name}\n' for name in counters)
+    hk=hk[:hook]+define+hk[hook:]+'\n'+undef
     code=code.replace('#include "cob_hk15.inc"',exported+before+hk)
     target='    if (cob_hk15_try(m, n, k, a, lda, b, ldb, c, ldc)) return;'
     assert code.count(target)==1
@@ -86,11 +96,15 @@ static void counted_leaf({spec}) {{ ++leaf_count; cob_sgemm_rowmajor_base({value
                     leaves.value=entries.value=attempts.value=0
                     refuse.value=int(mode=='allocation-fail')
                     if refuse.value:
-                        untouched=bytes(c)
-                        assert dll.attempt_hk(m,n,k,pa,la,pb,lb,pc,lc)==0 and bytes(c)==untouched and attempts.value==1
+                        assert dll.attempt_hk(m,n,k,pa,la,pb,lb,pc,lc)==1 and attempts.value==1
+                        for i in range(m):
+                            for j in range(n):
+                                ref=sum(a[a0+i*la+p]*b[b0+p*lb+j] for p in range(k))
+                                assert abs(c[c0+i*lc+j]-ref)<=.002
+                                c[c0+i*lc+j]=math.nan
                         attempts.value=0
                     dll.cob_sgemm_rowmajor(m,n,k,pa,la,pb,lb,pc,lc)
-                    assert (entries.value,leaves.value,attempts.value)==(1,0 if refuse.value else 15,1)
+                    assert (entries.value,leaves.value,attempts.value)==(1,0 if mode in ('scaled','allocation-fail') else 15,int(mode!='scaled'))
                     assert original==(snapshot(a),snapshot(b))
                     for index,val in enumerate(c):
                         off=index-c0
@@ -110,8 +124,12 @@ static void counted_leaf({spec}) {{ ++leaf_count; cob_sgemm_rowmajor_base({value
         (pa,la,pb,lb,pointer(b,b0+(k-1)*lb+n-1),lc),
         (high,la,pb,lb,pc,lc),(pa,la,high,lb,pc,lc),(pa,la,pb,lb,high,lc)]
     refuse.value=0
-    for bad in cases:
-        attempts.value=leaves.value=0
-        assert dll.attempt_hk(m,n,k,*bad)==0 and not attempts.value and not leaves.value
+    early=(attempts,leaves,*(I.in_dll(dll,key) for key in ('scans','classical','wide')))
+    calls_to_reject=[(m,n,k,*bad) for bad in cases]
+    calls_to_reject.extend((rows,n,k,pa,la,pb,lb,pc,lc) for rows in (0,12))
+    for args in calls_to_reject:
+        for counter in early:counter.value=0
+        assert dll.attempt_hk(*args)==0 and all(counter.value==0 for counter in early)
     assert saved==(bytes(a),bytes(b),bytes(c))
-    print(f'PASS 11 actual size boundaries, 18 residue classes x 5 fixtures, {calls} one-shot calls, {cells} FP64 outputs, max_abs_error={worst:.9g}; exact integer outputs, 11 null/stride/tail-overlap/address-overflow guards; scratch failure before write with full public retry.')
+    check_guard_cases(dll)
+    print(f'PASS 11 actual size boundaries, 18 residue classes x 5 fixtures, {calls} one-shot calls, {cells} FP64 outputs, max_abs_error={worst:.9g}; exact integer outputs, 11 null/stride/tail-overlap/address-overflow guards; scratch failure computes the complete classical fallback.')

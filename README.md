@@ -68,13 +68,26 @@ COB dispatcher. The required coefficient notice and exact integer verifier
 are in [third_party/fast-matmul](third_party/fast-matmul). Run
 `python3 tests/check_hk15.py` to test routing, fallback and FP64 accuracy.
 
+For an eligible product, COB checks the maximum absolute entry in every row
+and column of both operands, including both views of the reduction dimension.
+It uses classical multiplication if a line is zero or the largest line maximum
+in either operand exceeds four times its smallest. Nonfinite inputs and nonzero
+magnitudes outside the inclusive interval [2⁻⁴⁸, 2⁴⁸] use classical binary64
+accumulation with a final conversion to binary32. The scan reads logical
+entries only. Failure to allocate HK workspace also selects classical
+multiplication. This policy catches row, column and reduction-axis scale
+disparities. Complementary sparse patterns can have identical line maxima and
+still suffer cancellation in HK15. Absolute error also depends on the scale
+and conditioning of each dot product.
+
 The experimental `COB_ENABLE_HK15_RAGGED=ON` option in CMake and Make also
 accepts remainders. It enables HK15, computes the largest divisible core and
 finishes the missing rows, columns and reduction terms. The same child size
 and aspect limits apply. To reproduce the standalone build tested on Linux,
 also enable portable and recursive Strassen with native CPU compiler flags.
-On three fresh large rectangles, including a cropped view, it averaged 1.108×
-the previous standalone kernel on Neoverse N2 and 1.004× on Xeon 6975P-C.
+Before the input-magnitude check was added, the route ran 1.108× as fast as
+the previous standalone kernel on Neoverse N2 and 1.004× as fast on Xeon
+6975P-C across three fresh large rectangles, including a cropped view.
 FastMMW led the tested independent Arm field and lost all 18 paired calls to
 the candidate. The comparison omitted four BLAS-backed COB modes on Arm.
 On M5 Max, scaled positive inputs exposed large errors in this kernel,
