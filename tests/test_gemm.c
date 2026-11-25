@@ -47,6 +47,9 @@ static float max_abs_diff(const float* a, const float* b, int count)
     float max_diff = 0.0f;
     for (int i = 0; i < count; ++i) {
         const float diff = fabsf(a[i] - b[i]);
+        if (!isfinite(diff)) {
+            return INFINITY;
+        }
         if (diff > max_diff) {
             max_diff = diff;
         }
@@ -309,6 +312,12 @@ static int test_cancellation_heavy_aligned_shape(int size)
 
 int main(void)
 {
+    const float finite = 1.0f;
+    const float invalid = NAN;
+    if (isfinite(max_abs_diff(&finite, &invalid, 1))) {
+        fprintf(stderr, "non-finite output passed the accuracy check\n");
+        return 1;
+    }
     static const int shapes[][3] = {
         {1, 1, 1},
         {2, 3, 5},

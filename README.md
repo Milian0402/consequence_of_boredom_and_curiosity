@@ -26,6 +26,9 @@ multiplication at `5632^3` on an Apple M5 Max:
 | Apple Accelerate | 1549 GF/s |
 | OpenBLAS | 894 GF/s |
 
+The benchmark reports classical-equivalent throughput using `2 * M * N * K`
+divided by elapsed time. Strassen reduces the arithmetic actually executed.
+
 These numbers are a shape-specific historical snapshot, not a universal or
 current-head ranking. The competitors were measured with the best reliable
 harness available for each, so they were not all collected in one perfectly
@@ -45,7 +48,8 @@ row-major inputs with every dimension a multiple of 64, a largest-to-smallest
 dimension ratio of at most 4:3, and sizes from `6144` (exact squares from
 `5632`). Those inputs route through one level of Strassen on top of AMX
 kernels that run at about 96% of the measured single-core matrix-unit
-ceiling, so there is little room left above them.
+ceiling. This figure measures the inner kernels. End-to-end time also
+depends on the number of block products, packing, and recombination.
 
 Huge dense multiplies like these are the expensive core of real workloads:
 covariance and Gram matrices in scientific computing, dense layers in
