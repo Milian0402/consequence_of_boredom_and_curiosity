@@ -217,6 +217,9 @@ jobs:
         run: bash tools/world-rank/release-replay/restore-peers.sh "$VENDOR_DIR" "$RUNNER_TEMP/rank-result"
       - name: Compare installed candidates against an independent FP64 product
         run: bash tools/world-rank/run.sh "$RUNNER_TEMP/rank-result" "$VENDOR_DIR"
+      - name: Compare optional vendor-assisted medium-wide public routes
+        if: ${{ !cancelled() && needs.phase.outputs.label == 'stream-b' && env.RANK_STUDY_WORKER != '' }}
+        run: bash tools/world-rank/vendor-wide/run.sh "$RUNNER_TEMP/rank-result/vendor-wide-secondary"
       - name: Compare certified rank-48 and rank-49 block schedules
         if: ${{ !cancelled() && needs.phase.outputs.label == 'signed-leaves' && env.RANK_STUDY_WORKER != '' }}
         run: bash tools/world-rank/rank48/run.sh "$RUNNER_TEMP/rank-result/finite-ranks"
