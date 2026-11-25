@@ -26,6 +26,8 @@ COB_STRASSEN_SME ?= AUTO
 COB_ENABLE_PORTABLE_STRASSEN ?= OFF
 COB_ENABLE_RECURSIVE_STRASSEN ?= OFF
 COB_ENABLE_OPENBLAS_LEAF ?= OFF
+COB_BLAS_LEAF ?= NONE
+COB_ENABLE_ALIGNED_WINOGRAD ?= OFF
 COB_ENABLE_HK15 ?= OFF
 COB_ENABLE_N2_SMALL ?= OFF
 COB_ENABLE_X86_MEDIUM_ROUTE ?= OFF
@@ -60,21 +62,81 @@ else ifneq ($(COB_ENABLE_RECURSIVE_STRASSEN),OFF)
 $(error COB_ENABLE_RECURSIVE_STRASSEN must be ON or OFF)
 endif
 
+ifneq ($(words $(COB_BLAS_LEAF)),1)
+$(error COB_BLAS_LEAF must select exactly one provider)
+endif
+ifeq ($(filter NONE OPENBLAS MKL ARMPL,$(COB_BLAS_LEAF)),)
+$(error COB_BLAS_LEAF must be NONE, OPENBLAS, MKL or ARMPL)
+endif
+leaf_provider := $(COB_BLAS_LEAF)
 ifeq ($(COB_ENABLE_OPENBLAS_LEAF),ON)
-ifneq ($(UNAME_S):$(COB_ENABLE_PORTABLE_STRASSEN),Linux:ON)
-$(error COB_ENABLE_OPENBLAS_LEAF=ON requires Linux and COB_ENABLE_PORTABLE_STRASSEN=ON)
+ifeq ($(filter $(leaf_provider),NONE OPENBLAS),)
+$(error COB_ENABLE_OPENBLAS_LEAF=ON conflicts with COB_BLAS_LEAF=$(leaf_provider))
 endif
-ifeq ($(filter $(UNAME_M),aarch64 arm64 x86_64 amd64),)
-$(error COB_ENABLE_OPENBLAS_LEAF=ON requires a native x86-64 or Arm64 target)
-endif
-PKG_CONFIG ?= pkg-config
-ifneq ($(shell $(PKG_CONFIG) --exists openblas && echo yes),yes)
-$(error COB_ENABLE_OPENBLAS_LEAF=ON requires the OpenBLAS development package and its openblas.pc)
-endif
-SME_DEFINE += -DCOB_ENABLE_OPENBLAS_LEAF=1 $(shell $(PKG_CONFIG) --cflags openblas)
-OPENBLAS_LEAF_LIBS := $(shell $(PKG_CONFIG) --libs openblas)
+leaf_provider := OPENBLAS
 else ifneq ($(COB_ENABLE_OPENBLAS_LEAF),OFF)
 $(error COB_ENABLE_OPENBLAS_LEAF must be ON or OFF)
+endif
+
+ifeq ($(COB_ENABLE_ALIGNED_WINOGRAD),ON)
+ifneq ($(COB_ENABLE_PORTABLE_STRASSEN):$(COB_ENABLE_RECURSIVE_STRASSEN),ON:ON)
+$(error COB_ENABLE_ALIGNED_WINOGRAD requires portable Strassen and recursive Strassen)
+endif
+ifeq ($(leaf_provider),NONE)
+$(error COB_ENABLE_ALIGNED_WINOGRAD requires an external BLAS leaf)
+endif
+SME_DEFINE += -DCOB_ENABLE_ALIGNED_WINOGRAD=1
+else ifneq ($(COB_ENABLE_ALIGNED_WINOGRAD),OFF)
+$(error COB_ENABLE_ALIGNED_WINOGRAD must be ON or OFF)
+endif
+
+ifneq ($(leaf_provider),NONE)
+ifneq ($(UNAME_S):$(COB_ENABLE_PORTABLE_STRASSEN),Linux:ON)
+$(error An external leaf requires Linux and COB_ENABLE_PORTABLE_STRASSEN=ON)
+endif
+ifeq ($(filter $(UNAME_M),aarch64 arm64 x86_64 amd64),)
+$(error An external leaf requires a native x86-64 or Arm64 target)
+endif
+ifeq ($(leaf_provider),OPENBLAS)
+PKG_CONFIG ?= pkg-config
+ifneq ($(shell $(PKG_CONFIG) --exists openblas && echo yes),yes)
+$(error The OpenBLAS leaf requires the OpenBLAS development package and its openblas.pc)
+endif
+SME_DEFINE += -DCOB_ENABLE_OPENBLAS_LEAF=1 $(shell $(PKG_CONFIG) --cflags openblas)
+BLAS_LEAF_LIBS := $(shell $(PKG_CONFIG) --libs openblas)
+else
+ifeq ($(leaf_provider),MKL)
+ifeq ($(filter $(UNAME_M),x86_64 amd64),)
+$(error The oneMKL leaf requires Linux x86-64)
+endif
+COB_BLAS_ROOT ?= $(MKLROOT)
+leaf_components := mkl_intel_lp64 mkl_sequential mkl_core
+SME_DEFINE += -DCOB_ENABLE_MKL_SEQUENTIAL_LEAF=1
+else
+ifeq ($(filter $(UNAME_M),aarch64 arm64),)
+$(error The ArmPL leaf requires Linux Arm64)
+endif
+COB_BLAS_ROOT ?= $(ARMPL_DIR)
+leaf_components := armpl_lp64
+SME_DEFINE += -DCOB_ENABLE_ARMPL_SEQUENTIAL_LEAF=1
+endif
+ifneq ($(strip $(COB_BLAS_ROOT)),)
+SME_DEFINE += -I"$(COB_BLAS_ROOT)/include"
+leaf_shared = $(firstword $(foreach dir,lib lib/intel64 lib64,$(wildcard $(COB_BLAS_ROOT)/$(dir)/lib$(1).so $(COB_BLAS_ROOT)/$(dir)/lib$(1).so.3)))
+else
+leaf_shared = $(firstword $(filter-out lib$(1).so lib$(1).so.3,$(foreach suffix,so so.3,$(shell $(CC) -print-file-name=lib$(1).$(suffix)))))
+endif
+leaf_libraries := $(foreach component,$(leaf_components),$(or $(call leaf_shared,$(component)),$(error Cannot find shared $(component) for $(leaf_provider); set COB_BLAS_ROOT to its installation prefix)))
+leaf_rpath := $(foreach directory,$(sort $(dir $(leaf_libraries))),-Wl,-rpath,$(directory))
+ifeq ($(leaf_provider),MKL)
+BLAS_LEAF_LIBS := $(leaf_rpath) -Wl,--push-state,--no-as-needed $(leaf_libraries) -Wl,--pop-state -lpthread -lm -ldl
+else
+BLAS_LEAF_LIBS := $(leaf_rpath) $(leaf_libraries) -lm -ldl
+endif
+endif
+ifeq ($(COB_ENABLE_RECURSIVE_STRASSEN),ON)
+BLAS_LEAF_TEST := $(BUILD_DIR)/cob_openblas_winograd_test
+endif
 endif
 
 ifeq ($(COB_ENABLE_HK15),ON)
@@ -95,7 +157,7 @@ else ifneq ($(COB_ENABLE_X86_MEDIUM_ROUTE),OFF)
 $(error COB_ENABLE_X86_MEDIUM_ROUTE must be ON or OFF)
 endif
 
-NATIVE_KERNEL_HEADERS := src/cob_openblas_winograd.inc src/cob_hk15.inc third_party/fast-matmul/hk233.inc src/cob_n2_small.inc src/cob_blocked_leaf.inc src/cob_x86_cache_edge.inc src/cob_short_axes.inc src/cob_fused_strassen.inc src/cob_small_x86.inc src/cob_few_row_panel.inc
+NATIVE_KERNEL_HEADERS := src/cob_cblas_leaf.inc src/cob_openblas_winograd.inc src/cob_hk15.inc third_party/fast-matmul/hk233.inc src/cob_n2_small.inc src/cob_blocked_leaf.inc src/cob_x86_cache_edge.inc src/cob_short_axes.inc src/cob_fused_strassen.inc src/cob_small_x86.inc src/cob_few_row_panel.inc
 LIB_OBJ := $(BUILD_DIR)/gemm.o
 TEST_BIN := $(BUILD_DIR)/cob_gemm_test
 STRASSEN_TEST_OBJ := $(BUILD_DIR)/gemm_strassen_test.o
@@ -125,10 +187,10 @@ $(BUILD_DIR):
 
 # Track each output separately so reconfiguring a partially built directory
 # works even on versions of Make with one-second file timestamps.
-SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN) recursive:$(COB_ENABLE_RECURSIVE_STRASSEN) openblas:$(COB_ENABLE_OPENBLAS_LEAF) n2small:$(COB_ENABLE_N2_SMALL) x86-medium:$(COB_ENABLE_X86_MEDIUM_ROUTE) hk15:$(COB_ENABLE_HK15)
+SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN) recursive:$(COB_ENABLE_RECURSIVE_STRASSEN) blas:$(leaf_provider) aligned:$(COB_ENABLE_ALIGNED_WINOGRAD) blas-root:$(COB_BLAS_ROOT) n2small:$(COB_ENABLE_N2_SMALL) x86-medium:$(COB_ENABLE_X86_MEDIUM_ROUTE) hk15:$(COB_ENABLE_HK15)
 SME_OUTPUTS := $(LIB_OBJ) $(STRASSEN_TEST_OBJ) $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) \
                $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN) \
-               $(BENCH_BIN) $(CBLAS_BENCH_BIN) $(FORTRAN_BLAS_BENCH_BIN)
+               $(BENCH_BIN) $(CBLAS_BENCH_BIN) $(FORTRAN_BLAS_BENCH_BIN) $(BLAS_LEAF_TEST)
 define cob_track_sme_config
 ifneq ($(shell cat "$(1).sme-config" 2>/dev/null),$(SME_CONFIG))
 $(1): FORCE
@@ -146,7 +208,7 @@ $(LIB_OBJ): src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) | $(BUILD_DIR
 	$(save_sme_config)
 
 $(TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) tests/test_gemm.c $(LIB_OBJ) $(SME_OBJ) $(OPENBLAS_LEAF_LIBS) -o $@
+	$(CC) $(CFLAGS) tests/test_gemm.c $(LIB_OBJ) $(SME_OBJ) $(BLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
 $(STRASSEN_TEST_OBJ): src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) | $(BUILD_DIR)
@@ -154,7 +216,7 @@ $(STRASSEN_TEST_OBJ): src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) | $
 	$(save_sme_config)
 
 $(STRASSEN_TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(STRASSEN_TEST_OBJ) $(SME_OBJ) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_TEST_OBJ) $(SME_OBJ) $(OPENBLAS_LEAF_LIBS) -o $@
+	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_TEST_OBJ) $(SME_OBJ) $(BLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
 $(STRASSEN_SQUARE_TEST_OBJ): src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) | $(BUILD_DIR)
@@ -162,25 +224,32 @@ $(STRASSEN_SQUARE_TEST_OBJ): src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADE
 	$(save_sme_config)
 
 $(STRASSEN_SQUARE_TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) $(OPENBLAS_LEAF_LIBS) -o $@
+	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) $(BLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
 $(BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(BENCH_LDFLAGS) $(OPENBLAS_LEAF_LIBS) -o $@
+	$(CC) $(CFLAGS) $(BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(BENCH_LDFLAGS) $(BLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
 $(CBLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) FORCE | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(CBLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(CBLAS_LDFLAGS) $(OPENBLAS_LEAF_LIBS) -o $@
+	$(CC) $(CFLAGS) $(CBLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(CBLAS_LDFLAGS) $(BLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
 $(FORTRAN_BLAS_BENCH_BIN): bench/bench_gemm.c include/cob_gemm.h $(LIB_OBJ) $(SME_OBJ) FORCE | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $(FORTRAN_BLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(FORTRAN_BLAS_LDFLAGS) $(OPENBLAS_LEAF_LIBS) -o $@
+	$(CC) $(CFLAGS) $(FORTRAN_BLAS_BENCH_CFLAGS) bench/bench_gemm.c $(LIB_OBJ) $(SME_OBJ) $(FORTRAN_BLAS_LDFLAGS) $(BLAS_LEAF_LIBS) -o $@
 	$(save_sme_config)
 
-test: $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN)
+ifneq ($(BLAS_LEAF_TEST),)
+$(BLAS_LEAF_TEST): tests/test_openblas_winograd.c src/gemm.c include/cob_gemm.h $(NATIVE_KERNEL_HEADERS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(SME_DEFINE) $< $(BLAS_LEAF_LIBS) -lm -o $@
+	$(save_sme_config)
+endif
+
+test: $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN) $(BLAS_LEAF_TEST)
 	$(TEST_BIN)
 	$(STRASSEN_TEST_BIN)
 	$(STRASSEN_SQUARE_TEST_BIN)
+	$(BLAS_LEAF_TEST)
 
 test-portable-strassen: $(BUILD_DIR)/cob_portable_strassen_test
 	$<

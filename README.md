@@ -66,8 +66,21 @@ Enable portable Strassen as well and install the OpenBLAS development package
 with its `openblas.pc` file. Each subproduct uses OpenBLAS when its current
 thread count is one. Other thread counts select COB's native kernel.
 
-When all three options are on, the public row-major entry can use two
-Winograd levels on large rectangular products. Configure this build with
+Make and CMake also accept `COB_BLAS_LEAF` with the values `NONE` (the
+default), `OPENBLAS`, `MKL` on Linux x86-64, and `ARMPL` on Linux Arm64.
+The existing OpenBLAS flag selects `OPENBLAS`. For Intel use an LP64
+development installation providing the Intel LP64 interface, sequential and
+core shared libraries. For Arm use the LP64 sequential shared library.
+Supply `COB_BLAS_ROOT` for a nonstandard prefix containing the vendor
+headers and libraries, or use the vendor's `MKLROOT` or `ARMPL_DIR`.
+For example, configure `cmake -S . -B build -DCOB_ENABLE_PORTABLE_STRASSEN=ON -DCOB_ENABLE_RECURSIVE_STRASSEN=ON -DCOB_BLAS_LEAF=MKL`, or build and test with `make test COB_ENABLE_PORTABLE_STRASSEN=ON COB_ENABLE_RECURSIVE_STRASSEN=ON COB_BLAS_LEAF=ARMPL`.
+Make the selected shared libraries available through the system loader when
+running the resulting program. If these vendors' C or Fortran SGEMM symbols
+resolve to another BLAS in the process, COB takes its native fallback.
+
+With portable and recursive Strassen enabled, the selected BLAS provider
+can supply two Winograd levels on large rectangular products. For example,
+configure an OpenBLAS build with
 `cmake -S . -B build -DCOB_ENABLE_PORTABLE_STRASSEN=ON -DCOB_ENABLE_RECURSIVE_STRASSEN=ON -DCOB_ENABLE_OPENBLAS_LEAF=ON`.
 Set `OPENBLAS_NUM_THREADS=1` for a threaded OpenBLAS installation. The
 rectangular route requires a shortest dimension of at least 1024, a harmonic
@@ -75,6 +88,14 @@ mean of at least 2048 and a longest dimension no more than eight times the
 shortest. The core uses 49 BLAS calls. Fringes use up to two further calls.
 Workspace is allocated inside each multiplication and capped at 256 MiB.
 If HK15 is explicitly enabled, its existing eligible shapes take priority.
+
+For these rectangular products, setting `COB_ENABLE_ALIGNED_WINOGRAD=ON`
+in Make or CMake aligns the dimensions of the 49 terminal products to 16
+rows, 16 columns and 8 depth elements. An additional BLAS call accumulates
+the leftover depth into the leading output using beta equal to one. Up to
+two overwrite calls cover disjoint right and bottom strips. This option
+requires portable and recursive Strassen and a selected BLAS leaf. It is
+off by default. The same workspace cap and allocation fallback apply.
 
 ### Where the change applies
 

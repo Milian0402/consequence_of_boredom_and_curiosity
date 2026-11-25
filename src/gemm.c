@@ -1,3 +1,9 @@
+#if defined(__linux__) && ((defined(COB_ENABLE_MKL_SEQUENTIAL_LEAF) && COB_ENABLE_MKL_SEQUENTIAL_LEAF) || \
+    (defined(COB_ENABLE_ARMPL_SEQUENTIAL_LEAF) && COB_ENABLE_ARMPL_SEQUENTIAL_LEAF))
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#endif
 #if !defined(_POSIX_C_SOURCE)
 #define _POSIX_C_SOURCE 200112L
 #endif
@@ -3675,10 +3681,14 @@ static void cob_strassen_merge_product(
     }
 }
 
+#if defined(__linux__) && defined(COB_USE_PORTABLE_STRASSEN)
+#include "cob_cblas_leaf.inc"
+#endif
+
 /* Explicit crossover or external-leaf configurations keep their selected schedule. */
 #if defined(COB_USE_NATIVE_PANELS) && COB_ENABLE_RECTANGULAR_STRASSEN && \
     defined(COB_PORTABLE_STRASSEN_MIN_DIM_DEFAULTED) && !defined(COB_RECTANGULAR_MIN_HARMONIC_DIM) && \
-    (!defined(COB_ENABLE_OPENBLAS_LEAF) || !COB_ENABLE_OPENBLAS_LEAF)
+    !defined(COB_USE_CBLAS_LEAF)
 #define COB_USE_FUSED_STRASSEN 1
 #include "cob_fused_strassen.inc"
 #endif
@@ -3691,18 +3701,13 @@ extern int cob_sgemm_strassen_sme_leaf(int m, int n, int k,
 #endif
 
 #if defined(COB_USE_PORTABLE_STRASSEN)
-#if defined(__linux__) && defined(COB_ENABLE_OPENBLAS_LEAF) && COB_ENABLE_OPENBLAS_LEAF
-#define COB_USE_OPENBLAS_LEAF 1
-#include <cblas.h>
-#endif
-
 static int cob_strassen_leaf(int m, int n, int k, const float* a, int lda,
     const float* b, int ldb, float* c, int ldc)
 {
     /* Bypass the public dispatcher. The ordinary one-shot native kernel
        owns its packing, including the existing allocation fallback. */
-#if defined(COB_USE_OPENBLAS_LEAF)
-    if (openblas_get_num_threads() == 1) {
+#if defined(COB_USE_CBLAS_LEAF)
+    if (cob_cblas_leaf_is_serial()) {
         cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k,
             1.0f, a, lda, b, ldb, 0.0f, c, ldc);
         return 1;
@@ -3816,7 +3821,7 @@ static int cob_winograd_product(int m, int n, int k, const float* a, int lda,
     float* p = t + (size_t)kr * nc;
 
     /* A second level uses the same schedule and reuses one child workspace. */
-#if defined(COB_USE_OPENBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN)
+#if defined(COB_USE_CBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN)
 #define COB_WINOGRAD_LEAF(...) (child_scratch ? \
     cob_winograd_product(__VA_ARGS__, child_scratch, NULL, leaf) : leaf(__VA_ARGS__))
 #else
@@ -3867,7 +3872,7 @@ static int cob_winograd_product(int m, int n, int k, const float* a, int lda,
 #undef COB_WINOGRAD_LEAF
     return 1;
 }
-#if defined(COB_USE_OPENBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN)
+#if defined(COB_USE_CBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN)
 #include "cob_openblas_winograd.inc"
 #endif
 
@@ -4260,8 +4265,8 @@ void cob_sgemm_rowmajor_base(
     float* c,
     int ldc)
 {
-#if defined(COB_USE_OPENBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN) && defined(COB_USE_RECURSIVE_STRASSEN)
-    if (cob_openblas_winograd_try(m, n, k, a, lda, b, ldb, c, ldc, 2048)) return;
+#if defined(COB_USE_CBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN) && defined(COB_USE_RECURSIVE_STRASSEN)
+    if (cob_cblas_winograd_try(m, n, k, a, lda, b, ldb, c, ldc, 2048)) return;
 #endif
 #ifdef COB_USE_N2_SMALL
     if (cob_n2_try_sgemm(m, n, k, a, lda, b, ldb, c, ldc)) return;
