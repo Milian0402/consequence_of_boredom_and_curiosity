@@ -1250,10 +1250,114 @@ static inline void cob_sme_tiny_tile(int groups,int rows,int width,int k,const f
     }
 }
 
+/* 32x32 four-accumulator outer product with row-major B. Consecutive A
+   vectors provide 16 or 32 rows in each step. Sizes are always multiples
+   of the 16-lane streaming vector length. */
+__attribute__((always_inline))
+static inline void cob_sme_regular_pack(int mr, int k, const float* a, int lda, float* ap)
+    __arm_streaming __arm_inout("za")
+{
+    const svbool_t pg = svptrue_b32();
+    for (int p = 0; p < k; p += 16) {
+        for (uint32_t r = 0; r < 16; ++r) {
+            const float *top = a + (size_t)r * lda + p;
+            svld1_hor_za32(0, r, pg, top);
+            if (mr == 32) svld1_hor_za32(1, r, pg, top + 16*(size_t)lda);
+        }
+        for (uint32_t t = 0; t < 16; ++t) {
+            float* dest = ap + (p + t)*mr;
+            svst1_ver_za32(0, t, pg, dest);
+            if (mr == 32) svst1_ver_za32(1, t, pg, dest + 16);
+        }
+    }
+}
+
+__attribute__((always_inline))
+static inline void cob_sme_regular_tile(int mr, int nr, int k, const float* ap, const float* b,
+    int ldb, float* c, int ldc) __arm_streaming __arm_inout("za")
+{
+    const svbool_t pg = svptrue_b32();
+    const svcount_t group = svptrue_c32();
+    svzero_za();
+    for (int p = 0; p < k; p += 4) {
+        svfloat32x4_t a01 = svld1_f32_x4(group, ap + p*mr);
+        svfloat32x4_t a23 = a01;
+        if (mr == 32) a23 = svld1_f32_x4(group, ap + p*mr + 64);
+#define STEP(off, va, idx, other) do { \
+            const float* row = b + (size_t)(p + off)*ldb; \
+            svfloat32_t rhs0, rhs1; \
+            if (nr == 32) { \
+                svfloat32x2_t rhs = svld1_f32_x2(group,row); \
+                rhs0 = svget2_f32(rhs,0); rhs1 = svget2_f32(rhs,1); \
+            } else { rhs0 = svld1_f32(pg,row); rhs1 = rhs0; } \
+            svmopa_za32_f32_m(0, pg, pg, svget4_f32(va,idx), rhs0); \
+            if (nr == 32) svmopa_za32_f32_m(1,pg,pg,svget4_f32(va,idx),rhs1); \
+            if (mr == 32) { \
+                svmopa_za32_f32_m(2,pg,pg,svget4_f32(va,other),rhs0); \
+                if (nr == 32) svmopa_za32_f32_m(3,pg,pg,svget4_f32(va,other),rhs1); \
+            } \
+        } while (0)
+        if (mr == 32) {
+            STEP(0,a01,0,1); STEP(1,a01,2,3);
+            STEP(2,a23,0,1); STEP(3,a23,2,3);
+        } else {
+            STEP(0,a01,0,0); STEP(1,a01,1,1);
+            STEP(2,a01,2,2); STEP(3,a01,3,3);
+        }
+#undef STEP
+    }
+    for (uint32_t i = 0; i < 16; ++i) {
+        float *row = c + (size_t)i*ldc;
+        svst1_hor_za32(0, i, pg, row);
+        if (nr == 32) svst1_hor_za32(1,i,pg,row+16);
+        if (mr == 32) {
+            svst1_hor_za32(2,i,pg,row+16*(size_t)ldc);
+            if (nr == 32) svst1_hor_za32(3,i,pg,row+16*(size_t)ldc+16);
+        }
+    }
+}
+
+__attribute__((always_inline))
+static inline void cob_sme_regular_band(int mr, int n, int k, const float* a, int lda, const float* b, int ldb,
+    float* c, int ldc, float* ap) __arm_streaming __arm_inout("za")
+{
+    cob_sme_regular_pack(mr,k,a,lda,ap);
+    int j=0;
+    for (; j+32<=n; j+=32) cob_sme_regular_tile(mr,32,k,ap,b+j,ldb,c+j,ldc);
+    if (j<n) cob_sme_regular_tile(mr,16,k,ap,b+j,ldb,c+j,ldc);
+}
+
+
+__attribute__((always_inline))
+static inline void cob_sme_regular_grid(int m,int n,int k,const float* a,int lda,const float* b,int ldb,
+                           float* c,int ldc) __arm_streaming __arm_inout("za")
+{
+    _Alignas(64) float ap[32*96];
+    int i=0;
+    for (; i+32<=m; i+=32) cob_sme_regular_band(32,n,k,a+(size_t)i*lda,lda,b,ldb,c+(size_t)i*ldc,ldc,ap);
+    if (i<m) cob_sme_regular_band(16,n,k,a+(size_t)i*lda,lda,b,ldb,c+(size_t)i*ldc,ldc,ap);
+}
+
 __arm_new("za") __arm_locally_streaming
 int cob_sgemm_sme_tiny(int m,int n,int k,const float *a,int lda,const float *b,int ldb,float *c,int ldc)
 {
     if (svcntsw()!=16 || k>96) return 0;
+    if (((m | n | k) & 15) == 0 && m >= 32 && k >= 32 &&
+        ((m + 31) / 32) * ((n + 31) / 32) <= (m / 16) * ((n + 63) / 64)) {
+        if (m == n && n == k) {
+            switch (m) {
+            case 16: cob_sme_regular_grid(16,16,16,a,lda,b,ldb,c,ldc); break;
+            case 32: cob_sme_regular_grid(32,32,32,a,lda,b,ldb,c,ldc); break;
+            case 48: cob_sme_regular_grid(48,48,48,a,lda,b,ldb,c,ldc); break;
+            case 64: cob_sme_regular_grid(64,64,64,a,lda,b,ldb,c,ldc); break;
+            case 80: cob_sme_regular_grid(80,80,80,a,lda,b,ldb,c,ldc); break;
+            case 96: cob_sme_regular_grid(96,96,96,a,lda,b,ldb,c,ldc); break;
+            }
+        } else {
+            cob_sme_regular_grid(m,n,k,a,lda,b,ldb,c,ldc);
+        }
+        return 1;
+    }
     _Alignas(64) float pack[96*16];
     for (int base=0;base<m;base+=16) {
         int rows=m-base<16?m-base:16;
