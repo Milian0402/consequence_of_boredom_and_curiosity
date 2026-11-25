@@ -40,8 +40,13 @@ static int cob_hk15_try(int m, int n, int k, const float* aa, int lda,
 
     /* The certified source spells its 15 calls cob_sgemm_rowmajor. Bind that
        local name to the original dispatcher so no leaf re-enters HK15. */
+#ifdef COB_USE_HK15_CHILD
+    void (*const cob_sgemm_rowmajor)(int,int,int,const float*,int,
+        const float*,int,float*,int) = cob_hk15_child_product;
+#else
     void (*const cob_sgemm_rowmajor)(int,int,int,const float*,int,
         const float*,int,float*,int) = cob_sgemm_rowmajor_base;
+#endif
 #include "../tools/world-rank/finite/hk233.inc"
     free(workspace);
     return 1;

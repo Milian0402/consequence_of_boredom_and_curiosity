@@ -4030,10 +4030,37 @@ COB_THIN_TARGET static void cob_sgemm_few_rows(int m, int n, int k,
 #include "cob_n2_small.inc"
 #endif
 
+#if defined(COB_USE_HK15) && defined(COB_USE_FUSED_STRASSEN) && \
+    (defined(COB_HK15_CHILD_HARMONIC) || (defined(COB_HK15_CHILD_TRACE) && COB_HK15_CHILD_TRACE))
+#define COB_USE_HK15_CHILD 1
+#ifndef COB_HK15_CHILD_HARMONIC
+#define COB_HK15_CHILD_HARMONIC COB_FUSED_STRASSEN_MIN_HARMONIC_DIM
+#endif
+#if COB_HK15_CHILD_HARMONIC <= 0
+#error "COB_HK15_CHILD_HARMONIC must be positive"
+#endif
+#if defined(COB_HK15_CHILD_TRACE) && COB_HK15_CHILD_TRACE
+#define COB_TRACE_HK15_CHILD 1
+static _Thread_local int cob_hk15_children, cob_hk15_child_fused, cob_hk15_other_fused;
+
+int rank_hk15_route_count(int id)
+{
+    switch (id) {
+        case 0: return cob_hk15_children;
+        case 1: return cob_hk15_child_fused;
+        case 2: return cob_hk15_children - cob_hk15_child_fused;
+        case 3: return cob_hk15_other_fused;
+        default: return -1;
+    }
+}
+#endif
+static void cob_sgemm_dispatch(int hk_child,
+#else
 #ifdef COB_USE_HK15
 static
 #endif
 void cob_sgemm_rowmajor_base(
+#endif
     int m,
     int n,
     int k,
@@ -4117,7 +4144,18 @@ void cob_sgemm_rowmajor_base(
 #if defined(COB_USE_RECURSIVE_STRASSEN)
         !(lda == k && ldb == n && cob_recursive_square_is_eligible(m, n, k)) &&
 #endif
+#if defined(COB_USE_HK15_CHILD)
+        cob_sgemm_strassen_fused_at(m, n, k, a, lda, b, ldb, c, ldc,
+            hk_child ? COB_HK15_CHILD_HARMONIC : COB_FUSED_STRASSEN_MIN_HARMONIC_DIM)) {
+#ifdef COB_TRACE_HK15_CHILD
+        if (hk_child) ++cob_hk15_child_fused;
+        else ++cob_hk15_other_fused;
+#endif
+        return;
+    }
+#else
         cob_sgemm_strassen_fused(m, n, k, a, lda, b, ldb, c, ldc)) return;
+#endif
 #endif
 
 #if COB_SGEMM_STRASSEN1 && defined(COB_USE_PORTABLE_STRASSEN)
@@ -4137,12 +4175,32 @@ void cob_sgemm_rowmajor_base(
     cob_sgemm_rowmajor_fallback(m, n, k, a, lda, b, ldb, c, ldc);
 }
 
+#ifdef COB_USE_HK15_CHILD
+static void cob_sgemm_rowmajor_base(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+    cob_sgemm_dispatch(0,m,n,k,a,lda,b,ldb,c,ldc);
+}
+
+static void cob_hk15_child_product(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+#ifdef COB_TRACE_HK15_CHILD
+    ++cob_hk15_children;
+#endif
+    cob_sgemm_dispatch(1,m,n,k,a,lda,b,ldb,c,ldc);
+}
+#endif
+
 #ifdef COB_USE_HK15
 #include "cob_hk15.inc"
 
 void cob_sgemm_rowmajor(int m, int n, int k, const float* a, int lda,
     const float* b, int ldb, float* c, int ldc)
 {
+#ifdef COB_TRACE_HK15_CHILD
+    cob_hk15_children = cob_hk15_child_fused = cob_hk15_other_fused = 0;
+#endif
     if (cob_hk15_try(m, n, k, a, lda, b, ldb, c, ldc)) return;
     cob_sgemm_rowmajor_base(m, n, k, a, lda, b, ldb, c, ldc);
 }

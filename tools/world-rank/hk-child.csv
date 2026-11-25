@@ -1,0 +1,6 @@
+family,m,n,k,pad
+known-loss-square-child,1920,2880,2880,0
+known-loss-off-ratio,2048,2880,3264,3
+new-below-960,1904,2856,2856,1
+new-below-1024,2032,3048,3048,5
+new-above-1024,2176,3264,3264,0

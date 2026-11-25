@@ -18,8 +18,8 @@ SEEDS = {"discovery": (19473017, 37292229), "confirm": (6191231, 89743091),
          "small": (40762813, 92862107), "replicate": (59147207, 81729353), "short": (61734017, 39142873),
          "pilot": (72413951, 86537761), "heldout": (15741487, 84927113),
          "tile-screen": (43891307, 96537493), "tile-confirm": (53719481, 94173107),
-         "tile-replay": (61003441, 74271079)}
-TILE_PHASES = ("tile-screen", "tile-confirm", "tile-replay")
+         "tile-replay": (61003441, 74271079), "tile-child": (89132871, 31570843)}
+TILE_PHASES = ("tile-screen", "tile-confirm", "tile-replay", "tile-child")
 SHAPE_KEYS = ("family", "m", "n", "k", "pad", "mode")
 SMALL_VENDOR_MAX_MNK = 64 ** 3
 
@@ -294,7 +294,9 @@ def main():
                      help="independent direct peer only on shapes with m*n*k <= 64**3")
     cli.add_argument("--candidate", action="append", default=[], metavar="NAME=VARIANT:SO")
     cli.add_argument("--rounds", type=int, help="rounds per seed")
-    cli.add_argument("--stress", action="store_true", help="validate cancellation and scaled input on one representative rectangle")
+    stress_args = cli.add_mutually_exclusive_group()
+    stress_args.add_argument("--stress", action="store_true", help="validate cancellation and scaled input on one representative rectangle")
+    stress_args.add_argument("--stress-all", action="store_true", help="validate cancellation and scaled input on every panel layout")
     cli.add_argument("--tolerance", type=float, default=0.002)
     cli.add_argument("--timeout", type=float, default=600)
     cli.add_argument("--matrix-budget-mib", type=int, default=6144)
@@ -319,10 +321,14 @@ def main():
                          "paired_wins", "median_speedup", "minimum_speedup", "maximum_speedup"], files)
         jobs = [(case, i, block, seed, False) for block, seed in enumerate(seeds, 1)
                 for i, case in (enumerate(cases) if block == 1 else reversed(list(enumerate(cases))))]
-        if args.stress:
-            index = next((i for i,c in enumerate(cases) if min(c[k] for k in ("m","n","k")) >= 1536 and
-                          c["m"] != c["n"]), 0)
-            jobs.extend((dict(cases[index], mode=mode), index, 0, seeds[0], True) for mode in ("cancel","scaled"))
+        if args.stress or args.stress_all:
+            indices = range(len(cases))
+            if args.stress:
+                index = next((i for i,c in enumerate(cases) if min(c[k] for k in ("m","n","k")) >= 1536 and
+                              c["m"] != c["n"]), 0)
+                indices = [index]
+            jobs.extend((dict(cases[i], mode=mode), i, 0, seeds[0], True)
+                        for i in indices for mode in ("cancel", "scaled"))
         for case, index, block, seed, stress in jobs:
             try:
                 methods = eligible_entries(case, entries, small_peers)
