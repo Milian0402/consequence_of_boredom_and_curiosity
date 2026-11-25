@@ -15,7 +15,7 @@ independent implementation on each layout.
 |---|---|
 | Arm Neoverse N2, two odd large rectangles | Released COB with OpenBLAS leaves beat FastMMW in all twelve paired calls. |
 | Intel Xeon 6975P-C, the same two rectangles | Direct oneMKL beat every released build. At 2039 × 2969 × 3367 it took 221.63 ms versus 233.14 ms for COB. |
-| Intel Xeon 6975P-C, five wide rectangles | The standalone streamed-B experiment improved on prior COB on all five, with a geometric mean of 1.120×. It beat the fastest independent library on two. |
+| Intel Xeon 6975P-C and AMD EPYC 9V45, five wide rectangles | Streaming a panel of B improved standalone COB by 1.120× on each CPU. It beat the fastest independent library on two Intel layouts. AMD AOCL won all five on EPYC. |
 
 The [benchmark results](docs/audits/2026-11-25-ranking/README.md) include the
 matrix layouts, raw timings, numerical qualification and scripts for replay.

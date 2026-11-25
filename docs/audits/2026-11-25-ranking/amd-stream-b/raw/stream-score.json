@@ -1,0 +1,46 @@
+{
+  "panel_sha256": "466c2b51ee6df5fd737f3f4b1977c5b4ad75cdb7ae61bbaec7bc5919530f18fd",
+  "cpu": 0,
+  "primary": "stream-native",
+  "seeds": [
+    348271759,
+    710438957
+  ],
+  "decisions": {
+    "stream-native": {
+      "fresh_shapes": 5,
+      "geometric_mean": 1.1201298207689707,
+      "seed_geometric_means": [
+        1.114136177355063,
+        1.1234078260380231
+      ],
+      "shape_wins": 5,
+      "minimum_paired_speedup": 1.0350113649435042,
+      "gate_passed": true
+    },
+    "stream-avx2": {
+      "fresh_shapes": 5,
+      "geometric_mean": 1.0871203316947347,
+      "seed_geometric_means": [
+        1.0843171653155892,
+        1.0864519050972719
+      ],
+      "shape_wins": 5,
+      "minimum_paired_speedup": 1.0318066424894694,
+      "gate_passed": true
+    },
+    "stream-avx512": {
+      "fresh_shapes": 5,
+      "geometric_mean": 1.1209387006751115,
+      "seed_geometric_means": [
+        1.1225707079073401,
+        1.1191985796284747
+      ],
+      "shape_wins": 5,
+      "minimum_paired_speedup": 1.0358848281917095,
+      "gate_passed": true
+    }
+  },
+  "unqualified": [],
+  "omitted": []
+}

@@ -23,9 +23,16 @@ Checking the input magnitudes and switching to double accumulation fixed that fa
 
 A standalone candidate packed A across output rows and read B in place. It lost all five fresh warm-call comparisons against the release on each of Intel Xeon Platinum 8573C and Arm Neoverse N2. Its geometric-mean speed relative to the release was 0.775× on Intel and 0.980× on Arm. All 576 full-output validations passed. On the Intel 49 × 2861 × 157 layout with eleven floats of row padding, the released implementation reached 0.679× oneMKL's speed. [Timings, checks and offline verifier](linux-medium/README.md) · [Native run](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45686443679)
 
-On a Xeon 6975P-C, packing one strip of B and using it across the output rows improved standalone COB on all five previously untimed layouts and all 30 paired observations. The five-layout geometric mean was 1.120× the previous implementation. COB beat the fastest independent library at 108 × 1728 × 320 and 137 × 2179 × 347. The fastest independent library beat COB on the other three. The experiment also checked AVX2 and AVX-512 builds separately and compared 69,104,464 output elements with FP64. [Per-layout times, direct competitors and verifier](intel-stream-b/README.md)
+Packing one strip of B and reusing it across the output rows accelerated standalone COB on all five preregistered wide rectangles, on both a Xeon 6975P-C and an AMD EPYC 9V45. The same patch beat matched prior COB in all 60 paired observations across the two processors. Both native binaries selected AVX-512. The separately forced AVX2 path passed the improvement threshold on each machine as well.
 
-A separate test delegated whole products or all but the last few rows to a sequential BLAS. Over eight fresh eligible layouts, the whole oneMKL wrapper reached 1.100× the speed of released standalone COB and 1.002× the speed of calling the same oneMKL library directly. Moving the last one to four rows back into COB slowed down both providers on average. [Matched comparisons and single-thread checks](intel-vendor-tail/README.md)
+| CPU | Geometric mean vs prior COB | Geometric mean vs fastest independent one-shot | Layout wins vs fastest independent one-shot |
+|---|---:|---:|---:|
+| Intel Xeon 6975P-C | 1.1200× | 0.935× | 2/5 |
+| AMD EPYC 9V45 | 1.1201× | 0.958× | 0/5 |
+
+The two Intel wins were at 108 × 1728 × 320 and 137 × 2179 × 347. AOCL led the independent field on all five AMD layouts. Each native comparison checked 69,104,464 output elements against FP64. [Intel timings and verifier](intel-stream-b/README.md) · [AMD timings and verifier](amd-stream-b/README.md)
+
+A separate test delegated whole products or all but the last few rows to a sequential BLAS. Across eight eligible layouts (four shared with the streamed-B panel and four additional), the whole oneMKL wrapper reached 1.100× the speed of released standalone COB and 1.002× the speed of calling the same oneMKL library directly. Moving the last one to four rows back into COB slowed down both providers on average. [Matched comparisons and single-thread checks](intel-vendor-tail/README.md)
 
 ## Removing fourteen Winograd output updates
 

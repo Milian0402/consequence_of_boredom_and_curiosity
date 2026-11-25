@@ -1,0 +1,23 @@
+{
+  "run": 45691645697,
+  "attempt": 2,
+  "job_id": 139482794074,
+  "source_revision": "b2cdc6a2985726cb1658dc7cc730b5a1c4b99680",
+  "artifact_id": 15058669694,
+  "artifact_name": "world-rank-x86_64-45691645697-2",
+  "hosted_digest": "sha256:a2febe87f60232bf4626796ef0aed190f052a93d57e2b2d011723cdb47cfc581",
+  "download_sha256": "a2febe87f60232bf4626796ef0aed190f052a93d57e2b2d011723cdb47cfc581",
+  "zip_crc_passed": true,
+  "archive_bytes": 365172,
+  "files_verified": 96,
+  "raw_bytes": 2562973,
+  "file_manifest_sha256": "29c4d37b341dea14ca93f883f865fbdd988b92a1eefdfeb039a33905b45cfd4e",
+  "job_conclusion": "success",
+  "job_url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45691645697/job/139482794074",
+  "run_url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45691645697",
+  "host": {
+    "model": "AMD EPYC 9V45 96-Core Processor",
+    "architecture": "x86_64"
+  },
+  "production_revision": "b218beff1eaf8fd606d0934405cdc1e28ecdfe15"
+}
