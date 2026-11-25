@@ -1,0 +1,2 @@
+candidate.patch -text -whitespace
+stable-hk-source.patch -text -whitespace
