@@ -1,0 +1,7 @@
+implementation,m,n,k,pad,leaf,leaf_calls,padded,leaf_evidence,output_elements,timed_binary_exact,trace_binary_exact,timed_inputs_unchanged,trace_inputs_unchanged,passed,error
+fastmmw-768,2333,3119,3413,7,openblas,49,1,linked static OpenBLAS,7276627,1,1,1,1,1,
+fastmmw-1536,2333,3119,3413,7,openblas,7,1,linked static OpenBLAS,7276627,1,1,1,1,1,
+fastmmw-768,3019,2657,3347,9,openblas,49,1,linked static OpenBLAS,8021483,1,1,1,1,1,
+fastmmw-1536,3019,2657,3347,9,openblas,7,1,linked static OpenBLAS,8021483,1,1,1,1,1,
+fastmmw-768,3136,3200,3072,0,openblas,49,0,linked static OpenBLAS,10035200,1,1,1,1,1,
+fastmmw-1536,3136,3200,3072,0,openblas,7,0,linked static OpenBLAS,10035200,1,1,1,1,1,

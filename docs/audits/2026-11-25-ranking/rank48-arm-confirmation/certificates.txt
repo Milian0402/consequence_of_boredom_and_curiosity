@@ -1,0 +1,2 @@
+4x4x4_48_201-balanced: verified all 4096 bilinear tensor coefficients over the rationals
+4x4x4_49_156: verified all 4096 bilinear tensor coefficients over the rationals

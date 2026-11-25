@@ -53,6 +53,8 @@ Two published formulas partition each matrix into 4 × 4 blocks. The first compu
 
 On Arm Neoverse N2, the 48-product formula beat both direct OpenBLAS and ArmPL on three of four layouts. Its paired speedups over the faster library were 1.075×, 1.093× and 1.121×. It lost the 2048-square case and lost all four comparisons against the fastest direct Intel library. The Arm screen did not include released COB or FastMMW. [Linux timings, exact identities and offline replay](rank48-linux/README.md)
 
+A follow-up on N2 added released COB with sequential OpenBLAS and two FastMMW cutoffs. Released COB led all seven measured methods on both previously untimed odd layouts. At 2333 × 3119 × 3413 it took 810.65 ms versus 848.75 ms for FastMMW-768 and 871.89 ms for rank 48. At 3019 × 2657 × 3347 the times were 873.43, 918.60 and 925.05 ms. Both COB and FastMMW-768 beat rank 48 in all twelve paired calls. FastMMW-768 took first place on the compact control. [Arm confirmation, raw data and verifier](rank48-arm-confirmation/README.md)
+
 On the M5 Max, the 48-product formula passed all sixteen accuracy fixtures. At 2048 square it took 36.13 ms, against 8.92 ms for released COB and 9.46 ms for single-thread Accelerate. Both rivals beat the 48-product formula in all 24 paired comparisons. The 49-product formula exceeded the accuracy limit on the cancellation inputs at both square sizes. [Apple timings, error measurements and replay](rank48-m5/README.md)
 
 ## Reproduction

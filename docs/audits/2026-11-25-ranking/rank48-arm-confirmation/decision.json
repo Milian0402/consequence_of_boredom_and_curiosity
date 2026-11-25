@@ -1,0 +1,47 @@
+{
+  "primary_gate": false,
+  "primary_complete": true,
+  "qualifying_primary_head_to_heads": 6,
+  "primary_head_to_heads": 10,
+  "pinned_cpu": 0,
+  "first_to_last": {
+    "fresh-deep-odd": [
+      "release-openblas",
+      "fastmmw-768",
+      "form48",
+      "form49",
+      "fastmmw-1536",
+      "openblas",
+      "armpl"
+    ],
+    "fresh-wide-odd": [
+      "release-openblas",
+      "fastmmw-768",
+      "form48",
+      "form49",
+      "fastmmw-1536",
+      "openblas",
+      "armpl"
+    ],
+    "compact-control": [
+      "fastmmw-768",
+      "release-openblas",
+      "form48",
+      "fastmmw-1536",
+      "openblas",
+      "armpl"
+    ]
+  },
+  "fp64_fixtures": 84,
+  "fp64_outputs": 709332680,
+  "warm_calls": 126,
+  "numeric_exclusions": [
+    {
+      "family": "compact-control",
+      "method": "form49",
+      "mode": "cancel",
+      "seed": 73918261,
+      "max_abs_error": 0.00273158644762
+    }
+  ]
+}

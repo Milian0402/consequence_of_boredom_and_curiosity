@@ -1,0 +1,4 @@
+family,m,n,k,pad,cpu,core_m,core_n,core_k,calls,core_calls,core_overwrites,positive_updates,negative_updates,depth_updates,right_strips,bottom_strips,quadrants_ok,edges_ok,provider_ok,checked,output_exact,inputs_unchanged,guards,threads,passed
+fresh-deep-odd,2333,3119,3413,7,0,2304,3072,3392,52,49,49,0,0,1,1,1,1,1,1,7276627,1,1,1,1,1
+fresh-wide-odd,3019,2657,3347,9,0,3008,2624,3328,52,49,49,0,0,1,1,1,1,1,1,8021483,1,1,1,1,1
+compact-control,3136,3200,3072,0,0,3136,3200,3072,49,49,49,0,0,0,0,0,1,1,1,10035200,1,1,1,1,1
