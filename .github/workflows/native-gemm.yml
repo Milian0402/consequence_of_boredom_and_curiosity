@@ -75,6 +75,13 @@ jobs:
         if: matrix.arch == 'x86_64'
         continue-on-error: true
         run: bash tools/world-rank/aocl/build.sh "$VENDOR_DIR"
+      - name: Qualify the independent FastMMW Winograd comparator
+        id: fastmmw
+        if: needs.phase.outputs.label == 'tile-parent'
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          bash tools/world-rank/fastmmw/native-ci.sh "$VENDOR_DIR" 2>&1 | tee "$RUNNER_TEMP/rank-result/fastmmw-qualification.txt"
       - name: Prepare native vendor BLAS
         id: vendor
         continue-on-error: true
@@ -88,7 +95,7 @@ jobs:
         if: success()
         continue-on-error: true
         run: |
-          if [[ $(cat tools/world-rank/phase.txt) =~ ^(heldout|tile-screen|tile-confirm|tile-replay|tile-child)$ ]]; then
+          if [[ $(cat tools/world-rank/phase.txt) =~ ^(heldout|tile-screen|tile-confirm|tile-replay|tile-child|tile-parent)$ ]]; then
             bash tools/world-rank/blasfeo/build.sh "$VENDOR_DIR"
           fi
           if [[ $(cat tools/world-rank/phase.txt) == tile-replay && $(uname -m) == x86_64 ]]; then
@@ -106,7 +113,8 @@ jobs:
         if: >-
           ${{ !cancelled() && (steps.openblas.outcome == 'failure' ||
           steps.aocl.outcome == 'failure' || steps.vendor.outcome == 'failure' ||
-          steps.libxsmm.outcome == 'failure' || steps.blasfeo.outcome == 'failure') }}
+          steps.libxsmm.outcome == 'failure' || steps.blasfeo.outcome == 'failure' ||
+          steps.fastmmw.outcome == 'failure') }}
         run: |
           echo "At least one requested vendor build was unavailable." > "$RUNNER_TEMP/rank-result/missing-vendor.txt"
           exit 1

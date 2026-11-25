@@ -4031,17 +4031,19 @@ COB_THIN_TARGET static void cob_sgemm_few_rows(int m, int n, int k,
 #endif
 
 #if defined(COB_USE_HK15) && defined(COB_USE_FUSED_STRASSEN) && \
-    (defined(COB_HK15_CHILD_HARMONIC) || (defined(COB_HK15_CHILD_TRACE) && COB_HK15_CHILD_TRACE))
-#define COB_USE_HK15_CHILD 1
-#ifndef COB_HK15_CHILD_HARMONIC
-#define COB_HK15_CHILD_HARMONIC COB_FUSED_STRASSEN_MIN_HARMONIC_DIM
+    defined(COB_ENABLE_HK15_PARENT_960) && COB_ENABLE_HK15_PARENT_960
+#define COB_USE_HK15_PARENT_960 1
+#if defined(COB_HK15_CHILD_HARMONIC)
+#error "Select the parent policy or the first-stage child cutoff separately"
 #endif
-#if COB_HK15_CHILD_HARMONIC <= 0
-#error "COB_HK15_CHILD_HARMONIC must be positive"
 #endif
-#if defined(COB_HK15_CHILD_TRACE) && COB_HK15_CHILD_TRACE
+#if defined(COB_USE_HK15) && defined(COB_USE_FUSED_STRASSEN) && defined(COB_HK15_CHILD_TRACE) && COB_HK15_CHILD_TRACE
 #define COB_TRACE_HK15_CHILD 1
 static _Thread_local int cob_hk15_children, cob_hk15_child_fused, cob_hk15_other_fused;
+
+#if defined(COB_USE_HK15_PARENT_960)
+static _Thread_local int cob_hk15_trace_inside, cob_hk15_lower_children;
+#endif
 
 int rank_hk15_route_count(int id)
 {
@@ -4050,9 +4052,23 @@ int rank_hk15_route_count(int id)
         case 1: return cob_hk15_child_fused;
         case 2: return cob_hk15_children - cob_hk15_child_fused;
         case 3: return cob_hk15_other_fused;
+#if defined(COB_USE_HK15_PARENT_960)
+        case 4: return cob_hk15_lower_children;
+#else
+        case 4: return 0;
+#endif
         default: return -1;
     }
 }
+#endif
+#if defined(COB_USE_HK15) && defined(COB_USE_FUSED_STRASSEN) && !defined(COB_USE_HK15_PARENT_960) && \
+    (defined(COB_HK15_CHILD_HARMONIC) || (defined(COB_HK15_CHILD_TRACE) && COB_HK15_CHILD_TRACE))
+#define COB_USE_HK15_CHILD 1
+#ifndef COB_HK15_CHILD_HARMONIC
+#define COB_HK15_CHILD_HARMONIC COB_FUSED_STRASSEN_MIN_HARMONIC_DIM
+#endif
+#if COB_HK15_CHILD_HARMONIC <= 0
+#error "COB_HK15_CHILD_HARMONIC must be positive"
 #endif
 static void cob_sgemm_dispatch(int hk_child,
 #else
@@ -4154,7 +4170,13 @@ void cob_sgemm_rowmajor_base(
         return;
     }
 #else
-        cob_sgemm_strassen_fused(m, n, k, a, lda, b, ldb, c, ldc)) return;
+        cob_sgemm_strassen_fused(m, n, k, a, lda, b, ldb, c, ldc)) {
+#if defined(COB_USE_HK15_PARENT_960) && defined(COB_TRACE_HK15_CHILD)
+        if (cob_hk15_trace_inside) ++cob_hk15_child_fused;
+        else ++cob_hk15_other_fused;
+#endif
+        return;
+    }
 #endif
 #endif
 
@@ -4200,6 +4222,9 @@ void cob_sgemm_rowmajor(int m, int n, int k, const float* a, int lda,
 {
 #ifdef COB_TRACE_HK15_CHILD
     cob_hk15_children = cob_hk15_child_fused = cob_hk15_other_fused = 0;
+#ifdef COB_USE_HK15_PARENT_960
+    cob_hk15_trace_inside = cob_hk15_lower_children = 0;
+#endif
 #endif
     if (cob_hk15_try(m, n, k, a, lda, b, ldb, c, ldc)) return;
     cob_sgemm_rowmajor_base(m, n, k, a, lda, b, ldb, c, ldc);
