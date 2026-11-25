@@ -1,0 +1,99 @@
+{
+  "phase": "medium-transfer",
+  "benchmark_revision": "b0114de73cb91342cd5119c8b0892edaeb2e999f",
+  "release": "b218beff1eaf8fd606d0934405cdc1e28ecdfe15",
+  "patch_sha256": "d386d9ec173ffa4d9e7c6c14d8eb493f100e17dc08f000c6e97968026b085273",
+  "panel_sha256": "eb886434a55e82f6aa6ececafcd65e3b8dd9c746e1c15b2b05de3dff5f7e0a44",
+  "run": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45686443679",
+  "seeds": [
+    68539041,
+    93461257
+  ],
+  "full_output_abs_tolerance": 0.002,
+  "hosts": {
+    "x86_64": {
+      "model": "INTEL(R) XEON(R) PLATINUM 8573C",
+      "job": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45686443679/job/139460240296",
+      "job_id": 139460240296,
+      "artifact_id": 15056248202,
+      "artifact_sha256": "1f5eae4837f2694d1ed42c839d8b50e24f34a1d457142ec420ed32606260bde4",
+      "logical_cpu": "0",
+      "isa_tile": [
+        32,
+        12
+      ],
+      "timings": 486,
+      "validation_records": 324,
+      "checked_outputs": 57974328,
+      "max_abs_error_all": 3.62541925369e-05,
+      "failed_accuracy_records": 0,
+      "candidate_checks": {
+        "checked": 6441592,
+        "guards": 0,
+        "input_changes": 0,
+        "max_abs": 3.62541925369e-05,
+        "nonfinite": 0,
+        "records": 36
+      },
+      "native_flags": {
+        "common_flags": "-std=c11 -O3 -fPIC -shared -DCOB_ENABLE_PORTABLE_STRASSEN=1 -DCOB_ENABLE_RECURSIVE_STRASSEN=1 -DCOB_ENABLE_BLOCKED_LEAF=1 -DCOB_ENABLE_DIRECT_SMALL_GEMM=0 -DCOB_ENABLE_SHORT_AXES=1 -DCOB_ENABLE_FUSED_STRASSEN=1 -DCOB_ENABLE_SMALL_X86=1 -DCOB_ENABLE_FEW_ROW_PANEL=1",
+        "target_flags": "-march=native -DCOB_ENABLE_X86_MEDIUM_ROUTE=1",
+        "candidate_flag": "-DCOB_ENABLE_MEDIUM_TRANSPOSED_TILE=1",
+        "trace_flag": "-DCOB_MEDIUM_TRANSPOSE_TRACE=1"
+      },
+      "cpu_features": [
+        "avx2",
+        "avx512f",
+        "fma"
+      ],
+      "standalone_binary_sha256": {
+        "medium-incumbent.so": "cb213f14345b2f94eb607f1b947f819ab36e2dbf54e13eba3932149866845590",
+        "medium-incumbent.trace.so": "c701dc9e0276d4fa18dffd5835fa7b0df20dcccd23f07b08c8cded5b51dfab44",
+        "medium-transposed.so": "c20ee6885ab3ac1d93ad0ef0336b496a34d0dee01c91dbe9dcfe0a7c0d4512c6",
+        "medium-transposed.trace.so": "5c55ee747c8433bfd0e48f1adf40da9a91a42216de59f4848ff9d7102d2974cd"
+      }
+    },
+    "aarch64": {
+      "model": "Neoverse-N2",
+      "job": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45686443679/job/139460240408",
+      "job_id": 139460240408,
+      "artifact_id": 15057800129,
+      "artifact_sha256": "6eb57926e2e1659d7f363a0588d345ca98f3b1f5ffe6ac843e902da5a22c03e0",
+      "logical_cpu": "0",
+      "isa_tile": [
+        8,
+        12
+      ],
+      "timings": 378,
+      "validation_records": 252,
+      "checked_outputs": 45091144,
+      "max_abs_error_all": 3.62541925227e-05,
+      "failed_accuracy_records": 0,
+      "candidate_checks": {
+        "checked": 6441592,
+        "guards": 0,
+        "input_changes": 0,
+        "max_abs": 3.62541925227e-05,
+        "nonfinite": 0,
+        "records": 36
+      },
+      "native_flags": {
+        "common_flags": "-std=c11 -O3 -fPIC -shared -DCOB_ENABLE_PORTABLE_STRASSEN=1 -DCOB_ENABLE_RECURSIVE_STRASSEN=1 -DCOB_ENABLE_BLOCKED_LEAF=1 -DCOB_ENABLE_DIRECT_SMALL_GEMM=0 -DCOB_ENABLE_SHORT_AXES=1 -DCOB_ENABLE_FUSED_STRASSEN=1 -DCOB_ENABLE_SMALL_X86=1 -DCOB_ENABLE_FEW_ROW_PANEL=1",
+        "target_flags": "-mcpu=native -DCOB_USE_NEON=1 -DCOB_ENABLE_N2_SMALL=1",
+        "candidate_flag": "-DCOB_ENABLE_MEDIUM_TRANSPOSED_TILE=1",
+        "trace_flag": "-DCOB_MEDIUM_TRANSPOSE_TRACE=1"
+      },
+      "cpu_features": [
+        "asimd",
+        "sve",
+        "sve2"
+      ],
+      "standalone_binary_sha256": {
+        "medium-incumbent.so": "320476b874543d167db14f7fdbc90d6aa7907244a22a910fb4f329cb91fd341f",
+        "medium-incumbent.trace.so": "673b5e18f8a2ee2ddfe8282a5a631a4ddace33a13dde4724603fcc7ac2bcccd8",
+        "medium-transposed.so": "5ec20b5482a6d5d6941a401c3cf8ad7a66a26eb3cf246334b334e0035691f8ca",
+        "medium-transposed.trace.so": "015f3a799057204d413da75a3069d60b537ce1a3c7d293269340c29133ec35fb"
+      }
+    }
+  }
+}

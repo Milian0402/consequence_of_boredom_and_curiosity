@@ -1,0 +1,10 @@
+family,m,n,k,pad
+old-wide,112,1744,357,0
+fresh-wide-odd,73,1291,281,7
+fresh-long-depth,149,1201,619,3
+fresh-divisible,160,2304,384,0
+fresh-skinny-wide,49,2861,157,11
+fresh-near-boundary,241,1033,401,5
+control-transposed,1291,73,281,7
+control-compact,192,192,192,0
+control-footprint,211,1199,487,9

@@ -17,6 +17,10 @@ The release history includes standalone kernels for small Apple matrices and lar
 
 A subsequent M5 Max experiment improved the 49 × 35 × 39 case from 393.9 ns to 325.7 ns. Cached LIBXSMM took 353.9 ns. One mixed-scale fixture exceeded the registered 0.002 absolute-error limit in both the candidate and its predecessor, with identical output bits. The experiment did not qualify for release. [Results, patch and failing fixture](m5-experiment/README.md)
 
+## Medium rectangular products
+
+A standalone candidate packed A across output rows and read B in place. It lost all five fresh warm-call comparisons against the release on each of Intel Xeon Platinum 8573C and Arm Neoverse N2. Its geometric-mean speed relative to the release was 0.775× on Intel and 0.980× on Arm. All 576 full-output validations passed. On the Intel 49 × 2861 × 157 layout with eleven floats of row padding, the released implementation reached 0.679× oneMKL's speed. [Timings, checks and offline verifier](linux-medium/README.md) · [Native run](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45686443679)
+
 ## Reproduction
 
 The production checkout for these Linux results is [b218bef](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/tree/b218beff1eaf8fd606d0934405cdc1e28ecdfe15). Its library code matches [518e7d7](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/tree/518e7d77ea3d82d029f31dc10a3a705b42a7638b). The only changes between them correct two test fixtures. All ten host/build combinations produced byte-identical libraries before and after the corrections. The benchmark definitions, worker sources, vendor recipes and workflow are pinned at [7885da1](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/tree/7885da100a88fbc3a6f0ef11f486fece4eabee76/tools/world-rank).
