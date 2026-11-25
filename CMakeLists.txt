@@ -10,6 +10,7 @@ option(COB_BUILD_TESTS "Build correctness tests" ON)
 option(COB_BUILD_BENCH "Build benchmark runner" ON)
 option(COB_ENABLE_HK15 "Use one level of Hopcroft-Kerr on eligible 2-by-3-by-3 products" OFF)
 option(COB_ENABLE_N2_SMALL "Use the Neoverse N2 small-matrix kernel on Linux Arm64" OFF)
+option(COB_ENABLE_X86_STREAM_B "Use runtime-dispatched packed B panels for medium-wide FP32 products on Linux x86-64" OFF)
 option(COB_ENABLE_X86_MEDIUM_ROUTE "Reuse packed left panels for medium row-wide products on Linux x86-64" OFF)
 option(COB_ENABLE_PORTABLE_STRASSEN "Use one-level Strassen on eligible large native x86-64 and Arm64 products" OFF)
 option(COB_ENABLE_RECURSIVE_STRASSEN "Use a second Winograd level on eligible native Linux products" OFF)
@@ -138,9 +139,26 @@ function(cob_configure_strassen_leaf)
 endfunction()
 cob_configure_strassen_leaf()
 
+if(COB_ENABLE_X86_STREAM_B AND CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
+   CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64)$" AND CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    add_library(cob_stream_b_avx2 OBJECT src/cob_stream_b_kernel.c)
+    add_library(cob_stream_b_avx512 OBJECT src/cob_stream_b_kernel.c)
+    # A conservative SGEMM translation unit and runtime feature checks keep the
+    # archive usable on x86-64 CPUs without either instruction set.
+    target_compile_options(cob_stream_b_avx2 PRIVATE -march=x86-64 -mavx2 -mfma)
+    target_compile_options(cob_stream_b_avx512 PRIVATE -march=x86-64 -mavx512f -mfma)
+    target_compile_definitions(cob_stream_b_avx2 PRIVATE COB_STREAM_B_AVX512=0)
+    target_compile_definitions(cob_stream_b_avx512 PRIVATE COB_STREAM_B_AVX512=1)
+    set(cob_stream_b_objects $<TARGET_OBJECTS:cob_stream_b_avx2> $<TARGET_OBJECTS:cob_stream_b_avx512>)
+endif()
+
 add_library(cob_matmul STATIC
     src/gemm.c
 )
+
+include(GNUInstallDirs)
+install(TARGETS cob_matmul ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES include/cob_gemm.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 target_include_directories(cob_matmul
     PUBLIC
@@ -164,6 +182,13 @@ endif()
 
 if(COB_BUILD_TESTS)
     enable_testing()
+    if(TARGET cob_stream_b_avx2)
+        add_executable(cob_stream_b_test tests/test_stream_b.c ${cob_stream_b_objects})
+        target_include_directories(cob_stream_b_test PRIVATE include)
+        target_compile_definitions(cob_stream_b_test PRIVATE COB_ENABLE_X86_STREAM_B=1)
+        target_link_libraries(cob_stream_b_test PRIVATE m)
+        add_test(NAME cob_stream_b_test COMMAND cob_stream_b_test)
+    endif()
 
     add_executable(cob_gemm_test
         tests/test_gemm.c
@@ -265,6 +290,10 @@ foreach(target cob_matmul cob_matmul_strassen_test cob_matmul_strassen_square_te
         endif()
         if(COB_ENABLE_N2_SMALL)
             target_compile_definitions(${target} PRIVATE COB_ENABLE_N2_SMALL=1)
+        endif()
+        if(TARGET cob_stream_b_avx2)
+            target_compile_definitions(${target} PRIVATE COB_ENABLE_X86_STREAM_B=1)
+            target_sources(${target} PRIVATE ${cob_stream_b_objects})
         endif()
         if(COB_ENABLE_X86_MEDIUM_ROUTE)
             target_compile_definitions(${target} PRIVATE COB_ENABLE_X86_MEDIUM_ROUTE=1)
