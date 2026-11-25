@@ -1,0 +1,117 @@
+From 69b239d6ab9b9a86425ef6874634e3a1952a7f73 Mon Sep 17 00:00:00 2001
+From: Milian0402 <max@nordler.se>
+Date: Wed, 25 Nov 2026 22:16:15 +0100
+Subject: [PATCH] Read compact B directly for two Apple SME output row tiles
+
+---
+ README.md                            |  6 +++--
+ tests/test_apple_medium_wide.c       | 13 ++++++----
+ third_party/maxmulsk/strassen_leaf.c | 36 ++++++++++++++++++++++++++--
+ 3 files changed, 46 insertions(+), 9 deletions(-)
+
+diff --git a/README.md b/README.md
+index e822a83..632f39a 100644
+--- a/README.md
++++ b/README.md
+@@ -21,8 +21,10 @@ and inner dimensions of 96–384 with compact or padded row-major strides.
+ Enable it with `-DCOB_ENABLE_APPLE_MEDIUM_WIDE=ON` in CMake or
+ `COB_ENABLE_APPLE_MEDIUM_WIDE=ON` in Make. It requires the Apple SME2 leaf
+ and a supported 16-lane implementation at runtime. The public entry packs A
+-once per call, computes the first output tile while packing each B panel, and
+-uses that panel for the remaining rows. The option defaults to off.
++once per call. With 24–32 rows and compact A, B and C, it reads B directly for
++both output row tiles. For padded matrices and 33–55 rows, it computes the
++first output tile while packing each B panel for the remaining rows. The
++option defaults to off.
+ 
+ ## M5 Max benchmark
+ 
+diff --git a/tests/test_apple_medium_wide.c b/tests/test_apple_medium_wide.c
+index 7adafe5..fd968b8 100644
+--- a/tests/test_apple_medium_wide.c
++++ b/tests/test_apple_medium_wide.c
+@@ -3,9 +3,9 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ 
+-static int run_case(int m, int n, int k, int pad)
++static int run_case(int m, int n, int k, int pad, int output_pad)
+ {
+-    const int lda = k + pad, ldb = n + pad, ldc = n + pad + 1;
++    const int lda = k + pad, ldb = n + pad, ldc = n + output_pad;
+     const float guard = -8765.0f;
+     float *a = malloc((size_t)m * lda * sizeof(*a));
+     float *b = malloc((size_t)k * ldb * sizeof(*b));
+@@ -39,9 +39,12 @@ static int run_case(int m, int n, int k, int pad)
+ 
+ int main(void)
+ {
+-    const int cases[][4] = {{24, 1024, 96, 0}, {31, 1087, 127, 3}, {48, 1153, 193, 7},
+-                            {55, 4096, 384, 1}, {23, 1089, 131, 5}, {56, 1217, 147, 0}};
++    const int cases[][5] = {{24, 1024, 96, 0, 0}, {25, 1089, 97, 0, 0},
++                            {31, 1087, 127, 3, 4}, {32, 1153, 139, 0, 0},
++                            {32, 1153, 139, 0, 1}, {33, 1153, 139, 0, 0},
++                            {48, 1153, 193, 7, 8}, {55, 4096, 384, 1, 2},
++                            {23, 1089, 131, 5, 6}, {56, 1217, 147, 0, 1}};
+     for (size_t i = 0; i < sizeof(cases) / sizeof(*cases); ++i)
+-        if (!run_case(cases[i][0], cases[i][1], cases[i][2], cases[i][3])) return EXIT_FAILURE;
++        if (!run_case(cases[i][0], cases[i][1], cases[i][2], cases[i][3], cases[i][4])) return EXIT_FAILURE;
+     return EXIT_SUCCESS;
+ }
+diff --git a/third_party/maxmulsk/strassen_leaf.c b/third_party/maxmulsk/strassen_leaf.c
+index 62f81df..ed2132c 100644
+--- a/third_party/maxmulsk/strassen_leaf.c
++++ b/third_party/maxmulsk/strassen_leaf.c
+@@ -1740,15 +1740,47 @@ cob_wide_run(int m, int n, int k, const float *a, int lda, const float *b, int l
+     return 1;
+ }
+ 
++/* With only two A panels, reading compact B twice can cost less than creating
++   and consuming a packed copy. Keep each output tile live through the full K. */
++__arm_locally_streaming __arm_new("za") static int
++cob_wide_two_panels(int m, int n, int k, const float *a, const float *b,
++                    float *c, float *packed_a, size_t depth)
++{
++    if (svcntsw() != 16) return 0;
++    _Alignas(64) float stage[16 * 64];
++    pack_A_block(a, k, 0, m, 0, k, depth, packed_a, stage);
++
++    for (int col = 0; col < n; col += 64) {
++        const int width = n - col < 64 ? n - col : 64;
++        for (int row = 0; row < m; row += 16) {
++            const int height = m - row < 16 ? m - row : 16;
++            const float *left = packed_a + row * depth;
++            float *dst = c + (size_t)row * n + col;
++            svzero_za();
++            if (width == 64)
++                cob_sme_short_k_tile(k, left, b + col, n, svptrue_c32());
++            else
++                cob_sme_short_k_tile(k, left, b + col, n, svwhilelt_c32_u64(0, (unsigned)width, 4));
++            if (width == 64 && height == 16) store_za(dst, n);
++            else cob_sme_transfer_short_c(height, width, dst, n, 1);
++        }
++    }
++    return 1;
++}
++
+ int cob_sgemm_sme_medium_wide(int m, int n, int k, const float *a, int lda,
+                              const float *b, int ldb, float *c, int ldc)
+ {
+     const size_t depth = ((size_t)k + 63) & ~(size_t)63;
+     const size_t rows = ((size_t)m + 15) & ~(size_t)15;
+     const size_t a_size = rows * depth;
+-    float *packed = aligned_alloc(64, (a_size + (size_t)k * 64) * sizeof(*packed));
++    const int direct_b = m <= 32 && lda == k && ldb == n && ldc == n;
++    const size_t b_size = direct_b ? 0 : (size_t)k * 64;
++    float *packed = aligned_alloc(64, (a_size + b_size) * sizeof(*packed));
+     if (!packed) return 0;
+-    const int done = cob_wide_run(m, n, k, a, lda, b, ldb, c, ldc, packed, depth, packed + a_size);
++    const int done = direct_b
++        ? cob_wide_two_panels(m, n, k, a, b, c, packed, depth)
++        : cob_wide_run(m, n, k, a, lda, b, ldb, c, ldc, packed, depth, packed + a_size);
+     free(packed);
+     return done;
+ }
+-- 
+2.54.0 (Apple Git-157)
+

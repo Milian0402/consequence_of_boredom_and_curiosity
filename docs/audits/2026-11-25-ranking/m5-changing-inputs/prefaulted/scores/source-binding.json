@@ -1,0 +1,116 @@
+{
+  "vintage": "primary",
+  "manifest_sha256": "ad542d3932cc263fd910c8eb9abbf42a89a59e70cb14f5fe01cfd731caf31c38",
+  "protocol_sha256": "007795ce6325cffade48dd03dfb6c9c5702ba7ab34108fabaf693a0b20fecf9a",
+  "panel_sha256": "4de6b809bef12cf52912b2c6ab30566012dc9327c3c5cd267b6bb038545c122b",
+  "worker_sha256": "80f5263fbeb9bb6b1d61bf565c1999fba87981a0bfc76bcb312848b4aab97511",
+  "methods_sha256": {
+    "A": "a1220a1aff05fc050dea45451908e318a0820d2b6838b8e0324d83dd2c9894f7",
+    "B": "a1220a1aff05fc050dea45451908e318a0820d2b6838b8e0324d83dd2c9894f7",
+    "D": "ee68bb261774058edb1f4670820af73e43a792fda32cda5ac4016d3f7d5e2874",
+    "Accelerate": "d62591f4e02eee80cd614e9b4499677ea8cbfbba229c55fef7f5068b260dd837",
+    "OpenBLAS": "b719fb8dfccb11e8dbd4e3653326868188274dfcbb4dde90ab763e4c67f3e18e",
+    "ArmPL": "137dfeb76869ae03d47ab1a5ee22fd2084673d18df0eaff83ca8e1fc6d52b91c",
+    "MaxMulSK": "e0b36cd0c80ba6269e0531ec33e33572daaeda72e0b35bdda09dc6772d674546",
+    "MpGEMM": "af5b6981c8100de2a6ccf836858b6a996e6b14171b8993930a90cf11a2043963",
+    "prepared-LIBXSMM": "c99d00a04a552a84e855e45698ede6d8c4bdfc9421cb7dab65fb9260e9f04b6f",
+    "KleidiAI-fixed": "d6d9f6b8c86ad524cfe78444f662ead45c3b79b79c34cce54f38c081e38df8ab",
+    "KleidiAI-elastic": "297a46e46210c2ba5f4e99bff377bb2e0d2d75234fb6afb2903c5c59b2aa4fdc"
+  },
+  "source_hashes": {
+    "protocol.md": "007795ce6325cffade48dd03dfb6c9c5702ba7ab34108fabaf693a0b20fecf9a",
+    "panel.csv": "4de6b809bef12cf52912b2c6ab30566012dc9327c3c5cd267b6bb038545c122b",
+    "worker.c": "080b6c6c0d310e643caa3b68a4fbdcabf42d331a0526d3079af1fd0e15b5e0e0",
+    "worker": "80f5263fbeb9bb6b1d61bf565c1999fba87981a0bfc76bcb312848b4aab97511",
+    "methods.json": "e2da3bda66bf86b8cea9124ea011d3dfda22562149e981f4ccaf841cb03d968c",
+    "cache.txt": "0db95243f5fbefe17774b5c61ca9aa629fba6f4e4b3caeaeb06e38f9b89a94ab",
+    "run.py": "a39ab4af735c6a4318033d20b6de98d643e09db12c5ac213074e09caf61cc00c"
+  },
+  "raw_sha256": {
+    "run.log": "2c7892e576680ebd3f10a59a92c9f98ad206c4df64356d986475bbdf7be0273b",
+    "samples.csv": "7869cf8df8e00a0c0bc230a39f6364b3887c1422a0b2c3e16a88b74abc4a52d7",
+    "panel.csv": "4de6b809bef12cf52912b2c6ab30566012dc9327c3c5cd267b6bb038545c122b",
+    "accuracy.csv": "326ccc718d2770f0ad5c083d5fb7716e6b8ad571e232796960c29d2aa7f55673",
+    "pool.csv": "3b801bf1e4b291e82af92a4fed6ab207c14c37959e4b70593a90eefcf4956f46"
+  },
+  "local_worker_and_libraries_checked": true,
+  "finished_processes": 18,
+  "prepared_jit_code_bytes": [
+    [
+      "fresh-aligned-1",
+      1988
+    ],
+    [
+      "fresh-aligned-2",
+      1552
+    ],
+    [
+      "fresh-aligned-3",
+      2148
+    ],
+    [
+      "fresh-aligned-4",
+      1676
+    ],
+    [
+      "fresh-odd-1",
+      2484
+    ],
+    [
+      "fresh-odd-2",
+      2712
+    ],
+    [
+      "fresh-odd-3",
+      2904
+    ],
+    [
+      "fresh-odd-4",
+      3080
+    ],
+    [
+      "boundary-challenge",
+      2632
+    ],
+    [
+      "boundary-challenge",
+      2632
+    ],
+    [
+      "fresh-odd-4",
+      3080
+    ],
+    [
+      "fresh-odd-3",
+      2904
+    ],
+    [
+      "fresh-odd-2",
+      2712
+    ],
+    [
+      "fresh-odd-1",
+      2484
+    ],
+    [
+      "fresh-aligned-4",
+      1676
+    ],
+    [
+      "fresh-aligned-3",
+      2148
+    ],
+    [
+      "fresh-aligned-2",
+      1552
+    ],
+    [
+      "fresh-aligned-1",
+      1988
+    ]
+  ],
+  "registered_epoch_order_verified": true,
+  "arena_pools_with_nonresident_snapshot": 1,
+  "maximum_missing_pages_at_snapshot": 2,
+  "faults": null
+}

@@ -1,0 +1,72 @@
+starting 1 fresh-aligned-1 1795642085.224409
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit fresh-aligned-1 1988
+finished 1 fresh-aligned-1 1795642087.756521
+starting 1 fresh-aligned-2 1795642087.7566478
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit fresh-aligned-2 1552
+finished 1 fresh-aligned-2 1795642089.376487
+starting 1 fresh-aligned-3 1795642089.376574
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit fresh-aligned-3 2148
+finished 1 fresh-aligned-3 1795642091.2079191
+starting 1 fresh-aligned-4 1795642091.209214
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit fresh-aligned-4 1676
+finished 1 fresh-aligned-4 1795642093.112426
+starting 1 fresh-odd-1 1795642093.112517
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit fresh-odd-1 2484
+finished 1 fresh-odd-1 1795642094.666642
+starting 1 fresh-odd-2 1795642094.6667788
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit fresh-odd-2 2712
+finished 1 fresh-odd-2 1795642096.5422552
+starting 1 fresh-odd-3 1795642096.542333
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit fresh-odd-3 2904
+finished 1 fresh-odd-3 1795642098.400615
+starting 1 fresh-odd-4 1795642098.4006689
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit fresh-odd-4 3080
+finished 1 fresh-odd-4 1795642099.8810759
+starting 1 boundary-challenge 1795642099.88113
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit boundary-challenge 2632
+finished 1 boundary-challenge 1795642101.978744
+starting 2 boundary-challenge 1795642101.978944
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit boundary-challenge 2632
+finished 2 boundary-challenge 1795642104.33616
+starting 2 fresh-odd-4 1795642104.336312
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit fresh-odd-4 3080
+finished 2 fresh-odd-4 1795642106.140685
+starting 2 fresh-odd-3 1795642106.140775
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit fresh-odd-3 2904
+finished 2 fresh-odd-3 1795642107.9283452
+starting 2 fresh-odd-2 1795642107.928424
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit fresh-odd-2 2712
+finished 2 fresh-odd-2 1795642109.8277388
+starting 2 fresh-odd-1 1795642109.827828
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit fresh-odd-1 2484
+finished 2 fresh-odd-1 1795642111.4573781
+starting 2 fresh-aligned-4 1795642111.4574971
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit fresh-aligned-4 1676
+finished 2 fresh-aligned-4 1795642113.580687
+starting 2 fresh-aligned-3 1795642113.5807538
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit fresh-aligned-3 2148
+finished 2 fresh-aligned-3 1795642115.573152
+starting 2 fresh-aligned-2 1795642115.573201
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit fresh-aligned-2 1552
+finished 2 fresh-aligned-2 1795642117.311499
+starting 2 fresh-aligned-1 1795642117.311559
+OpenBLAS core=vortexm4 config=OpenBLAS 0.3.34 DYNAMIC_ARCH NO_AFFINITY USE_OPENMP vortexm4 MAX_THREADS=56 threads=1
+jit fresh-aligned-1 1988
+finished 2 fresh-aligned-1 1795642119.228781

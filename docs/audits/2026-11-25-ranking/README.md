@@ -25,6 +25,8 @@ The installed opt-in kernel now reads B directly for compact matrices with 24–
 
 A third comparison added two Arm KleidiAI SME2 kernels. Both packed their FP32 inputs and allocated workspace on each call. COB beat both on all eight, by 1.749× against the fixed tile and 1.784× against the elastic tile on average. It reached 1.053× the fastest measured method per shape for repeated calls, with six wins above 1%. When measured on the first invocation in a new process, its geometric mean fell to 0.922× the fastest field. Two compact shapes remained faster in other libraries in all three warm comparisons. [Complete field, first-call times and provider verification](m5-kleidiai-field/README.md)
 
+Changing the matrices on every call reversed the lead over external libraries. With 22–121 distinct input/output triples per shape and all matrix pages locked in memory, COB reached 1.026× the fastest external method on repeated identical buffers and 0.950× when cycling through different buffers. It still delivered 1.051× its predecessor’s speed on changing data. A separately prefaulted run reproduced the reversal (1.013× and 0.936×). At 24 × 1088 × 280, COB went from 14.1 µs to 38.8 µs. Identical-function controls also show that close per-shape differences can vary by several percent. [Changing-input measurements, accuracy checks and replay](m5-changing-inputs/README.md)
+
 An earlier trial removed the B copy throughout the 24–55-row range. At 53 × 3757 × 129 the direct path was slower than the previous packed implementation even in the same-address crossover. The shipping kernel retains B packing for 33–55 rows and for padded layouts. [Broad trial, identical-function controls and observations](m5-wide-layouts/README.md)
 
 ## Apple M5 Max wide rectangles

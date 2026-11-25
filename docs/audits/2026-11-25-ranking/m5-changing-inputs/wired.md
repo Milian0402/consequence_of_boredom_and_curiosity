@@ -1,0 +1,3 @@
+# Resident-page confirmation
+
+Some intermediate VM snapshots of the initially prefaulted data showed a small number of nonresident arena pages. In the second run, use the original eight shapes and extra challenge, seeds, ordinary public participant binaries, ordering and scoring unchanged. Apply mlock to all three already bounded arenas (roughly 128–136 MiB total) before matrix generation and preserve them through both hot and rotating timing epochs. Require every sampled arena page resident and record process major/minor faults per epoch. Even successful wiring only establishes VM residency and does not identify data served from a system-level cache or DRAM. This validation decision preceded viewing either ranking.
