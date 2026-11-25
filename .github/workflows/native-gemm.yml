@@ -219,6 +219,9 @@ jobs:
         run: bash tools/world-rank/release-replay/restore-peers.sh "$VENDOR_DIR" "$RUNNER_TEMP/rank-result"
       - name: Compare installed candidates against an independent FP64 product
         run: bash tools/world-rank/run.sh "$RUNNER_TEMP/rank-result" "$VENDOR_DIR"
+      - name: Compare certified rank-48 and rank-49 block schedules
+        if: ${{ !cancelled() && needs.phase.outputs.label == 'signed-leaves' && env.RANK_STUDY_WORKER != '' }}
+        run: bash tools/world-rank/rank48/run.sh "$RUNNER_TEMP/rank-result/finite-ranks"
       - name: Measure whole-call and component times on the same CPU
         if: ${{ !cancelled() && needs.phase.outputs.label == 'leaf-wave' }}
         run: |
