@@ -1,0 +1,5024 @@
+{
+  "provenance": {
+    "archive_bytes": 336606,
+    "artifact_id": 15070866969,
+    "artifact_sha256": "sha256:35a87101d52ffd67c86fe98844f0ca8cc5ec193d9ad2a9a06a2cc16dac39b3ec",
+    "attempt": 1,
+    "job": 139558833328,
+    "job_conclusion": "success",
+    "run": 45715020807,
+    "sha": "7f413444ef2c907a265275b749de4fc49e1daf96"
+  },
+  "architecture": "x86_64",
+  "model": "Intel(R) Xeon(R) 6975P-C",
+  "cpu": 0,
+  "qualified": 145,
+  "method_cases": 147,
+  "references": 28,
+  "accuracy_rows": 588,
+  "timing_rows": 870,
+  "passed_accuracies": 580,
+  "passed_timings": 870,
+  "checked_cells": {
+    "accuracy": 3724780968,
+    "warm": 5587171452
+  },
+  "max_abs": {
+    "released-hk15": 0.000471659097102,
+    "ragged-hk15": 0.000466852936441,
+    "release-openblas-aligned-two": 0.00158926159405,
+    "release-openblas-two": 0.000575212381035,
+    "release-mkl-aligned-two": 0.00157718100299,
+    "release-mkl-two": 0.000554984316973,
+    "hk15-openblas-leaf": 0.000241171794121,
+    "hk15-mkl-leaf": 0.000517714555696,
+    "mkl-handle-oneshot": 5.77663155426e-05,
+    "mkl-handle-prepared": 5.77663155426e-05,
+    "openblas": 6.57289067458e-05,
+    "mkl": 5.77663155426e-05,
+    "mkl-jit": 5.77663155426e-05,
+    "aocl": 5.8202808507e-05,
+    "fastmmw-768": 0.0016222738444,
+    "fastmmw-1536": 0.000203618756645,
+    "blasfeo": 5.00437535393e-05,
+    "tblis-ab-1": 0.000197908926195,
+    "tblis-ab-2": 0.000698197776543,
+    "onednn-oneshot": 0.000338868448139,
+    "onednn-cached-plan": 0.000338868448139
+  },
+  "primary": "ragged-hk15",
+  "gates": {
+    "ragged-hk15": {
+      "repeat": {
+        "old_standalone": {
+          "passes": false,
+          "geomean": 0.9973122921036528,
+          "seed_geomeans": [
+            1.0045032165264858,
+            0.9901128756694517
+          ],
+          "raw_wins": 1,
+          "paired_wins": 9
+        },
+        "direct": {
+          "passes": false,
+          "geomean": 0.8021068677955743,
+          "seed_geomeans": [
+            0.8161391401762506,
+            0.7926404922808045
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "independent_oneshot": {
+          "passes": false,
+          "geomean": 0.8021068677955743,
+          "seed_geomeans": [
+            0.8161391401762506,
+            0.7926404922808045
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "independent_any": {
+          "passes": false,
+          "geomean": 0.8021068677955743,
+          "seed_geomeans": [
+            0.8161391401762506,
+            0.7926404922808045
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "released_winograd": {
+          "passes": false,
+          "geomean": 0.8745912038182376,
+          "seed_geomeans": [
+            0.8787128172704968,
+            0.8662637473006366
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "whole_oneshot": {
+          "passes": false,
+          "geomean": 0.8021068677955743,
+          "seed_geomeans": [
+            0.8161391401762506,
+            0.7926404922808045
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "whole_any": {
+          "passes": false,
+          "geomean": 0.8021068677955743,
+          "seed_geomeans": [
+            0.8161391401762506,
+            0.7926404922808045
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        }
+      },
+      "fresh": {
+        "old_standalone": {
+          "passes": false,
+          "geomean": 0.9818060912394881,
+          "seed_geomeans": [
+            0.9876317734093003,
+            0.975063843049096
+          ],
+          "raw_wins": 0,
+          "paired_wins": 3
+        },
+        "direct": {
+          "passes": false,
+          "geomean": 0.7983907981045931,
+          "seed_geomeans": [
+            0.8020008427692786,
+            0.785133278156768
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "independent_oneshot": {
+          "passes": false,
+          "geomean": 0.7967282415112843,
+          "seed_geomeans": [
+            0.7954656755659636,
+            0.7853258098365324
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "independent_any": {
+          "passes": false,
+          "geomean": 0.7988431507458559,
+          "seed_geomeans": [
+            0.8021146668855835,
+            0.7859147089035846
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "released_winograd": {
+          "passes": false,
+          "geomean": 0.8635709182921958,
+          "seed_geomeans": [
+            0.8636005450464758,
+            0.8630189025057573
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "whole_oneshot": {
+          "passes": false,
+          "geomean": 0.7967282415112843,
+          "seed_geomeans": [
+            0.7954656755659636,
+            0.7853258098365324
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "whole_any": {
+          "passes": false,
+          "geomean": 0.7988431507458559,
+          "seed_geomeans": [
+            0.8021146668855835,
+            0.7859147089035846
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        }
+      },
+      "full_field_passes_both": false
+    },
+    "hk15-openblas-leaf": {
+      "repeat": {
+        "old_standalone": {
+          "passes": true,
+          "geomean": 1.1183697858591433,
+          "seed_geomeans": [
+            1.1130783221954463,
+            1.1224097128067154
+          ],
+          "raw_wins": 3,
+          "paired_wins": 18
+        },
+        "direct": {
+          "passes": false,
+          "geomean": 0.8952267614261386,
+          "seed_geomeans": [
+            0.8956358486209226,
+            0.8902077566222181
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "independent_oneshot": {
+          "passes": false,
+          "geomean": 0.8952267614261386,
+          "seed_geomeans": [
+            0.8956358486209226,
+            0.8902077566222181
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "independent_any": {
+          "passes": false,
+          "geomean": 0.8952267614261386,
+          "seed_geomeans": [
+            0.8956358486209226,
+            0.8902077566222181
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "released_winograd": {
+          "passes": false,
+          "geomean": 0.9737106124876946,
+          "seed_geomeans": [
+            0.9729250626847407,
+            0.9708444402575441
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "whole_oneshot": {
+          "passes": false,
+          "geomean": 0.8952267614261386,
+          "seed_geomeans": [
+            0.8956358486209226,
+            0.8902077566222181
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "whole_any": {
+          "passes": false,
+          "geomean": 0.8952267614261386,
+          "seed_geomeans": [
+            0.8956358486209226,
+            0.8902077566222181
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        }
+      },
+      "fresh": {
+        "old_standalone": {
+          "passes": true,
+          "geomean": 1.1006592718048043,
+          "seed_geomeans": [
+            1.1122294022270862,
+            1.090626270603068
+          ],
+          "raw_wins": 3,
+          "paired_wins": 17
+        },
+        "direct": {
+          "passes": false,
+          "geomean": 0.8921297723944239,
+          "seed_geomeans": [
+            0.8984250117733895,
+            0.884875789122404
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "independent_oneshot": {
+          "passes": false,
+          "geomean": 0.8939361448805224,
+          "seed_geomeans": [
+            0.9023539540138038,
+            0.8882625850842458
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "independent_any": {
+          "passes": false,
+          "geomean": 0.893214280264865,
+          "seed_geomeans": [
+            0.8984067174438753,
+            0.8861496131189615
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "released_winograd": {
+          "passes": false,
+          "geomean": 0.9683647406572709,
+          "seed_geomeans": [
+            0.9732279613176412,
+            0.9720757637577687
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "whole_oneshot": {
+          "passes": false,
+          "geomean": 0.8939361448805224,
+          "seed_geomeans": [
+            0.9023539540138038,
+            0.8882625850842458
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "whole_any": {
+          "passes": false,
+          "geomean": 0.893214280264865,
+          "seed_geomeans": [
+            0.8984067174438753,
+            0.8861496131189615
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        }
+      },
+      "full_field_passes_both": false
+    },
+    "hk15-mkl-leaf": {
+      "repeat": {
+        "old_standalone": {
+          "passes": true,
+          "geomean": 1.1412548834963319,
+          "seed_geomeans": [
+            1.1406227875184525,
+            1.1465983634423336
+          ],
+          "raw_wins": 3,
+          "paired_wins": 18
+        },
+        "direct": {
+          "passes": false,
+          "geomean": 0.9171888974042529,
+          "seed_geomeans": [
+            0.9179621763821073,
+            0.9159838229383819
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "independent_oneshot": {
+          "passes": false,
+          "geomean": 0.9171888974042529,
+          "seed_geomeans": [
+            0.9179621763821073,
+            0.9159838229383819
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "independent_any": {
+          "passes": false,
+          "geomean": 0.9171888974042529,
+          "seed_geomeans": [
+            0.9179621763821073,
+            0.9159838229383819
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "released_winograd": {
+          "passes": false,
+          "geomean": 0.9980862864538245,
+          "seed_geomeans": [
+            0.9965227912236857,
+            0.9990171578052967
+          ],
+          "raw_wins": 1,
+          "paired_wins": 7
+        },
+        "whole_oneshot": {
+          "passes": false,
+          "geomean": 0.9171888974042529,
+          "seed_geomeans": [
+            0.9179621763821073,
+            0.9159838229383819
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "whole_any": {
+          "passes": false,
+          "geomean": 0.9171888974042529,
+          "seed_geomeans": [
+            0.9179621763821073,
+            0.9159838229383819
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        }
+      },
+      "fresh": {
+        "old_standalone": {
+          "passes": true,
+          "geomean": 1.1278489326439616,
+          "seed_geomeans": [
+            1.1318714070897393,
+            1.1311145714068265
+          ],
+          "raw_wins": 3,
+          "paired_wins": 18
+        },
+        "direct": {
+          "passes": false,
+          "geomean": 0.9187357021264707,
+          "seed_geomeans": [
+            0.9250098053856612,
+            0.9142633456886742
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "independent_oneshot": {
+          "passes": false,
+          "geomean": 0.916525087243674,
+          "seed_geomeans": [
+            0.9140318564375712,
+            0.9144875428569638
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "independent_any": {
+          "passes": false,
+          "geomean": 0.9198544885278861,
+          "seed_geomeans": [
+            0.9251410875714853,
+            0.9151732975514788
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "released_winograd": {
+          "passes": false,
+          "geomean": 0.990579615020269,
+          "seed_geomeans": [
+            0.9873088068491037,
+            0.9969898018333132
+          ],
+          "raw_wins": 1,
+          "paired_wins": 7
+        },
+        "whole_oneshot": {
+          "passes": false,
+          "geomean": 0.916525087243674,
+          "seed_geomeans": [
+            0.9140318564375712,
+            0.9144875428569638
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        },
+        "whole_any": {
+          "passes": false,
+          "geomean": 0.9198544885278861,
+          "seed_geomeans": [
+            0.9251410875714853,
+            0.9151732975514788
+          ],
+          "raw_wins": 0,
+          "paired_wins": 0
+        }
+      },
+      "full_field_passes_both": false
+    }
+  },
+  "by_family": {
+    "repeat-depth-only": {
+      "eligible": [
+        "released-hk15",
+        "ragged-hk15",
+        "release-openblas-aligned-two",
+        "release-openblas-two",
+        "release-mkl-aligned-two",
+        "release-mkl-two",
+        "hk15-openblas-leaf",
+        "hk15-mkl-leaf",
+        "mkl-handle-oneshot",
+        "mkl-handle-prepared",
+        "openblas",
+        "mkl",
+        "mkl-jit",
+        "aocl",
+        "fastmmw-768",
+        "fastmmw-1536",
+        "blasfeo",
+        "tblis-ab-1",
+        "tblis-ab-2",
+        "onednn-oneshot",
+        "onednn-cached-plan"
+      ],
+      "whole_raw_winner": "openblas",
+      "entries": {
+        "ragged-hk15": {
+          "ms": 228.25275249999999,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 221.25754949999998,
+              "ratio": 0.9654236090867954,
+              "wins": 0,
+              "seed_medians": [
+                0.9730556833826729,
+                0.9547914320451306
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -9.419528999999983,
+                -0.6143750000000003,
+                -6.271621000000005,
+                -11.24956199999999,
+                -10.453039999999996,
+                -5.084917000000022
+              ],
+              "leave_one_out_ratio_range": [
+                0.9577915347909177,
+                0.9730556833826729
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 176.51091699999998,
+              "ratio": 0.7772536454001799,
+              "wins": 0,
+              "seed_medians": [
+                0.7866865855949507,
+                0.775640760989154
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -47.20866899999998,
+                -47.75093499999999,
+                -54.52773900000002,
+                -53.32287399999999,
+                -51.87592099999999,
+                -50.16079700000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.775640760989154,
+                0.7788665298112057
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 176.51091699999998,
+              "ratio": 0.7772536454001799,
+              "wins": 0,
+              "seed_medians": [
+                0.7866865855949507,
+                0.775640760989154
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -47.20866899999998,
+                -47.75093499999999,
+                -54.52773900000002,
+                -53.32287399999999,
+                -51.87592099999999,
+                -50.16079700000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.775640760989154,
+                0.7788665298112057
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 176.51091699999998,
+              "ratio": 0.7772536454001799,
+              "wins": 0,
+              "seed_medians": [
+                0.7866865855949507,
+                0.775640760989154
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -47.20866899999998,
+                -47.75093499999999,
+                -54.52773900000002,
+                -53.32287399999999,
+                -51.87592099999999,
+                -50.16079700000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.775640760989154,
+                0.7788665298112057
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-two",
+              "time_ms": 191.1442005,
+              "ratio": 0.8386804560604376,
+              "wins": 0,
+              "seed_medians": [
+                0.8457636854539413,
+                0.8315516894247926
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -34.42042799999997,
+                -32.54795600000001,
+                -38.17937000000002,
+                -38.68761899999998,
+                -39.49962800000001,
+                -35.97869600000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.8359727041015268,
+                0.8413882080193484
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 176.51091699999998,
+              "ratio": 0.7772536454001799,
+              "wins": 0,
+              "seed_medians": [
+                0.7866865855949507,
+                0.775640760989154
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -47.20866899999998,
+                -47.75093499999999,
+                -54.52773900000002,
+                -53.32287399999999,
+                -51.87592099999999,
+                -50.16079700000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.775640760989154,
+                0.7788665298112057
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 176.51091699999998,
+              "ratio": 0.7772536454001799,
+              "wins": 0,
+              "seed_medians": [
+                0.7866865855949507,
+                0.775640760989154
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -47.20866899999998,
+                -47.75093499999999,
+                -54.52773900000002,
+                -53.32287399999999,
+                -51.87592099999999,
+                -50.16079700000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.775640760989154,
+                0.7788665298112057
+              ]
+            }
+          }
+        },
+        "hk15-openblas-leaf": {
+          "ms": 198.808245,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 221.25754949999998,
+              "ratio": 1.1191547152019752,
+              "wins": 6,
+              "seed_medians": [
+                1.1253242107408667,
+                1.1129852196630836
+              ],
+              "raw_won": true,
+              "passes": true,
+              "missing": [],
+              "paired_differences_ms": [
+                20.216507999999994,
+                24.861507000000003,
+                27.17783800000001,
+                24.405239999999996,
+                17.888177000000006,
+                22.511058000000002
+              ],
+              "leave_one_out_ratio_range": [
+                1.1129852196630836,
+                1.1253242107408667
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 176.51091699999998,
+              "ratio": 0.8909795374118863,
+              "wins": 0,
+              "seed_medians": [
+                0.894245246230678,
+                0.8867449335198558
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -17.572632000000006,
+                -22.27505299999999,
+                -21.078280000000007,
+                -17.668072000000006,
+                -23.53470399999999,
+                -22.564821999999985
+              ],
+              "leave_one_out_ratio_range": [
+                0.8877138285930947,
+                0.894245246230678
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 176.51091699999998,
+              "ratio": 0.8909795374118863,
+              "wins": 0,
+              "seed_medians": [
+                0.894245246230678,
+                0.8867449335198558
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -17.572632000000006,
+                -22.27505299999999,
+                -21.078280000000007,
+                -17.668072000000006,
+                -23.53470399999999,
+                -22.564821999999985
+              ],
+              "leave_one_out_ratio_range": [
+                0.8877138285930947,
+                0.894245246230678
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 176.51091699999998,
+              "ratio": 0.8909795374118863,
+              "wins": 0,
+              "seed_medians": [
+                0.894245246230678,
+                0.8867449335198558
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -17.572632000000006,
+                -22.27505299999999,
+                -21.078280000000007,
+                -17.668072000000006,
+                -23.53470399999999,
+                -22.564821999999985
+              ],
+              "leave_one_out_ratio_range": [
+                0.8877138285930947,
+                0.894245246230678
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-two",
+              "time_ms": 191.1442005,
+              "ratio": 0.9698144128719236,
+              "wins": 0,
+              "seed_medians": [
+                0.9752783980867871,
+                0.9579262967755962
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -4.784390999999999,
+                -7.072074000000011,
+                -4.729911000000003,
+                -3.0328169999999934,
+                -11.158411000000006,
+                -8.382720999999982
+              ],
+              "leave_one_out_ratio_range": [
+                0.9643504276570601,
+                0.9752783980867871
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 176.51091699999998,
+              "ratio": 0.8909795374118863,
+              "wins": 0,
+              "seed_medians": [
+                0.894245246230678,
+                0.8867449335198558
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -17.572632000000006,
+                -22.27505299999999,
+                -21.078280000000007,
+                -17.668072000000006,
+                -23.53470399999999,
+                -22.564821999999985
+              ],
+              "leave_one_out_ratio_range": [
+                0.8877138285930947,
+                0.894245246230678
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 176.51091699999998,
+              "ratio": 0.8909795374118863,
+              "wins": 0,
+              "seed_medians": [
+                0.894245246230678,
+                0.8867449335198558
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -17.572632000000006,
+                -22.27505299999999,
+                -21.078280000000007,
+                -17.668072000000006,
+                -23.53470399999999,
+                -22.564821999999985
+              ],
+              "leave_one_out_ratio_range": [
+                0.8877138285930947,
+                0.894245246230678
+              ]
+            }
+          }
+        },
+        "hk15-mkl-leaf": {
+          "ms": 193.836891,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 221.25754949999998,
+              "ratio": 1.1408335979774236,
+              "wins": 6,
+              "seed_medians": [
+                1.1533971114820636,
+                1.1393596889563404
+              ],
+              "raw_won": true,
+              "passes": true,
+              "missing": [],
+              "paired_differences_ms": [
+                23.486991000000014,
+                29.689881,
+                30.83229000000001,
+                26.715956000000013,
+                26.123196000000014,
+                27.625391999999998
+              ],
+              "leave_one_out_ratio_range": [
+                1.1393596889563404,
+                1.1423075069985067
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 176.51091699999998,
+              "ratio": 0.9154192064061287,
+              "wins": 0,
+              "seed_medians": [
+                0.9109477061256537,
+                0.9198907066866038
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -14.302148999999986,
+                -17.446678999999992,
+                -17.423828000000004,
+                -15.357355999999989,
+                -15.299684999999979,
+                -17.450487999999986
+              ],
+              "leave_one_out_ratio_range": [
+                0.9109477061256537,
+                0.9198907066866038
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 176.51091699999998,
+              "ratio": 0.9154192064061287,
+              "wins": 0,
+              "seed_medians": [
+                0.9109477061256537,
+                0.9198907066866038
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -14.302148999999986,
+                -17.446678999999992,
+                -17.423828000000004,
+                -15.357355999999989,
+                -15.299684999999979,
+                -17.450487999999986
+              ],
+              "leave_one_out_ratio_range": [
+                0.9109477061256537,
+                0.9198907066866038
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 176.51091699999998,
+              "ratio": 0.9154192064061287,
+              "wins": 0,
+              "seed_medians": [
+                0.9109477061256537,
+                0.9198907066866038
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -14.302148999999986,
+                -17.446678999999992,
+                -17.423828000000004,
+                -15.357355999999989,
+                -15.299684999999979,
+                -17.450487999999986
+              ],
+              "leave_one_out_ratio_range": [
+                0.9109477061256537,
+                0.9198907066866038
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-two",
+              "time_ms": 191.1442005,
+              "ratio": 0.9902252801058526,
+              "wins": 0,
+              "seed_medians": [
+                0.99204296433863,
+                0.9849806631031239
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -1.5139079999999805,
+                -2.243700000000015,
+                -1.0754590000000008,
+                -0.722100999999975,
+                -2.923391999999997,
+                -3.2683869999999837
+              ],
+              "leave_one_out_ratio_range": [
+                0.9884075958730751,
+                0.99204296433863
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 176.51091699999998,
+              "ratio": 0.9154192064061287,
+              "wins": 0,
+              "seed_medians": [
+                0.9109477061256537,
+                0.9198907066866038
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -14.302148999999986,
+                -17.446678999999992,
+                -17.423828000000004,
+                -15.357355999999989,
+                -15.299684999999979,
+                -17.450487999999986
+              ],
+              "leave_one_out_ratio_range": [
+                0.9109477061256537,
+                0.9198907066866038
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 176.51091699999998,
+              "ratio": 0.9154192064061287,
+              "wins": 0,
+              "seed_medians": [
+                0.9109477061256537,
+                0.9198907066866038
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -14.302148999999986,
+                -17.446678999999992,
+                -17.423828000000004,
+                -15.357355999999989,
+                -15.299684999999979,
+                -17.450487999999986
+              ],
+              "leave_one_out_ratio_range": [
+                0.9109477061256537,
+                0.9198907066866038
+              ]
+            }
+          }
+        }
+      },
+      "first_call_ms": {
+        "released-hk15": 219.9541545,
+        "ragged-hk15": 229.29251950000003,
+        "release-openblas-aligned-two": 200.135728,
+        "release-openblas-two": 195.862368,
+        "release-mkl-aligned-two": 193.525374,
+        "release-mkl-two": 194.823274,
+        "hk15-openblas-leaf": 198.1515455,
+        "hk15-mkl-leaf": 199.60697299999998,
+        "mkl-handle-oneshot": 181.0516405,
+        "mkl-handle-prepared": 181.127307,
+        "openblas": 177.861825,
+        "mkl": 180.14337749999999,
+        "mkl-jit": 181.217603,
+        "aocl": 210.2561225,
+        "fastmmw-768": 242.617422,
+        "fastmmw-1536": 221.802657,
+        "blasfeo": 336.3652925,
+        "tblis-ab-1": 342.747646,
+        "tblis-ab-2": 367.42970349999996,
+        "onednn-oneshot": 302.10856399999994,
+        "onednn-cached-plan": 305.5875495
+      },
+      "methods_ms": {
+        "released-hk15": 221.25754949999998,
+        "ragged-hk15": 228.25275249999999,
+        "release-openblas-aligned-two": 206.95031450000002,
+        "release-openblas-two": 205.164818,
+        "release-mkl-aligned-two": 191.2333295,
+        "release-mkl-two": 191.1442005,
+        "hk15-openblas-leaf": 198.808245,
+        "hk15-mkl-leaf": 193.836891,
+        "mkl-handle-oneshot": 179.3501295,
+        "mkl-handle-prepared": 179.47939200000002,
+        "openblas": 176.51091699999998,
+        "mkl": 179.484215,
+        "mkl-jit": 178.221215,
+        "aocl": 205.468934,
+        "fastmmw-768": 230.2587005,
+        "fastmmw-1536": 221.015637,
+        "blasfeo": 336.8733035,
+        "tblis-ab-1": 339.45426899999995,
+        "tblis-ab-2": 364.245575,
+        "onednn-oneshot": 305.77172399999995,
+        "onednn-cached-plan": 306.792037
+      }
+    },
+    "repeat-row-and-column": {
+      "eligible": [
+        "released-hk15",
+        "ragged-hk15",
+        "release-openblas-aligned-two",
+        "release-openblas-two",
+        "release-mkl-aligned-two",
+        "release-mkl-two",
+        "hk15-openblas-leaf",
+        "hk15-mkl-leaf",
+        "mkl-handle-oneshot",
+        "mkl-handle-prepared",
+        "openblas",
+        "mkl",
+        "mkl-jit",
+        "aocl",
+        "fastmmw-768",
+        "fastmmw-1536",
+        "tblis-ab-1",
+        "tblis-ab-2",
+        "onednn-oneshot",
+        "onednn-cached-plan"
+      ],
+      "whole_raw_winner": "openblas",
+      "entries": {
+        "ragged-hk15": {
+          "ms": 234.972385,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 240.8992335,
+              "ratio": 1.0244893312107979,
+              "wins": 6,
+              "seed_medians": [
+                1.0226295097239844,
+                1.0263491526976116
+              ],
+              "raw_won": true,
+              "passes": true,
+              "missing": [],
+              "paired_differences_ms": [
+                5.328012000000021,
+                9.034230000000004,
+                1.0934290000000069,
+                6.178862000000008,
+                1.0084300000000046,
+                8.811983999999995
+              ],
+              "leave_one_out_ratio_range": [
+                1.0226295097239844,
+                1.0263491526976116
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 193.629347,
+              "ratio": 0.8235133006353184,
+              "wins": 0,
+              "seed_medians": [
+                0.8248003263500939,
+                0.8222262749205428
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -41.24994199999998,
+                -38.69887799999999,
+                -45.090000999999994,
+                -41.687842,
+                -48.814147000000006,
+                -39.039925000000004
+              ],
+              "leave_one_out_ratio_range": [
+                0.8222262749205428,
+                0.8248003263500939
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 193.629347,
+              "ratio": 0.8235133006353184,
+              "wins": 0,
+              "seed_medians": [
+                0.8248003263500939,
+                0.8222262749205428
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -41.24994199999998,
+                -38.69887799999999,
+                -45.090000999999994,
+                -41.687842,
+                -48.814147000000006,
+                -39.039925000000004
+              ],
+              "leave_one_out_ratio_range": [
+                0.8222262749205428,
+                0.8248003263500939
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 193.629347,
+              "ratio": 0.8235133006353184,
+              "wins": 0,
+              "seed_medians": [
+                0.8248003263500939,
+                0.8222262749205428
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -41.24994199999998,
+                -38.69887799999999,
+                -45.090000999999994,
+                -41.687842,
+                -48.814147000000006,
+                -39.039925000000004
+              ],
+              "leave_one_out_ratio_range": [
+                0.8222262749205428,
+                0.8248003263500939
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-aligned-two",
+              "time_ms": 211.100169,
+              "ratio": 0.9037527824629636,
+              "wins": 0,
+              "seed_medians": [
+                0.9066620894183993,
+                0.9010711994953575
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -22.152989999999985,
+                -21.653546999999996,
+                -21.11563899999999,
+                -23.19874999999999,
+                -31.936099999999996,
+                -23.018656
+              ],
+              "leave_one_out_ratio_range": [
+                0.9015953122125933,
+                0.9059102527133339
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 193.629347,
+              "ratio": 0.8235133006353184,
+              "wins": 0,
+              "seed_medians": [
+                0.8248003263500939,
+                0.8222262749205428
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -41.24994199999998,
+                -38.69887799999999,
+                -45.090000999999994,
+                -41.687842,
+                -48.814147000000006,
+                -39.039925000000004
+              ],
+              "leave_one_out_ratio_range": [
+                0.8222262749205428,
+                0.8248003263500939
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 193.629347,
+              "ratio": 0.8235133006353184,
+              "wins": 0,
+              "seed_medians": [
+                0.8248003263500939,
+                0.8222262749205428
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -41.24994199999998,
+                -38.69887799999999,
+                -45.090000999999994,
+                -41.687842,
+                -48.814147000000006,
+                -39.039925000000004
+              ],
+              "leave_one_out_ratio_range": [
+                0.8222262749205428,
+                0.8248003263500939
+              ]
+            }
+          }
+        },
+        "hk15-openblas-leaf": {
+          "ms": 213.5193155,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 240.8992335,
+              "ratio": 1.1282407388506068,
+              "wins": 6,
+              "seed_medians": [
+                1.110315360992816,
+                1.137975671278266
+              ],
+              "raw_won": true,
+              "passes": true,
+              "missing": [],
+              "paired_differences_ms": [
+                23.922029000000013,
+                28.136901999999992,
+                21.834141000000002,
+                26.61150200000001,
+                29.384929000000003,
+                31.238160999999987
+              ],
+              "leave_one_out_ratio_range": [
+                1.1243139986521125,
+                1.132167479049101
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 193.629347,
+              "ratio": 0.9023717651319859,
+              "wins": 0,
+              "seed_medians": [
+                0.8955232206682316,
+                0.9040359021405527
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -22.655924999999993,
+                -19.596206000000006,
+                -24.349288999999995,
+                -21.255202,
+                -20.437648000000003,
+                -16.61374800000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.9007076281234191,
+                0.9040359021405527
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 193.629347,
+              "ratio": 0.9023717651319859,
+              "wins": 0,
+              "seed_medians": [
+                0.8955232206682316,
+                0.9040359021405527
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -22.655924999999993,
+                -19.596206000000006,
+                -24.349288999999995,
+                -21.255202,
+                -20.437648000000003,
+                -16.61374800000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.9007076281234191,
+                0.9040359021405527
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 193.629347,
+              "ratio": 0.9023717651319859,
+              "wins": 0,
+              "seed_medians": [
+                0.8955232206682316,
+                0.9040359021405527
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -22.655924999999993,
+                -19.596206000000006,
+                -24.349288999999995,
+                -21.255202,
+                -20.437648000000003,
+                -16.61374800000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.9007076281234191,
+                0.9040359021405527
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-aligned-two",
+              "time_ms": 211.100169,
+              "ratio": 0.987548030445214,
+              "wins": 0,
+              "seed_medians": [
+                0.9880177740207725,
+                0.9870782868696554
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -3.558972999999993,
+                -2.550875000000008,
+                -0.3749269999999971,
+                -2.7661099999999883,
+                -3.5596009999999954,
+                -0.5924790000000069
+              ],
+              "leave_one_out_ratio_range": [
+                0.9870782868696554,
+                0.9880177740207725
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 193.629347,
+              "ratio": 0.9023717651319859,
+              "wins": 0,
+              "seed_medians": [
+                0.8955232206682316,
+                0.9040359021405527
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -22.655924999999993,
+                -19.596206000000006,
+                -24.349288999999995,
+                -21.255202,
+                -20.437648000000003,
+                -16.61374800000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.9007076281234191,
+                0.9040359021405527
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 193.629347,
+              "ratio": 0.9023717651319859,
+              "wins": 0,
+              "seed_medians": [
+                0.8955232206682316,
+                0.9040359021405527
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -22.655924999999993,
+                -19.596206000000006,
+                -24.349288999999995,
+                -21.255202,
+                -20.437648000000003,
+                -16.61374800000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.9007076281234191,
+                0.9040359021405527
+              ]
+            }
+          }
+        },
+        "hk15-mkl-leaf": {
+          "ms": 209.26283499999997,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 240.8992335,
+              "ratio": 1.15586273348386,
+              "wins": 6,
+              "seed_medians": [
+                1.1439556649064364,
+                1.158412393678353
+              ],
+              "raw_won": true,
+              "passes": true,
+              "missing": [],
+              "paired_differences_ms": [
+                30.298975000000006,
+                32.756054000000006,
+                27.488642000000006,
+                32.91265600000001,
+                37.04460400000001,
+                32.473689
+              ],
+              "leave_one_out_ratio_range": [
+                1.1544479068912097,
+                1.1572775600765104
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 193.629347,
+              "ratio": 0.9274420972308908,
+              "wins": 0,
+              "seed_medians": [
+                0.9226557582907371,
+                0.9280244493528269
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -16.278979,
+                -14.97705399999999,
+                -18.69478799999999,
+                -14.954047999999997,
+                -12.777972999999998,
+                -15.378219999999999
+              ],
+              "leave_one_out_ratio_range": [
+                0.9268597451089545,
+                0.9280244493528269
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 193.629347,
+              "ratio": 0.9274420972308908,
+              "wins": 0,
+              "seed_medians": [
+                0.9226557582907371,
+                0.9280244493528269
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -16.278979,
+                -14.97705399999999,
+                -18.69478799999999,
+                -14.954047999999997,
+                -12.777972999999998,
+                -15.378219999999999
+              ],
+              "leave_one_out_ratio_range": [
+                0.9268597451089545,
+                0.9280244493528269
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 193.629347,
+              "ratio": 0.9274420972308908,
+              "wins": 0,
+              "seed_medians": [
+                0.9226557582907371,
+                0.9280244493528269
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -16.278979,
+                -14.97705399999999,
+                -18.69478799999999,
+                -14.954047999999997,
+                -12.777972999999998,
+                -15.378219999999999
+              ],
+              "leave_one_out_ratio_range": [
+                0.9268597451089545,
+                0.9280244493528269
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-aligned-two",
+              "time_ms": 211.100169,
+              "ratio": 1.0152016246924485,
+              "wins": 6,
+              "seed_medians": [
+                1.0133886765774547,
+                1.0170145728074422
+              ],
+              "raw_won": true,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                2.817973000000001,
+                2.0682770000000072,
+                5.279574000000009,
+                3.535044000000015,
+                4.100074000000009,
+                0.6430490000000066
+              ],
+              "leave_one_out_ratio_range": [
+                1.0133886765774547,
+                1.0170145728074422
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 193.629347,
+              "ratio": 0.9274420972308908,
+              "wins": 0,
+              "seed_medians": [
+                0.9226557582907371,
+                0.9280244493528269
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -16.278979,
+                -14.97705399999999,
+                -18.69478799999999,
+                -14.954047999999997,
+                -12.777972999999998,
+                -15.378219999999999
+              ],
+              "leave_one_out_ratio_range": [
+                0.9268597451089545,
+                0.9280244493528269
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 193.629347,
+              "ratio": 0.9274420972308908,
+              "wins": 0,
+              "seed_medians": [
+                0.9226557582907371,
+                0.9280244493528269
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -16.278979,
+                -14.97705399999999,
+                -18.69478799999999,
+                -14.954047999999997,
+                -12.777972999999998,
+                -15.378219999999999
+              ],
+              "leave_one_out_ratio_range": [
+                0.9268597451089545,
+                0.9280244493528269
+              ]
+            }
+          }
+        }
+      },
+      "first_call_ms": {
+        "released-hk15": 239.3024525,
+        "ragged-hk15": 234.8833245,
+        "release-openblas-aligned-two": 210.4426725,
+        "release-openblas-two": 223.6611385,
+        "release-mkl-aligned-two": 210.79909,
+        "release-mkl-two": 229.43447550000002,
+        "hk15-openblas-leaf": 212.394507,
+        "hk15-mkl-leaf": 211.747473,
+        "mkl-handle-oneshot": 204.13938349999998,
+        "mkl-handle-prepared": 201.54700649999998,
+        "openblas": 197.797855,
+        "mkl": 209.152807,
+        "mkl-jit": 208.431682,
+        "aocl": 228.423817,
+        "fastmmw-768": 263.2018145,
+        "fastmmw-1536": 241.0501035,
+        "tblis-ab-1": 376.296246,
+        "tblis-ab-2": 388.0209685,
+        "onednn-oneshot": 331.66846250000003,
+        "onednn-cached-plan": 339.72963
+      },
+      "methods_ms": {
+        "released-hk15": 240.8992335,
+        "ragged-hk15": 234.972385,
+        "release-openblas-aligned-two": 224.28218950000002,
+        "release-openblas-two": 230.8623035,
+        "release-mkl-aligned-two": 211.100169,
+        "release-mkl-two": 227.80979299999998,
+        "hk15-openblas-leaf": 213.5193155,
+        "hk15-mkl-leaf": 209.26283499999997,
+        "mkl-handle-oneshot": 202.07455,
+        "mkl-handle-prepared": 201.57736500000001,
+        "openblas": 193.629347,
+        "mkl": 200.60931349999998,
+        "mkl-jit": 200.3729165,
+        "aocl": 224.5235595,
+        "fastmmw-768": 249.00058850000002,
+        "fastmmw-1536": 239.493089,
+        "tblis-ab-1": 374.34018849999995,
+        "tblis-ab-2": 393.7093875,
+        "onednn-oneshot": 345.20144799999997,
+        "onednn-cached-plan": 343.074074
+      }
+    },
+    "repeat-all-fringes": {
+      "eligible": [
+        "released-hk15",
+        "ragged-hk15",
+        "release-openblas-aligned-two",
+        "release-openblas-two",
+        "release-mkl-aligned-two",
+        "release-mkl-two",
+        "hk15-openblas-leaf",
+        "hk15-mkl-leaf",
+        "mkl-handle-oneshot",
+        "mkl-handle-prepared",
+        "openblas",
+        "mkl",
+        "mkl-jit",
+        "aocl",
+        "fastmmw-768",
+        "fastmmw-1536",
+        "tblis-ab-1",
+        "tblis-ab-2",
+        "onednn-oneshot",
+        "onednn-cached-plan"
+      ],
+      "whole_raw_winner": "openblas",
+      "entries": {
+        "ragged-hk15": {
+          "ms": 227.455758,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 225.5526135,
+              "ratio": 1.0029243145146038,
+              "wins": 3,
+              "seed_medians": [
+                1.0185866521236657,
+                0.9904908852175092
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                2.5004740000000023,
+                4.120631000000014,
+                4.756757,
+                -2.162839,
+                -1.1794239999999845,
+                -4.038410999999992
+              ],
+              "leave_one_out_ratio_range": [
+                0.9949604577031628,
+                1.0108881713260447
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 182.4753605,
+              "ratio": 0.8062381029137281,
+              "wins": 0,
+              "seed_medians": [
+                0.8378032669739309,
+                0.7808664958151029
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -37.24856100000002,
+                -39.496949,
+                -33.261288,
+                -49.86969599999999,
+                -51.28468,
+                -47.623267
+              ],
+              "leave_one_out_ratio_range": [
+                0.7906324277772423,
+                0.8218437780502139
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 182.4753605,
+              "ratio": 0.8062381029137281,
+              "wins": 0,
+              "seed_medians": [
+                0.8378032669739309,
+                0.7808664958151029
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -37.24856100000002,
+                -39.496949,
+                -33.261288,
+                -49.86969599999999,
+                -51.28468,
+                -47.623267
+              ],
+              "leave_one_out_ratio_range": [
+                0.7906324277772423,
+                0.8218437780502139
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 182.4753605,
+              "ratio": 0.8062381029137281,
+              "wins": 0,
+              "seed_medians": [
+                0.8378032669739309,
+                0.7808664958151029
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -37.24856100000002,
+                -39.496949,
+                -33.261288,
+                -49.86969599999999,
+                -51.28468,
+                -47.623267
+              ],
+              "leave_one_out_ratio_range": [
+                0.7906324277772423,
+                0.8218437780502139
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-aligned-two",
+              "time_ms": 199.0326965,
+              "ratio": 0.8826106128812525,
+              "wins": 0,
+              "seed_medians": [
+                0.8848026058805477,
+                0.8675650744897049
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -26.618618000000012,
+                -24.057127999999985,
+                -25.166347000000005,
+                -32.16445299999998,
+                -30.994268999999992,
+                -27.038355999999986
+              ],
+              "leave_one_out_ratio_range": [
+                0.8811304786667695,
+                0.8840907470957357
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 182.4753605,
+              "ratio": 0.8062381029137281,
+              "wins": 0,
+              "seed_medians": [
+                0.8378032669739309,
+                0.7808664958151029
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -37.24856100000002,
+                -39.496949,
+                -33.261288,
+                -49.86969599999999,
+                -51.28468,
+                -47.623267
+              ],
+              "leave_one_out_ratio_range": [
+                0.7906324277772423,
+                0.8218437780502139
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 182.4753605,
+              "ratio": 0.8062381029137281,
+              "wins": 0,
+              "seed_medians": [
+                0.8378032669739309,
+                0.7808664958151029
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -37.24856100000002,
+                -39.496949,
+                -33.261288,
+                -49.86969599999999,
+                -51.28468,
+                -47.623267
+              ],
+              "leave_one_out_ratio_range": [
+                0.7906324277772423,
+                0.8218437780502139
+              ]
+            }
+          }
+        },
+        "hk15-openblas-leaf": {
+          "ms": 204.0665935,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 225.5526135,
+              "ratio": 1.1078076773019483,
+              "wins": 6,
+              "seed_medians": [
+                1.1037053896625457,
+                1.1164309671094204
+              ],
+              "raw_won": true,
+              "passes": true,
+              "missing": [],
+              "paired_differences_ms": [
+                16.807914000000007,
+                22.727919000000014,
+                20.973960000000012,
+                23.494770999999997,
+                27.812451000000017,
+                14.669300999999995
+              ],
+              "leave_one_out_ratio_range": [
+                1.1037053896625457,
+                1.1119099649413509
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 182.4753605,
+              "ratio": 0.8923720122790795,
+              "wins": 0,
+              "seed_medians": [
+                0.89714143075982,
+                0.8800142981297219
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -22.94112100000001,
+                -20.889661000000004,
+                -17.04408499999999,
+                -24.212085999999992,
+                -22.292804999999998,
+                -28.91555500000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.8912769255648927,
+                0.8934670989932664
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 182.4753605,
+              "ratio": 0.8923720122790795,
+              "wins": 0,
+              "seed_medians": [
+                0.89714143075982,
+                0.8800142981297219
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -22.94112100000001,
+                -20.889661000000004,
+                -17.04408499999999,
+                -24.212085999999992,
+                -22.292804999999998,
+                -28.91555500000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.8912769255648927,
+                0.8934670989932664
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 182.4753605,
+              "ratio": 0.8923720122790795,
+              "wins": 0,
+              "seed_medians": [
+                0.89714143075982,
+                0.8800142981297219
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -22.94112100000001,
+                -20.889661000000004,
+                -17.04408499999999,
+                -24.212085999999992,
+                -22.292804999999998,
+                -28.91555500000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.8912769255648927,
+                0.8934670989932664
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-aligned-two",
+              "time_ms": 199.0326965,
+              "ratio": 0.9639241229759505,
+              "wins": 0,
+              "seed_medians": [
+                0.9557511092008266,
+                0.967754611299716
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -12.311178000000005,
+                -5.449839999999984,
+                -8.949143999999992,
+                -6.506842999999984,
+                -2.002393999999991,
+                -8.330643999999998
+              ],
+              "leave_one_out_ratio_range": [
+                0.960093634652185,
+                0.967754611299716
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 182.4753605,
+              "ratio": 0.8923720122790795,
+              "wins": 0,
+              "seed_medians": [
+                0.89714143075982,
+                0.8800142981297219
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -22.94112100000001,
+                -20.889661000000004,
+                -17.04408499999999,
+                -24.212085999999992,
+                -22.292804999999998,
+                -28.91555500000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.8912769255648927,
+                0.8934670989932664
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 182.4753605,
+              "ratio": 0.8923720122790795,
+              "wins": 0,
+              "seed_medians": [
+                0.89714143075982,
+                0.8800142981297219
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -22.94112100000001,
+                -20.889661000000004,
+                -17.04408499999999,
+                -24.212085999999992,
+                -22.292804999999998,
+                -28.91555500000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.8912769255648927,
+                0.8934670989932664
+              ]
+            }
+          }
+        },
+        "hk15-mkl-leaf": {
+          "ms": 201.01357050000001,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 225.5526135,
+              "ratio": 1.1272477631317703,
+              "wins": 6,
+              "seed_medians": [
+                1.1247035824040021,
+                1.1421151896319883
+              ],
+              "raw_won": true,
+              "passes": true,
+              "missing": [],
+              "paired_differences_ms": [
+                26.66980100000002,
+                25.038101000000008,
+                21.984651999999993,
+                28.032715999999986,
+                32.06230700000001,
+                22.058120000000013
+              ],
+              "leave_one_out_ratio_range": [
+                1.1247035824040021,
+                1.1297919438595383
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 182.4753605,
+              "ratio": 0.9088025601103982,
+              "wins": 0,
+              "seed_medians": [
+                0.9203249962779819,
+                0.9002596009940144
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -13.079233999999996,
+                -18.57947900000001,
+                -16.033393000000007,
+                -19.674141000000006,
+                -18.042949000000004,
+                -21.526735999999993
+              ],
+              "leave_one_out_ratio_range": [
+                0.907463925059655,
+                0.9101411951611412
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 182.4753605,
+              "ratio": 0.9088025601103982,
+              "wins": 0,
+              "seed_medians": [
+                0.9203249962779819,
+                0.9002596009940144
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -13.079233999999996,
+                -18.57947900000001,
+                -16.033393000000007,
+                -19.674141000000006,
+                -18.042949000000004,
+                -21.526735999999993
+              ],
+              "leave_one_out_ratio_range": [
+                0.907463925059655,
+                0.9101411951611412
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 182.4753605,
+              "ratio": 0.9088025601103982,
+              "wins": 0,
+              "seed_medians": [
+                0.9203249962779819,
+                0.9002596009940144
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -13.079233999999996,
+                -18.57947900000001,
+                -16.033393000000007,
+                -19.674141000000006,
+                -18.042949000000004,
+                -21.526735999999993
+              ],
+              "leave_one_out_ratio_range": [
+                0.907463925059655,
+                0.9101411951611412
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-aligned-two",
+              "time_ms": 199.0326965,
+              "ratio": 0.9890493271572363,
+              "wins": 1,
+              "seed_medians": [
+                0.984362767762484,
+                0.9953228189306368
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -2.4492909999999926,
+                -3.1396579999999896,
+                -7.938452000000012,
+                -1.9688979999999967,
+                2.247462000000006,
+                -0.9418249999999795
+              ],
+              "leave_one_out_ratio_range": [
+                0.988080217022704,
+                0.9900184372917686
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 182.4753605,
+              "ratio": 0.9088025601103982,
+              "wins": 0,
+              "seed_medians": [
+                0.9203249962779819,
+                0.9002596009940144
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -13.079233999999996,
+                -18.57947900000001,
+                -16.033393000000007,
+                -19.674141000000006,
+                -18.042949000000004,
+                -21.526735999999993
+              ],
+              "leave_one_out_ratio_range": [
+                0.907463925059655,
+                0.9101411951611412
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 182.4753605,
+              "ratio": 0.9088025601103982,
+              "wins": 0,
+              "seed_medians": [
+                0.9203249962779819,
+                0.9002596009940144
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [
+                "blasfeo"
+              ],
+              "paired_differences_ms": [
+                -13.079233999999996,
+                -18.57947900000001,
+                -16.033393000000007,
+                -19.674141000000006,
+                -18.042949000000004,
+                -21.526735999999993
+              ],
+              "leave_one_out_ratio_range": [
+                0.907463925059655,
+                0.9101411951611412
+              ]
+            }
+          }
+        }
+      },
+      "first_call_ms": {
+        "released-hk15": 228.1581205,
+        "ragged-hk15": 229.10274950000002,
+        "release-openblas-aligned-two": 208.235228,
+        "release-openblas-two": 216.619607,
+        "release-mkl-aligned-two": 201.026876,
+        "release-mkl-two": 208.4322675,
+        "hk15-openblas-leaf": 205.1606795,
+        "hk15-mkl-leaf": 202.89109249999998,
+        "mkl-handle-oneshot": 188.2553885,
+        "mkl-handle-prepared": 185.696626,
+        "openblas": 184.241604,
+        "mkl": 186.556777,
+        "mkl-jit": 186.11372050000003,
+        "aocl": 205.8176495,
+        "fastmmw-768": 239.97049250000003,
+        "fastmmw-1536": 220.31581350000002,
+        "tblis-ab-1": 349.54928,
+        "tblis-ab-2": 369.9530685,
+        "onednn-oneshot": 265.180729,
+        "onednn-cached-plan": 266.58499550000005
+      },
+      "methods_ms": {
+        "released-hk15": 225.5526135,
+        "ragged-hk15": 227.455758,
+        "release-openblas-aligned-two": 210.4531795,
+        "release-openblas-two": 213.601863,
+        "release-mkl-aligned-two": 199.0326965,
+        "release-mkl-two": 204.2325125,
+        "hk15-openblas-leaf": 204.0665935,
+        "hk15-mkl-leaf": 201.01357050000001,
+        "mkl-handle-oneshot": 182.76418,
+        "mkl-handle-prepared": 184.2969625,
+        "openblas": 182.4753605,
+        "mkl": 182.642953,
+        "mkl-jit": 183.45038399999999,
+        "aocl": 209.98741700000002,
+        "fastmmw-768": 233.94226099999997,
+        "fastmmw-1536": 222.8757375,
+        "tblis-ab-1": 345.611558,
+        "tblis-ab-2": 368.4382865,
+        "onednn-oneshot": 265.6724145,
+        "onednn-cached-plan": 262.05890850000003
+      }
+    },
+    "anchor-weak-ragged": {
+      "eligible": [
+        "released-hk15",
+        "ragged-hk15",
+        "release-openblas-aligned-two",
+        "release-openblas-two",
+        "release-mkl-aligned-two",
+        "release-mkl-two",
+        "hk15-openblas-leaf",
+        "hk15-mkl-leaf",
+        "mkl-handle-oneshot",
+        "mkl-handle-prepared",
+        "openblas",
+        "mkl",
+        "mkl-jit",
+        "aocl",
+        "fastmmw-768",
+        "fastmmw-1536",
+        "blasfeo",
+        "tblis-ab-1",
+        "tblis-ab-2",
+        "onednn-oneshot",
+        "onednn-cached-plan"
+      ],
+      "whole_raw_winner": "openblas",
+      "entries": {
+        "ragged-hk15": {
+          "ms": 252.63629500000002,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 237.917953,
+              "ratio": 0.9360338962315313,
+              "wins": 0,
+              "seed_medians": [
+                0.935104644728593,
+                0.9369631477344698
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -16.609774999999992,
+                -13.461033999999984,
+                -18.348831000000036,
+                -18.82440299999999,
+                -16.149177000000016,
+                -9.914682000000008
+              ],
+              "leave_one_out_ratio_range": [
+                0.935104644728593,
+                0.9369631477344698
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 194.51168749999997,
+              "ratio": 0.7716410478533376,
+              "wins": 0,
+              "seed_medians": [
+                0.771739434026452,
+                0.7715426616802233
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -56.044437,
+                -56.742141,
+                -58.171625000000034,
+                -54.254513,
+                -63.33352900000003,
+                -57.036257000000006
+              ],
+              "leave_one_out_ratio_range": [
+                0.7715426616802233,
+                0.771739434026452
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 194.51168749999997,
+              "ratio": 0.7716410478533376,
+              "wins": 0,
+              "seed_medians": [
+                0.771739434026452,
+                0.7715426616802233
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -56.044437,
+                -56.742141,
+                -58.171625000000034,
+                -54.254513,
+                -63.33352900000003,
+                -57.036257000000006
+              ],
+              "leave_one_out_ratio_range": [
+                0.7715426616802233,
+                0.771739434026452
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 194.51168749999997,
+              "ratio": 0.7716410478533376,
+              "wins": 0,
+              "seed_medians": [
+                0.771739434026452,
+                0.7715426616802233
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -56.044437,
+                -56.742141,
+                -58.171625000000034,
+                -54.254513,
+                -63.33352900000003,
+                -57.036257000000006
+              ],
+              "leave_one_out_ratio_range": [
+                0.7715426616802233,
+                0.771739434026452
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-aligned-two",
+              "time_ms": 214.7333515,
+              "ratio": 0.8439676003309555,
+              "wins": 0,
+              "seed_medians": [
+                0.8410314730312122,
+                0.8447680283143466
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -40.13271300000002,
+                -39.460991,
+                -40.512725000000025,
+                -38.873987,
+                -39.77649700000002,
+                -34.52627
+              ],
+              "leave_one_out_ratio_range": [
+                0.8431991602450716,
+                0.8447360404168396
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 194.51168749999997,
+              "ratio": 0.7716410478533376,
+              "wins": 0,
+              "seed_medians": [
+                0.771739434026452,
+                0.7715426616802233
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -56.044437,
+                -56.742141,
+                -58.171625000000034,
+                -54.254513,
+                -63.33352900000003,
+                -57.036257000000006
+              ],
+              "leave_one_out_ratio_range": [
+                0.7715426616802233,
+                0.771739434026452
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 194.51168749999997,
+              "ratio": 0.7716410478533376,
+              "wins": 0,
+              "seed_medians": [
+                0.771739434026452,
+                0.7715426616802233
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -56.044437,
+                -56.742141,
+                -58.171625000000034,
+                -54.254513,
+                -63.33352900000003,
+                -57.036257000000006
+              ],
+              "leave_one_out_ratio_range": [
+                0.7715426616802233,
+                0.771739434026452
+              ]
+            }
+          }
+        },
+        "hk15-openblas-leaf": {
+          "ms": 216.80789950000002,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 237.917953,
+              "ratio": 1.0867536957998176,
+              "wins": 6,
+              "seed_medians": [
+                1.0848493839810998,
+                1.1003124661018633
+              ],
+              "raw_won": true,
+              "passes": true,
+              "missing": [],
+              "paired_differences_ms": [
+                14.31906500000002,
+                19.11115000000002,
+                18.49727999999998,
+                16.545511000000012,
+                21.883523999999987,
+                24.129105999999982
+              ],
+              "leave_one_out_ratio_range": [
+                1.0848493839810998,
+                1.0886580076185353
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 194.51168749999997,
+              "ratio": 0.8908736015431975,
+              "wins": 0,
+              "seed_medians": [
+                0.8883841598707205,
+                0.8933630432156745
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -25.11559699999999,
+                -24.169956999999993,
+                -21.325514000000016,
+                -18.884599,
+                -25.300828000000024,
+                -22.992469000000014
+              ],
+              "leave_one_out_ratio_range": [
+                0.8883841598707205,
+                0.8933630432156745
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 194.51168749999997,
+              "ratio": 0.8908736015431975,
+              "wins": 0,
+              "seed_medians": [
+                0.8883841598707205,
+                0.8933630432156745
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -25.11559699999999,
+                -24.169956999999993,
+                -21.325514000000016,
+                -18.884599,
+                -25.300828000000024,
+                -22.992469000000014
+              ],
+              "leave_one_out_ratio_range": [
+                0.8883841598707205,
+                0.8933630432156745
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 194.51168749999997,
+              "ratio": 0.8908736015431975,
+              "wins": 0,
+              "seed_medians": [
+                0.8883841598707205,
+                0.8933630432156745
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -25.11559699999999,
+                -24.169956999999993,
+                -21.325514000000016,
+                -18.884599,
+                -25.300828000000024,
+                -22.992469000000014
+              ],
+              "leave_one_out_ratio_range": [
+                0.8883841598707205,
+                0.8933630432156745
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-aligned-two",
+              "time_ms": 214.7333515,
+              "ratio": 0.9834434722028229,
+              "wins": 0,
+              "seed_medians": [
+                0.9680423258941184,
+                0.9920065672631809
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -9.203873000000002,
+                -6.888806999999996,
+                -3.6666140000000125,
+                -3.5040729999999964,
+                -1.7437960000000197,
+                -0.4824820000000063
+              ],
+              "leave_one_out_ratio_range": [
+                0.9831807736490729,
+                0.9837061707565729
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 194.51168749999997,
+              "ratio": 0.8908736015431975,
+              "wins": 0,
+              "seed_medians": [
+                0.8883841598707205,
+                0.8933630432156745
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -25.11559699999999,
+                -24.169956999999993,
+                -21.325514000000016,
+                -18.884599,
+                -25.300828000000024,
+                -22.992469000000014
+              ],
+              "leave_one_out_ratio_range": [
+                0.8883841598707205,
+                0.8933630432156745
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 194.51168749999997,
+              "ratio": 0.8908736015431975,
+              "wins": 0,
+              "seed_medians": [
+                0.8883841598707205,
+                0.8933630432156745
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -25.11559699999999,
+                -24.169956999999993,
+                -21.325514000000016,
+                -18.884599,
+                -25.300828000000024,
+                -22.992469000000014
+              ],
+              "leave_one_out_ratio_range": [
+                0.8883841598707205,
+                0.8933630432156745
+              ]
+            }
+          }
+        },
+        "hk15-mkl-leaf": {
+          "ms": 214.76786,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 237.917953,
+              "ratio": 1.0952950365191905,
+              "wins": 6,
+              "seed_medians": [
+                1.091125584574023,
+                1.1192478481776558
+              ],
+              "raw_won": true,
+              "passes": true,
+              "missing": [],
+              "paired_differences_ms": [
+                21.651959000000026,
+                19.598639000000002,
+                16.369652999999985,
+                19.062807000000014,
+                25.574236,
+                26.60596299999998
+              ],
+              "leave_one_out_ratio_range": [
+                1.091125584574023,
+                1.0994644884643578
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 194.51168749999997,
+              "ratio": 0.9014904247251233,
+              "wins": 0,
+              "seed_medians": [
+                0.8934572738252984,
+                0.9037447523042568
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -17.782702999999984,
+                -23.68246800000001,
+                -23.45314100000001,
+                -16.367303,
+                -21.610116000000012,
+                -20.515612000000015
+              ],
+              "leave_one_out_ratio_range": [
+                0.8992360971459898,
+                0.9037447523042568
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 194.51168749999997,
+              "ratio": 0.9014904247251233,
+              "wins": 0,
+              "seed_medians": [
+                0.8934572738252984,
+                0.9037447523042568
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -17.782702999999984,
+                -23.68246800000001,
+                -23.45314100000001,
+                -16.367303,
+                -21.610116000000012,
+                -20.515612000000015
+              ],
+              "leave_one_out_ratio_range": [
+                0.8992360971459898,
+                0.9037447523042568
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 194.51168749999997,
+              "ratio": 0.9014904247251233,
+              "wins": 0,
+              "seed_medians": [
+                0.8934572738252984,
+                0.9037447523042568
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -17.782702999999984,
+                -23.68246800000001,
+                -23.45314100000001,
+                -16.367303,
+                -21.610116000000012,
+                -20.515612000000015
+              ],
+              "leave_one_out_ratio_range": [
+                0.8992360971459898,
+                0.9037447523042568
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-aligned-two",
+              "time_ms": 214.7333515,
+              "ratio": 0.9933811465026893,
+              "wins": 2,
+              "seed_medians": [
+                0.9736779720783144,
+                1.0090781028055988
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -1.8709789999999948,
+                -6.401318000000017,
+                -5.794241000000006,
+                -0.9867769999999942,
+                1.946915999999993,
+                1.9943749999999927
+              ],
+              "leave_one_out_ratio_range": [
+                0.9914051209332811,
+                0.9953571720720974
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 194.51168749999997,
+              "ratio": 0.9014904247251233,
+              "wins": 0,
+              "seed_medians": [
+                0.8934572738252984,
+                0.9037447523042568
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -17.782702999999984,
+                -23.68246800000001,
+                -23.45314100000001,
+                -16.367303,
+                -21.610116000000012,
+                -20.515612000000015
+              ],
+              "leave_one_out_ratio_range": [
+                0.8992360971459898,
+                0.9037447523042568
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 194.51168749999997,
+              "ratio": 0.9014904247251233,
+              "wins": 0,
+              "seed_medians": [
+                0.8934572738252984,
+                0.9037447523042568
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -17.782702999999984,
+                -23.68246800000001,
+                -23.45314100000001,
+                -16.367303,
+                -21.610116000000012,
+                -20.515612000000015
+              ],
+              "leave_one_out_ratio_range": [
+                0.8992360971459898,
+                0.9037447523042568
+              ]
+            }
+          }
+        }
+      },
+      "first_call_ms": {
+        "released-hk15": 234.704732,
+        "ragged-hk15": 253.33505099999996,
+        "release-openblas-aligned-two": 222.7152365,
+        "release-openblas-two": 225.852244,
+        "release-mkl-aligned-two": 215.066337,
+        "release-mkl-two": 224.25137750000002,
+        "hk15-openblas-leaf": 216.768675,
+        "hk15-mkl-leaf": 216.839445,
+        "mkl-handle-oneshot": 198.01807100000002,
+        "mkl-handle-prepared": 195.491526,
+        "openblas": 194.728532,
+        "mkl": 197.024915,
+        "mkl-jit": 196.02350349999998,
+        "aocl": 215.00665850000001,
+        "fastmmw-768": 261.92343399999993,
+        "fastmmw-1536": 236.7032395,
+        "blasfeo": 361.43765049999996,
+        "tblis-ab-1": 370.67331849999994,
+        "tblis-ab-2": 391.784032,
+        "onednn-oneshot": 326.902943,
+        "onednn-cached-plan": 326.8524615
+      },
+      "methods_ms": {
+        "released-hk15": 237.917953,
+        "ragged-hk15": 252.63629500000002,
+        "release-openblas-aligned-two": 223.495682,
+        "release-openblas-two": 226.74711,
+        "release-mkl-aligned-two": 214.7333515,
+        "release-mkl-two": 222.1839785,
+        "hk15-openblas-leaf": 216.80789950000002,
+        "hk15-mkl-leaf": 214.76786,
+        "mkl-handle-oneshot": 196.2991915,
+        "mkl-handle-prepared": 195.263177,
+        "openblas": 194.51168749999997,
+        "mkl": 195.4122935,
+        "mkl-jit": 194.9366065,
+        "aocl": 222.24963,
+        "fastmmw-768": 252.659187,
+        "fastmmw-1536": 235.444005,
+        "blasfeo": 364.80550300000004,
+        "tblis-ab-1": 367.90884150000005,
+        "tblis-ab-2": 390.222504,
+        "onednn-oneshot": 330.861195,
+        "onednn-cached-plan": 322.0985865
+      }
+    },
+    "fresh-column-depth": {
+      "eligible": [
+        "released-hk15",
+        "ragged-hk15",
+        "release-openblas-aligned-two",
+        "release-openblas-two",
+        "release-mkl-aligned-two",
+        "release-mkl-two",
+        "hk15-openblas-leaf",
+        "hk15-mkl-leaf",
+        "mkl-handle-oneshot",
+        "mkl-handle-prepared",
+        "openblas",
+        "mkl",
+        "mkl-jit",
+        "aocl",
+        "fastmmw-768",
+        "fastmmw-1536",
+        "blasfeo",
+        "tblis-ab-1",
+        "tblis-ab-2",
+        "onednn-oneshot",
+        "onednn-cached-plan"
+      ],
+      "whole_raw_winner": "openblas",
+      "entries": {
+        "ragged-hk15": {
+          "ms": 223.22541800000002,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 215.123141,
+              "ratio": 0.9654437540744132,
+              "wins": 0,
+              "seed_medians": [
+                0.9710369321929386,
+                0.9598505759558879
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -6.441878999999984,
+                -5.5144230000000185,
+                -10.456120000000013,
+                -13.638337,
+                -8.994828999999982,
+                -5.878466999999999
+              ],
+              "leave_one_out_ratio_range": [
+                0.9598505759558879,
+                0.9710369321929386
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 175.675533,
+              "ratio": 0.7821651502262567,
+              "wins": 0,
+              "seed_medians": [
+                0.7850253199157265,
+                0.7785031379904491
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -47.81402600000001,
+                -39.215125000000015,
+                -49.802790000000016,
+                -36.076893999999996,
+                -49.622789,
+                -50.055986999999995
+              ],
+              "leave_one_out_ratio_range": [
+                0.7793049805367868,
+                0.7850253199157265
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 175.675533,
+              "ratio": 0.7821651502262567,
+              "wins": 0,
+              "seed_medians": [
+                0.7850253199157265,
+                0.7785031379904491
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -47.81402600000001,
+                -39.215125000000015,
+                -49.802790000000016,
+                -36.076893999999996,
+                -49.622789,
+                -50.055986999999995
+              ],
+              "leave_one_out_ratio_range": [
+                0.7793049805367868,
+                0.7850253199157265
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 175.675533,
+              "ratio": 0.7821651502262567,
+              "wins": 0,
+              "seed_medians": [
+                0.7850253199157265,
+                0.7785031379904491
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -47.81402600000001,
+                -39.215125000000015,
+                -49.802790000000016,
+                -36.076893999999996,
+                -49.622789,
+                -50.055986999999995
+              ],
+              "leave_one_out_ratio_range": [
+                0.7793049805367868,
+                0.7850253199157265
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-aligned-two",
+              "time_ms": 192.247023,
+              "ratio": 0.8716767034300863,
+              "wins": 0,
+              "seed_medians": [
+                0.8758694728270688,
+                0.8674839340331039
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -26.127444,
+                -26.914413000000025,
+                -32.56721600000001,
+                -22.889521999999996,
+                -29.688081000000004,
+                -34.148580999999986
+              ],
+              "leave_one_out_ratio_range": [
+                0.8674839340331039,
+                0.8758694728270688
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 175.675533,
+              "ratio": 0.7821651502262567,
+              "wins": 0,
+              "seed_medians": [
+                0.7850253199157265,
+                0.7785031379904491
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -47.81402600000001,
+                -39.215125000000015,
+                -49.802790000000016,
+                -36.076893999999996,
+                -49.622789,
+                -50.055986999999995
+              ],
+              "leave_one_out_ratio_range": [
+                0.7793049805367868,
+                0.7850253199157265
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 175.675533,
+              "ratio": 0.7821651502262567,
+              "wins": 0,
+              "seed_medians": [
+                0.7850253199157265,
+                0.7785031379904491
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -47.81402600000001,
+                -39.215125000000015,
+                -49.802790000000016,
+                -36.076893999999996,
+                -49.622789,
+                -50.055986999999995
+              ],
+              "leave_one_out_ratio_range": [
+                0.7793049805367868,
+                0.7850253199157265
+              ]
+            }
+          }
+        },
+        "hk15-openblas-leaf": {
+          "ms": 197.770895,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 215.123141,
+              "ratio": 1.0844084541501375,
+              "wins": 5,
+              "seed_medians": [
+                1.0797116699677618,
+                1.0902586370331389
+              ],
+              "raw_won": true,
+              "passes": true,
+              "missing": [],
+              "paired_differences_ms": [
+                17.670024000000005,
+                15.600273999999997,
+                14.477766000000003,
+                -2.426474000000012,
+                17.802314000000013,
+                23.638944999999996
+              ],
+              "leave_one_out_ratio_range": [
+                1.0797116699677618,
+                1.0891052383325133
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 175.675533,
+              "ratio": 0.8823746513623241,
+              "wins": 0,
+              "seed_medians": [
+                0.8804764883793286,
+                0.8842728143453195
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -23.702123000000018,
+                -18.100428,
+                -24.868903999999997,
+                -24.86503100000001,
+                -22.825646000000006,
+                -20.538575
+              ],
+              "leave_one_out_ratio_range": [
+                0.8804764883793286,
+                0.8842728143453195
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 175.675533,
+              "ratio": 0.8823746513623241,
+              "wins": 0,
+              "seed_medians": [
+                0.8804764883793286,
+                0.8842728143453195
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -23.702123000000018,
+                -18.100428,
+                -24.868903999999997,
+                -24.86503100000001,
+                -22.825646000000006,
+                -20.538575
+              ],
+              "leave_one_out_ratio_range": [
+                0.8804764883793286,
+                0.8842728143453195
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 175.675533,
+              "ratio": 0.8823746513623241,
+              "wins": 0,
+              "seed_medians": [
+                0.8804764883793286,
+                0.8842728143453195
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -23.702123000000018,
+                -18.100428,
+                -24.868903999999997,
+                -24.86503100000001,
+                -22.825646000000006,
+                -20.538575
+              ],
+              "leave_one_out_ratio_range": [
+                0.8804764883793286,
+                0.8842728143453195
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-aligned-two",
+              "time_ms": 192.247023,
+              "ratio": 0.9733703333487866,
+              "wins": 0,
+              "seed_medians": [
+                0.9703655815469171,
+                0.9763750851506561
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -2.0155410000000096,
+                -5.799716000000011,
+                -7.633329999999994,
+                -11.677659000000007,
+                -2.8909380000000096,
+                -4.631168999999991
+              ],
+              "leave_one_out_ratio_range": [
+                0.9703655815469171,
+                0.9763750851506561
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 175.675533,
+              "ratio": 0.8823746513623241,
+              "wins": 0,
+              "seed_medians": [
+                0.8804764883793286,
+                0.8842728143453195
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -23.702123000000018,
+                -18.100428,
+                -24.868903999999997,
+                -24.86503100000001,
+                -22.825646000000006,
+                -20.538575
+              ],
+              "leave_one_out_ratio_range": [
+                0.8804764883793286,
+                0.8842728143453195
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 175.675533,
+              "ratio": 0.8823746513623241,
+              "wins": 0,
+              "seed_medians": [
+                0.8804764883793286,
+                0.8842728143453195
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -23.702123000000018,
+                -18.100428,
+                -24.868903999999997,
+                -24.86503100000001,
+                -22.825646000000006,
+                -20.538575
+              ],
+              "leave_one_out_ratio_range": [
+                0.8804764883793286,
+                0.8842728143453195
+              ]
+            }
+          }
+        },
+        "hk15-mkl-leaf": {
+          "ms": 193.58610850000002,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 215.123141,
+              "ratio": 1.1018230624881242,
+              "wins": 6,
+              "seed_medians": [
+                1.0986363559321064,
+                1.1114901294315216
+              ],
+              "raw_won": true,
+              "passes": true,
+              "missing": [],
+              "paired_differences_ms": [
+                18.411521000000015,
+                18.971477999999987,
+                20.451282999999986,
+                5.588403999999992,
+                21.569895000000006,
+                25.964851999999983
+              ],
+              "leave_one_out_ratio_range": [
+                1.0986363559321064,
+                1.105009769044142
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 175.675533,
+              "ratio": 0.9044777812196558,
+              "wins": 0,
+              "seed_medians": [
+                0.9029791810680198,
+                0.905976381371292
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -22.960626000000012,
+                -14.729224000000013,
+                -18.895387000000014,
+                -16.850153000000006,
+                -19.058065000000013,
+                -18.212668000000015
+              ],
+              "leave_one_out_ratio_range": [
+                0.9029791810680198,
+                0.905976381371292
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 175.675533,
+              "ratio": 0.9044777812196558,
+              "wins": 0,
+              "seed_medians": [
+                0.9029791810680198,
+                0.905976381371292
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -22.960626000000012,
+                -14.729224000000013,
+                -18.895387000000014,
+                -16.850153000000006,
+                -19.058065000000013,
+                -18.212668000000015
+              ],
+              "leave_one_out_ratio_range": [
+                0.9029791810680198,
+                0.905976381371292
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 175.675533,
+              "ratio": 0.9044777812196558,
+              "wins": 0,
+              "seed_medians": [
+                0.9029791810680198,
+                0.905976381371292
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -22.960626000000012,
+                -14.729224000000013,
+                -18.895387000000014,
+                -16.850153000000006,
+                -19.058065000000013,
+                -18.212668000000015
+              ],
+              "leave_one_out_ratio_range": [
+                0.9029791810680198,
+                0.905976381371292
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-aligned-two",
+              "time_ms": 192.247023,
+              "ratio": 0.9897882341672645,
+              "wins": 1,
+              "seed_medians": [
+                0.9914774745532363,
+                0.9880989937812926
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -1.274044000000002,
+                -2.4285120000000218,
+                -1.65981300000001,
+                -3.662781000000004,
+                0.8766429999999825,
+                -2.3052620000000026
+              ],
+              "leave_one_out_ratio_range": [
+                0.9880989937812926,
+                0.9914774745532363
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 175.675533,
+              "ratio": 0.9044777812196558,
+              "wins": 0,
+              "seed_medians": [
+                0.9029791810680198,
+                0.905976381371292
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -22.960626000000012,
+                -14.729224000000013,
+                -18.895387000000014,
+                -16.850153000000006,
+                -19.058065000000013,
+                -18.212668000000015
+              ],
+              "leave_one_out_ratio_range": [
+                0.9029791810680198,
+                0.905976381371292
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 175.675533,
+              "ratio": 0.9044777812196558,
+              "wins": 0,
+              "seed_medians": [
+                0.9029791810680198,
+                0.905976381371292
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -22.960626000000012,
+                -14.729224000000013,
+                -18.895387000000014,
+                -16.850153000000006,
+                -19.058065000000013,
+                -18.212668000000015
+              ],
+              "leave_one_out_ratio_range": [
+                0.9029791810680198,
+                0.905976381371292
+              ]
+            }
+          }
+        }
+      },
+      "first_call_ms": {
+        "released-hk15": 210.2698245,
+        "ragged-hk15": 222.2848325,
+        "release-openblas-aligned-two": 203.28056249999997,
+        "release-openblas-two": 203.379319,
+        "release-mkl-aligned-two": 191.484015,
+        "release-mkl-two": 199.6879735,
+        "hk15-openblas-leaf": 197.39425,
+        "hk15-mkl-leaf": 196.063609,
+        "mkl-handle-oneshot": 177.8173925,
+        "mkl-handle-prepared": 178.281467,
+        "openblas": 175.068579,
+        "mkl": 178.34792500000003,
+        "mkl-jit": 179.2587495,
+        "aocl": 208.66242499999998,
+        "fastmmw-768": 235.15871700000002,
+        "fastmmw-1536": 211.9456985,
+        "blasfeo": 331.87408750000003,
+        "tblis-ab-1": 328.377535,
+        "tblis-ab-2": 357.7304885,
+        "onednn-oneshot": 306.15055550000005,
+        "onednn-cached-plan": 302.099332
+      },
+      "methods_ms": {
+        "released-hk15": 215.123141,
+        "ragged-hk15": 223.22541800000002,
+        "release-openblas-aligned-two": 205.981878,
+        "release-openblas-two": 201.889843,
+        "release-mkl-aligned-two": 192.247023,
+        "release-mkl-two": 197.25635450000001,
+        "hk15-openblas-leaf": 197.770895,
+        "hk15-mkl-leaf": 193.58610850000002,
+        "mkl-handle-oneshot": 178.502895,
+        "mkl-handle-prepared": 178.20336700000001,
+        "openblas": 175.675533,
+        "mkl": 177.745809,
+        "mkl-jit": 178.475663,
+        "aocl": 210.88193700000002,
+        "fastmmw-768": 227.109231,
+        "fastmmw-1536": 219.278877,
+        "blasfeo": 332.19041550000003,
+        "tblis-ab-1": 326.03432399999997,
+        "tblis-ab-2": 357.3331375,
+        "onednn-oneshot": 302.32895199999996,
+        "onednn-cached-plan": 303.0180685
+      }
+    },
+    "fresh-bottom-depth": {
+      "eligible": [
+        "released-hk15",
+        "ragged-hk15",
+        "release-openblas-aligned-two",
+        "release-openblas-two",
+        "release-mkl-aligned-two",
+        "release-mkl-two",
+        "hk15-openblas-leaf",
+        "hk15-mkl-leaf",
+        "mkl-handle-oneshot",
+        "mkl-handle-prepared",
+        "openblas",
+        "mkl",
+        "mkl-jit",
+        "aocl",
+        "fastmmw-768",
+        "fastmmw-1536",
+        "blasfeo",
+        "tblis-ab-1",
+        "tblis-ab-2",
+        "onednn-oneshot",
+        "onednn-cached-plan"
+      ],
+      "whole_raw_winner": "openblas",
+      "entries": {
+        "ragged-hk15": {
+          "ms": 285.94633999999996,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 280.769655,
+              "ratio": 0.9820374807328871,
+              "wins": 1,
+              "seed_medians": [
+                0.9839678160069408,
+                0.9680384586810574
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -4.49048299999999,
+                1.2186690000000056,
+                -5.717937000000006,
+                -1.9682359999999566,
+                -16.12482599999998,
+                -9.316674999999996
+              ],
+              "leave_one_out_ratio_range": [
+                0.9801071454588334,
+                0.9839678160069408
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 224.4127915,
+              "ratio": 0.7966502818051681,
+              "wins": 0,
+              "seed_medians": [
+                0.8004250449574953,
+                0.7651397328977182
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -55.899304999999984,
+                -53.96874600000001,
+                -59.53518299999999,
+                -56.147719999999985,
+                -69.302596,
+                -68.46092799999998
+              ],
+              "leave_one_out_ratio_range": [
+                0.7928755186528408,
+                0.8004250449574953
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 224.4127915,
+              "ratio": 0.7966502818051681,
+              "wins": 0,
+              "seed_medians": [
+                0.8004250449574953,
+                0.7651397328977182
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -55.899304999999984,
+                -53.96874600000001,
+                -59.53518299999999,
+                -56.147719999999985,
+                -69.302596,
+                -68.46092799999998
+              ],
+              "leave_one_out_ratio_range": [
+                0.7928755186528408,
+                0.8004250449574953
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 224.4127915,
+              "ratio": 0.7966502818051681,
+              "wins": 0,
+              "seed_medians": [
+                0.8004250449574953,
+                0.7651397328977182
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -55.899304999999984,
+                -53.96874600000001,
+                -59.53518299999999,
+                -56.147719999999985,
+                -69.302596,
+                -68.46092799999998
+              ],
+              "leave_one_out_ratio_range": [
+                0.7928755186528408,
+                0.8004250449574953
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-aligned-two",
+              "time_ms": 238.3835325,
+              "ratio": 0.8390855730756714,
+              "wins": 0,
+              "seed_medians": [
+                0.83908229467767,
+                0.8390888514736727
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -45.07172699999998,
+                -40.382208000000006,
+                -50.890032000000005,
+                -45.908530999999975,
+                -47.031935,
+                -44.32458999999997
+              ],
+              "leave_one_out_ratio_range": [
+                0.83908229467767,
+                0.8390888514736727
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 224.4127915,
+              "ratio": 0.7966502818051681,
+              "wins": 0,
+              "seed_medians": [
+                0.8004250449574953,
+                0.7651397328977182
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -55.899304999999984,
+                -53.96874600000001,
+                -59.53518299999999,
+                -56.147719999999985,
+                -69.302596,
+                -68.46092799999998
+              ],
+              "leave_one_out_ratio_range": [
+                0.7928755186528408,
+                0.8004250449574953
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 224.4127915,
+              "ratio": 0.7966502818051681,
+              "wins": 0,
+              "seed_medians": [
+                0.8004250449574953,
+                0.7651397328977182
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -55.899304999999984,
+                -53.96874600000001,
+                -59.53518299999999,
+                -56.147719999999985,
+                -69.302596,
+                -68.46092799999998
+              ],
+              "leave_one_out_ratio_range": [
+                0.7928755186528408,
+                0.8004250449574953
+              ]
+            }
+          }
+        },
+        "hk15-openblas-leaf": {
+          "ms": 245.9315415,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 280.769655,
+              "ratio": 1.1326039898159843,
+              "wins": 6,
+              "seed_medians": [
+                1.153159762395838,
+                1.1250822755521759
+              ],
+              "raw_won": true,
+              "passes": true,
+              "missing": [],
+              "paired_differences_ms": [
+                31.052153,
+                37.39962400000002,
+                37.417176999999995,
+                34.306321000000025,
+                28.846362000000013,
+                31.371647999999976
+              ],
+              "leave_one_out_ratio_range": [
+                1.126977147051754,
+                1.1382308325802148
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 224.4127915,
+              "ratio": 0.9183416102666999,
+              "wins": 0,
+              "seed_medians": [
+                0.926624349247517,
+                0.9016173192925125
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -20.356668999999993,
+                -17.787791,
+                -16.400068999999988,
+                -19.873162999999998,
+                -24.331408,
+                -27.772605000000006
+              ],
+              "leave_one_out_ratio_range": [
+                0.9167583725000685,
+                0.9199248480333312
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 224.4127915,
+              "ratio": 0.9183416102666999,
+              "wins": 0,
+              "seed_medians": [
+                0.926624349247517,
+                0.9016173192925125
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -20.356668999999993,
+                -17.787791,
+                -16.400068999999988,
+                -19.873162999999998,
+                -24.331408,
+                -27.772605000000006
+              ],
+              "leave_one_out_ratio_range": [
+                0.9167583725000685,
+                0.9199248480333312
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 224.4127915,
+              "ratio": 0.9183416102666999,
+              "wins": 0,
+              "seed_medians": [
+                0.926624349247517,
+                0.9016173192925125
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -20.356668999999993,
+                -17.787791,
+                -16.400068999999988,
+                -19.873162999999998,
+                -24.331408,
+                -27.772605000000006
+              ],
+              "leave_one_out_ratio_range": [
+                0.9167583725000685,
+                0.9199248480333312
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-aligned-two",
+              "time_ms": 238.3835325,
+              "ratio": 0.975463189854854,
+              "wins": 0,
+              "seed_medians": [
+                0.9682567875636581,
+                0.9855017960524329
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -9.52909099999999,
+                -4.201252999999988,
+                -7.754918,
+                -9.63397399999999,
+                -2.060747000000002,
+                -3.6362669999999984
+              ],
+              "leave_one_out_ratio_range": [
+                0.9682567875636581,
+                0.98266959214605
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 224.4127915,
+              "ratio": 0.9183416102666999,
+              "wins": 0,
+              "seed_medians": [
+                0.926624349247517,
+                0.9016173192925125
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -20.356668999999993,
+                -17.787791,
+                -16.400068999999988,
+                -19.873162999999998,
+                -24.331408,
+                -27.772605000000006
+              ],
+              "leave_one_out_ratio_range": [
+                0.9167583725000685,
+                0.9199248480333312
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 224.4127915,
+              "ratio": 0.9183416102666999,
+              "wins": 0,
+              "seed_medians": [
+                0.926624349247517,
+                0.9016173192925125
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -20.356668999999993,
+                -17.787791,
+                -16.400068999999988,
+                -19.873162999999998,
+                -24.331408,
+                -27.772605000000006
+              ],
+              "leave_one_out_ratio_range": [
+                0.9167583725000685,
+                0.9199248480333312
+              ]
+            }
+          }
+        },
+        "hk15-mkl-leaf": {
+          "ms": 244.5573085,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 280.769655,
+              "ratio": 1.149417155624659,
+              "wins": 6,
+              "seed_medians": [
+                1.1460531911801448,
+                1.1530748235732247
+              ],
+              "raw_won": true,
+              "passes": true,
+              "missing": [],
+              "paired_differences_ms": [
+                33.226463999999986,
+                37.08535100000002,
+                35.902285000000006,
+                38.09247400000002,
+                30.234795000000037,
+                37.46037499999999
+              ],
+              "leave_one_out_ratio_range": [
+                1.1460531911801448,
+                1.152781120069173
+              ]
+            },
+            "direct": {
+              "peer": "openblas",
+              "time_ms": 224.4127915,
+              "ratio": 0.925203559426553,
+              "wins": 0,
+              "seed_medians": [
+                0.9254246342852773,
+                0.9113928838343629
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -18.182358000000008,
+                -18.102064000000002,
+                -17.91496099999998,
+                -16.087010000000014,
+                -22.942974999999976,
+                -21.68387799999999
+              ],
+              "leave_one_out_ratio_range": [
+                0.9249824845678286,
+                0.9254246342852773
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "openblas",
+              "time_ms": 224.4127915,
+              "ratio": 0.925203559426553,
+              "wins": 0,
+              "seed_medians": [
+                0.9254246342852773,
+                0.9113928838343629
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -18.182358000000008,
+                -18.102064000000002,
+                -17.91496099999998,
+                -16.087010000000014,
+                -22.942974999999976,
+                -21.68387799999999
+              ],
+              "leave_one_out_ratio_range": [
+                0.9249824845678286,
+                0.9254246342852773
+              ]
+            },
+            "independent_any": {
+              "peer": "openblas",
+              "time_ms": 224.4127915,
+              "ratio": 0.925203559426553,
+              "wins": 0,
+              "seed_medians": [
+                0.9254246342852773,
+                0.9113928838343629
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -18.182358000000008,
+                -18.102064000000002,
+                -17.91496099999998,
+                -16.087010000000014,
+                -22.942974999999976,
+                -21.68387799999999
+              ],
+              "leave_one_out_ratio_range": [
+                0.9249824845678286,
+                0.9254246342852773
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-aligned-two",
+              "time_ms": 238.3835325,
+              "ratio": 0.9787347971530092,
+              "wins": 1,
+              "seed_medians": [
+                0.9696553482144491,
+                0.9972661883708743
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -7.354780000000005,
+                -4.515525999999992,
+                -9.269809999999989,
+                -5.847821000000003,
+                -0.6723139999999794,
+                2.452460000000017
+              ],
+              "leave_one_out_ratio_range": [
+                0.9760722797701917,
+                0.9813973145358266
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "openblas",
+              "time_ms": 224.4127915,
+              "ratio": 0.925203559426553,
+              "wins": 0,
+              "seed_medians": [
+                0.9254246342852773,
+                0.9113928838343629
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -18.182358000000008,
+                -18.102064000000002,
+                -17.91496099999998,
+                -16.087010000000014,
+                -22.942974999999976,
+                -21.68387799999999
+              ],
+              "leave_one_out_ratio_range": [
+                0.9249824845678286,
+                0.9254246342852773
+              ]
+            },
+            "whole_any": {
+              "peer": "openblas",
+              "time_ms": 224.4127915,
+              "ratio": 0.925203559426553,
+              "wins": 0,
+              "seed_medians": [
+                0.9254246342852773,
+                0.9113928838343629
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -18.182358000000008,
+                -18.102064000000002,
+                -17.91496099999998,
+                -16.087010000000014,
+                -22.942974999999976,
+                -21.68387799999999
+              ],
+              "leave_one_out_ratio_range": [
+                0.9249824845678286,
+                0.9254246342852773
+              ]
+            }
+          }
+        }
+      },
+      "first_call_ms": {
+        "released-hk15": 274.5454935,
+        "ragged-hk15": 284.676554,
+        "release-openblas-aligned-two": 252.69810650000002,
+        "release-openblas-two": 260.15124850000007,
+        "release-mkl-aligned-two": 244.4249965,
+        "release-mkl-two": 253.62172449999997,
+        "hk15-openblas-leaf": 252.96658399999998,
+        "hk15-mkl-leaf": 252.60937299999998,
+        "mkl-handle-oneshot": 237.143452,
+        "mkl-handle-prepared": 231.769746,
+        "openblas": 230.890761,
+        "mkl": 232.4925085,
+        "mkl-jit": 232.169301,
+        "aocl": 267.42176750000004,
+        "fastmmw-768": 293.41672600000004,
+        "fastmmw-1536": 275.368065,
+        "blasfeo": 422.7281765000001,
+        "tblis-ab-1": 417.67589100000004,
+        "tblis-ab-2": 451.19012749999996,
+        "onednn-oneshot": 406.14383300000003,
+        "onednn-cached-plan": 404.837884
+      },
+      "methods_ms": {
+        "released-hk15": 280.769655,
+        "ragged-hk15": 285.94633999999996,
+        "release-openblas-aligned-two": 254.88214200000004,
+        "release-openblas-two": 259.86230900000004,
+        "release-mkl-aligned-two": 238.3835325,
+        "release-mkl-two": 248.8686395,
+        "hk15-openblas-leaf": 245.9315415,
+        "hk15-mkl-leaf": 244.5573085,
+        "mkl-handle-oneshot": 226.8675775,
+        "mkl-handle-prepared": 226.81100399999997,
+        "openblas": 224.4127915,
+        "mkl": 226.0825045,
+        "mkl-jit": 226.20933,
+        "aocl": 263.69049,
+        "fastmmw-768": 277.38684150000006,
+        "fastmmw-1536": 270.645386,
+        "blasfeo": 419.97621699999996,
+        "tblis-ab-1": 415.8077025,
+        "tblis-ab-2": 449.543009,
+        "onednn-oneshot": 406.38927449999994,
+        "onednn-cached-plan": 401.4826415
+      }
+    },
+    "fresh-wide-boundary": {
+      "eligible": [
+        "released-hk15",
+        "ragged-hk15",
+        "release-openblas-aligned-two",
+        "release-openblas-two",
+        "release-mkl-aligned-two",
+        "release-mkl-two",
+        "hk15-openblas-leaf",
+        "hk15-mkl-leaf",
+        "mkl-handle-oneshot",
+        "mkl-handle-prepared",
+        "openblas",
+        "mkl",
+        "mkl-jit",
+        "aocl",
+        "fastmmw-768",
+        "fastmmw-1536",
+        "blasfeo",
+        "tblis-ab-1",
+        "tblis-ab-2",
+        "onednn-oneshot",
+        "onednn-cached-plan"
+      ],
+      "whole_raw_winner": "mkl-handle-prepared",
+      "entries": {
+        "ragged-hk15": {
+          "ms": 220.2000305,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 219.4864505,
+              "ratio": 0.9982104815969386,
+              "wins": 2,
+              "seed_medians": [
+                1.0082506676197485,
+                0.9977067623965921
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                1.8102239999999992,
+                7.0028279999999885,
+                -3.819937999999995,
+                -5.616854999999976,
+                -0.2720619999999896,
+                -0.5067980000000027
+              ],
+              "leave_one_out_ratio_range": [
+                0.9977067623965921,
+                0.9987142007972851
+              ]
+            },
+            "direct": {
+              "peer": "mkl",
+              "time_ms": 178.705777,
+              "ratio": 0.816733543454736,
+              "wins": 0,
+              "seed_medians": [
+                0.8209564897501704,
+                0.8125105971593017
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -31.834384999999994,
+                -37.88466500000001,
+                -46.939178,
+                -44.218066,
+                -32.09836699999999,
+                -41.43454400000002
+              ],
+              "leave_one_out_ratio_range": [
+                0.8125105971593017,
+                0.8209564897501704
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "mkl-handle-oneshot",
+              "time_ms": 178.1929565,
+              "ratio": 0.8116419012223918,
+              "wins": 0,
+              "seed_medians": [
+                0.8010506920995671,
+                0.8131084793224876
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -43.87613700000001,
+                -38.597357,
+                -44.60349399999999,
+                -42.16730899999999,
+                -34.795667,
+                -41.30241400000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.8101753231222959,
+                0.8131084793224876
+              ]
+            },
+            "independent_any": {
+              "peer": "mkl-handle-prepared",
+              "time_ms": 177.99857400000002,
+              "ratio": 0.8181225659987748,
+              "wins": 0,
+              "seed_medians": [
+                0.8213060825614096,
+                0.8149390494361398
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -36.720239000000014,
+                -37.81069300000001,
+                -46.95000599999999,
+                -43.44858399999998,
+                -34.282254999999985,
+                -40.897864000000006
+              ],
+              "leave_one_out_ratio_range": [
+                0.8149390494361398,
+                0.8213060825614096
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-two",
+              "time_ms": 194.8403665,
+              "ratio": 0.8805060259415409,
+              "wins": 0,
+              "seed_medians": [
+                0.8763846781254045,
+                0.8830626840813645
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -27.121614000000015,
+                -24.207600999999997,
+                -28.53847300000001,
+                -25.976242999999982,
+                -15.36120499999999,
+                -26.972789999999996
+              ],
+              "leave_one_out_ratio_range": [
+                0.8779493678017174,
+                0.8830626840813645
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "mkl-handle-oneshot",
+              "time_ms": 178.1929565,
+              "ratio": 0.8116419012223918,
+              "wins": 0,
+              "seed_medians": [
+                0.8010506920995671,
+                0.8131084793224876
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -43.87613700000001,
+                -38.597357,
+                -44.60349399999999,
+                -42.16730899999999,
+                -34.795667,
+                -41.30241400000001
+              ],
+              "leave_one_out_ratio_range": [
+                0.8101753231222959,
+                0.8131084793224876
+              ]
+            },
+            "whole_any": {
+              "peer": "mkl-handle-prepared",
+              "time_ms": 177.99857400000002,
+              "ratio": 0.8181225659987748,
+              "wins": 0,
+              "seed_medians": [
+                0.8213060825614096,
+                0.8149390494361398
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -36.720239000000014,
+                -37.81069300000001,
+                -46.95000599999999,
+                -43.44858399999998,
+                -34.282254999999985,
+                -40.897864000000006
+              ],
+              "leave_one_out_ratio_range": [
+                0.8149390494361398,
+                0.8213060825614096
+              ]
+            }
+          }
+        },
+        "hk15-openblas-leaf": {
+          "ms": 202.225085,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 219.4864505,
+              "ratio": 1.0856446767576329,
+              "wins": 6,
+              "seed_medians": [
+                1.1050599504208802,
+                1.0575819866817484
+              ],
+              "raw_won": true,
+              "passes": true,
+              "missing": [],
+              "paired_differences_ms": [
+                26.568177999999996,
+                17.396703999999986,
+                20.951462000000003,
+                11.78890000000002,
+                2.7279920000000124,
+                17.24062100000001
+              ],
+              "leave_one_out_ratio_range": [
+                1.0848249932031748,
+                1.086464360312091
+              ]
+            },
+            "direct": {
+              "peer": "mkl",
+              "time_ms": 178.705777,
+              "ratio": 0.8762475424826061,
+              "wins": 0,
+              "seed_medians": [
+                0.8888409000946532,
+                0.8690373033184694
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -7.076430999999994,
+                -27.490789000000014,
+                -22.167778,
+                -26.812311000000005,
+                -29.098312999999987,
+                -23.687125
+              ],
+              "leave_one_out_ratio_range": [
+                0.8690373033184694,
+                0.8834577816467427
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "mkl-handle-oneshot",
+              "time_ms": 178.1929565,
+              "ratio": 0.8815809700485446,
+              "wins": 0,
+              "seed_medians": [
+                0.90055305866568,
+                0.8790540701297498
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -19.11818300000001,
+                -28.203481000000004,
+                -19.832093999999994,
+                -24.76155399999999,
+                -31.795613,
+                -23.554994999999995
+              ],
+              "leave_one_out_ratio_range": [
+                0.8790540701297498,
+                0.8841078699673396
+              ]
+            },
+            "independent_any": {
+              "peer": "mkl-handle-prepared",
+              "time_ms": 177.99857400000002,
+              "ratio": 0.8794470311864588,
+              "wins": 0,
+              "seed_medians": [
+                0.8887866036859751,
+                0.8727957797052269
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -11.962285000000017,
+                -27.41681700000001,
+                -22.178605999999988,
+                -26.04282899999999,
+                -31.282200999999983,
+                -23.15044499999999
+              ],
+              "leave_one_out_ratio_range": [
+                0.8727957797052269,
+                0.8860982826676909
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-two",
+              "time_ms": 194.8403665,
+              "ratio": 0.9563743340489246,
+              "wins": 0,
+              "seed_medians": [
+                0.9811102202504132,
+                0.9546105658043429
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -2.363660000000017,
+                -13.813724999999998,
+                -3.7670730000000097,
+                -8.570487999999987,
+                -12.361150999999987,
+                -9.225370999999981
+              ],
+              "leave_one_out_ratio_range": [
+                0.9546105658043429,
+                0.9581381022935063
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "mkl-handle-oneshot",
+              "time_ms": 178.1929565,
+              "ratio": 0.8815809700485446,
+              "wins": 0,
+              "seed_medians": [
+                0.90055305866568,
+                0.8790540701297498
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -19.11818300000001,
+                -28.203481000000004,
+                -19.832093999999994,
+                -24.76155399999999,
+                -31.795613,
+                -23.554994999999995
+              ],
+              "leave_one_out_ratio_range": [
+                0.8790540701297498,
+                0.8841078699673396
+              ]
+            },
+            "whole_any": {
+              "peer": "mkl-handle-prepared",
+              "time_ms": 177.99857400000002,
+              "ratio": 0.8794470311864588,
+              "wins": 0,
+              "seed_medians": [
+                0.8887866036859751,
+                0.8727957797052269
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -11.962285000000017,
+                -27.41681700000001,
+                -22.178605999999988,
+                -26.04282899999999,
+                -31.282200999999983,
+                -23.15044499999999
+              ],
+              "leave_one_out_ratio_range": [
+                0.8727957797052269,
+                0.8860982826676909
+              ]
+            }
+          }
+        },
+        "hk15-mkl-leaf": {
+          "ms": 193.044205,
+          "tiers": {
+            "old_standalone": {
+              "peer": "released-hk15",
+              "time_ms": 219.4864505,
+              "ratio": 1.1328261490584874,
+              "wins": 6,
+              "seed_medians": [
+                1.1516818587463926,
+                1.129163136402101
+              ],
+              "raw_won": true,
+              "passes": true,
+              "missing": [],
+              "paired_differences_ms": [
+                29.134855000000016,
+                35.19526200000001,
+                18.202384000000016,
+                24.767523000000015,
+                16.197777999999996,
+                26.480221999999998
+              ],
+              "leave_one_out_ratio_range": [
+                1.129163136402101,
+                1.136489161714874
+              ]
+            },
+            "direct": {
+              "peer": "mkl",
+              "time_ms": 178.705777,
+              "ratio": 0.9266944938624355,
+              "wins": 0,
+              "seed_medians": [
+                0.9471531672017254,
+                0.9255319521257969
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -4.509753999999977,
+                -9.692230999999996,
+                -24.91685599999999,
+                -13.833688000000011,
+                -15.628527000000004,
+                -14.447524000000017
+              ],
+              "leave_one_out_ratio_range": [
+                0.9255319521257969,
+                0.9278570355990743
+              ]
+            },
+            "independent_oneshot": {
+              "peer": "mkl-handle-oneshot",
+              "time_ms": 178.1929565,
+              "ratio": 0.9200212816302995,
+              "wins": 0,
+              "seed_medians": [
+                0.9138295627305484,
+                0.9262130005300507
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -16.551505999999993,
+                -10.404922999999982,
+                -22.58117199999998,
+                -11.782930999999996,
+                -18.325827000000018,
+                -14.315394000000008
+              ],
+              "leave_one_out_ratio_range": [
+                0.9138295627305484,
+                0.9262130005300507
+              ]
+            },
+            "independent_any": {
+              "peer": "mkl-handle-prepared",
+              "time_ms": 177.99857400000002,
+              "ratio": 0.930084052690259,
+              "wins": 0,
+              "seed_medians": [
+                0.9475564990987627,
+                0.9282982054944107
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -9.395608,
+                -9.61825899999999,
+                -24.927683999999978,
+                -13.064205999999995,
+                -17.812414999999998,
+                -13.910844000000006
+              ],
+              "leave_one_out_ratio_range": [
+                0.9282982054944107,
+                0.9318698998861071
+              ]
+            },
+            "released_winograd": {
+              "peer": "release-mkl-two",
+              "time_ms": 194.8403665,
+              "ratio": 1.0033693796065988,
+              "wins": 5,
+              "seed_medians": [
+                1.001056946942661,
+                1.0056818122705364
+              ],
+              "raw_won": true,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                0.20301699999999978,
+                3.984833000000021,
+                -6.516150999999998,
+                4.408135000000008,
+                1.1086349999999967,
+                0.014230000000003962
+              ],
+              "leave_one_out_ratio_range": [
+                1.001056946942661,
+                1.0056818122705364
+              ]
+            },
+            "whole_oneshot": {
+              "peer": "mkl-handle-oneshot",
+              "time_ms": 178.1929565,
+              "ratio": 0.9200212816302995,
+              "wins": 0,
+              "seed_medians": [
+                0.9138295627305484,
+                0.9262130005300507
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -16.551505999999993,
+                -10.404922999999982,
+                -22.58117199999998,
+                -11.782930999999996,
+                -18.325827000000018,
+                -14.315394000000008
+              ],
+              "leave_one_out_ratio_range": [
+                0.9138295627305484,
+                0.9262130005300507
+              ]
+            },
+            "whole_any": {
+              "peer": "mkl-handle-prepared",
+              "time_ms": 177.99857400000002,
+              "ratio": 0.930084052690259,
+              "wins": 0,
+              "seed_medians": [
+                0.9475564990987627,
+                0.9282982054944107
+              ],
+              "raw_won": false,
+              "passes": false,
+              "missing": [],
+              "paired_differences_ms": [
+                -9.395608,
+                -9.61825899999999,
+                -24.927683999999978,
+                -13.064205999999995,
+                -17.812414999999998,
+                -13.910844000000006
+              ],
+              "leave_one_out_ratio_range": [
+                0.9282982054944107,
+                0.9318698998861071
+              ]
+            }
+          }
+        }
+      },
+      "first_call_ms": {
+        "released-hk15": 216.87250450000002,
+        "ragged-hk15": 221.87937200000002,
+        "release-openblas-aligned-two": 213.963843,
+        "release-openblas-two": 210.25985699999998,
+        "release-mkl-aligned-two": 202.80210999999997,
+        "release-mkl-two": 197.86627299999998,
+        "hk15-openblas-leaf": 205.6124855,
+        "hk15-mkl-leaf": 198.184237,
+        "mkl-handle-oneshot": 182.5799835,
+        "mkl-handle-prepared": 178.547428,
+        "openblas": 181.919953,
+        "mkl": 181.763493,
+        "mkl-jit": 179.2369635,
+        "aocl": 213.133736,
+        "fastmmw-768": 241.14565249999998,
+        "fastmmw-1536": 221.8139005,
+        "blasfeo": 338.8179025,
+        "tblis-ab-1": 335.06952,
+        "tblis-ab-2": 355.019251,
+        "onednn-oneshot": 325.684009,
+        "onednn-cached-plan": 325.0162915
+      },
+      "methods_ms": {
+        "released-hk15": 219.4864505,
+        "ragged-hk15": 220.2000305,
+        "release-openblas-aligned-two": 210.4450975,
+        "release-openblas-two": 206.670726,
+        "release-mkl-aligned-two": 198.03248349999998,
+        "release-mkl-two": 194.8403665,
+        "hk15-openblas-leaf": 202.225085,
+        "hk15-mkl-leaf": 193.044205,
+        "mkl-handle-oneshot": 178.1929565,
+        "mkl-handle-prepared": 177.99857400000002,
+        "openblas": 182.3489415,
+        "mkl": 178.705777,
+        "mkl-jit": 179.4276675,
+        "aocl": 213.84523449999998,
+        "fastmmw-768": 234.68251099999998,
+        "fastmmw-1536": 222.307436,
+        "blasfeo": 339.88773449999997,
+        "tblis-ab-1": 332.9514065,
+        "tblis-ab-2": 356.328063,
+        "onednn-oneshot": 321.6199965,
+        "onednn-cached-plan": 319.8585345
+      }
+    }
+  },
+  "post_score_guard": {
+    "cases": {
+      "repeat-depth-only": {
+        "identical_pairs": 6,
+        "wall_median": 0.9848775229516933,
+        "cpu_median": 0.9850321622335456
+      },
+      "repeat-row-and-column": {
+        "identical_pairs": 6,
+        "wall_median": 0.9689908134310529,
+        "cpu_median": 0.9690130918586336
+      },
+      "repeat-all-fringes": {
+        "identical_pairs": 6,
+        "wall_median": 0.9762747713959614,
+        "cpu_median": 0.9762899170306425
+      },
+      "fresh-column-depth": {
+        "identical_pairs": 6,
+        "wall_median": 0.9875003347140825,
+        "cpu_median": 0.9874382501542784
+      },
+      "fresh-bottom-depth": {
+        "identical_pairs": 6,
+        "wall_median": 0.970992405694864,
+        "cpu_median": 0.9710093480213022
+      },
+      "fresh-wide-boundary": {
+        "identical_pairs": 6,
+        "wall_median": 0.966390286541988,
+        "cpu_median": 0.9666090052789762
+      }
+    },
+    "cohorts": {
+      "repeat": 0.9766927952828917,
+      "fresh": 0.9749190282566523
+    }
+  },
+  "out_of_cohort_exact_dyadic_stress": {
+    "direct-openblas": {
+      "status": "complete",
+      "fixtures": 19,
+      "with_error_above_band": 0,
+      "with_nonfinite": 0,
+      "wrong_sign_cells": 0,
+      "nonfinite_cells": 0,
+      "exact_fixtures": 19,
+      "failed_fixtures": []
+    },
+    "released-hk15": {
+      "status": "complete",
+      "fixtures": 19,
+      "with_error_above_band": 7,
+      "with_nonfinite": 1,
+      "wrong_sign_cells": 2014675,
+      "nonfinite_cells": 5600860,
+      "exact_fixtures": 6,
+      "failed_fixtures": [
+        "outer@7",
+        "outer@8",
+        "outer@16",
+        "inside@8",
+        "inside@16",
+        "scatter@8",
+        "global@127"
+      ]
+    },
+    "ragged-hk15": {
+      "status": "complete",
+      "fixtures": 19,
+      "with_error_above_band": 8,
+      "with_nonfinite": 1,
+      "wrong_sign_cells": 946721,
+      "nonfinite_cells": 5595068,
+      "exact_fixtures": 7,
+      "failed_fixtures": [
+        "outer@7",
+        "outer@8",
+        "outer@16",
+        "inside@8",
+        "inside@16",
+        "scatter@8",
+        "scatter@16",
+        "global@127"
+      ]
+    },
+    "release-openblas-two": {
+      "status": "complete",
+      "fixtures": 19,
+      "with_error_above_band": 3,
+      "with_nonfinite": 1,
+      "wrong_sign_cells": 899403,
+      "nonfinite_cells": 5241750,
+      "exact_fixtures": 11,
+      "failed_fixtures": [
+        "outer@8",
+        "outer@16",
+        "global@127"
+      ]
+    },
+    "release-openblas-aligned-two": {
+      "status": "complete",
+      "fixtures": 19,
+      "with_error_above_band": 3,
+      "with_nonfinite": 1,
+      "wrong_sign_cells": 349428,
+      "nonfinite_cells": 5184000,
+      "exact_fixtures": 11,
+      "failed_fixtures": [
+        "outer@8",
+        "outer@16",
+        "global@127"
+      ]
+    },
+    "release-mkl-two": {
+      "status": "complete",
+      "fixtures": 19,
+      "with_error_above_band": 5,
+      "with_nonfinite": 1,
+      "wrong_sign_cells": 797594,
+      "nonfinite_cells": 5241750,
+      "exact_fixtures": 11,
+      "failed_fixtures": [
+        "outer@8",
+        "outer@16",
+        "scatter@8",
+        "scatter@16",
+        "global@127"
+      ]
+    },
+    "release-mkl-aligned-two": {
+      "status": "complete",
+      "fixtures": 19,
+      "with_error_above_band": 5,
+      "with_nonfinite": 1,
+      "wrong_sign_cells": 347425,
+      "nonfinite_cells": 5184000,
+      "exact_fixtures": 11,
+      "failed_fixtures": [
+        "outer@8",
+        "outer@16",
+        "scatter@8",
+        "scatter@16",
+        "global@127"
+      ]
+    },
+    "hk15-openblas-leaf": {
+      "status": "complete",
+      "fixtures": 19,
+      "with_error_above_band": 5,
+      "with_nonfinite": 1,
+      "wrong_sign_cells": 176880,
+      "nonfinite_cells": 3732620,
+      "exact_fixtures": 8,
+      "failed_fixtures": [
+        "outer@8",
+        "outer@16",
+        "inside@8",
+        "inside@16",
+        "global@127"
+      ]
+    },
+    "hk15-mkl-leaf": {
+      "status": "complete",
+      "fixtures": 19,
+      "with_error_above_band": 5,
+      "with_nonfinite": 1,
+      "wrong_sign_cells": 176792,
+      "nonfinite_cells": 3732620,
+      "exact_fixtures": 8,
+      "failed_fixtures": [
+        "outer@8",
+        "outer@16",
+        "inside@8",
+        "inside@16",
+        "global@127"
+      ]
+    },
+    "guarded-hk15": {
+      "status": "complete",
+      "fixtures": 19,
+      "with_error_above_band": 0,
+      "with_nonfinite": 0,
+      "wrong_sign_cells": 0,
+      "nonfinite_cells": 0,
+      "exact_fixtures": 19,
+      "failed_fixtures": []
+    }
+  }
+}

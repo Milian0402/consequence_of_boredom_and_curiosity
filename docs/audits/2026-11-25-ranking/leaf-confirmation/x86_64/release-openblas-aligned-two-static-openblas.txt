@@ -1,0 +1,2 @@
+libcob_matmul.a(gemm.c.o) -> libopenblas.a(cblas_sgemm.o): cblas_sgemm
+libcob_matmul.a(gemm.c.o) -> libopenblas.a(memory.o): openblas_get_num_threads

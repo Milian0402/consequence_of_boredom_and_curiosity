@@ -1,0 +1,3 @@
+*.patch -text -whitespace
+*.csv -text -whitespace
+compiler.txt -text -whitespace

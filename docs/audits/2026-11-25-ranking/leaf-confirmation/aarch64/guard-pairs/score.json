@@ -1,0 +1,326 @@
+{
+  "cases": {
+    "repeat-depth-only": {
+      "pairs": [
+        {
+          "seed": 197906831,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.995228606311817
+        },
+        {
+          "seed": 197906831,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9892539638427225
+        },
+        {
+          "seed": 197906831,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9898623124300449
+        },
+        {
+          "seed": 884039527,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9830114287638062
+        },
+        {
+          "seed": 884039527,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9966832091123259
+        },
+        {
+          "seed": 884039527,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.989976218000875
+        }
+      ],
+      "qualified": true,
+      "median": 0.9899192652154599,
+      "seed_medians": [
+        0.9898623124300449,
+        0.989976218000875
+      ],
+      "median_caller_ratio": 0.989983775303623
+    },
+    "repeat-row-and-column": {
+      "pairs": [
+        {
+          "seed": 197906831,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9890891579129535
+        },
+        {
+          "seed": 197906831,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9838936572247283
+        },
+        {
+          "seed": 197906831,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.997183269606637
+        },
+        {
+          "seed": 884039527,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9964595842928885
+        },
+        {
+          "seed": 884039527,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9982708122364907
+        },
+        {
+          "seed": 884039527,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9922635882586409
+        }
+      ],
+      "qualified": true,
+      "median": 0.9943615862757647,
+      "seed_medians": [
+        0.9890891579129535,
+        0.9964595842928885
+      ],
+      "median_caller_ratio": 0.994395697162487
+    },
+    "repeat-all-fringes": {
+      "pairs": [
+        {
+          "seed": 197906831,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9924271449034489
+        },
+        {
+          "seed": 197906831,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9931670217261338
+        },
+        {
+          "seed": 197906831,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9908676988993064
+        },
+        {
+          "seed": 884039527,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9889164775550533
+        },
+        {
+          "seed": 884039527,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9897220623392217
+        },
+        {
+          "seed": 884039527,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9847289035025699
+        }
+      ],
+      "qualified": true,
+      "median": 0.990294880619264,
+      "seed_medians": [
+        0.9924271449034489,
+        0.9889164775550533
+      ],
+      "median_caller_ratio": 0.9902810632108738
+    },
+    "fresh-column-depth": {
+      "pairs": [
+        {
+          "seed": 197906831,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9948069940216829
+        },
+        {
+          "seed": 197906831,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9924917437142049
+        },
+        {
+          "seed": 197906831,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9857766807109012
+        },
+        {
+          "seed": 884039527,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9895845550247384
+        },
+        {
+          "seed": 884039527,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9914720354357092
+        },
+        {
+          "seed": 884039527,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9889687015820288
+        }
+      ],
+      "qualified": true,
+      "median": 0.9905282952302238,
+      "seed_medians": [
+        0.9924917437142049,
+        0.9895845550247384
+      ],
+      "median_caller_ratio": 0.9905146918273704
+    },
+    "fresh-bottom-depth": {
+      "pairs": [
+        {
+          "seed": 197906831,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9902012488729952
+        },
+        {
+          "seed": 197906831,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.996745019148682
+        },
+        {
+          "seed": 197906831,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9870449044478068
+        },
+        {
+          "seed": 884039527,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.984719425449033
+        },
+        {
+          "seed": 884039527,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.99384991734696
+        },
+        {
+          "seed": 884039527,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9865813974951786
+        }
+      ],
+      "qualified": true,
+      "median": 0.988623076660401,
+      "seed_medians": [
+        0.9902012488729952,
+        0.9865813974951786
+      ],
+      "median_caller_ratio": 0.9886357595054667
+    },
+    "fresh-wide-boundary": {
+      "pairs": [
+        {
+          "seed": 197906831,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9844273375089742
+        },
+        {
+          "seed": 197906831,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9950291332113019
+        },
+        {
+          "seed": 197906831,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9876279849315831
+        },
+        {
+          "seed": 884039527,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9923657769247837
+        },
+        {
+          "seed": 884039527,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9964737839798772
+        },
+        {
+          "seed": 884039527,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.995920378273226
+        }
+      ],
+      "qualified": true,
+      "median": 0.9936974550680429,
+      "seed_medians": [
+        0.9876279849315831,
+        0.995920378273226
+      ],
+      "median_caller_ratio": 0.9936874932389687
+    }
+  },
+  "cohorts": {
+    "repeat": 0.9915232056756047,
+    "fresh": 0.9909473997401413
+  }
+}

@@ -1,0 +1,5 @@
+method,provider,status
+release-openblas-aligned-two,openblas,ready
+release-openblas-two,openblas,ready
+release-armpl-aligned-two,armpl,ready
+release-armpl-two,armpl,ready

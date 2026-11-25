@@ -1,0 +1,10 @@
+{
+  "archive_bytes": 293850,
+  "artifact_id": 15071492801,
+  "artifact_sha256": "sha256:a72c07784346e4d81c6ad54bbc0f71abfb56ceb0763b7483a860aa2fb2006ec9",
+  "attempt": 1,
+  "job": 139558833248,
+  "job_conclusion": "success",
+  "run": 45715020807,
+  "sha": "7f413444ef2c907a265275b749de4fc49e1daf96"
+}

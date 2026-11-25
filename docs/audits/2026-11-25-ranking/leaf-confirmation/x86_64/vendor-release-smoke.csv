@@ -1,0 +1,5 @@
+method,m,n,k,lda,ldb,ldc,ar,ac,br,bc,cr,cc,cpu,threads,checked,guards,a_mod64,b_mod64,c_mod64,max_error,output_sha256,ordinary_trace_equal,serial_provider,route,vendor_calls,core_leaves
+release-openblas-aligned-two,31,37,19,29,53,49,3,5,2,4,1,6,0,1,1147,901,48,56,28,6.82566041021e-07,2dc5310955825e654423129aa41ba739c716d2b3c5ee267f3f32316f97cba840,1,OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED,native-no-vendor-calls,0,0
+release-openblas-two,31,37,19,29,53,49,3,5,2,4,1,6,0,1,1147,901,48,56,28,6.82566041021e-07,2dc5310955825e654423129aa41ba739c716d2b3c5ee267f3f32316f97cba840,1,OpenBLAS 0.3.34 NO_LAPACK NO_LAPACKE NO_AFFINITY USE_LOCKING SAPPHIRERAPIDS SINGLE_THREADED,native-no-vendor-calls,0,0
+release-mkl-aligned-two,31,37,19,29,53,49,3,5,2,4,1,6,0,1,1147,901,48,56,28,6.82566041021e-07,2dc5310955825e654423129aa41ba739c716d2b3c5ee267f3f32316f97cba840,1,libmkl_intel_lp64.so.3,native-no-vendor-calls,0,0
+release-mkl-two,31,37,19,29,53,49,3,5,2,4,1,6,0,1,1147,901,48,56,28,6.82566041021e-07,2dc5310955825e654423129aa41ba739c716d2b3c5ee267f3f32316f97cba840,1,libmkl_intel_lp64.so.3,native-no-vendor-calls,0,0

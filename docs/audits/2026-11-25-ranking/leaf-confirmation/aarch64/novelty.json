@@ -1,0 +1,47 @@
+{
+  "panel_sha256": "204a37e5fd61c9530f01ec7a95e01ea2d09acf719784f198af6cdd6221609eff",
+  "public_main": "f322a9ab58454762563b97323fdc5f29016cc39f",
+  "unique_dimension_tables": 885,
+  "geometry_rows": 289542,
+  "public_text_files": 915,
+  "duplicate_payloads_skipped": 7152,
+  "inventory_sha256": "12d87ed64ddd44dd76932a23aa3366bfc2fa648eec3cfe7947e7a7ccf5bc2769",
+  "matches": {
+    "repeat-depth-only": {
+      "ordered": 7,
+      "any_permutation": 7,
+      "example": "public-main@f322a9ab58454762563b97323fdc5f29016cc39f/docs/audits/2026-11-25-ranking/ragged-hk15/README.md"
+    },
+    "repeat-row-and-column": {
+      "ordered": 7,
+      "any_permutation": 7,
+      "example": "public-main@f322a9ab58454762563b97323fdc5f29016cc39f/docs/audits/2026-11-25-ranking/ragged-hk15/README.md"
+    },
+    "repeat-all-fringes": {
+      "ordered": 7,
+      "any_permutation": 7,
+      "example": "public-main@f322a9ab58454762563b97323fdc5f29016cc39f/docs/audits/2026-11-25-ranking/ragged-hk15/README.md"
+    },
+    "anchor-weak-ragged": {
+      "ordered": 91,
+      "any_permutation": 91,
+      "example": "outputs/production-release-first-run.zip!head-to-head.csv"
+    },
+    "fresh-column-depth": {
+      "ordered": 0,
+      "any_permutation": 0,
+      "example": null
+    },
+    "fresh-bottom-depth": {
+      "ordered": 0,
+      "any_permutation": 0,
+      "example": null
+    },
+    "fresh-wide-boundary": {
+      "ordered": 0,
+      "any_permutation": 0,
+      "example": null
+    }
+  },
+  "scope": "Workspace CSV files outside work/world-rank/leaf-confirm, all nested CSV members of output ZIPs, plus tracked main CSV and source/document text at the stated commit. Text scan recognizes adjacent ordered triples in common comma, table, multiplication or whitespace notation."
+}

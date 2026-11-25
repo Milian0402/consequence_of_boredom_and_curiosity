@@ -1,0 +1,6 @@
+worker=release-mkl-aligned-two.worker needed=libmkl_intel_lp64.so.3 sdk_soname=libmkl_intel_lp64.so.3 same_file=1 sha256=eb5a6748ec4e85dc07bd4dbf860af21e86f26647dbba837a94338a8289bf1faa
+worker=release-mkl-aligned-two.trace.worker needed=libmkl_intel_lp64.so.3 sdk_soname=libmkl_intel_lp64.so.3 same_file=1 sha256=eb5a6748ec4e85dc07bd4dbf860af21e86f26647dbba837a94338a8289bf1faa
+worker=release-mkl-aligned-two.worker needed=libmkl_sequential.so.3 sdk_soname=libmkl_sequential.so.3 same_file=1 sha256=812f56b8de337f2bc591426462232a4b114a443b284dabfb985e9af0c39f32be
+worker=release-mkl-aligned-two.trace.worker needed=libmkl_sequential.so.3 sdk_soname=libmkl_sequential.so.3 same_file=1 sha256=812f56b8de337f2bc591426462232a4b114a443b284dabfb985e9af0c39f32be
+worker=release-mkl-aligned-two.worker needed=libmkl_core.so.3 sdk_soname=libmkl_core.so.3 same_file=1 sha256=2b7ed4833447281eec1edee574115f663169dec03d38c7cd2ed8fe2db8c0861e
+worker=release-mkl-aligned-two.trace.worker needed=libmkl_core.so.3 sdk_soname=libmkl_core.so.3 same_file=1 sha256=2b7ed4833447281eec1edee574115f663169dec03d38c7cd2ed8fe2db8c0861e

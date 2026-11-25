@@ -1,0 +1,326 @@
+{
+  "cases": {
+    "repeat-depth-only": {
+      "pairs": [
+        {
+          "seed": 197906831,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9959007211921123
+        },
+        {
+          "seed": 197906831,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9812681083229928
+        },
+        {
+          "seed": 197906831,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 1.0040519371632946
+        },
+        {
+          "seed": 884039527,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9877257437711902
+        },
+        {
+          "seed": 884039527,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.956421416444594
+        },
+        {
+          "seed": 884039527,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9820293021321963
+        }
+      ],
+      "qualified": true,
+      "median": 0.9848775229516933,
+      "seed_medians": [
+        0.9959007211921123,
+        0.9820293021321963
+      ],
+      "median_caller_ratio": 0.9850321622335456
+    },
+    "repeat-row-and-column": {
+      "pairs": [
+        {
+          "seed": 197906831,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9606141418785082
+        },
+        {
+          "seed": 197906831,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9680498054293406
+        },
+        {
+          "seed": 197906831,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.958593384066907
+        },
+        {
+          "seed": 884039527,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9768046991407839
+        },
+        {
+          "seed": 884039527,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9699318214327651
+        },
+        {
+          "seed": 884039527,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 1.008117553897647
+        }
+      ],
+      "qualified": true,
+      "median": 0.9689908134310529,
+      "seed_medians": [
+        0.9606141418785082,
+        0.9768046991407839
+      ],
+      "median_caller_ratio": 0.9690130918586336
+    },
+    "repeat-all-fringes": {
+      "pairs": [
+        {
+          "seed": 197906831,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 1.0016679340150263
+        },
+        {
+          "seed": 197906831,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9915590248397904
+        },
+        {
+          "seed": 197906831,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9764901815255687
+        },
+        {
+          "seed": 884039527,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9760593612663542
+        },
+        {
+          "seed": 884039527,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9499675965030508
+        },
+        {
+          "seed": 884039527,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.951987307113983
+        }
+      ],
+      "qualified": true,
+      "median": 0.9762747713959614,
+      "seed_medians": [
+        0.9915590248397904,
+        0.951987307113983
+      ],
+      "median_caller_ratio": 0.9762899170306425
+    },
+    "fresh-column-depth": {
+      "pairs": [
+        {
+          "seed": 197906831,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9533795526961982
+        },
+        {
+          "seed": 197906831,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9418150434857365
+        },
+        {
+          "seed": 197906831,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9854421448779647
+        },
+        {
+          "seed": 884039527,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9895585245502004
+        },
+        {
+          "seed": 884039527,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 1.008496712533688
+        },
+        {
+          "seed": 884039527,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9998285841471352
+        }
+      ],
+      "qualified": true,
+      "median": 0.9875003347140825,
+      "seed_medians": [
+        0.9533795526961982,
+        0.9998285841471352
+      ],
+      "median_caller_ratio": 0.9874382501542784
+    },
+    "fresh-bottom-depth": {
+      "pairs": [
+        {
+          "seed": 197906831,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9751447517277122
+        },
+        {
+          "seed": 197906831,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9839793224143996
+        },
+        {
+          "seed": 197906831,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9678135421498648
+        },
+        {
+          "seed": 884039527,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9642957008419974
+        },
+        {
+          "seed": 884039527,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9650705261253101
+        },
+        {
+          "seed": 884039527,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9741712692398633
+        }
+      ],
+      "qualified": true,
+      "median": 0.970992405694864,
+      "seed_medians": [
+        0.9751447517277122,
+        0.9650705261253101
+      ],
+      "median_caller_ratio": 0.9710093480213022
+    },
+    "fresh-wide-boundary": {
+      "pairs": [
+        {
+          "seed": 197906831,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9476973062804435
+        },
+        {
+          "seed": 197906831,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9952974755367645
+        },
+        {
+          "seed": 197906831,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 1.0048991858934804
+        },
+        {
+          "seed": 884039527,
+          "round": 1,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.96788139595815
+        },
+        {
+          "seed": 884039527,
+          "round": 2,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9648991771258258
+        },
+        {
+          "seed": 884039527,
+          "round": 3,
+          "both_qualified": true,
+          "bitwise_equal": true,
+          "wall_ratio": 0.9453356216715832
+        }
+      ],
+      "qualified": true,
+      "median": 0.966390286541988,
+      "seed_medians": [
+        0.9952974755367645,
+        0.9648991771258258
+      ],
+      "median_caller_ratio": 0.9666090052789762
+    }
+  },
+  "cohorts": {
+    "repeat": 0.9766927952828917,
+    "fresh": 0.9749190282566523
+  }
+}
