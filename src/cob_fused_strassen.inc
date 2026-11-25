@@ -11,6 +11,34 @@
 #define COB_FUSED_NC 768
 #endif
 enum { COB_FUSED_KC = 256 };
+#if defined(COB_USE_X86_SIMD) && defined(COB_ENABLE_HK15_PARENT_960) && COB_ENABLE_HK15_PARENT_960 && defined(COB_USE_HK15)
+#if defined(COB_ENABLE_HK_X86_REGISTER) && COB_ENABLE_HK_X86_REGISTER
+#define COB_USE_HK_REGISTER 1
+#include "cob_hk_x86_register.inc"
+#endif
+#if defined(COB_USE_HK_REGISTER) || (defined(COB_ENABLE_HK_X86_K288) && COB_ENABLE_HK_X86_K288)
+#define COB_USE_HK_X86_LEAF 1
+#if defined(COB_HK_X86_LEAF_TRACE) && COB_HK_X86_LEAF_TRACE
+#define COB_TRACE_HK_X86_LEAF 1
+static _Thread_local int cob_hk_x86_children, cob_hk_x86_products, cob_hk_x86_nr;
+int rank_hk_x86_leaf_count(int id) {
+    return id == 0 ? cob_hk_x86_children : id == 1 ? cob_hk_x86_products : id == 2 ? cob_hk_x86_nr : -1;
+}
+#endif
+#endif
+#endif
+#if defined(COB_USE_HK_X86_LEAF) && defined(COB_ENABLE_HK_X86_K288) && COB_ENABLE_HK_X86_K288
+#define COB_USE_HK_X86_K288 1
+/* A 513..576-deep product usually needs three 256-deep panels. Equalize
+   two panels here, bounding the extra packing workspace to 32 depth rows. */
+static int cob_hk_x86_k288_limit(cob_blocked_kernel kernel, int depth)
+{
+    if (depth >= 513 && depth <= 576 &&
+        ((kernel.mr == 6 && kernel.nr == 16) || (kernel.mr == 12 && kernel.nr == 32)))
+        return (depth + 1) / 2;
+    return COB_FUSED_KC;
+}
+#endif
 #if COB_FUSED_MC < 1 || COB_FUSED_MC > 2048 || COB_FUSED_NC < 1 || COB_FUSED_NC > 768
 #error "Fused slab dimensions exceed workspace bounds"
 #endif
@@ -113,6 +141,12 @@ typedef struct {
     int rows, cols, depth, lda, ldb;
     float* pack_a;
     float* pack_b;
+#if defined(COB_USE_HK_X86_K288)
+    int kc;
+#endif
+#if defined(COB_USE_HK_X86_LEAF)
+    int x86_child;
+#endif
 } cob_fused_slab;
 
 #if defined(COB_ENABLE_FUSED_FINAL_PANEL) && COB_ENABLE_FUSED_FINAL_PANEL
@@ -127,8 +161,15 @@ static void cob_fused_product(const cob_fused_slab* s, cob_fused_operand a,
 #if !defined(COB_ENABLE_FUSED_FINAL_PANEL) || !COB_ENABLE_FUSED_FINAL_PANEL
     (void)output;
 #endif
+#ifdef COB_TRACE_HK_X86_LEAF
+    if (s->x86_child) ++cob_hk_x86_products;
+#endif
     for (int pc = 0; pc < s->depth;) {
+#if defined(COB_USE_HK_X86_K288)
+        const int kb = cob_min_i32(s->kc, s->depth-pc);
+#else
         const int kb = cob_min_i32(COB_FUSED_KC, s->depth-pc);
+#endif
         cob_fused_pack_b(s->pack_b, b, (size_t)pc*s->ldb, s->ldb, kb, s->cols, s->kernel.nr);
         for (int ic = 0; ic < s->rows;) {
             const int mb = cob_min_i32(s->kernel.mc, s->rows-ic);
@@ -137,6 +178,12 @@ static void cob_fused_product(const cob_fused_slab* s, cob_fused_operand a,
             if (output && kb == s->depth-pc)
                 cob_final_panel(&s->kernel,mb,s->cols,kb,s->pack_a,s->pack_b,
                     c+(size_t)ic*ldc,ldc,pc!=0,output,ic);
+            else
+#endif
+#ifdef COB_USE_HK_REGISTER
+            if (s->x86_child)
+                cob_hk_reg_apply(s->kernel, mb, s->cols, kb, s->pack_a, s->pack_b,
+                    c+(size_t)ic*ldc, ldc, pc != 0);
             else
 #endif
                 cob_blocked_apply_panel(s->kernel, mb, s->cols, kb, s->pack_a, s->pack_b,
@@ -187,9 +234,12 @@ static void cob_fused_finish_edges(int m, int n, int k, const float* a, int lda,
     }
 }
 
-static int cob_sgemm_strassen_fused_at(int m, int n, int k, const float* a, int lda,
-    const float* b, int ldb, float* c, int ldc, int min_harmonic)
+static int cob_sgemm_strassen_fused_impl(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc, int min_harmonic, int hk_child)
 {
+#ifndef COB_USE_HK_X86_LEAF
+    (void)hk_child;
+#endif
     const int min_dim = cob_min_i32(m, cob_min_i32(n,k));
     const int max_dim = m > n ? (m > k ? m : k) : (n > k ? n : k);
     if (min_dim < 2 || min_dim < min_harmonic / 2 ||
@@ -205,14 +255,31 @@ static int cob_sgemm_strassen_fused_at(int m, int n, int k, const float* a, int 
     if (!cob_blocked_select_kernel(&kernel)) return 0;
     const int mh = m/2, nh = n/2, kh = k/2;
     const int rows = cob_min_i32(mh, COB_FUSED_MC), cols = cob_min_i32(nh, COB_FUSED_NC);
+#if defined(COB_USE_HK_X86_K288)
+    const int kc = hk_child ? cob_hk_x86_k288_limit(kernel, kh) : COB_FUSED_KC;
+    const int kb = cob_min_i32(kh, kc);
+#else
     const int kb = cob_min_i32(kh, COB_FUSED_KC);
+#endif
     const int packed_m = (cob_min_i32(rows,kernel.mc)+kernel.mr-1)/kernel.mr*kernel.mr;
     const int packed_n = (cols+kernel.nr-1)/kernel.nr*kernel.nr;
     const size_t pack_a_size = (size_t)packed_m*kb, pack_b_size = (size_t)packed_n*kb;
     float* work = cob_aligned_alloc(64, (pack_b_size+pack_a_size+(size_t)rows*cols)*sizeof(float));
     if (!work) return 0;
     float* product = work+pack_b_size+pack_a_size;
-    cob_fused_slab slab = {kernel, 0, 0, kh, lda, ldb, work+pack_b_size, work};
+    cob_fused_slab slab = {kernel, 0, 0, kh, lda, ldb, work+pack_b_size, work,
+#if defined(COB_USE_HK_X86_K288)
+                           kc,
+#endif
+#ifdef COB_USE_HK_REGISTER
+                           hk_child && ((kernel.mr == 6 && kernel.nr == 16) || (kernel.mr == 12 && kernel.nr == 32)),
+#elif defined(COB_USE_HK_X86_K288)
+                           hk_child && kc != COB_FUSED_KC,
+#endif
+    };
+#ifdef COB_TRACE_HK_X86_LEAF
+    if (slab.x86_child) { ++cob_hk_x86_children; cob_hk_x86_nr = kernel.nr; }
+#endif
     for (int jc = 0; jc < nh;) {
         slab.cols = cob_min_i32(cols,nh-jc);
         const float* b11 = b+jc;
@@ -269,6 +336,12 @@ static int cob_sgemm_strassen_fused_at(int m, int n, int k, const float* a, int 
     free(work);
     cob_fused_finish_edges(m, n, k, a, lda, b, ldb, c, ldc);
     return 1;
+}
+
+static int cob_sgemm_strassen_fused_at(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc, int min_harmonic)
+{
+    return cob_sgemm_strassen_fused_impl(m,n,k,a,lda,b,ldb,c,ldc,min_harmonic,0);
 }
 
 static int cob_sgemm_strassen_fused(int m, int n, int k, const float* a, int lda,

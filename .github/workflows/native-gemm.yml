@@ -77,7 +77,7 @@ jobs:
         run: bash tools/world-rank/aocl/build.sh "$VENDOR_DIR"
       - name: Qualify the independent FastMMW Winograd comparator
         id: fastmmw
-        if: needs.phase.outputs.label == 'tile-parent'
+        if: needs.phase.outputs.label == 'tile-parent' || needs.phase.outputs.label == 'leaf-wave'
         continue-on-error: true
         run: |
           set -o pipefail
@@ -95,7 +95,7 @@ jobs:
         if: success()
         continue-on-error: true
         run: |
-          if [[ $(cat tools/world-rank/phase.txt) =~ ^(heldout|tile-screen|tile-confirm|tile-replay|tile-child|tile-parent)$ ]]; then
+          if [[ $(cat tools/world-rank/phase.txt) =~ ^(heldout|tile-screen|tile-confirm|tile-replay|tile-child|tile-parent|leaf-wave)$ ]]; then
             bash tools/world-rank/blasfeo/build.sh "$VENDOR_DIR"
           fi
           if [[ $(cat tools/world-rank/phase.txt) == tile-replay && $(uname -m) == x86_64 ]]; then
@@ -103,6 +103,11 @@ jobs:
           fi
       - name: Compare installed candidates against an independent FP64 product
         run: bash tools/world-rank/run.sh "$RUNNER_TEMP/rank-result" "$VENDOR_DIR"
+      - name: Measure whole-call and component times on the same CPU
+        if: ${{ !cancelled() && needs.phase.outputs.label == 'leaf-wave' }}
+        run: |
+          cpu=$(python3 -c 'import os; print(min(os.sched_getaffinity(0)))')
+          bash tools/world-rank/hk-profile/run.sh "$PWD" "$RUNNER_TEMP/rank-result/hk-profile" "$cpu"
       - name: Compare nine small workloads with warmed and cold JIT
         if: ${{ !cancelled() }}
         run: |

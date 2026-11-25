@@ -92,7 +92,7 @@ NATIVE_OUTPUTS := $(LIB_OBJ) $(STRASSEN_TEST_OBJ) $(STRASSEN_SQUARE_TEST_OBJ) \
 $(foreach target,$(NATIVE_OUTPUTS),$(eval $(call cob_track_native_config,$(target))))
 save_native_config = @printf '%s\n' '$(NATIVE_CONFIG)' > "$@.native-config"
 
-$(LIB_OBJ): src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
+$(LIB_OBJ): src/gemm.c src/cob_openblas_winograd.inc include/cob_gemm.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(NATIVE_CPPFLAGS) -c src/gemm.c -o $@
 	$(save_native_config)
 
@@ -100,7 +100,7 @@ $(TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(LIB_OBJ) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) tests/test_gemm.c $(LIB_OBJ) $(OPENBLAS_LEAF_LIBS) -o $@
 	$(save_native_config)
 
-$(STRASSEN_TEST_OBJ): src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
+$(STRASSEN_TEST_OBJ): src/gemm.c src/cob_openblas_winograd.inc include/cob_gemm.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(NATIVE_CPPFLAGS) -DCOB_SGEMM_STRASSEN1_MIN_DIM=1024 -c src/gemm.c -o $@
 	$(save_native_config)
 
@@ -108,7 +108,7 @@ $(STRASSEN_TEST_BIN): tests/test_gemm.c include/cob_gemm.h $(STRASSEN_TEST_OBJ) 
 	$(CC) $(CFLAGS) tests/test_gemm.c $(STRASSEN_TEST_OBJ) $(OPENBLAS_LEAF_LIBS) -o $@
 	$(save_native_config)
 
-$(STRASSEN_SQUARE_TEST_OBJ): src/gemm.c include/cob_gemm.h | $(BUILD_DIR)
+$(STRASSEN_SQUARE_TEST_OBJ): src/gemm.c src/cob_openblas_winograd.inc include/cob_gemm.h | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(NATIVE_CPPFLAGS) -DCOB_SGEMM_STRASSEN1_MIN_DIM=8192 -DCOB_SGEMM_STRASSEN1_SQUARE_MIN_DIM=128 -c src/gemm.c -o $@
 	$(save_native_config)
 

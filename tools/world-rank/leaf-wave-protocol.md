@@ -1,0 +1,19 @@
+# Single-thread FP32 leaf comparison
+
+The measured operation is row-major SGEMM with no transposes, unit product scale, and overwrite of C. Report M × N × K and the common leading-dimension padding. The physical N/M swap changes both operand strides. The two swapped layouts have equal arithmetic work and distinct row-major access patterns.
+
+The first two layouts in `leaf-wave.csv` are historical Intel anchors. The last three are fixed holdouts. Their ordered dimension triples are new relative to the preceding benchmark panels. The CSV SHA-256 is `e1fb795b4de6b84ad332bdf55bcc8571f3861325009c92ea904ca22ae57cf5e6`. Run all implementations on the same machine, one pinned CPU, using seed blocks 63714293 and 91375811. Record three counterbalanced whole-call timings per block. Report the host model assigned by CI.
+
+| Family | Fixed primary | Diagnostic |
+| --- | --- | --- |
+| Standalone outer Winograd with COB leaves | winograd-cob-2 | winograd-cob-1 |
+| Standalone HK leaf specialization on AVX2/FMA x86 | hk-register | hk-k288 |
+| COB Winograd with external OpenBLAS leaves | cob-openblas-winograd, the public entry | cob-openblas-previous, the previous public entry with identical library and build flags, and hybrid-openblas, the separately built prototype |
+
+The standalone outer Winograd tests cap total fast-algorithm depth at two. Two outer levels use the ordinary packed COB multiplication at their leaves. A single outer level permits at most one further Strassen level. The full public dispatcher handles inputs with no outer split.
+
+The standalone baseline is the immutable 0cff6ec089a43e65eeb3bfefd12a1fc68f205be4 public HK parent cutoff of 960. Record each fixed primary on all qualifying layouts, including the out-of-HK transposed control. Within each standalone family, a secondary, separately labeled anchor-selected result may choose the variant with the highest geometric mean of its two anchor median paired speedups over the incumbent. An exact tie chooses the fixed primary. A method that fails validation on an anchor cannot be selected. Freeze this choice using only the anchors and score it unchanged on the holdouts. Keep the fixed-primary score even when a secondary ranks first on the anchors. Use the all-three and the two HK-eligible holdout summaries together; the two reversals of M and N share an unordered dimension triple.
+
+Include ordinary native BLAS libraries, the two external FastMMW thresholds, and both pre-existing project Winograd hybrids. Score the new public OpenBLAS-backed entry directly against the prototype and the old public assisted entry at 0cff6ec, including each entry’s raw duration on identical inputs. The external field comprises the direct libraries and externally authored FastMMW with a serial OpenBLAS leaf. Report assistance by external libraries for every method that uses it. Report the outright fastest qualified whole call across every tested method for each host and case.
+
+Qualify each method on each host and layout separately. Require full-output comparisons to FP64 on both random seeds, cancellation and scaled inputs. The absolute error limit is 0.002. Reject nonfinite values, changed guards or a different thread count or logical CPU. Verify the native routes of the standalone incumbent, the new standalone and assisted entries, FastMMW, and the two existing prototype hybrids. The immutable prior public assisted binary participates in all four full-output checks and six elapsed observations. Keep raw data and explicit reasons when a peer fails a fixture. A win over an implementation requires the six paired timings from the same layout, seeds and rounds. Report median peer-time divided by candidate-time, per-seed medians and wins out of six. The raw winner uses the least qualified median time. Geometric means give each layout equal weight. This study measures the listed Linux hosts, floating-point mode, layouts and library revisions.

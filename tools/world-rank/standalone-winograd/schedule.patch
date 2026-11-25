@@ -1,0 +1,26 @@
+--- a/tools/world-rank/hybrid_next.c
++++ b/tools/world-rank/hybrid_next.c
+@@ -72 +72 @@
+-    float* c,int ldc,float* scratch,int levels)
++    float* c,int ldc,float* scratch,int levels,rank_sgemm_fn leaf)
+@@ -75 +75 @@
+-        rank_bridge(m,n,k,a,lda,b,ldb,c,ldc);
++        leaf(m,n,k,a,lda,b,ldb,c,ldc);
+@@ -86 +86 @@
+-#define CHILD(A,LD_A,B,LD_B,C,LD_C) winograd(h,w,d,A,LD_A,B,LD_B,C,LD_C,child,levels-1)
++#define CHILD(A,LD_A,B,LD_B,C,LD_C) winograd(h,w,d,A,LD_A,B,LD_B,C,LD_C,child,levels-1,leaf)
+@@ -120 +120 @@
+-    const float* b,int ldb,float* c,int ldc)
++    const float* b,int ldb,float* c,int ldc,rank_sgemm_fn leaf)
+@@ -132,2 +132,2 @@
+-    if (nc!=n) rank_bridge(mc,n-nc,k,a,lda,b+nc,ldb,c+nc,ldc);
+-    if (mc!=m) rank_bridge(m-mc,n,k,a+(size_t)mc*lda,lda,b,ldb,c+(size_t)mc*ldc,ldc);
++    if (nc!=n) leaf(mc,n-nc,k,a,lda,b+nc,ldb,c+nc,ldc);
++    if (mc!=m) leaf(m-mc,n,k,a+(size_t)mc*lda,lda,b,ldb,c+(size_t)mc*ldc,ldc);
+@@ -157 +157,2 @@
+-            winograd(mc,nc,kc,a,lda,b,ldb,c,ldc,scratch,levels);
++            rank_sgemm_fn leaf=standalone_leaf_for_depth(levels);
++            winograd(mc,nc,kc,a,lda,b,ldb,c,ldc,scratch,levels,leaf);
+@@ -159 +160 @@
+-            complete_edges(m,n,k,mc,nc,kc,a,lda,b,ldb,c,ldc);
++            complete_edges(m,n,k,mc,nc,kc,a,lda,b,ldb,c,ldc,leaf);

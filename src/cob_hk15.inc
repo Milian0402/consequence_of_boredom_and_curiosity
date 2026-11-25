@@ -13,7 +13,11 @@ static void cob_hk15_fused_child(int m, int n, int k, const float* a, int lda,
 #if defined(COB_USE_RECURSIVE_STRASSEN)
         !(lda == k && ldb == n && cob_recursive_square_is_eligible(m, n, k)) &&
 #endif
+#ifdef COB_USE_HK_X86_LEAF
+        cob_sgemm_strassen_fused_impl(m, n, k, a, lda, b, ldb, c, ldc, 960, 1)) {
+#else
         cob_sgemm_strassen_fused_at(m, n, k, a, lda, b, ldb, c, ldc, 960)) {
+#endif
 #ifdef COB_TRACE_HK15_CHILD
         ++cob_hk15_child_fused;
 #endif
@@ -27,6 +31,21 @@ static void cob_hk15_fused_child(int m, int n, int k, const float* a, int lda,
     --cob_hk15_trace_inside;
 #endif
 }
+
+#ifdef COB_USE_HK_X86_LEAF
+static void cob_hk15_fused_default_child(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+#ifdef COB_TRACE_HK15_CHILD
+    ++cob_hk15_children;
+    ++cob_hk15_trace_inside;
+#endif
+    cob_hk_x86_base(1, m, n, k, a, lda, b, ldb, c, ldc);
+#ifdef COB_TRACE_HK15_CHILD
+    --cob_hk15_trace_inside;
+#endif
+}
+#endif
 
 #ifdef COB_TRACE_HK15_CHILD
 static void cob_hk15_trace_base(int m, int n, int k, const float* a, int lda,
@@ -92,6 +111,10 @@ static int cob_hk15_try(int m, int n, int k, const float* aa, int lda,
     const double volume = 3.0*mh*nh*kh;
     if (volume >= 960*area && volume < COB_FUSED_STRASSEN_MIN_HARMONIC_DIM*area)
         cob_sgemm_rowmajor = cob_hk15_fused_child;
+#ifdef COB_USE_HK_X86_LEAF
+    else if (volume >= COB_FUSED_STRASSEN_MIN_HARMONIC_DIM*area)
+        cob_sgemm_rowmajor = cob_hk15_fused_default_child;
+#endif
 #elif defined(COB_USE_HK15_CHILD)
     void (*const cob_sgemm_rowmajor)(int,int,int,const float*,int,
         const float*,int,float*,int) = cob_hk15_child_product;

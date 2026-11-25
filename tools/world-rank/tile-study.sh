@@ -10,7 +10,7 @@ phase=$(cat "$dir/phase.txt")
 arch=$(uname -m)
 cc=${CC:-cc}
 previous=b83033d199137b370c03a5a3d63365f1025162b7
-case "$phase" in tile-screen|tile-confirm|tile-replay|tile-child|tile-parent) ;; *) exit 2 ;; esac
+case "$phase" in tile-screen|tile-confirm|tile-replay|tile-child|tile-parent|leaf-wave) ;; *) exit 2 ;; esac
 [[ $(uname -s) == Linux ]]
 common=(-std=c11 -O3 -fPIC -shared -DCOB_ENABLE_PORTABLE_STRASSEN=1 -DCOB_ENABLE_RECURSIVE_STRASSEN=1)
 case "$arch" in
@@ -26,6 +26,7 @@ case "$arch" in
 esac
 if [[ $phase == tile-replay ]]; then panel="$dir/entry-replay.csv"; fi
 if [[ $phase == tile-child ]]; then panel="$dir/hk-child.csv"; fi
+if [[ $phase == leaf-wave ]]; then panel="$dir/leaf-wave.csv"; fi
 if [[ $phase == tile-parent ]]; then panel="$dir/hk-parent.csv"; fi
 export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 OMP_THREAD_LIMIT=1 MKL_NUM_THREADS=1 MKL_DYNAMIC=FALSE BLIS_NUM_THREADS=1 GOTO_NUM_THREADS=1
 peers=()
@@ -80,6 +81,11 @@ tile_candidate() {
 }
 compile_entry "$build/previous" "$build/incumbent.so"
 tile_plugin cob-incumbent "$build/incumbent.so"
+if [[ $phase == leaf-wave ]]; then
+    source "$dir/leaf-wave-study.inc"
+    run_leaf_wave
+    exit $?
+fi
 if [[ $phase == tile-parent ]]; then
     source "$dir/hk-parent-study.inc"
     run_hk_parent
