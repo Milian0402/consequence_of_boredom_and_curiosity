@@ -1491,10 +1491,100 @@ __arm_new("za") __arm_locally_streaming
     return 1;
 }
 
+/* The first twelve depth slices of both row panels live in Z registers.
+   Later slices take a compact tile-major stack path. */
+__attribute__((always_inline)) static inline void
+cob_small_input(int m, int rem, const float *a, int lda)
+    __arm_streaming __arm_inout("za")
+{
+    const svbool_t pk = svwhilelt_b32_s32(0, rem);
+#define FILL_FOUR(TILE, ROW, SRC) do { \
+    const float *base_ = (SRC); \
+    svfloat32x4_t z = svcreate4_f32(svld1_f32(pk,base_),svld1_f32(pk,base_+lda), \
+        svld1_f32(pk,base_+2*(size_t)lda),svld1_f32(pk,base_+3*(size_t)lda)); \
+    svwrite_hor_za32_f32_vg4(TILE,ROW,z); \
+} while (0)
+#pragma clang loop unroll(full)
+    for (int i=0;i<16;i+=4) FILL_FOUR(0,i,a+(size_t)i*lda);
+    int i=0;
+    for (; i+4<=m-16; i+=4) FILL_FOUR(1,i,a+(size_t)(16+i)*lda);
+    for (;i<m-16;++i) svld1_hor_za32(1,i,pk,a+(size_t)(16+i)*lda);
+#undef FILL_FOUR
+}
+
+__attribute__((always_inline)) static inline void
+cob_small_compute(int m,int n,int k,const float *a,int lda,const float *b,int ldb,float *c,int ldc)
+    __arm_streaming __arm_inout("za")
+{
+    const svbool_t full=svptrue_b32();
+    const svcount_t group=svptrue_c32();
+    const svbool_t rows=svwhilelt_b32_s32(0,m-16), cols=svwhilelt_b32_s32(0,n-16);
+    _Alignas(64) float upper[36*16],lower[36*16];
+    for (int p=16;p<k;p+=16) {
+        int rem=k-p<16?k-p:16;
+        cob_small_input(m,rem,a+p,lda);
+        for (int j=0;j<rem;j+=4) {
+            svst1_f32_x4(group,upper+16*(p+j-12),svread_ver_za32_f32_vg4(0,j));
+            svst1_f32_x4(group,lower+16*(p+j-12),svread_ver_za32_f32_vg4(1,j));
+        }
+    }
+    cob_small_input(m,16,a,lda);
+    svst1_f32_x4(group,upper,svread_ver_za32_f32_vg4(0,12));
+    svst1_f32_x4(group,lower,svread_ver_za32_f32_vg4(1,12));
+    svfloat32x4_t u0=svread_ver_za32_f32_vg4(0,0), d0=svread_ver_za32_f32_vg4(1,0);
+    svfloat32x4_t u4=svread_ver_za32_f32_vg4(0,4), d4=svread_ver_za32_f32_vg4(1,4);
+    svfloat32x4_t u8=svread_ver_za32_f32_vg4(0,8), d8=svread_ver_za32_f32_vg4(1,8);
+    svzero_za();
+#define PRODUCT(P,U,D) do { \
+    const float *rhs_=b+(size_t)(P)*ldb; \
+    svfloat32_t lo_=svld1_f32(full,rhs_), hi_=svld1_f32(cols,rhs_+16); \
+    svmopa_za32_f32_m(0,full,full,U,lo_); svmopa_za32_f32_m(1,full,cols,U,hi_); \
+    svmopa_za32_f32_m(2,rows,full,D,lo_); svmopa_za32_f32_m(3,rows,cols,D,hi_); \
+} while (0)
+#define FOUR(P,U,D) do { \
+    PRODUCT(P,svget4_f32(U,0),svget4_f32(D,0)); PRODUCT(P+1,svget4_f32(U,1),svget4_f32(D,1)); \
+    PRODUCT(P+2,svget4_f32(U,2),svget4_f32(D,2)); PRODUCT(P+3,svget4_f32(U,3),svget4_f32(D,3)); \
+} while (0)
+    FOUR(0,u0,d0); FOUR(4,u4,d4); FOUR(8,u8,d8);
+    int p=12;
+    for (;p+4<=k;p+=4) {
+        svfloat32x4_t u=svld1_f32_x4(group,upper+16*(p-12));
+        svfloat32x4_t d=svld1_f32_x4(group,lower+16*(p-12));
+        FOUR(p,u,d);
+    }
+    for (;p<k;++p) {
+        svfloat32_t u=svld1_f32(full,upper+16*(p-12)), d=svld1_f32(full,lower+16*(p-12));
+        PRODUCT(p,u,d);
+    }
+#undef FOUR
+#undef PRODUCT
+    for (int r=0;r<16;++r) {
+        svst1_hor_za32(0,r,full,c+(size_t)r*ldc);
+        svst1_hor_za32(1,r,cols,c+(size_t)r*ldc+16);
+    }
+    for (int r=0;r<m-16;++r) {
+        svst1_hor_za32(2,r,full,c+(size_t)(r+16)*ldc);
+        svst1_hor_za32(3,r,cols,c+(size_t)(r+16)*ldc+16);
+    }
+}
+
+__arm_new("za") __arm_locally_streaming static int
+cob_small_entry(int m,int n,int k,const float *a,int lda,const float *b,int ldb,float *c,int ldc)
+{
+    if (svcntsw()!=16) return 0;
+    if (m==32 && n==32 && k==32)
+        cob_small_compute(32,32,32,a,lda,b,ldb,c,ldc);
+    else
+        cob_small_compute(m,n,k,a,lda,b,ldb,c,ldc);
+    return 1;
+}
+
 int cob_sgemm_sme_tiny(int m, int n, int k, const float *a, int lda, const float *b, int ldb,
                        float *c, int ldc)
 {
     /* The public entry checked pointers, strides, non-aliasing and 16..96 bounds. */
+    if (m>16 && m<=32 && n>16 && n<=32 && k>=16 && k<=48)
+        return cob_small_entry(m,n,k,a,lda,b,ldb,c,ldc);
     if (((m | n | k) & 15) == 0 && m > 16 && n == 16 && k >= 32)
         return cob_rect_entry(m, n, k, a, lda, b, ldb, c, ldc);
     return cob_sme_tiny_legacy(m, n, k, a, lda, b, ldb, c, ldc);
