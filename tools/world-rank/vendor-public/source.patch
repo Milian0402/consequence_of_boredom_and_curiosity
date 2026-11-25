@@ -1,0 +1,73 @@
+--- a/src/gemm.c
++++ b/src/gemm.c
+@@ -3586,0 +3587,25 @@
++#if defined(__linux__) && defined(COB_USE_PORTABLE_STRASSEN)
++#if COB_ENABLE_OPENBLAS_LEAF + COB_ENABLE_MKL_SEQUENTIAL_LEAF + COB_ENABLE_ARMPL_SEQUENTIAL_LEAF > 1
++#error "Choose one external CBLAS leaf."
++#endif
++#if COB_ENABLE_OPENBLAS_LEAF
++#include <cblas.h>
++#define COB_USE_CBLAS_LEAF 1
++static inline int cob_cblas_leaf_is_serial(void) { return openblas_get_num_threads() == 1; }
++#elif COB_ENABLE_MKL_SEQUENTIAL_LEAF
++#include <mkl.h>
++_Static_assert(sizeof(MKL_INT) == sizeof(int), "Select the LP64 oneMKL interface.");
++#define COB_USE_CBLAS_LEAF 1
++static inline int cob_cblas_leaf_is_serial(void) { return mkl_get_max_threads() == 1; }
++#elif COB_ENABLE_ARMPL_SEQUENTIAL_LEAF
++#include <armpl.h>
++_Static_assert(sizeof(armpl_int_t) == sizeof(int), "Select the LP64 ArmPL interface.");
++#define COB_USE_CBLAS_LEAF 1
++/* Link the LP64 sequential provider. */
++static inline int cob_cblas_leaf_is_serial(void) { return 1; }
++#endif
++#endif
++
++#ifndef COB_CBLAS_WINOGRAD_MIN_HARMONIC
++#define COB_CBLAS_WINOGRAD_MIN_HARMONIC 2048
++#endif
+@@ -3592,4 +3616,0 @@
+-#if defined(COB_USE_PORTABLE_STRASSEN) && defined(__linux__) && defined(COB_ENABLE_OPENBLAS_LEAF) && COB_ENABLE_OPENBLAS_LEAF
+-#define COB_USE_OPENBLAS_LEAF 1
+-#include <cblas.h>
+-#endif
+@@ -3605,2 +3626,2 @@
+-#if defined(COB_USE_OPENBLAS_LEAF)
+-    if (openblas_get_num_threads() == 1) {
++#if defined(COB_USE_CBLAS_LEAF)
++    if (cob_cblas_leaf_is_serial()) {
+@@ -3714 +3735 @@
+-#if defined(COB_USE_OPENBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN)
++#if defined(COB_USE_CBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN)
+@@ -3765 +3786 @@
+-#if defined(COB_USE_OPENBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN)
++#if defined(COB_USE_CBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN)
+@@ -4107,2 +4128,2 @@
+-#if defined(COB_USE_OPENBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN) && defined(COB_USE_RECURSIVE_STRASSEN)
+-    if (cob_openblas_winograd_try(m, n, k, a, lda, b, ldb, c, ldc, 2048)) return;
++#if defined(COB_USE_CBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN) && defined(COB_USE_RECURSIVE_STRASSEN)
++    if (cob_openblas_winograd_try(m, n, k, a, lda, b, ldb, c, ldc, COB_CBLAS_WINOGRAD_MIN_HARMONIC)) return;
+--- a/src/cob_openblas_winograd.inc
++++ b/src/cob_openblas_winograd.inc
+@@ -12 +12 @@
+-    if (3.0*m*n*k < min_harmonic*areas || openblas_get_num_threads() != 1) return 0;
++    if (3.0*m*n*k < min_harmonic*areas || !cob_cblas_leaf_is_serial()) return 0;
+@@ -17 +17,5 @@
+-    const int core_m = m - m%4, core_n = n - n%4, core_k = k - k%4;
++    const int split = 1 << RANK_CBLAS_LEVELS;
++    const int align_mn = RANK_CBLAS_ALIGNED ? 64 : split;
++    const int align_k = RANK_CBLAS_ALIGNED ? 32 : split;
++    const int core_m = m - m%align_mn, core_n = n - n%align_mn, core_k = k - k%align_k;
++    if (core_m == 0 || core_n == 0 || core_k == 0) return 0;
+@@ -20 +24 @@
+-    const size_t total = parent + parent/4;
++    const size_t total = RANK_CBLAS_LEVELS == 2 ? parent + parent/4 : parent;
+@@ -26 +30 @@
+-        work, work+parent, cob_strassen_leaf);
++        work, RANK_CBLAS_LEVELS == 2 ? work+parent : NULL, cob_strassen_leaf);
+@@ -30 +34,4 @@
+-    if (k != core_k) {
++    if (k != core_k && RANK_CBLAS_ALIGNED) {
++        cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, core_m, core_n, k-core_k,
++            1.0f, a+core_k, lda, b+(size_t)core_k*ldb, ldb, 1.0f, c, ldc);
++    } else if (k != core_k) {

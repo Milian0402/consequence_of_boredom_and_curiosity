@@ -33,9 +33,50 @@ jobs:
           name: packing-cost-${{ github.run_id }}
           path: ${{ runner.temp }}/packing-cost
           retention-days: 14
-  benchmark:
+  onednn:
     needs: phase
-    if: needs.phase.outputs.label != 'packing-cost'
+    if: needs.phase.outputs.label == 'aligned-core'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {runner: ubuntu-24.04, arch: x86_64}
+          - {runner: ubuntu-24.04-arm, arch: aarch64}
+    runs-on: ${{ matrix.runner }}
+    name: Build sequential oneDNN on ${{ matrix.arch }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Build pinned oneDNN and qualify both wrappers
+        env:
+          JOBS: 4
+        run: bash tools/world-rank/onednn/build.sh "$RUNNER_TEMP/onednn"
+      - name: Package the verified libraries and build evidence
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/onednn-artifact"
+          cd "$RUNNER_TEMP/onednn"
+          if [[ -s qualified-oneshot.log && -s qualified-cached-plan.log ]] &&
+             grep -q '^PASS ' qualified-oneshot.log && grep -q '^PASS ' qualified-cached-plan.log; then
+            tar czf "$RUNNER_TEMP/onednn-artifact/runtime.tgz" prefix onednn-f32-{oneshot,cached-plan}.so
+            cd "$RUNNER_TEMP/onednn-artifact"
+            sha256sum runtime.tgz > runtime.tgz.sha256
+            cd "$RUNNER_TEMP/onednn"
+          fi
+          for file in host.txt configure.log build.log install.log dependencies.txt build-fingerprint.txt imports.txt               cmake/CMakeCache.txt cmake/compile_commands.json qualified-{oneshot,cached-plan}.log; do
+            if [[ -f $file ]]; then cp "$file" "$RUNNER_TEMP/onednn-artifact/"; fi
+          done
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: ${{ !cancelled() }}
+        with:
+          name: onednn-${{ matrix.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/onednn-artifact
+          retention-days: 14
+  benchmark:
+    needs: [phase, onednn]
+    if: ${{ !cancelled() && needs.phase.result == 'success' && needs.phase.outputs.label != 'packing-cost' }}
     name: Frozen ranking on ${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -44,7 +85,7 @@ jobs:
         include:
           - {runner: ubuntu-24.04, arch: x86_64}
           - {runner: ubuntu-24.04-arm, arch: aarch64}
-    timeout-minutes: 70
+    timeout-minutes: 90
     env:
       VENDOR_DIR: ${{ github.workspace }}/../world-rank-vendors
     steps:
@@ -55,8 +96,30 @@ jobs:
       - name: Prepare system tools and fallback FP64 BLAS
         run: |
           sudo apt-get update -qq
-          sudo apt-get install --no-install-recommends -y gcc gfortran make pkg-config libopenblas-pthread-dev unzip
+          sudo apt-get install --no-install-recommends -y gcc g++ gfortran make pkg-config libopenblas-pthread-dev unzip
           mkdir -p "$VENDOR_DIR" "$RUNNER_TEMP/rank-result"
+      - name: Retrieve the same-family oneDNN build and evidence
+        id: retrieve_onednn
+        if: needs.phase.outputs.label == 'aligned-core'
+        continue-on-error: true
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: onednn-${{ matrix.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/onednn-input
+      - name: Qualify oneDNN on the CPU that will be measured
+        id: onednn
+        if: needs.phase.outputs.label == 'aligned-core'
+        continue-on-error: true
+        run: |
+          cd "$RUNNER_TEMP/onednn-input"
+          sha256sum --check runtime.tgz.sha256
+          mkdir -p "$VENDOR_DIR/onednn" "$RUNNER_TEMP/rank-result/onednn"
+          tar xzf runtime.tgz -C "$VENDOR_DIR/onednn"
+          bash "$GITHUB_WORKSPACE/tools/world-rank/onednn/qualify.sh" "$VENDOR_DIR/onednn" "$VENDOR_DIR/onednn/prefix/include"
+          cp "$VENDOR_DIR/onednn"/{qualified-*.log,host.txt} "$RUNNER_TEMP/rank-result/onednn/"
+          mkdir -p "$RUNNER_TEMP/rank-result/onednn/build"
+          cp ./*.txt ./*.log ./runtime.tgz.sha256 "$RUNNER_TEMP/rank-result/onednn/build/"
+          touch "$VENDOR_DIR/onednn/qualified"
       - name: Verify standalone fused kernels against FP64
         run: |
           if [[ $(uname -m) == aarch64 ]]; then
@@ -77,7 +140,7 @@ jobs:
         run: bash tools/world-rank/aocl/build.sh "$VENDOR_DIR"
       - name: Qualify the independent FastMMW Winograd comparator
         id: fastmmw
-        if: needs.phase.outputs.label == 'tile-parent' || needs.phase.outputs.label == 'leaf-wave'
+        if: needs.phase.outputs.label == 'tile-parent' || needs.phase.outputs.label == 'leaf-wave' || needs.phase.outputs.label == 'aligned-core'
         continue-on-error: true
         run: |
           set -o pipefail
@@ -88,6 +151,7 @@ jobs:
         run: bash tools/world-rank/vendors/build.sh "$VENDOR_DIR"
       - name: Build LIBXSMM small-shape JIT kernels
         id: libxsmm
+        if: needs.phase.outputs.label != 'aligned-core'
         continue-on-error: true
         run: bash tools/world-rank/libxsmm/build.sh "$VENDOR_DIR"
       - name: Build native BLASFEO and verify its standard SGEMM entry
@@ -95,12 +159,16 @@ jobs:
         if: success()
         continue-on-error: true
         run: |
-          if [[ $(cat tools/world-rank/phase.txt) =~ ^(heldout|tile-screen|tile-confirm|tile-replay|tile-child|tile-parent|leaf-wave)$ ]]; then
+          if [[ $(cat tools/world-rank/phase.txt) =~ ^(heldout|tile-screen|tile-confirm|tile-replay|tile-child|tile-parent|leaf-wave|aligned-core)$ ]]; then
             bash tools/world-rank/blasfeo/build.sh "$VENDOR_DIR"
           fi
           if [[ $(cat tools/world-rank/phase.txt) == tile-replay && $(uname -m) == x86_64 ]]; then
             RANK_BLASFEO_ROW_SLAB=48 bash tools/world-rank/blasfeo/build.sh "$VENDOR_DIR"
           fi
+      - name: Qualify optional Intel Haswell TBLIS Strassen
+        if: needs.phase.outputs.label == 'aligned-core' && matrix.arch == 'x86_64'
+        continue-on-error: true
+        run: bash tools/world-rank/tblis/build.sh "$VENDOR_DIR"
       - name: Compare installed candidates against an independent FP64 product
         run: bash tools/world-rank/run.sh "$RUNNER_TEMP/rank-result" "$VENDOR_DIR"
       - name: Measure whole-call and component times on the same CPU
@@ -119,7 +187,7 @@ jobs:
           ${{ !cancelled() && (steps.openblas.outcome == 'failure' ||
           steps.aocl.outcome == 'failure' || steps.vendor.outcome == 'failure' ||
           steps.libxsmm.outcome == 'failure' || steps.blasfeo.outcome == 'failure' ||
-          steps.fastmmw.outcome == 'failure') }}
+          steps.fastmmw.outcome == 'failure' || steps.onednn.outcome == 'failure') }}
         run: |
           echo "At least one requested vendor build was unavailable." > "$RUNNER_TEMP/rank-result/missing-vendor.txt"
           exit 1
