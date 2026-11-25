@@ -1,0 +1,110 @@
+/* Reuse the frozen worker's RNG, input distributions, plugin initialization,
+   one-task check and clock. Unused previous entry points are removed at link. */
+#define main previous_study_main
+#include "../worker.c"
+#undef main
+#include <sys/mman.h>
+#include <unistd.h>
+
+struct view {
+    float *start, *data;
+    size_t count, bytes, origin;
+    int rows, cols, ld;
+};
+
+static struct view parent(int rows,int cols,int ld,int origin,uint32_t bits)
+{
+    size_t page=(size_t)sysconf(_SC_PAGESIZE);
+    if (ld<cols || cols<1 || rows<1 || origin<0) fatal("invalid parent layout");
+    /* Preserve the old page-rounded envelope at both archived endpoints.
+       Mixed cells can cross a nominal storage row; logical rows never overlap. */
+    size_t bytes=((size_t)(origin/ld+rows+2)*ld*sizeof(float)+page-1)/page*page;
+    if ((size_t)origin+(size_t)(rows-1)*ld+cols>bytes/sizeof(float)) fatal("view out of bounds");
+    char *map=mmap(NULL,bytes+2*page,PROT_NONE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
+    if (map==MAP_FAILED || mprotect(map+page,bytes,PROT_READ|PROT_WRITE)) fatal("parent mapping");
+    float *start=(float*)(map+page);
+    for (size_t i=0;i<bytes/sizeof(float);++i) set_bits(start+i,bits);
+    return (struct view){start,start+origin,bytes/sizeof(float),bytes,(size_t)origin,rows,cols,ld};
+}
+
+/* FNV-1a over logical cells in canonical little-endian binary32 order. */
+static uint64_t fingerprint(struct view v)
+{
+    uint64_t h=UINT64_C(14695981039346656037);
+    for(int i=0;i<v.rows;++i) for(int j=0;j<v.cols;++j) {
+        uint32_t u=get_bits(v.data+(size_t)i*v.ld+j);
+        for(int b=0;b<4;++b) { h^=(u>>(8*b))&255u; h*=UINT64_C(1099511628211); }
+    }
+    return h;
+}
+
+static double verify(struct view a,struct view b,struct view c,size_t *guards)
+{
+    double *row=calloc((size_t)c.cols,sizeof(*row));
+    if (!row) fatal("reference allocation");
+    double worst=0;
+    for (int i=0;i<c.rows;++i) {
+        memset(row,0,(size_t)c.cols*sizeof(*row));
+        for (int p=0;p<a.cols;++p) {
+            const double av=a.data[(size_t)i*a.ld+p];
+            const float *bp=b.data+(size_t)p*b.ld;
+            for (int j=0;j<c.cols;++j) row[j]+=av*(double)bp[j];
+        }
+        for (int j=0;j<c.cols;++j) {
+            double error=fabs(c.data[(size_t)i*c.ld+j]-row[j]);
+            if (!isfinite(error) || error>0.002) fatal("FP64 mismatch");
+            if (error>worst) worst=error;
+        }
+    }
+    free(row);
+    *guards=0;
+    for (size_t i=0;i<c.count;++i) {
+        if (i>=c.origin && (i-c.origin)/(size_t)c.ld<(size_t)c.rows &&
+            (i-c.origin)%(size_t)c.ld<(size_t)c.cols) continue;
+        if (get_bits(c.start+i)!=output_guard) fatal("outside C view changed");
+        ++*guards;
+    }
+    return worst;
+}
+
+int main(int argc,char **argv)
+{
+    if (argc!=14) fatal("usage: plugin-or-public distribution seed calls M N K lda ldb ldc ao bo co");
+    if (!pin_cpu()) fatal("pin or initialization thread");
+    rank_sgemm_fn product=cob_sgemm_rowmajor;
+    if (strcmp(argv[1],"public")) { plugin(argv[1]); product=selected_sgemm; }
+    const char *mode=argv[2]; uint32_t seed=number(argv[3]);
+    const int calls=number(argv[4]),m=number(argv[5]),n=number(argv[6]),k=number(argv[7]);
+    if (m<=0 || m>4096 || n<=0 || n>8192 || k<=0 || k>2048 || calls>1024) fatal("invalid dimensions");
+    struct view a=parent(m,k,number(argv[8]),number(argv[11]),input_guard);
+    struct view b=parent(k,n,number(argv[9]),number(argv[12]),input_guard);
+    struct view c=parent(m,n,number(argv[10]),number(argv[13]),output_guard);
+    if (!strcmp(mode,"cancel")) {
+        cancellation_input(a.data,m,k,a.ld,1); cancellation_input(b.data,k,n,b.ld,0);
+    } else if (!strcmp(mode,"random") || !strcmp(mode,"scaled")) {
+        for(int i=0;i<m;++i) fill(a.data+(size_t)i*a.ld,k,&seed);
+        for(int p=0;p<k;++p) fill(b.data+(size_t)p*b.ld,n,&seed);
+        if (!strcmp(mode,"scaled")) {
+            for(int i=0;i<m;++i) for(int p=k/2;p<k;++p) a.data[(size_t)i*a.ld+p]*=0x1p-8f;
+            for(int p=0;p<k/2;++p) for(int j=0;j<n;++j) b.data[(size_t)p*b.ld+j]*=0x1p-8f;
+        }
+    } else fatal("unknown distribution");
+    if (mprotect(a.start,a.bytes,PROT_READ) || mprotect(b.start,b.bytes,PROT_READ)) fatal("read-only parents");
+    for(int i=0;i<m;++i) for(int j=0;j<n;++j) c.data[(size_t)i*c.ld+j]=NAN;
+    double start=seconds();
+    product(m,n,k,a.data,a.ld,b.data,b.ld,c.data,c.ld);
+    double first=seconds()-start;
+    if (!single_task()) fatal("thread count after first call");
+    start=seconds();
+    for (int r=0;r<calls;++r) product(m,n,k,a.data,a.ld,b.data,b.ld,c.data,c.ld);
+    double elapsed=seconds()-start;
+    if (!single_task()) fatal("thread count after batch");
+    size_t guards;
+    double error=verify(a,b,c,&guards);
+    printf("FACTOR,%zu,%zu,%u,%u,%u,%d,1,%.12g,%.12g,%.12g,%016" PRIx64 ",%016" PRIx64 ",%016" PRIx64 ",%zu,%zu,%zu,%d,%d,%d\n",(size_t)m*n,guards,
+           (unsigned)((uintptr_t)a.data%64),(unsigned)((uintptr_t)b.data%64),(unsigned)((uintptr_t)c.data%64),
+           sched_getcpu(),error,first,calls ? elapsed/calls : 0,
+           fingerprint(a),fingerprint(b),fingerprint(c),(size_t)(a.data-a.start),(size_t)(b.data-b.start),
+           (size_t)(c.data-c.start),a.ld,b.ld,c.ld);
+    return 0;
+}

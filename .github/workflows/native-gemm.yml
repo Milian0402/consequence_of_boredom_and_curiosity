@@ -79,7 +79,7 @@ jobs:
       contents: read
       actions: read
     needs: [phase, onednn]
-    if: ${{ !cancelled() && needs.phase.result == 'success' && needs.phase.outputs.label != 'packing-cost' && needs.phase.outputs.label != 'rank48-arm-confirm' && needs.phase.outputs.label != 'stream-release' && needs.phase.outputs.label != 'cropped-views' }}
+    if: ${{ !cancelled() && needs.phase.result == 'success' && needs.phase.outputs.label != 'packing-cost' && needs.phase.outputs.label != 'rank48-arm-confirm' && needs.phase.outputs.label != 'stream-release' && needs.phase.outputs.label != 'cropped-views' && needs.phase.outputs.label != 'arm-layout' }}
     name: ${{ needs.phase.outputs.label == 'grouped-b-x86' && format('Grouped B ranking on x86-64, replica {0}', matrix.replica) || needs.phase.outputs.label == 'frontier-x86' && format('Frontier ranking on x86-64, replica {0}', matrix.replica) || format('Frozen ranking on {0}', matrix.arch) }}
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -374,5 +374,66 @@ jobs:
         with:
           name: cropped-views-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/view-result
+          if-no-files-found: error
+          retention-days: 30
+
+  layout-factors:
+    needs: phase
+    if: needs.phase.outputs.label == 'arm-layout'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6
+          path: production-source
+          persist-credentials: false
+      - name: Build the fixed sequential oneMKL peer
+        run: bash tools/world-rank/vendors/build.sh "$RUNNER_TEMP/factor-vendors"
+      - name: Measure six independent matrix layout factors
+        run: bash tools/world-rank/factorial/run.sh "$PWD/production-source" "$RUNNER_TEMP/factor-vendors" "$RUNNER_TEMP/factor-result"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: ${{ !cancelled() }}
+        with:
+          name: factorial-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/factor-result
+          if-no-files-found: error
+          retention-days: 30
+
+  arm-wide:
+    needs: phase
+    if: needs.phase.outputs.label == 'arm-layout'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 75
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6
+          path: production-source
+          persist-credentials: false
+      - name: Build or verify independent Arm SGEMM libraries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install --no-install-recommends -y gcc g++ cmake make pkg-config unzip
+          bash tools/world-rank/arm-wide/peers.sh "$RUNNER_TEMP/arm-vendors" "$RUNNER_TEMP/arm-result"
+      - name: Run installed standalone variants and the independent field on one CPU
+        run: bash tools/world-rank/arm-wide/run.sh "$PWD/production-source" "$RUNNER_TEMP/arm-vendors" "$RUNNER_TEMP/arm-result"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: ${{ !cancelled() }}
+        with:
+          name: arm-wide-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/arm-result
           if-no-files-found: error
           retention-days: 30

@@ -1,0 +1,142 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -10,6 +10,7 @@
+ option(COB_BUILD_BENCH "Build benchmark runner" ON)
+ option(COB_ENABLE_HK15 "Use one level of Hopcroft-Kerr on eligible 2-by-3-by-3 products" OFF)
+ option(COB_ENABLE_N2_SMALL "Use the Neoverse N2 small-matrix kernel on Linux Arm64" OFF)
++option(COB_ENABLE_ARM_STREAM_B "Stream full-depth B panels for medium-wide Linux AArch64 SGEMM" OFF)
+ option(COB_ENABLE_X86_STREAM_B "Use runtime-dispatched packed B panels for medium-wide FP32 products on Linux x86-64" OFF)
+ option(COB_ENABLE_X86_MEDIUM_ROUTE "Reuse packed left panels for medium row-wide products on Linux x86-64" OFF)
+ option(COB_ENABLE_PORTABLE_STRASSEN "Use one-level Strassen on eligible large native x86-64 and Arm64 products" OFF)
+@@ -291,6 +292,12 @@
+         if(COB_ENABLE_N2_SMALL)
+             target_compile_definitions(${target} PRIVATE COB_ENABLE_N2_SMALL=1)
+         endif()
++        if(COB_ENABLE_ARM_STREAM_B AND CMAKE_SYSTEM_NAME STREQUAL "Linux" AND
++           CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm64|aarch64|ARM64|AARCH64)$" AND
++           CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
++            target_compile_definitions(${target} PRIVATE COB_ENABLE_ARM_STREAM_B=1)
++            target_sources(${target} PRIVATE src/cob_arm_stream_b.c)
++        endif()
+         if(TARGET cob_stream_b_avx2)
+             target_compile_definitions(${target} PRIVATE COB_ENABLE_X86_STREAM_B=1)
+             target_sources(${target} PRIVATE ${cob_stream_b_objects})
+diff --git a/src/cob_arm_stream_b.c b/src/cob_arm_stream_b.c
+new file mode 100644
+--- /dev/null
++++ b/src/cob_arm_stream_b.c
+@@ -0,0 +1,41 @@
++#include <arm_neon.h>
++#include <stddef.h>
++#include <stdint.h>
++#include <string.h>
++
++#include "cob_arm_stream_b.h"
++
++#define COB_N2_TILE_KERNELS_ONLY
++#include "cob_n2_small.inc"
++
++void cob_arm_stream_b_product(int m, int n, int k, const float* a, int lda,
++    const float* b, int ldb, float* c, int ldc)
++{
++    enum { width = cob_arm_stream_width };
++    _Alignas(64) float panel[cob_arm_stream_max_k*width];
++    for (int begin = 0; begin < n; begin += width) {
++        /* A short last panel shifts left. All sources and destinations remain
++           in bounds. Overlapping results repeat the same ordered reduction. */
++        const int j = begin <= n - width ? begin : n - width;
++        for (int p = 0; p < k; ++p)
++            memcpy(panel + (size_t)p*width, b + (size_t)p*ldb + j, width*sizeof(float));
++
++        int i = 0;
++        for (; i <= m - 6; i += 6)
++            n2_full(k, a + (size_t)i*lda, lda, panel, width, c + (size_t)i*ldc + j, ldc);
++        if (i < m) {
++            const float* bottom = a + (size_t)i*lda;
++            float* output = c + (size_t)i*ldc + j;
++            /* Constant row counts remove inactive accumulators from each edge. */
++#define COB_ARM_EDGE(rows) case rows: n2_edge(rows, 4, 4, k, bottom, lda, panel, width, output, ldc); break
++            switch (m - i) {
++                COB_ARM_EDGE(1);
++                COB_ARM_EDGE(2);
++                COB_ARM_EDGE(3);
++                COB_ARM_EDGE(4);
++                COB_ARM_EDGE(5);
++            }
++#undef COB_ARM_EDGE
++        }
++    }
++}
+diff --git a/src/cob_arm_stream_b.h b/src/cob_arm_stream_b.h
+new file mode 100644
+--- /dev/null
++++ b/src/cob_arm_stream_b.h
+@@ -0,0 +1,9 @@
++#ifndef COB_ARM_STREAM_B_H
++#define COB_ARM_STREAM_B_H
++
++enum { cob_arm_stream_width = 16, cob_arm_stream_max_k = 384 };
++
++void cob_arm_stream_b_product(int m, int n, int k, const float* a, int lda,
++    const float* b, int ldb, float* c, int ldc);
++
++#endif
+diff --git a/src/cob_n2_small.inc b/src/cob_n2_small.inc
+--- a/src/cob_n2_small.inc
++++ b/src/cob_n2_small.inc
+@@ -146,6 +146,7 @@
+ #undef N2_WRITE
+ }
+ 
++#ifndef COB_N2_TILE_KERNELS_ONLY
+ N2_INLINE void n2_strip(int rows, int n, int k, const float *a, int lda,
+                         const float *b, int ldb, float *c, int ldc)
+ {
+@@ -190,5 +191,6 @@
+ #undef N2_REST
+     return 1;
+ }
++#endif
+ #undef N2_ROWS
+ #undef N2_INLINE
+diff --git a/src/gemm.c b/src/gemm.c
+--- a/src/gemm.c
++++ b/src/gemm.c
+@@ -4250,6 +4250,23 @@
+     const float* b, int ldb, float* c, int ldc);
+ #endif
+ 
++#if defined(COB_ENABLE_ARM_STREAM_B) && COB_ENABLE_ARM_STREAM_B && defined(__linux__) && \
++    defined(__aarch64__) && defined(COB_USE_NEON) && defined(__ARM_NEON)
++#define COB_USE_ARM_STREAM_B 1
++#include "cob_arm_stream_b.h"
++
++static int cob_arm_stream_b_eligible(int m, int n, int k,
++    const float* a, int lda, const float* b, int ldb, float* c, int ldc)
++{
++    if (m < 24 || m > 160 || n < 1024 || n > 4096 || k < 96 || k > cob_arm_stream_max_k ||
++        n < 8*m || m*k > 49152 || !a || !b || !c || lda < k || ldb < n || ldc < n)
++        return 0;
++    const size_t count = (size_t)(m - 1)*ldc + n;
++    return !cob_f32_ranges_overlap(c, count, a, (size_t)(m - 1)*lda + k) &&
++           !cob_f32_ranges_overlap(c, count, b, (size_t)(k - 1)*ldb + n);
++}
++#endif
++
+ #if defined(COB_ENABLE_N2_SMALL) && COB_ENABLE_N2_SMALL && defined(__linux__) && \
+     defined(__aarch64__) && defined(COB_USE_NEON) && defined(__ARM_NEON)
+ #define COB_USE_N2_SMALL 1
+@@ -4270,6 +4287,12 @@
+     float* c,
+     int ldc)
+ {
++#ifdef COB_USE_ARM_STREAM_B
++    if (cob_arm_stream_b_eligible(m, n, k, a, lda, b, ldb, c, ldc)) {
++        cob_arm_stream_b_product(m, n, k, a, lda, b, ldb, c, ldc);
++        return;
++    }
++#endif
+ #ifdef COB_USE_X86_STREAM_B
+     if (cob_try_stream_b(m, n, k, a, lda, b, ldb, c, ldc)) return;
+ #endif

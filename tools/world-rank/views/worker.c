@@ -53,6 +53,10 @@ static double verify(struct view a,struct view b,struct view c,size_t *guards)
     return worst;
 }
 
+#ifdef VIEW_AUDIT_HEADER
+#include VIEW_AUDIT_HEADER
+#endif
+
 int main(int argc,char **argv)
 {
     if (argc!=17) fatal("usage: plugin-or-public distribution seed calls M N K lda ldb ldc ar ac br bc cr cc");
@@ -92,6 +96,9 @@ int main(int argc,char **argv)
     if (!single_task()) fatal("thread count after batch");
     size_t guards;
     double error=verify(a,b,c,&guards);
+#ifdef VIEW_AUDIT_HEADER
+    report_audit(argv[1], calls, a, b, c);
+#endif
     printf("VIEW,%zu,%zu,%u,%u,%u,%d,1,%.12g,%.12g,%.12g",(size_t)m*n,guards,
            (unsigned)((uintptr_t)a.data%64),(unsigned)((uintptr_t)b.data%64),(unsigned)((uintptr_t)c.data%64),
            sched_getcpu(),error,first,calls ? elapsed/calls : 0);
