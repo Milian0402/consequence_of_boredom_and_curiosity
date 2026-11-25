@@ -52,6 +52,14 @@ leaves was faster on both rectangles on each CPU. All standalone COB output
 checks passed. Two-level FastMMW exceeded the accuracy limit on the Arm
 control. [Native comparisons](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45664272660)
 
+On Linux x86-64, CMake `-DCOB_ENABLE_X86_STREAM_B=ON` or Make
+`COB_ENABLE_X86_STREAM_B=ON` enables a packed-B kernel for wide FP32 outputs.
+It covers 24–160 rows, 1024–4096 columns and reduction depths of 96–384,
+with at least eight columns per row and at most 49,152 elements in A.
+A generic GCC or Clang x86-64 build chooses AVX-512F or AVX2/FMA at runtime
+and uses the existing path on other CPUs. Each optimized kernel is compiled
+in its own object. The option defaults to OFF.
+
 For large products on native Linux x86-64 or Arm64, enable the one-level Strassen path with `make COB_ENABLE_PORTABLE_STRASSEN=ON` or configure CMake with `-DCOB_ENABLE_PORTABLE_STRASSEN=ON`. It uses the native single-thread kernels for each subproduct. Contiguous balanced products use the original 1536 crossover. For rectangular or strided inputs, the dispatcher also weighs the number of products saved against the workspace needed for the three temporary matrices.
 
 Linux builds can also select a second Winograd level by enabling

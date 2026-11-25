@@ -3197,6 +3197,11 @@ static int cob_sgemm_one_shot_x86(int m, int n, int k, const float* a, int lda,
 #endif
 #endif
 
+#if defined(COB_ENABLE_X86_STREAM_B) && COB_ENABLE_X86_STREAM_B && defined(COB_USE_X86_SIMD) && defined(__linux__)
+#define COB_USE_X86_STREAM_B 1
+#include "cob_stream_b_dispatch.inc"
+#endif
+
 static void cob_sgemm_rowmajor_fallback(
     int m,
     int n,
@@ -4265,6 +4270,9 @@ void cob_sgemm_rowmajor_base(
     float* c,
     int ldc)
 {
+#ifdef COB_USE_X86_STREAM_B
+    if (cob_try_stream_b(m, n, k, a, lda, b, ldb, c, ldc)) return;
+#endif
 #if defined(COB_USE_CBLAS_LEAF) && defined(COB_USE_RECTANGULAR_STRASSEN) && defined(COB_USE_RECURSIVE_STRASSEN)
     if (cob_cblas_winograd_try(m, n, k, a, lda, b, ldb, c, ldc, 2048)) return;
 #endif
