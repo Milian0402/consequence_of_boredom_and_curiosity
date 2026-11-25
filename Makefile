@@ -29,6 +29,7 @@ COB_ENABLE_OPENBLAS_LEAF ?= OFF
 COB_BLAS_LEAF ?= NONE
 COB_ENABLE_ALIGNED_WINOGRAD ?= OFF
 COB_ENABLE_HK15 ?= OFF
+COB_ENABLE_APPLE_MEDIUM_WIDE ?= OFF
 COB_ENABLE_N2_SMALL ?= OFF
 COB_ENABLE_X86_MEDIUM_ROUTE ?= OFF
 COB_ENABLE_X86_STREAM_B ?= OFF
@@ -146,6 +147,16 @@ else ifneq ($(COB_ENABLE_HK15),OFF)
 $(error COB_ENABLE_HK15 must be ON or OFF)
 endif
 
+ifeq ($(COB_ENABLE_APPLE_MEDIUM_WIDE),ON)
+ifneq ($(SME_OBJ),)
+APPLE_WIDE_DEFINE := -DCOB_ENABLE_APPLE_MEDIUM_WIDE=1
+SME_DEFINE += $(APPLE_WIDE_DEFINE)
+APPLE_WIDE_TEST := $(BUILD_DIR)/cob_apple_medium_wide_test
+endif
+else ifneq ($(COB_ENABLE_APPLE_MEDIUM_WIDE),OFF)
+$(error COB_ENABLE_APPLE_MEDIUM_WIDE must be ON or OFF)
+endif
+
 ifeq ($(COB_ENABLE_N2_SMALL),ON)
 SME_DEFINE += -DCOB_ENABLE_N2_SMALL=1
 else ifneq ($(COB_ENABLE_N2_SMALL),OFF)
@@ -200,7 +211,7 @@ $(BUILD_DIR):
 
 # Track each output separately so reconfiguring a partially built directory
 # works even on versions of Make with one-second file timestamps.
-SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN) recursive:$(COB_ENABLE_RECURSIVE_STRASSEN) blas:$(leaf_provider) aligned:$(COB_ENABLE_ALIGNED_WINOGRAD) blas-root:$(COB_BLAS_ROOT) n2small:$(COB_ENABLE_N2_SMALL) stream-b:$(COB_ENABLE_X86_STREAM_B) x86-medium:$(COB_ENABLE_X86_MEDIUM_ROUTE) hk15:$(COB_ENABLE_HK15)
+SME_CONFIG := $(if $(SME_OBJ),ON:$(COB_SME_CC),OFF) portable:$(COB_ENABLE_PORTABLE_STRASSEN) recursive:$(COB_ENABLE_RECURSIVE_STRASSEN) blas:$(leaf_provider) aligned:$(COB_ENABLE_ALIGNED_WINOGRAD) blas-root:$(COB_BLAS_ROOT) apple-wide:$(COB_ENABLE_APPLE_MEDIUM_WIDE) n2small:$(COB_ENABLE_N2_SMALL) stream-b:$(COB_ENABLE_X86_STREAM_B) x86-medium:$(COB_ENABLE_X86_MEDIUM_ROUTE) hk15:$(COB_ENABLE_HK15)
 SME_OUTPUTS := $(LIB_OBJ) $(STRASSEN_TEST_OBJ) $(STRASSEN_SQUARE_TEST_OBJ) $(SME_OBJ) \
                $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN) \
                $(BENCH_BIN) $(CBLAS_BENCH_BIN) $(FORTRAN_BLAS_BENCH_BIN) $(BLAS_LEAF_TEST)
@@ -213,7 +224,7 @@ $(foreach target,$(SME_OUTPUTS),$(eval $(call cob_track_sme_config,$(target))))
 save_sme_config = @printf '%s\n' '$(SME_CONFIG)' > "$@.sme-config"
 
 $(BUILD_DIR)/strassen_sme_leaf.o: $(SME_SRC) | $(BUILD_DIR)
-	$(COB_SME_CC) $(CFLAGS) $(SME_FLAGS) -c $(SME_SRC) -o $@
+	$(COB_SME_CC) $(CFLAGS) $(SME_FLAGS) $(APPLE_WIDE_DEFINE) -c $(SME_SRC) -o $@
 	$(save_sme_config)
 
 ifneq ($(STREAM_B_OBJS),)
@@ -269,12 +280,18 @@ $(BLAS_LEAF_TEST): tests/test_openblas_winograd.c src/gemm.c include/cob_gemm.h 
 	$(save_sme_config)
 endif
 
-test: $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN) $(BLAS_LEAF_TEST) $(STREAM_B_TEST)
+ifneq ($(APPLE_WIDE_TEST),)
+$(APPLE_WIDE_TEST): tests/test_apple_medium_wide.c $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $< $(LIB_OBJ) $(SME_OBJ) $(STREAM_B_OBJS) $(BLAS_LEAF_LIBS) -o $@
+endif
+
+test: $(TEST_BIN) $(STRASSEN_TEST_BIN) $(STRASSEN_SQUARE_TEST_BIN) $(BLAS_LEAF_TEST) $(STREAM_B_TEST) $(APPLE_WIDE_TEST)
 	$(TEST_BIN)
 	$(STRASSEN_TEST_BIN)
 	$(STRASSEN_SQUARE_TEST_BIN)
 	$(BLAS_LEAF_TEST)
 	$(STREAM_B_TEST)
+	$(APPLE_WIDE_TEST)
 
 test-portable-strassen: $(BUILD_DIR)/cob_portable_strassen_test
 	$<

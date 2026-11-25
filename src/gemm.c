@@ -4246,6 +4246,10 @@ static int cob_sgemm_try_sme_classical(int m, int n, int k, const float* a, int 
 #endif
 
 #if defined(COB_WITH_STRASSEN_SME_LEAF) && defined(COB_USE_APPLE_SME) && defined(COB_USE_APPLE_AMX)
+#if defined(COB_ENABLE_APPLE_MEDIUM_WIDE) && COB_ENABLE_APPLE_MEDIUM_WIDE
+extern int cob_sgemm_sme_medium_wide(int m, int n, int k, const float *a, int lda,
+    const float *b, int ldb, float *c, int ldc);
+#endif
 extern int cob_sgemm_sme_tiny(int m, int n, int k, const float* a, int lda,
     const float* b, int ldb, float* c, int ldc);
 #endif
@@ -4280,6 +4284,13 @@ void cob_sgemm_rowmajor_base(
     if (cob_n2_try_sgemm(m, n, k, a, lda, b, ldb, c, ldc)) return;
 #endif
 #if defined(COB_WITH_STRASSEN_SME_LEAF) && defined(COB_USE_APPLE_SME) && defined(COB_USE_APPLE_AMX)
+#if defined(COB_ENABLE_APPLE_MEDIUM_WIDE) && COB_ENABLE_APPLE_MEDIUM_WIDE
+    if (m >= 24 && m <= 55 && n >= 1024 && n <= 4096 && k >= 96 && k <= 384 &&
+        a && b && c && lda >= k && ldb >= n && ldc >= n && cob_apple_sme2p1_available() &&
+        !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, a, (size_t)(m - 1) * lda + k) &&
+        !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, b, (size_t)(k - 1) * ldb + n) &&
+        cob_sgemm_sme_medium_wide(m, n, k, a, lda, b, ldb, c, ldc)) return;
+#endif
     if (m >= 16 && m <= 96 && n >= 16 && n <= 96 && k >= 16 && k <= 96 &&
         a && b && c && lda >= k && ldb >= n && ldc >= n && cob_apple_sme2p1_available() &&
         !cob_f32_ranges_overlap(c, (size_t)(m - 1) * ldc + n, a, (size_t)(m - 1) * lda + k) &&
