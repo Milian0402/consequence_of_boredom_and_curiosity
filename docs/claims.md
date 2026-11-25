@@ -5,6 +5,12 @@ evidence needed to re-audit it.
 
 ## Current Claim Status
 
+The November 25 production comparison qualified all five linked builds on
+Intel Xeon 6975P-C and Arm Neoverse N2. The best released build won both
+registered odd holdouts on Arm. Direct oneMKL beat every released build on
+both Intel holdouts. COB's claim is specific to the operation, host, shapes,
+build and competitors in each comparison. [Public benchmark record](audits/2026-11-25-ranking/README.md)
+
 The November 25 M5 Max comparison covers six prespecified large balanced shapes. COB led the tested single-threaded implementations on each target median, and MaxMulSK led the 4096-square control. [Results and scope](audits/2026-11-25-strassen-sme.md)
 
 Native Linux runs also compared COB with OpenBLAS on an Intel Xeon 6975P-C and an Arm Neoverse-N2. One-level Strassen improved over classical COB on both CPUs. Rankings against OpenBLAS depend on the processor and matrix shape. [Linux results](audits/2026-11-25-linux-native.md)

@@ -1,11 +1,18 @@
 # COB GEMM
 
-A fast, experimental, single-threaded matrix multiplication library.
+COB computes `C = A × B` for row-major FP32 matrices on one CPU thread.
+It includes native kernels for Apple Silicon, Arm64 and x86-64, with optional
+BLAS-backed algorithms for large rectangular products on Linux.
 
-COB focuses on one job: multiplying FP32 row-major matrices on a CPU as fast
-as possible, especially on Apple Silicon. It is not a full BLAS replacement.
-The deliberately narrow contract leaves more room for specialized AMX, SME,
-and packing strategies.
+## Measured performance
+
+On Arm Neoverse N2, the released COB build with sequential OpenBLAS subproducts
+beat every measured one-shot competitor on both prespecified odd rectangles.
+It beat FastMMW in all twelve paired calls. On Intel Xeon 6975P-C, direct
+oneMKL won both comparisons against the released builds. At
+2039 × 2969 × 3367 it took 221.63 ms against COB's 233.14 ms.
+The release also has wins on Apple M5 Max and AMD EPYC for the shapes and builds
+listed in the [benchmark results](docs/audits/2026-11-25-ranking/README.md).
 
 ## Rectangular and strided benchmarks
 
@@ -18,7 +25,7 @@ gives the external-library comparisons, numerical checks and limits.
 
 ## M5 Max benchmark
 
-On one Apple M5 Max, COB had the fastest median one-thread, one-shot FP32 time on six prespecified large square and near-square products against Apple Accelerate, MpGEMM and MaxMulSK v5.1. Geometric mean paired speedups were 1.067× over previous COB, 1.067× over MaxMulSK, 1.197× over MpGEMM and 1.209× over Accelerate. MaxMulSK led on the 4096-square control. All times include packing and allocation. The public multiply entry point selects the new kernel automatically in supported builds.
+On one Apple M5 Max, COB had the fastest median one-thread, one-shot FP32 time on six prespecified large square and near-square products against Apple Accelerate, MpGEMM and MaxMulSK v5.1. Geometric mean paired speedups were 1.067× over previous COB, 1.067× over MaxMulSK, 1.197× over MpGEMM and 1.209× over Accelerate. MaxMulSK led on the 4096-square control. On a later integrated build, COB won five of the six target medians against MaxMulSK. MaxMulSK won at 6271 × 6337 × 6209. All times include packing and allocation. The public multiply entry point selects the new kernel automatically in supported builds.
 
 The [November 25 audit](docs/audits/2026-11-25-strassen-sme.md) gives the dimensions, controls and accuracy checks. The [July crossover study](docs/audits/2026-07-12-square-crossover.md) records earlier results at 5632 square.
 
@@ -270,8 +277,10 @@ Useful project notes:
 
 ## Goal
 
-The goal is still to become the fastest open-source single-threaded matrix
-multiplication implementation inside this narrow contract. Measurements cover one M5 Max, one Intel Xeon 6975P-C and one Arm Neoverse-N2 runner type. Additional processors and workloads remain open.
+The goal is to lead single-threaded CPU matrix multiplication for this FP32
+operation. The published comparisons cover Apple M5 Max, AMD EPYC, Intel Xeon
+and Arm Neoverse N2. Several independent libraries lead on individual workloads.
+[Results by CPU and layout](docs/audits/2026-11-25-ranking/README.md)
 
 ## Optional Apple SME2 Strassen leaf
 

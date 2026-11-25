@@ -1,0 +1,98 @@
+{
+  "scope": "Linux, one process thread, row-major FP32 C = A \u00d7 B, no aliasing",
+  "benchmark_revision": "7885da100a88fbc3a6f0ef11f486fece4eabee76",
+  "corrected_run": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45682774110",
+  "first_run": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45679590298",
+  "training_run": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45672997916",
+  "production_revision": "518e7d77ea3d82d029f31dc10a3a705b42a7638b",
+  "previous_revision": "3222dddb42944630f45c6864150cfaff54df257a",
+  "fixture_revision": "b218beff1eaf8fd606d0934405cdc1e28ecdfe15",
+  "panel_sha256": "887b737adebeaa132045b71835e05d38cc707227283cec2fc61412d48f3331fa",
+  "seeds": [
+    73194653,
+    28417069
+  ],
+  "maximum_absolute_error": 0.002,
+  "hosts": {
+    "x86_64": {
+      "cpu": "Intel(R) Xeon(R) 6975P-C",
+      "job": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45682774110/job/139447504327",
+      "artifact_id": 15054539106,
+      "artifact_sha256": "9e6eaae1ce40812171220fab1c013962c59f49e4724bf81ddc419e847f24de59",
+      "fixed": "release-mkl-aligned-two",
+      "selection": "intel_extrapolation_from_amd",
+      "meets_two_odd_rule": false,
+      "native_independent_kernels": {
+        "onednn-cached-plan": {
+          "fresh-deep-odd": [
+            "brg_matmul:avx512_core"
+          ],
+          "fresh-near-square-control": [
+            "brg_matmul:avx512_core"
+          ],
+          "fresh-wide-odd": [
+            "brg_matmul:avx512_core"
+          ],
+          "repeat-wide-odd": [
+            "brg_matmul:avx512_core"
+          ]
+        },
+        "onednn-oneshot": {
+          "fresh-deep-odd": [
+            "brg_matmul:avx512_core"
+          ],
+          "fresh-near-square-control": [
+            "brg_matmul:avx512_core"
+          ],
+          "fresh-wide-odd": [
+            "brg_matmul:avx512_core"
+          ],
+          "repeat-wide-odd": [
+            "brg_matmul:avx512_core"
+          ]
+        },
+        "tblis-ab-1": "Haswell FP32 16x6 assembly, 1 level(s), 28 verified tiles in the qualification case",
+        "tblis-ab-2": "Haswell FP32 16x6 assembly, 2 level(s), 49 verified tiles in the qualification case"
+      }
+    },
+    "aarch64": {
+      "cpu": "Neoverse-N2",
+      "job": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45682774110/job/139447504055",
+      "artifact_id": 15055768387,
+      "artifact_sha256": "fde0feb6b5c739534bbc70239abe96cce307d90cd327898784374982ba805824",
+      "fixed": "release-openblas-aligned-two",
+      "selection": "trained_neoverse_n2",
+      "meets_two_odd_rule": true,
+      "native_independent_kernels": {
+        "onednn-cached-plan": {
+          "fresh-deep-odd": [
+            "gemm:jit:f32"
+          ],
+          "fresh-near-square-control": [
+            "brg:sve_128"
+          ],
+          "fresh-wide-odd": [
+            "gemm:jit:f32"
+          ],
+          "repeat-wide-odd": [
+            "gemm:jit:f32"
+          ]
+        },
+        "onednn-oneshot": {
+          "fresh-deep-odd": [
+            "gemm:jit:f32"
+          ],
+          "fresh-near-square-control": [
+            "brg:sve_128"
+          ],
+          "fresh-wide-odd": [
+            "gemm:jit:f32"
+          ],
+          "repeat-wide-odd": [
+            "gemm:jit:f32"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+--- a/third_party/maxmulsk/strassen_leaf.c
++++ b/third_party/maxmulsk/strassen_leaf.c
+@@ -1648,21 +1648,27 @@
+ }
+ 
+ __attribute__((always_inline)) static inline void
+-cob_edge_shape(int bands,int m,int n,int k,const float *a,int lda,
+-               const float *b,int ldb,float *c,int ldc)
++cob_edge_shape(int bands, int full_rows, int m, int n, int k, const float *a, int lda,
++               const float *b, int ldb, float *c, int ldc)
+     __arm_streaming __arm_inout("za")
+ {
+-    for (int i=0;i<32;i+=16)
+-        cob_edge_panel(bands,16,n,k,a+(size_t)i*lda,lda,b,ldb,c+(size_t)i*ldc,ldc);
+-    cob_edge_panel(bands,m-32,n,k,a+32*(size_t)lda,lda,b,ldb,c+32*(size_t)ldc,ldc);
++    for (int i = 0; i < full_rows; i += 16)
++        cob_edge_panel(bands, 16, n, k, a + (size_t)i * lda, lda, b, ldb, c + (size_t)i * ldc, ldc);
++    cob_edge_panel(bands, m - full_rows, n, k, a + (size_t)full_rows * lda, lda,
++                   b, ldb, c + (size_t)full_rows * ldc, ldc);
+ }
+ 
+ __arm_new("za") __arm_locally_streaming static int
+ cob_edge_entry(int m,int n,int k,const float *a,int lda,const float *b,int ldb,float *c,int ldc)
+ {
+     if (svcntsw()!=16) return 0;
+-    if (n<=32) cob_edge_shape(2,m,n,k,a,lda,b,ldb,c,ldc);
+-    else cob_edge_shape(3,m,n,k,a,lda,b,ldb,c,ldc);
++    if (m <= 48) {
++        if (n <= 32) cob_edge_shape(2, 32, m, n, k, a, lda, b, ldb, c, ldc);
++        else cob_edge_shape(3, 32, m, n, k, a, lda, b, ldb, c, ldc);
++    } else {
++        if (n <= 32) cob_edge_shape(2, 48, m, n, k, a, lda, b, ldb, c, ldc);
++        else cob_edge_shape(3, 48, m, n, k, a, lda, b, ldb, c, ldc);
++    }
+     return 1;
+ }
+ 
+@@ -1670,7 +1676,9 @@
+                        float *c, int ldc)
+ {
+     /* The public entry checked pointers, strides, non-aliasing and 16..96 bounds. */
+-    if (m>=33 && m<=48 && n>=17 && n<=48 && k>=16 && k<=48)
++    /* The regular grid already handles complete 16-lane shapes above 48 rows. */
++    if (m >= 33 && m <= 64 && n >= 17 && n <= 48 && k >= 16 && k <= 48 &&
++        (m <= 48 || ((m | n | k) & 15) != 0))
+         return cob_edge_entry(m,n,k,a,lda,b,ldb,c,ldc);
+     if (m>16 && m<=32 && n>16 && n<=32 && k>=16 && k<=48)
+         return cob_small_entry(m,n,k,a,lda,b,ldb,c,ldc);

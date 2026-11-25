@@ -1,11 +1,11 @@
 # Project Status
 
-Last updated: 2026-07-13
+Updated November 25, 2026.
 
 ## Goal
 
-The project goal is still ambitious: become the fastest open-source
-single-threaded matrix multiplication software in this repo's chosen scope.
+The project aims to deliver the fastest single-threaded CPU implementation
+of the FP32 operation below. Benchmarks include proprietary vendor libraries.
 
 The chosen scope is intentionally narrow:
 
@@ -16,7 +16,15 @@ The chosen scope is intentionally narrow:
 - `C = A * B`, equivalent to `alpha = 1` and `beta = 0`.
 - Apple Silicon first, with AMX and SME2.1 paths when available.
 
-## Where It Landed
+## November benchmark
+
+COB won both registered large odd rectangles on Arm Neoverse N2 using
+sequential OpenBLAS for its subproducts. Direct oneMKL was faster than every
+released build on both Intel Xeon holdouts. The linked evidence includes
+the single-thread timing records, numerical checks and earlier Apple and
+AMD measurements. [Results and reproduction](audits/2026-11-25-ranking/README.md)
+
+## July benchmark
 
 The implementation is elite on selected routed shapes, but the previous broad
 fastest claim is suspended. A July current-head re-audit found a confirmed

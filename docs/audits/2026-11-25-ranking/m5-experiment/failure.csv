@@ -1,0 +1,2 @@
+m,n,k,seed,max_abs_ref,worst_i,worst_j,worst_ref,max_abs_fp64,incumbent_max_abs_fp64,bit_mismatches,nonfinite,max_error_over_abs_sum,elements_above_fixed_absolute_limit,worst_relative_error_at_max_abs,worst_ulp_error_at_max_abs
+64,25,29,40096813,18375.6094976,44,12,17846.3838843,0.00283442336513,0.00283442336513,0,0,2.1710775093e-07,1,1.58823399939e-07,1.45122476295

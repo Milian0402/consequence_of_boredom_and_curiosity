@@ -1,0 +1,9 @@
+arch,implementation,m,n,k,pad,route,observed,expected,output_elements,timed_binary_exact,trace_binary_exact,timed_inputs_unchanged,trace_inputs_unchanged,passed
+x86_64,cob-hk15-parent-960,1879,3437,3041,3,hk-parent,0|0|0|1|0,0|0|0|1|0,6458123,1,1,1,1,1
+x86_64,cob-hk15-parent-960,2039,2969,3367,11,hk-parent,0|0|0|1|0,0|0|0|1|0,6053791,1,1,1,1,1
+x86_64,cob-hk15-parent-960,1973,3319,2897,7,hk-parent,0|0|0|1|0,0|0|0|1|0,6548387,1,1,1,1,1
+x86_64,cob-hk15-parent-960,2624,2752,2688,0,hk-parent,0|0|0|1|0,0|0|0|1|0,7221248,1,1,1,1,1
+aarch64,cob-hk15-parent-960,1879,3437,3041,3,hk-parent,0|0|0|1|0,0|0|0|1|0,6458123,1,1,1,1,1
+aarch64,cob-hk15-parent-960,2039,2969,3367,11,hk-parent,0|0|0|1|0,0|0|0|1|0,6053791,1,1,1,1,1
+aarch64,cob-hk15-parent-960,1973,3319,2897,7,hk-parent,0|0|0|1|0,0|0|0|1|0,6548387,1,1,1,1,1
+aarch64,cob-hk15-parent-960,2624,2752,2688,0,hk-parent,0|0|0|1|0,0|0|0|1|0,7221248,1,1,1,1,1

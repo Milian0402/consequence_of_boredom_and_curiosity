@@ -1,0 +1,17 @@
+arch,implementation,m,n,k,pad,leaf,leaf_calls,padded,output_elements,timed_binary_exact,trace_binary_exact,timed_inputs_unchanged,trace_inputs_unchanged,passed
+x86_64,fastmmw-768,1879,3437,3041,3,openblas,49,1,6458123,1,1,1,1,1
+x86_64,fastmmw-1536,1879,3437,3041,3,openblas,7,1,6458123,1,1,1,1,1
+x86_64,fastmmw-768,2039,2969,3367,11,openblas,49,1,6053791,1,1,1,1,1
+x86_64,fastmmw-1536,2039,2969,3367,11,openblas,7,1,6053791,1,1,1,1,1
+x86_64,fastmmw-768,1973,3319,2897,7,openblas,49,1,6548387,1,1,1,1,1
+x86_64,fastmmw-1536,1973,3319,2897,7,openblas,7,1,6548387,1,1,1,1,1
+x86_64,fastmmw-768,2624,2752,2688,0,openblas,49,0,7221248,1,1,1,1,1
+x86_64,fastmmw-1536,2624,2752,2688,0,openblas,7,0,7221248,1,1,1,1,1
+aarch64,fastmmw-768,1879,3437,3041,3,openblas,49,1,6458123,1,1,1,1,1
+aarch64,fastmmw-1536,1879,3437,3041,3,openblas,7,1,6458123,1,1,1,1,1
+aarch64,fastmmw-768,2039,2969,3367,11,openblas,49,1,6053791,1,1,1,1,1
+aarch64,fastmmw-1536,2039,2969,3367,11,openblas,7,1,6053791,1,1,1,1,1
+aarch64,fastmmw-768,1973,3319,2897,7,openblas,49,1,6548387,1,1,1,1,1
+aarch64,fastmmw-1536,1973,3319,2897,7,openblas,7,1,6548387,1,1,1,1,1
+aarch64,fastmmw-768,2624,2752,2688,0,openblas,49,0,7221248,1,1,1,1,1
+aarch64,fastmmw-1536,2624,2752,2688,0,openblas,7,0,7221248,1,1,1,1,1

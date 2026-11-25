@@ -1,0 +1,17 @@
+class,m,n,k,pad
+anchor,49,35,39,1
+held-out,51,29,42,5
+held-out,55,39,33,3
+held-out,61,45,47,7
+held-out,53,32,24,0
+held-out,58,21,31,2
+held-out,63,47,23,6
+held-out,64,41,32,1
+held-out,50,17,16,4
+control,32,32,32,0
+control,36,36,36,0
+control,48,48,48,0
+aligned-control,64,32,32,0
+outside,65,35,39,1
+outside,53,49,39,1
+outside,53,35,49,1

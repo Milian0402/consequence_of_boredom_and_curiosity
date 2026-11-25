@@ -1,0 +1,9 @@
+arch,family,field_winner,field_median_ms,fastest_release,release_median_ms,fixed,fixed_median_ms,independent,independent_median_ms,paired_speedup,wins,pairs,winner_if_cached_included
+x86_64,repeat-wide-odd,mkl-jit,211.6047,release-mkl-aligned-two,219.9322,release-mkl-aligned-two,219.9322,mkl-jit,211.6047,0.9589991,0,6,mkl-jit
+x86_64,fresh-deep-odd,mkl,221.6332,release-mkl-aligned-two,233.1420,release-mkl-aligned-two,233.1420,mkl,221.6332,0.9544934,0,6,mkl
+x86_64,fresh-wide-odd,cob-mkl-aligned-two,208.5212,release-mkl-aligned-two,209.3859,release-mkl-aligned-two,209.3859,mkl,208.7551,0.9957060,2,6,cob-mkl-aligned-two
+x86_64,fresh-near-square-control,cob-mkl-two,205.6292,release-mkl-two,208.0729,release-mkl-aligned-two,210.5373,mkl,206.5164,0.9855423,2,6,cob-mkl-two
+aarch64,repeat-wide-odd,release-openblas-aligned-two,639.8278,release-openblas-aligned-two,639.8278,release-openblas-aligned-two,639.8278,fastmmw-768,663.4565,1.0361088,6,6,release-openblas-aligned-two
+aarch64,fresh-deep-odd,release-openblas-aligned-two,666.7519,release-openblas-aligned-two,666.7519,release-openblas-aligned-two,666.7519,fastmmw-768,700.0077,1.0513769,6,6,release-openblas-aligned-two
+aarch64,fresh-wide-odd,release-openblas-aligned-two,621.9124,release-openblas-aligned-two,621.9124,release-openblas-aligned-two,621.9124,fastmmw-768,647.4488,1.0383856,6,6,release-openblas-aligned-two
+aarch64,fresh-near-square-control,cob-armpl-aligned-two,619.9458,release-armpl-aligned-two,620.1104,release-openblas-aligned-two,649.2284,fastmmw-768,656.4061,1.0108653,5,6,cob-armpl-aligned-two
