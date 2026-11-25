@@ -1,0 +1,28 @@
+{
+  "phase": "supplemental-after-two-AMD-hosts",
+  "registered_at_utc": "2026-11-25T21:35:47.380468+00:00",
+  "benchmark": "6977fd9dd9542b67eb2ddcf763b78f6e84fda56b",
+  "study_run": 45704182519,
+  "previous_attempt": 1,
+  "prior_hosts": [
+    {
+      "replica": 1,
+      "job": 139521811697,
+      "cpu": "AMD EPYC 7763 64-Core Processor"
+    },
+    {
+      "replica": 2,
+      "job": 139521811716,
+      "cpu": "AMD EPYC 9V45 96-Core Processor"
+    }
+  ],
+  "selected_prior_job": 139521811697,
+  "maximum_new_host_assignments": 1,
+  "retain_result_regardless_of_cpu": true,
+  "additional_resampling": false,
+  "reuse_unchanged_panel_and_gate": true,
+  "classification": "supplemental Intel opportunity if eligible, otherwise an AMD forwarding control; original two hosts and decisions remain separate",
+  "purpose": "measure the Intel-only prefix if an eligible native CPU is allocated; retain a negative, AMD or incomplete outcome",
+  "panel_sha256": "2b4d6871262a4d038533b6cab819e819c3cff1eaf3ef606678b2ad6e30520ed5",
+  "protocol_sha256": "02581f0e088da5d11c0308b3583b9ef5f87e239999268ff6430952596db57c60"
+}

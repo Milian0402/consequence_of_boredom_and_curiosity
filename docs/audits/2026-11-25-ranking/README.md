@@ -57,6 +57,8 @@ A full factorial test independently switched each of the three physical row stri
 
 The first two jobs for a follow-up eight-column Intel kernel landed on AMD EPYC 7763 and 9V45. Both exercised its forwarding control, with all 66 wrapper calls going directly to sequential oneMKL. Across six fresh layouts the wrappers ran within 0.2% of calling oneMKL directly. [Host identities, other libraries, raw timings and route checks](x86-eight-column-prefix/README.md)
 
+On the additional Xeon 6973P-C, the eight-column kernel ran on all nine eligible shapes. Across the six fresh layouts it achieved 0.950× the speed of direct oneMKL and won zero layout medians. At 68 × 2176 × 244 it took 415.55 µs versus 354.67 µs for direct oneMKL. The separate explicit JIT API generated a kernel on nine of eleven shapes; this study verified its results without timing those handles. [Intel timings and JIT status per shape](intel-eight-column-prefix/README.md)
+
 ## Packing adjacent B panels on x86
 
 Two Intel Xeon 6975P-C jobs tested packing four adjacent B panels before doing the same arithmetic as the released kernel. Grouped packing reached 97.1% and 96.8% of the incumbent's throughput across eight new rectangles. At 64 × 2304 × 224, the released kernel itself took 382 and 377 µs, while direct oneMKL took 315 and 313 µs. The four-panel implementation stays in the benchmark branch. BLASFEO qualified on nine of the twelve layouts per job and exited on the other three. [Per-layout timings, eligibility and replay](grouped-b-x86/README.md) · [Native benchmark](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45701814927)

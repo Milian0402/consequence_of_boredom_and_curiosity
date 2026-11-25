@@ -1,0 +1,37 @@
+{
+  "total_files_examined": 4296,
+  "unique_csvs_examined": 1036,
+  "prior_dimension_tables": 832,
+  "prior_geometry_rows": 266569,
+  "ordered_table_inventory_sha256": "d7bd2aa40f00b8e689e2cd6733721c33c72309776b4153af473240070456b546",
+  "matches": {
+    "repeat-deeper": 44,
+    "repeat-ragged": 80,
+    "repeat-short": 2,
+    "fresh-thin": 0,
+    "fresh-odd": 0,
+    "fresh-exact": 0,
+    "fresh-long": 0,
+    "fresh-high-depth": 0,
+    "fresh-upper": 0,
+    "control-cropped-deeper": 44,
+    "control-cropped-short": 2
+  },
+  "examples": {
+    "repeat-deeper": [
+      "work/cob-linux-public/tools/world-rank/stream/panel.csv"
+    ],
+    "repeat-ragged": [
+      "work/cob-linux-public/tools/world-rank/stream/panel.csv"
+    ],
+    "repeat-short": [
+      "work/world-rank/frontier-wave/final-checkpoint/docs/audits/2026-11-25-ranking/cropped-views/raw/panel.csv"
+    ],
+    "control-cropped-deeper": [
+      "work/cob-linux-public/tools/world-rank/stream/panel.csv"
+    ],
+    "control-cropped-short": [
+      "work/world-rank/frontier-wave/final-checkpoint/docs/audits/2026-11-25-ranking/cropped-views/raw/panel.csv"
+    ]
+  }
+}

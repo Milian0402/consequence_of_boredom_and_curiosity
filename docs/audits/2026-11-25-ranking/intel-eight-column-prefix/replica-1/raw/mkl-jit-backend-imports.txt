@@ -1,0 +1,15 @@
+                 U MKL_Get_Max_Threads
+                 U MKL_Get_Version_String
+                 w _ITM_deregisterTMCloneTable
+                 w _ITM_registerTMCloneTable
+                 w __cxa_finalize@GLIBC_2.2.5
+                 U __fprintf_chk@GLIBC_2.3.4
+                 w __gmon_start__
+                 U __stack_chk_fail@GLIBC_2.4
+                 U cblas_sgemm
+                 U dladdr@GLIBC_2.34
+                 U mkl_sgemm_jit
+                 U sgemm_direct
+                 U stderr@GLIBC_2.2.5
+                 U strrchr@GLIBC_2.2.5
+                 U strstr@GLIBC_2.2.5
