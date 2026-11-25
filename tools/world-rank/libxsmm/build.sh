@@ -42,3 +42,12 @@ python3 "$here/smoke.py" "$out/libxsmm-wide.so"
       -DRANK_LIBXSMM_CACHE_LAST=1 -I"$src/include" "$here/adapter.c" \
       "$src/lib/libxsmm.a" "${flags[@]}" -o "$out/libxsmm-cached.so"
 python3 "$here/smoke.py" "$out/libxsmm-cached.so"
+
+if [[ ${RANK_FRONTIER_LIBXSMM:-0} == 1 ]]; then
+    for policy in dispatch retained; do
+        options=()
+        if [[ $policy == retained ]]; then options+=(-DRANK_LIBXSMM_CACHE_LAST=1); fi
+        "$cc" -O3 -std=c11 -Wall -Wextra -Werror "${options[@]}" -I"$src/include" "$here/../frontier/xsmm.c" \
+            "$src/lib/libxsmm.a" "${flags[@]}" -o "$out/libxsmm-$policy.so"
+    done
+fi

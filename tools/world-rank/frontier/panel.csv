@@ -1,0 +1,13 @@
+family,m,n,k,pad
+repeat-thin-loss,37,2387,119,5
+repeat-wide-loss,61,3451,191,13
+repeat-wide-win,137,2179,347,7
+fresh-lower-fringe,25,1087,97,3
+fresh-irregular,41,2377,139,11
+fresh-exact-width,55,3072,184,1
+fresh-single-column-tail,79,1793,223,0
+fresh-full-tiles,96,2304,288,0
+fresh-near-max-width,73,4079,337,9
+fresh-high-depth,91,1217,377,5
+fresh-long-strided,83,2459,307,7
+control-below-width,45,997,173,9

@@ -14,7 +14,7 @@ import subprocess
 import tempfile
 from contextlib import ExitStack, contextmanager
 
-SEEDS = {"discovery": (19473017, 37292229), "confirm": (6191231, 89743091),
+SEEDS = {"frontier-x86": (856103219, 1743857903), "discovery": (19473017, 37292229), "confirm": (6191231, 89743091),
          "small": (40762813, 92862107), "replicate": (59147207, 81729353), "short": (61734017, 39142873),
          "pilot": (72413951, 86537761), "heldout": (15741487, 84927113),
          "tile-screen": (43891307, 96537493), "tile-confirm": (53719481, 94173107),
@@ -22,7 +22,7 @@ SEEDS = {"discovery": (19473017, 37292229), "confirm": (6191231, 89743091),
          "tile-parent": (45682013, 79065127), "leaf-wave": (63714293, 91375811),
          "aligned-core": (48236471, 85109381), "hk-forms": (62490137, 87035629),
          "medium-transfer": (68539041, 93461257), "stream-b": (348271759, 710438957), "stream-release": (348271759, 710438957), "signed-leaves": (31048579, 196173023), "release-replay": (73194653, 28417069)}
-QUALIFIED_PHASES = ("aligned-core", "hk-forms", "release-replay", "medium-transfer", "signed-leaves", "stream-b", "stream-release")
+QUALIFIED_PHASES = ("frontier-x86", "aligned-core", "hk-forms", "release-replay", "medium-transfer", "signed-leaves", "stream-b", "stream-release")
 TILE_PHASES = ("tile-screen", "tile-confirm", "tile-replay", "tile-child", "tile-parent", "leaf-wave", *QUALIFIED_PHASES)
 SHAPE_KEYS = ("family", "m", "n", "k", "pad", "mode")
 SMALL_VENDOR_MAX_MNK = 64 ** 3
@@ -85,7 +85,9 @@ def implementations(args):
     return entries, small_peers
 
 
-def eligible_entries(case, entries, small_peers):
+def eligible_entries(case, entries, small_peers, excluded=()):
+    if excluded:
+        entries = {n:v for n,v in entries.items() if (case["family"],n) not in excluded}
     if case["m"] * case["n"] * case["k"] <= SMALL_VENDOR_MAX_MNK:
         return entries
     return {name: spec for name, spec in entries.items() if name not in small_peers}
@@ -253,7 +255,7 @@ def summarize(args, cases, entries, small_peers, results, errors, comparisons):
     strongest_ratios = {}
     full_peers = ["openblas", *(spec.partition("=")[0] for spec in args.vendor)]
     for i, case in enumerate(cases):
-        names = list(eligible_entries(case, entries, small_peers))
+        names = list(eligible_entries(case, entries, small_peers, args.geometry_exclusions))
         if args.phase in QUALIFIED_PHASES:
             names = [name for name in names if (i, name) in args.qualified_layouts]
         independents = [name for name in names if name in full_peers or name in small_peers]
@@ -266,7 +268,7 @@ def summarize(args, cases, entries, small_peers, results, errors, comparisons):
             errors.append({**case, "error": "incomplete paired timing rounds"})
             continue
         elapsed = {name: median(obs.values()) for name, obs in labels.items()}
-        one_shot = [name for name in independents if args.phase not in QUALIFIED_PHASES or name != "onednn-cached-plan"]
+        one_shot = [name for name in independents if args.phase not in QUALIFIED_PHASES or name not in ("onednn-cached-plan","libxsmm-retained")]
         if not one_shot:
             errors.append({**case, "error": "no eligible one-shot independent comparison"})
             continue
@@ -282,7 +284,7 @@ def summarize(args, cases, entries, small_peers, results, errors, comparisons):
                         "fastest_independent_median": fastest_peer, "speedups_vs_fastest_independent": vs_fastest})
         if args.phase in QUALIFIED_PHASES:
             ranking[-1]["fastest_independent_including_cached"] = min(independents, key=elapsed.__getitem__)
-            ranking[-1]["fastest_one_shot_median"] = min((n for n in names if n != "onednn-cached-plan"), key=elapsed.__getitem__)
+            ranking[-1]["fastest_one_shot_median"] = min((n for n in names if n not in ("onednn-cached-plan","libxsmm-retained")), key=elapsed.__getitem__)
         for name, peer in itertools.permutations(names, 2):
             values = [labels[peer][key] / labels[name][key] for key in sorted(required)]
             ratio = median(values)
@@ -330,6 +332,10 @@ def main():
     args.worker, args.openblas = args.worker.resolve(), args.openblas.resolve()
     entries, small_peers = implementations(args)
     cases = read_panel(args.panel)
+    args.geometry_exclusions = set()
+    if args.phase == "frontier-x86":
+        with (args.out/"libxsmm-routes.csv").open(newline="") as stream:
+            args.geometry_exclusions = {(r["family"],r["implementation"]) for r in csv.DictReader(stream) if r["admitted"]=="0"}
     seeds, results, errors = SEEDS[args.phase], {}, []
     keys = ["phase", *SHAPE_KEYS, "block", "seed", "stress"]
     with ExitStack() as files:
@@ -352,7 +358,7 @@ def main():
                         for i in indices for mode in ("cancel", "scaled"))
         for case, index, block, seed, stress in jobs:
             try:
-                methods = eligible_entries(case, entries, small_peers)
+                methods = eligible_entries(case, entries, small_peers, args.geometry_exclusions)
                 run_block(args, trace, case, index, block, seed, methods, accuracy, timings, results, errors, stress)
             except (RuntimeError, TimeoutError, OSError, ValueError, subprocess.SubprocessError) as exc:
                 errors.append(dict(**case, block=block, seed=seed, error=str(exc)))

@@ -287,6 +287,17 @@ static void measure(shape s,const char* variant,const char* file,const float* a,
         printf(",input_changes=%zu",changed);
         if (changed) fatal("first multiply changed input bytes");
     }
+    if (lib) {
+        /* Identify the actual non-reference GEMM outside both timed regions. */
+        size_t (*xsmm_size)(int,int,int,int,int,int)=NULL;
+        void* address=dlsym(lib,"rank_xsmm_code_size");
+        memcpy(&xsmm_size,&address,sizeof xsmm_size);
+        if (xsmm_size) {
+            size_t bytes=xsmm_size(s.m,s.n,s.k,lda,ldb,ldc);
+            if (!bytes) fatal("LIBXSMM failed native GEMM identity");
+            printf(",xsmm_jit_bytes=%zu",bytes);
+        }
+    }
     if (onednn_implementation) printf(",onednn_impl=%s",onednn_implementation());
     putchar('\n');
     fflush(stdout);

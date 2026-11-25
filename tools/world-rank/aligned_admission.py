@@ -16,7 +16,9 @@ def qualified_layouts(args, cases, entries, results, seeds):
     def shape(row):
         return tuple(int(row[key]) for key in fields)
     routes = {}
-    route_files = ["routes.csv"] if args.phase in ("medium-transfer","stream-b","stream-release") else ["routes.csv", "fastmmw-routes.csv"]
+    route_files = ["routes.csv"] if args.phase in ("medium-transfer","stream-b","stream-release","frontier-x86") else ["routes.csv", "fastmmw-routes.csv"]
+    if args.phase == "frontier-x86":
+        route_files.append("host-pad-routes.csv")
     if args.phase == "stream-release":
         route_files.append("research-routes.csv")
     if args.phase == "aligned-core":
@@ -59,9 +61,11 @@ def qualified_layouts(args, cases, entries, results, seeds):
                         gate.add((r["mode"],int(r["block"]),int(r["seed"])))
                 observed=results.get((index,name),{})
                 reason = "all_checks_passed"
-                if name == "hk-packed-forms" and not preflight_ok:
+                if (case["family"],name) in getattr(args,"geometry_exclusions",set()):
+                    reason="no_verified_nonreference_kernel"
+                elif name == "hk-packed-forms" and not preflight_ok:
                     reason="whole_call_preflight_failed"
-                elif (name.startswith(("cob-","fastmmw-","release-","original-","signed-","stream-","cmake-","make-","research-")) or name in ("hk-packed-forms","medium-incumbent","medium-transposed")) and not routes.get((name,geometry),False):
+                elif (name.startswith(("cob-","fastmmw-","release-","original-","signed-","stream-","cmake-","make-","research-","frontier-","host-")) or name in ("hk-packed-forms","medium-incumbent","medium-transposed")) and not routes.get((name,geometry),False):
                     reason="route_unqualified"
                 elif gate!=required or len(inspected)!=4:
                     reason="incomplete_or_failed_full_fp64"

@@ -1,0 +1,32 @@
+{
+  "total_files_examined": 3204,
+  "unique_csvs_examined": 916,
+  "prior_dimension_tables": 746,
+  "prior_geometry_rows": 204619,
+  "ordered_table_inventory_sha256": "d0f3a56b374f3b0df6c7509c1c15da47d139e663b9c0d21e8fd337778d20101c",
+  "matches": {
+    "repeat-thin-loss": 42,
+    "repeat-wide-loss": 42,
+    "repeat-wide-win": 42,
+    "fresh-lower-fringe": 0,
+    "fresh-irregular": 0,
+    "fresh-exact-width": 0,
+    "fresh-single-column-tail": 0,
+    "fresh-full-tiles": 0,
+    "fresh-near-max-width": 0,
+    "fresh-high-depth": 0,
+    "fresh-long-strided": 0,
+    "control-below-width": 0
+  },
+  "examples": {
+    "repeat-thin-loss": [
+      "work/cob-linux-public/tools/world-rank/stream/panel.csv"
+    ],
+    "repeat-wide-loss": [
+      "work/cob-linux-public/tools/world-rank/stream/panel.csv"
+    ],
+    "repeat-wide-win": [
+      "work/cob-linux-public/tools/world-rank/stream/panel.csv"
+    ]
+  }
+}
