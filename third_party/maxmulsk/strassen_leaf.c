@@ -3,7 +3,7 @@
 // Adapted in November 2026 from MaxMulSK v5.1,
 // https://github.com/UlasSertan/MaxMulSK/blob/7473af234eeaa79061bcc693acca77ad8a4e9c75/sme/v5/sme-1x4-fusedpack-v51.cpp
 // COB changes: C11 entry point for strided Strassen half-products, fixed
-// blocking and full-width B panels. See LICENSE and NOTICE in this directory.
+// blocking, predicated partial B panels and packed Strassen sums. See LICENSE and NOTICE in this directory.
 
 #include <arm_sme.h>
 #include <arm_sve.h>
@@ -40,7 +40,7 @@ s0 = FK_GROUP((g) + 2);                                                    \
 svst1_f32_x4(p4, out + ((g) + 1) * 64, s1);                                \
 s1 = FK_GROUP((g) + 3);
 
-#define FK_PACK_A_KP_CHUNK(SRC, STRIDE)                                           \
+#define FK_PACK_A_WITH(SRC, STRIDE, LOAD)                                           \
 do {                                                               \
     /* ---- HORIZONTAL FILL: memory -> Z -> ZA ------------- */    \
     /* No svzero_za here: every ZA element that is read back */    \
@@ -51,20 +51,20 @@ do {                                                               \
     /* the same slice. q0 and q1 are two independent four-Z */     \
     /* groups so a load is always in flight while ZA is */         \
     /* written. */                                                 \
-    svfloat32x4_t q0 = svld1_f32_x4(p4, (SRC) + 0 * (STRIDE));             \
-    svfloat32x4_t q1 = svld1_f32_x4(p4, (SRC) + 1 * (STRIDE));             \
+    svfloat32x4_t q0 = LOAD(p4, (SRC) + 0 * (STRIDE));             \
+    svfloat32x4_t q1 = LOAD(p4, (SRC) + 1 * (STRIDE));             \
     for (uint32_t r = 0; r < 14; r += 2) {                         \
         svwrite_hor_za32_f32_m(0, r, pg, svget4_f32(q0, 0));       \
         svwrite_hor_za32_f32_m(1, r, pg, svget4_f32(q0, 1));       \
         svwrite_hor_za32_f32_m(2, r, pg, svget4_f32(q0, 2));       \
         svwrite_hor_za32_f32_m(3, r, pg, svget4_f32(q0, 3));       \
         /* every component of q0 is consumed; refill it */         \
-        q0 = svld1_f32_x4(p4, (SRC) + (r + 2) * (STRIDE));                 \
+        q0 = LOAD(p4, (SRC) + (r + 2) * (STRIDE));                 \
         svwrite_hor_za32_f32_m(0, r + 1, pg, svget4_f32(q1, 0));   \
         svwrite_hor_za32_f32_m(1, r + 1, pg, svget4_f32(q1, 1));   \
         svwrite_hor_za32_f32_m(2, r + 1, pg, svget4_f32(q1, 2));   \
         svwrite_hor_za32_f32_m(3, r + 1, pg, svget4_f32(q1, 3));   \
-        q1 = svld1_f32_x4(p4, (SRC) + (r + 3) * (STRIDE));                 \
+        q1 = LOAD(p4, (SRC) + (r + 3) * (STRIDE));                 \
     }                                                              \
     /* DRAIN: rows 14 and 15 are already in q0/q1. No load of */   \
     /* rows 16/17 -- they do not exist in this 16-row panel. */    \
@@ -96,6 +96,8 @@ do {                                                               \
     svst1_f32_x4(p4, out + 14 * 64, s0);                           \
     svst1_f32_x4(p4, out + 15 * 64, s1);                           \
 } while (0)
+#define FK_PACK_A_KP_CHUNK(SRC, STRIDE) FK_PACK_A_WITH(SRC, STRIDE, svld1_f32_x4)
+
 
 
 
@@ -610,7 +612,24 @@ static bool run_streaming(const float* A, const float* B, float* C,
 
             const size_t mcl0 = min_size(Mc, M);
 
-            fuse_pack(A, B, lda, ldb, mcl0, nn, ncl, kk, kcl, Kc, Kc_pad, packed_A, packed_B, stage);
+            const size_t full_cols = ncl / 64 * 64;
+            if (full_cols) {
+                fuse_pack(A, B, lda, ldb, mcl0, nn, full_cols, kk, kcl, Kc,
+                    Kc_pad, packed_A, packed_B, stage);
+            } else {
+                pack_A_block(A, lda, 0, mcl0, kk, kcl, Kc_pad, packed_A, stage);
+            }
+            if (full_cols != ncl) {
+                /* Zero inactive lanes of the last 64-column panel without
+                   reading beyond the caller's row, including the last row. */
+                const svcount_t live = svwhilelt_c32_u64(0, ncl - full_cols, 4);
+                const float* tail = B + kk * ldb + nn + full_cols;
+                float* panel = packed_B + full_cols * Kc;
+                for (size_t p = 0; p < kcl; ++p) {
+                    svst1_f32_x4(svptrue_c32(), panel + p * 64,
+                        svld1_f32_x4(live, tail + p * ldb));
+                }
+            }
             pf_next_a(&pfa, A, lda, M, K, N, Mc, Kc, Nc, kk, nn, 0, ((mcl0 + 15) / 16) * ((ncl + 63) / 64));
             compute_block(C, ldc, 0, mcl0, nn, ncl, kcl, first_k, Kc, Kc_pad, packed_A, packed_B, scratch, &pfa);
 
@@ -628,14 +647,14 @@ static bool run_streaming(const float* A, const float* B, float* C,
 
 /* The dispatcher verifies SME availability and a 16-lane streaming vector
    length. Full 64-column B panels avoid reading outside strided quadrants. */
-int cob_sgemm_strassen_sme_leaf(int m, int n, int k, const float* a, int lda,
+static int cob_sgemm_sme_packed(size_t row_block, int m, int n, int k, const float* a, int lda,
     const float* b, int ldb, float* c, int ldc)
 {
-    const size_t mc = min_size(64, ((size_t)m + 15) / 16 * 16);
+    const size_t mc = min_size(row_block, ((size_t)m + 15) / 16 * 16);
     const size_t nc = min_size(1024, (size_t)n);
     const size_t kc = min_size(1024, (size_t)k);
     const size_t packed_a_count = mc * ((kc + 63) / 64 * 64);
-    const size_t packed_b_count = nc * kc;
+    const size_t packed_b_count = ((nc + 63) / 64 * 64) * kc;
     const size_t tile_count = 16 * 64;
     float* packed_a = aligned_alloc(64,
         (packed_a_count + packed_b_count + 2 * tile_count) * sizeof(float));
@@ -646,5 +665,416 @@ int cob_sgemm_strassen_sme_leaf(int m, int n, int k, const float* a, int lda,
     const int ok = run_streaming(a, b, c, m, k, n, lda, ldb, ldc,
         packed_a, packed_b, stage, scratch, kc, nc, mc);
     free(packed_a);
+    return ok;
+}
+
+int cob_sgemm_strassen_sme_leaf(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+    return cob_sgemm_sme_packed(64, m, n, k, a, lda, b, ldb, c, ldc);
+}
+
+int cob_sgemm_sme_classical(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+    return cob_sgemm_sme_packed(256, m, n, k, a, lda, b, ldb, c, ldc);
+}
+/* The vector kernel broadcasts each group of four A coefficients over as
+   many as 256 contiguous columns of B and keeps results in ZA across K. */
+__attribute__((always_inline))
+static inline void cob_sme_vector_tile(int rows, int groups, int columns, int k,
+    const float* a, int lda, const float* b, int ldb, float* c, int ldc, int first)
+    __arm_streaming __arm_inout("za")
+{
+    const svcount_t full = svptrue_c32();
+    const svcount_t last = svwhilelt_c32_u64(64u * (groups - 1), (unsigned)columns, 4);
+    if (first) {
+        svzero_za();
+    } else {
+        for (int i = 0; i < rows; ++i) {
+            for (int g = 0; g < groups; ++g) {
+                const svcount_t mask = g + 1 == groups ? last : full;
+                const float* row = c + (size_t)i * ldc + 64 * g;
+                svwrite_za32_f32_vg1x4(i * groups + g, svld1_f32_x4(mask, row));
+            }
+        }
+    }
+
+    const svbool_t lanes = svptrue_b32();
+    int p = 0;
+    for (; k - p >= 4; p += 4) {
+        const svfloat32_t left0 = svld1rq_f32(lanes, a + p);
+        const svfloat32_t left1 = rows == 2 ? svld1rq_f32(lanes, a + lda + p) : left0;
+        /* The indexed FMA requires a literal lane number. */
+#define COB_SME_VECTOR_STEP(lane) do { \
+    for (int g = 0; g < groups; ++g) { \
+        const svcount_t mask = g + 1 == groups ? last : full; \
+        const float* bp = b + (size_t)(p + lane) * ldb + 64 * g; \
+        const svfloat32x4_t right = svld1_f32_x4(mask, bp); \
+        svmla_lane_za32_f32_vg1x4(g, right, left0, lane); \
+        if (rows == 2) { \
+            svmla_lane_za32_f32_vg1x4(groups + g, right, left1, lane); \
+        } \
+    } \
+} while (0)
+        COB_SME_VECTOR_STEP(0);
+        COB_SME_VECTOR_STEP(1);
+        COB_SME_VECTOR_STEP(2);
+        COB_SME_VECTOR_STEP(3);
+#undef COB_SME_VECTOR_STEP
+    }
+    for (; p < k; ++p) {
+        for (int g = 0; g < groups; ++g) {
+            const svcount_t mask = g + 1 == groups ? last : full;
+            const svfloat32x4_t right = svld1_f32_x4(mask, b + (size_t)p * ldb + 64 * g);
+            for (int i = 0; i < rows; ++i) {
+                const svfloat32_t left = svdup_n_f32(a[(size_t)i * lda + p]);
+                svmla_single_za32_f32_vg1x4(i * groups + g, right, left);
+            }
+        }
+    }
+    for (int i = 0; i < rows; ++i) {
+        for (int g = 0; g < groups; ++g) {
+            const svcount_t mask = g + 1 == groups ? last : full;
+            const svfloat32x4_t result = svread_za32_f32_vg1x4(i * groups + g);
+            svst1_f32_x4(mask, c + (size_t)i * ldc + 64 * g, result);
+        }
+    }
+}
+
+__attribute__((always_inline))
+static inline void cob_sme_vector_rows(int rows, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+    __arm_streaming __arm_inout("za")
+{
+    for (int p = 0; p < k;) {
+        const int count = k - p < 128 ? k - p : 128;
+        int j = 0;
+        for (; n - j >= 256; j += 256) {
+            cob_sme_vector_tile(rows, 4, 256, count, a + p, lda,
+                b + (size_t)p * ldb + j, ldb, c + j, ldc, p == 0);
+        }
+        for (; j < n;) {
+            const int width = n - j < 64 ? n - j : 64;
+            cob_sme_vector_tile(rows, 1, width, count, a + p, lda,
+                b + (size_t)p * ldb + j, ldb, c + j, ldc, p == 0);
+            j += width;
+        }
+        p += count;
+    }
+}
+
+/* One group of K rows of B is walked in increasing output-column order.
+   Pack only the short left operand, keeping B in the caller's layout. */
+__attribute__((always_inline))
+static inline void cob_sme_outer_rows(int m, int n, int k, const float *a, int lda,
+                        const float *b, int ldb, float *c, int ldc)
+    __arm_streaming __arm_inout("za")
+{
+    const svbool_t full = svptrue_b32();
+    const svcount_t four_vectors = svptrue_c32();
+    const svbool_t rows = svwhilelt_b32_s32(0, m);
+    enum { k_panel = 96 };
+    _Alignas(64) float pack[k_panel][16];
+    for (int kb = 0; kb < k;) {
+        const int count = k - kb < k_panel ? k - kb : k_panel;
+        for (int p = 0; p < count; ++p) {
+            for (int i = 0; i < m; ++i) {
+                pack[p][i] = a[(size_t)i * lda + kb + p];
+            }
+        }
+
+        const int main_cols = n / 64 * 64;
+        int j = 0;
+        for (; j < main_cols; j += 64) {
+            if (kb == 0) {
+                svzero_za();
+            } else {
+                for (int i = 0; i < m; ++i) {
+                    const float *row = c + (size_t)i * ldc + j;
+                    svld1_hor_za32(0, i, full, row);
+                    svld1_hor_za32(1, i, full, row + 16);
+                    svld1_hor_za32(2, i, full, row + 32);
+                    svld1_hor_za32(3, i, full, row + 48);
+                }
+            }
+            for (int p = 0; p < count; ++p) {
+                const svfloat32_t lhs = svld1_f32(rows, pack[p]);
+                const svfloat32x4_t rhs = svld1_f32_x4(four_vectors, b + (size_t)(kb + p) * ldb + j);
+                svmopa_za32_f32_m(0, rows, full, lhs, svget4_f32(rhs, 0));
+                svmopa_za32_f32_m(1, rows, full, lhs, svget4_f32(rhs, 1));
+                svmopa_za32_f32_m(2, rows, full, lhs, svget4_f32(rhs, 2));
+                svmopa_za32_f32_m(3, rows, full, lhs, svget4_f32(rhs, 3));
+            }
+            for (int i = 0; i < m; ++i) {
+                float *row = c + (size_t)i * ldc + j;
+                svst1_hor_za32(0, i, full, row);
+                svst1_hor_za32(1, i, full, row + 16);
+                svst1_hor_za32(2, i, full, row + 32);
+                svst1_hor_za32(3, i, full, row + 48);
+            }
+        }
+        for (; j < n;) {
+            const int width = n - j < 16 ? n - j : 16;
+            const svbool_t cols = svwhilelt_b32_s32(0, width);
+            if (kb == 0) {
+                svzero_za();
+            } else {
+                for (int i = 0; i < m; ++i) {
+                    svld1_hor_za32(0, i, cols, c + (size_t)i * ldc + j);
+                }
+            }
+            for (int p = 0; p < count; ++p) {
+                const svfloat32_t lhs = svld1_f32(rows, pack[p]);
+                const svfloat32_t rhs = svld1_f32(cols, b + (size_t)(kb + p) * ldb + j);
+                svmopa_za32_f32_m(0, rows, cols, lhs, rhs);
+            }
+            for (int i = 0; i < m; ++i) {
+                svst1_hor_za32(0, i, cols, c + (size_t)i * ldc + j);
+            }
+            j += width;
+        }
+        kb += count;
+    }
+}
+__arm_new("za") __arm_locally_streaming
+int cob_sgemm_sme_few_rows(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+    if (svcntsw() != 16 || m < 1 || m > 16) {
+        return 0;
+    }
+    if (m == 1) {
+        cob_sme_vector_rows(1, n, k, a, lda, b, ldb, c, ldc);
+    } else if (m == 2) {
+        cob_sme_vector_rows(2, n, k, a, lda, b, ldb, c, ldc);
+    } else {
+        cob_sme_outer_rows(m, n, k, a, lda, b, ldb, c, ldc);
+    }
+    return 1;
+}
+
+/* Multiply a row-major A by one column of B. Each row owns a group of 64
+   partial sums in ZA. All lanes contribute to the final dot product. */
+__attribute__((always_inline))
+static inline void cob_sme_dot_tile(int rows, int k, const float* a, int lda,
+    const float* b, float* c, int ldc, int first)
+    __arm_streaming __arm_inout("za")
+{
+    const svcount_t full = svptrue_c32();
+    svzero_za();
+    int p = 0;
+    for (; k - p >= 64; p += 64) {
+        const svfloat32x4_t bv = svld1_f32_x4(full, b + p);
+        for (int i = 0; i < rows; ++i) {
+            const svfloat32x4_t av = svld1_f32_x4(full, a + (size_t)i * lda + p);
+            svmla_za32_f32_vg1x4(i, av, bv);
+        }
+    }
+    if (p < k) {
+        const svcount_t tail = svwhilelt_c32_u64(p, k, 4);
+        const svfloat32x4_t bv = svld1_f32_x4(tail, b + p);
+        for (int i = 0; i < rows; ++i) {
+            const svfloat32x4_t av = svld1_f32_x4(tail, a + (size_t)i * lda + p);
+            svmla_za32_f32_vg1x4(i, av, bv);
+        }
+    }
+
+    const svbool_t lanes = svptrue_b32();
+    for (int i = 0; i < rows; ++i) {
+        const svfloat32x4_t result = svread_za32_f32_vg1x4(i);
+        const svfloat32_t s01 = svadd_f32_x(lanes, svget4_f32(result, 0), svget4_f32(result, 1));
+        const svfloat32_t s23 = svadd_f32_x(lanes, svget4_f32(result, 2), svget4_f32(result, 3));
+        const float sum = svaddv_f32(lanes, svadd_f32_x(lanes, s01, s23));
+        float* output = c + (size_t)i * ldc;
+        *output = first ? sum : *output + sum;
+    }
+}
+
+__arm_new("za") __arm_locally_streaming
+int cob_sgemm_sme_one_column(int m, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+    if (svcntsw() != 16) {
+        return 0;
+    }
+    enum { panel = 2048, row_tile = 8 };
+    _Alignas(64) float packed[panel];
+    for (int p = 0; p < k;) {
+        int count = k - p;
+        const float* vector = b + (size_t)p * ldb;
+        if (ldb != 1) {
+            count = count < panel ? count : panel;
+            for (int q = 0; q < count; ++q) {
+                packed[q] = vector[(size_t)q * ldb];
+            }
+            vector = packed;
+        }
+        int i = 0;
+        for (; m - i >= row_tile; i += row_tile) {
+            cob_sme_dot_tile(row_tile, count, a + (size_t)i * lda + p, lda,
+                vector, c + (size_t)i * ldc, ldc, p == 0);
+        }
+        if (i < m) {
+            cob_sme_dot_tile(m - i, count, a + (size_t)i * lda + p, lda,
+                vector, c + (size_t)i * ldc, ldc, p == 0);
+        }
+        p += count;
+    }
+    return 1;
+}
+
+/* The fused path accepts full 128-column square tiles. Each operand is
+   either one quadrant or the elementwise sum/difference of two quadrants.
+   Combine while loading the native leaf's packed representation. */
+#include <stddef.h>
+
+__attribute__((always_inline))
+static inline svfloat32x4_t load_four(const float* src, ptrdiff_t delta, int sign)
+    __arm_streaming
+{
+    const svbool_t pg = svptrue_b32();
+    const svcount_t p4 = svptrue_c32();
+    const svfloat32x4_t first = svld1_f32_x4(p4, src);
+    if (!sign) return first;
+    const svfloat32x4_t second = svld1_f32_x4(p4, src + delta);
+#define LINEAR_LANE(i) (sign > 0 ? \
+    svadd_f32_x(pg, svget4_f32(first, i), svget4_f32(second, i)) : \
+    svsub_f32_x(pg, svget4_f32(first, i), svget4_f32(second, i)))
+    return svcreate4_f32(LINEAR_LANE(0), LINEAR_LANE(1), LINEAR_LANE(2), LINEAR_LANE(3));
+#undef LINEAR_LANE
+}
+
+__attribute__((always_inline))
+static inline void fused_pack_a(const float* src, ptrdiff_t delta, int sign,
+    size_t ld, size_t rows, size_t kk, size_t klen, size_t kc, float* packed)
+    __arm_streaming __arm_inout("za")
+{
+    const svbool_t pg = svptrue_b32();
+    const svcount_t p4 = svptrue_c32();
+    const svfloat32_t zu = svundef_f32();
+    for (size_t i = 0; i < rows; i += 16) {
+        float* const pA = packed + i * kc;
+        const float* row = src + i * ld + kk;
+        for (size_t kp = 0; kp < klen; kp += 64) {
+#define LINEAR_LOAD(pred, ptr) load_four((ptr), delta, sign)
+            FK_PACK_A_WITH(row + kp, ld, LINEAR_LOAD);
+#undef LINEAR_LOAD
+        }
+    }
+}
+
+__attribute__((always_inline))
+static inline void fused_pack_b(const float* src, ptrdiff_t delta, int sign, size_t ld,
+    size_t jj, size_t nn, size_t kk, size_t klen, size_t kc, float* packed) __arm_streaming
+{
+    const svcount_t p4 = svptrue_c32();
+    for (size_t p = 0; p < klen; ++p) {
+        const float* row = src + (kk + p) * ld + jj;
+        float* panel = packed + p * 64;
+        for (size_t j = 0; j < nn; j += 64) {
+            svst1_f32_x4(p4, panel, load_four(row + j, delta, sign));
+            if (j + 64 < nn) panel += kc * 64;
+        }
+    }
+}
+
+typedef struct {
+    size_t h, kc, nc, lda, ldb, ldc;
+    float* packed_a;
+    float* packed_b;
+    float* product;
+} FusedWorkspace;
+
+#ifndef COB_FUSED_MC
+#define COB_FUSED_MC 128
+#endif
+
+/* Reuse the packed sum of A across all column blocks. The last two
+   products add directly to the accumulated output quadrants. */
+__attribute__((noinline))
+static void fused_product(FusedWorkspace* w, const float* a, const float* a2, int add_a,
+    const float* b, const float* b2, int add_b, float* c, size_t ldc, bool accumulate)
+    __arm_streaming __arm_inout("za")
+{
+    const size_t h = w->h, kc = w->kc, nc = w->nc;
+    const ptrdiff_t da = a2 ? a2 - a : 0, db = b2 ? b2 - b : 0;
+    PfCursor cursor = {0};
+    for (size_t kk = 0; kk < h; kk += kc) {
+        size_t klen = min_size(kc, h - kk);
+        if (add_a == 0) fused_pack_a(a, 0, 0, w->lda, h, kk, klen, kc, w->packed_a);
+        else if (add_a > 0) fused_pack_a(a, da, 1, w->lda, h, kk, klen, kc, w->packed_a);
+        else fused_pack_a(a, da, -1, w->lda, h, kk, klen, kc, w->packed_a);
+        for (size_t jj = 0; jj < h; jj += nc) {
+            size_t nn = min_size(nc, h - jj);
+            if (add_b == 0) fused_pack_b(b, 0, 0, w->ldb, jj, nn, kk, klen, kc, w->packed_b);
+            else if (add_b > 0) fused_pack_b(b, db, 1, w->ldb, jj, nn, kk, klen, kc, w->packed_b);
+            else fused_pack_b(b, db, -1, w->ldb, jj, nn, kk, klen, kc, w->packed_b);
+            for (size_t i = 0; i < h; i += COB_FUSED_MC) {
+                const size_t mm = min_size(COB_FUSED_MC, h - i);
+                compute_block(c, ldc, i, mm, jj, nn, klen,
+                    kk == 0 && !accumulate, kc, kc, w->packed_a + i * kc,
+                    w->packed_b, NULL, &cursor);
+            }
+        }
+    }
+}
+
+__arm_locally_streaming __arm_new("za")
+static int fused_square(FusedWorkspace* w, const float* a, const float* b, float* c)
+{
+    if (svcntsw() != 16) return 0;
+    const svbool_t pg = svptrue_b32();
+    const size_t h = w->h, ldc = w->ldc;
+    const float *a11 = a, *a12 = a + h, *a21 = a + h*w->lda, *a22 = a21 + h;
+    const float *b11 = b, *b12 = b + h, *b21 = b + h*w->ldb, *b22 = b21 + h;
+    float *c11 = c, *c12 = c + h, *c21 = c + h*ldc, *c22 = c21 + h;
+    fused_product(w, a21, a22, 1, b11, NULL, 0, c21, ldc, false);
+    fused_product(w, a11, NULL, 0, b12, b22, -1, c12, ldc, false);
+    fused_product(w, a22, NULL, 0, b21, b11, -1, c11, ldc, false);
+    fused_product(w, a11, a22, 1, b11, b22, 1, c22, ldc, false);
+    for (size_t i = 0; i < h; ++i) {
+        for (size_t j = 0; j < h; j += 16) {
+            size_t pos = i*ldc + j;
+            svfloat32_t m1 = svld1_f32(pg, c22+pos), m2 = svld1_f32(pg, c21+pos);
+            svfloat32_t m3 = svld1_f32(pg, c12+pos), m4 = svld1_f32(pg, c11+pos);
+            svst1_f32(pg, c11+pos, svadd_f32_x(pg, m1, m4));
+            svst1_f32(pg, c21+pos, svadd_f32_x(pg, m2, m4));
+            svst1_f32(pg, c22+pos, svadd_f32_x(pg, svsub_f32_x(pg, m1, m2), m3));
+        }
+    }
+    fused_product(w, a11, a12, 1, b22, NULL, 0, w->product, h, false);
+    for (size_t i = 0; i < h; ++i) {
+        for (size_t j = 0; j < h; j += 16) {
+            size_t pos = i*ldc+j;
+            svfloat32_t m5 = svld1_f32(pg, w->product+i*h+j);
+            svst1_f32(pg, c11+pos, svsub_f32_x(pg, svld1_f32(pg, c11+pos), m5));
+            svst1_f32(pg, c12+pos, svadd_f32_x(pg, svld1_f32(pg, c12+pos), m5));
+        }
+    }
+    fused_product(w, a21, a11, -1, b11, b12, 1, c22, ldc, true);
+    fused_product(w, a12, a22, -1, b21, b22, 1, c11, ldc, true);
+    return 1;
+}
+
+#ifndef COB_FUSED_KC
+#define COB_FUSED_KC 1024
+#endif
+#ifndef COB_FUSED_NC
+#define COB_FUSED_NC 1024
+#endif
+
+int cob_sgemm_strassen_fused_square(int n, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+    if (n < 128 || n > 16384 || n % 128 != 0) return 0;
+    size_t h = (size_t)n / 2, kc = min_size(h, COB_FUSED_KC), nc = min_size(h, COB_FUSED_NC);
+    size_t packed_a = h * kc, packed_b = nc * kc, output = h * h;
+    float* workspace = aligned_alloc(64, (packed_a + packed_b + output) * sizeof(float));
+    if (!workspace) return 0;
+    FusedWorkspace w = {h, kc, nc, (size_t)lda, (size_t)ldb, (size_t)ldc,
+                        workspace, workspace + packed_a, workspace + packed_a + packed_b};
+    int ok = fused_square(&w, a, b, c);
+    free(workspace);
     return ok;
 }
