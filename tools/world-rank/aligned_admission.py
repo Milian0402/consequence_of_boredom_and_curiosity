@@ -16,7 +16,7 @@ def qualified_layouts(args, cases, entries, results, seeds):
     def shape(row):
         return tuple(int(row[key]) for key in fields)
     routes = {}
-    route_files = ["routes.csv"] if args.phase == "medium-transfer" else ["routes.csv", "fastmmw-routes.csv"]
+    route_files = ["routes.csv"] if args.phase in ("medium-transfer","stream-b") else ["routes.csv", "fastmmw-routes.csv"]
     if args.phase == "aligned-core":
         route_files.append("aligned-routes.csv")
     if args.phase == "release-replay":
@@ -56,7 +56,7 @@ def qualified_layouts(args, cases, entries, results, seeds):
                 reason = "all_checks_passed"
                 if name == "hk-packed-forms" and not preflight_ok:
                     reason="whole_call_preflight_failed"
-                elif (name.startswith(("cob-","fastmmw-","release-","original-","signed-")) or name in ("hk-packed-forms","medium-incumbent","medium-transposed")) and not routes.get((name,geometry),False):
+                elif (name.startswith(("cob-","fastmmw-","release-","original-","signed-","stream-")) or name in ("hk-packed-forms","medium-incumbent","medium-transposed")) and not routes.get((name,geometry),False):
                     reason="route_unqualified"
                 elif gate!=required or len(inspected)!=4:
                     reason="incomplete_or_failed_full_fp64"

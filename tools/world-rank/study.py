@@ -21,8 +21,8 @@ SEEDS = {"discovery": (19473017, 37292229), "confirm": (6191231, 89743091),
          "tile-replay": (61003441, 74271079), "tile-child": (89132871, 31570843),
          "tile-parent": (45682013, 79065127), "leaf-wave": (63714293, 91375811),
          "aligned-core": (48236471, 85109381), "hk-forms": (62490137, 87035629),
-         "medium-transfer": (68539041, 93461257), "signed-leaves": (31048579, 196173023), "release-replay": (73194653, 28417069)}
-QUALIFIED_PHASES = ("aligned-core", "hk-forms", "release-replay", "medium-transfer", "signed-leaves")
+         "medium-transfer": (68539041, 93461257), "stream-b": (348271759, 710438957), "signed-leaves": (31048579, 196173023), "release-replay": (73194653, 28417069)}
+QUALIFIED_PHASES = ("aligned-core", "hk-forms", "release-replay", "medium-transfer", "signed-leaves", "stream-b")
 TILE_PHASES = ("tile-screen", "tile-confirm", "tile-replay", "tile-child", "tile-parent", "leaf-wave", *QUALIFIED_PHASES)
 SHAPE_KEYS = ("family", "m", "n", "k", "pad", "mode")
 SMALL_VENDOR_MAX_MNK = 64 ** 3

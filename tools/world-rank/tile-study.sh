@@ -10,7 +10,7 @@ phase=$(cat "$dir/phase.txt")
 arch=$(uname -m)
 cc=${CC:-cc}
 previous=b83033d199137b370c03a5a3d63365f1025162b7
-case "$phase" in tile-screen|tile-confirm|tile-replay|tile-child|tile-parent|leaf-wave|aligned-core|hk-forms|release-replay|medium-transfer|signed-leaves) ;; *) exit 2 ;; esac
+case "$phase" in tile-screen|tile-confirm|tile-replay|tile-child|tile-parent|leaf-wave|aligned-core|hk-forms|release-replay|medium-transfer|signed-leaves|stream-b) ;; *) exit 2 ;; esac
 [[ $(uname -s) == Linux ]]
 common=(-std=c11 -O3 -fPIC -shared -DCOB_ENABLE_PORTABLE_STRASSEN=1 -DCOB_ENABLE_RECURSIVE_STRASSEN=1)
 case "$arch" in
@@ -24,6 +24,7 @@ case "$arch" in
         panel="$dir/n2-tiles-${phase#tile-}.csv" ;;
     *) echo "Unsupported tile-study architecture $arch" >&2; exit 2 ;;
 esac
+if [[ $phase == stream-b ]]; then panel="$dir/stream/panel.csv"; fi
 if [[ $phase == signed-leaves ]]; then
     panel="$dir/signed/panel.csv"
     if [[ $arch == aarch64 ]]; then names=(openblas armpl blasfeo); fi
@@ -43,7 +44,7 @@ if [[ $phase == tile-parent ]]; then panel="$dir/hk-parent.csv"; fi
 export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 OMP_THREAD_LIMIT=1 MKL_NUM_THREADS=1 MKL_DYNAMIC=FALSE BLIS_NUM_THREADS=1 GOTO_NUM_THREADS=1
 peers=()
 for name in "${names[@]}"; do
-    if [[ ( $phase == aligned-core || $phase == hk-forms || $phase == release-replay || $phase == medium-transfer || $phase == signed-leaves ) && $name != openblas ]]; then continue; fi
+    if [[ ( $phase == aligned-core || $phase == hk-forms || $phase == release-replay || $phase == medium-transfer || $phase == signed-leaves || $phase == stream-b ) && $name != openblas ]]; then continue; fi
     [[ -r "$vendor/$name.so" ]] || { echo "Required benchmark library $name missing" >&2; exit 1; }
     if [[ $name != openblas ]]; then peers+=(--vendor "$name=$vendor/$name.so"); fi
 done
@@ -92,6 +93,14 @@ tile_candidate() {
     printf 'variant_flags[%s]=%s\n' "$name" "$*" >> "$out/tile-build.txt"
     tile_plugin "$name" "$build/$name.so"
 }
+if [[ $phase == stream-b ]]; then
+    if [[ -n ${GITHUB_ENV:-} ]]; then
+        printf 'RANK_STUDY_WORKER=%s\nRANK_STUDY_ROOT=%s\nRANK_STUDY_CPU=%s\nRANK_STUDY_VENDOR_DIR=%s\n' "$build/worker" "$build" "$cpu" "$vendor" >> "$GITHUB_ENV"
+    fi
+    source "$dir/stream-study.inc"
+    run_stream_b
+    exit $?
+fi
 if [[ $phase == signed-leaves || $phase == medium-transfer ]]; then
     if [[ -n ${GITHUB_ENV:-} ]]; then
         printf 'RANK_STUDY_WORKER=%s\nRANK_STUDY_ROOT=%s\nRANK_STUDY_CPU=%s\n' \
