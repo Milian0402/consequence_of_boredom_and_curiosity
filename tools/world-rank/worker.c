@@ -130,6 +130,7 @@ static void cancellation_input(float* x, int rows, int cols, int ld, int is_a)
 #include "vendor.h"
 
 extern void hybrid_sgemm_rowmajor(int,int,int,const float*,int,const float*,int,float*,int);
+extern void rank_hybrid_next(int,int,int,const float*,int,const float*,int,float*,int);
 rank_sgemm_fn rank_bridge;
 static rank_sgemm_fn selected_sgemm;
 static int vendor_calls;
@@ -216,6 +217,7 @@ static rank_sgemm_fn choose(const char* variant,void* lib)
     if (!lib) fatal("selected variant requires a vendor plugin");
     if (!strcmp(variant,"direct")) return selected_sgemm;
     if (!strcmp(variant,"hybrid")) return hybrid_sgemm_rowmajor;
+    if (!strcmp(variant,"hybrid-next")) return rank_hybrid_next;
     fatal("unknown variant");
     return NULL;
 }

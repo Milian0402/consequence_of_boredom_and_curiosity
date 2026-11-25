@@ -1,0 +1,6 @@
+family,m,n,k,pad,mode
+square,56,56,56,0,random
+square,104,104,104,0,random
+odd,29,83,53,5,random
+odd,79,67,97,3,random
+rect,40,112,56,0,random

@@ -21,7 +21,7 @@ for fn in sgemm_rowmajor sgemm_ref_rowmajor sgemm_pack_a sgemm_free_packed_a sge
 done
 "$cc" "${flags[@]}" -c "$build/base.c" -o "$build/native.o"
 "$cc" "${flags[@]}" "${renames[@]}" -c "$build/hybrid.c" -o "$build/hybrid.o"
-"$cc" "${flags[@]}" -Wall -Wextra -Werror "$rank_dir/worker.c" "$build/native.o" "$build/hybrid.o" -lm -ldl -o "$build/worker"
+"$cc" "${flags[@]}" -Wall -Wextra -Werror "$rank_dir/worker.c" "$rank_dir/hybrid_next.c" "$build/native.o" "$build/hybrid.o" -lm -ldl -o "$build/worker"
 
 extra=()
 while IFS= read -r definition; do

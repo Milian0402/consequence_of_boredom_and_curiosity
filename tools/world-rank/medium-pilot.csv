@@ -1,0 +1,9 @@
+family,m,n,k,pad
+medium-anchor,96,256,512,0
+medium-anchor,97,641,193,5
+wide-anchor,128,4096,256,0
+tall-anchor,1024,128,2048,0
+medium-screen,72,1472,384,0
+medium-screen,181,1097,431,3
+medium-screen,243,288,677,5
+tall-screen,769,165,493,7

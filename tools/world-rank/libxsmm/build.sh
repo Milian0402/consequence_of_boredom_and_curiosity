@@ -35,3 +35,10 @@ mv "$tmp/libxsmm.so" "$out/libxsmm.so"
 "$cc" -O3 -std=c11 -Wall -Wextra -Werror -DRANK_LIBXSMM_MAX_MNK=2097152 \
       -I"$src/include" "$here/adapter.c" "$src/lib/libxsmm.a" "${flags[@]}" -o "$out/libxsmm-wide.so"
 python3 "$here/smoke.py" "$out/libxsmm-wide.so"
+
+# Keep the last dispatched function on each caller thread. Repeated inputs
+# can then use the kernel pointer directly while sharing the same shape cap.
+"$cc" -O3 -std=c11 -Wall -Wextra -Werror -DRANK_LIBXSMM_MAX_MNK=2097152 \
+      -DRANK_LIBXSMM_CACHE_LAST=1 -I"$src/include" "$here/adapter.c" \
+      "$src/lib/libxsmm.a" "${flags[@]}" -o "$out/libxsmm-cached.so"
+python3 "$here/smoke.py" "$out/libxsmm-cached.so"

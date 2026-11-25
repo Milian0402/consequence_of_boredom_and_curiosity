@@ -1,0 +1,8 @@
+family,m,n,k,pad,mode
+square-anchor,64,64,64,0,random
+odd-anchor,37,113,59,5,random
+square,40,40,40,0,random
+square,88,88,88,0,random
+odd,23,77,43,3,random
+odd,73,61,89,7,random
+rect,32,96,48,0,random

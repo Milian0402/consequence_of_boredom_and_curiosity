@@ -3150,6 +3150,10 @@ static int cob_sgemm_one_shot_x86(int m, int n, int k, const float* a, int lda,
 #include "cob_blocked_leaf.inc"
 #endif
 
+#if defined(COB_ENABLE_MEDIUM_DIRECT_A) && COB_ENABLE_MEDIUM_DIRECT_A && defined(COB_USE_X86_SIMD)
+#include "cob_medium_direct_a.inc"
+#endif
+
 static void cob_sgemm_rowmajor_fallback(
     int m,
     int n,
@@ -3165,6 +3169,10 @@ static void cob_sgemm_rowmajor_fallback(
         lda < k || ldb < n || ldc < n) {
         return;
     }
+
+#if defined(COB_ENABLE_MEDIUM_DIRECT_A) && COB_ENABLE_MEDIUM_DIRECT_A && defined(COB_USE_X86_SIMD)
+    if (cob_try_medium_direct_a(m, n, k, a, lda, b, ldb, c, ldc)) return;
+#endif
 
 #if defined(COB_USE_BLOCKED_LEAF)
     if (cob_sgemm_one_shot_blocked(m, n, k, a, lda, b, ldb, c, ldc)) return;

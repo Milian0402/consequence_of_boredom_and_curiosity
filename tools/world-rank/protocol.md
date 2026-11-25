@@ -29,3 +29,9 @@ On the 13 previously confirmed layouts, compare the frozen 3cd1efc standalone en
 ## Short-row dispatch verification
 
 At 13 and 15 output rows a split NEON row tile regressed against the packed incumbent. The final Arm dispatch caps the new path at one 12-row tile. The x86 panel stays enabled through 15 rows after all four tested heights beat the incumbent on AMD. Test all six registered 9–15-row layouts in short.csv with new inputs and both timing orders against current independent libraries and the original frozen entry. Keep this follow-up separate from the preceding 20-shape replication, which used the full 15-row range on both CPUs.
+
+## Medium rectangular and small Arm experiments
+
+The medium pilot compares changing the depth and lifetime of packed panels on both architectures. On x86 it also tests wider register tiles and a kernel that packs only B. The Arm small pilot compares a native 6-by-16 NEON kernel with COB and a warmed LIBXSMM lookup on the entire small panel. Capture independent BLAS results on each case and keep the full six timings and FP64 checks. The incumbent is the distributed configuration at 22bbdbd. These are one-shot calls with reusable libraries already initialized.
+
+Freeze the pilot and held-out dimensions together. Select at most one policy per architecture and workload family from the pilot, with the incumbent as the default. Favor reproducible improvements across related dimensions and inspect regressions. Confirm the selected policy against the incumbent and strongest eligible independent competitor on the untouched dimensions with fresh seeds. Report losses and actual runner models, including any change between phases. Report vendor-backed recursion separately from standalone COB.
