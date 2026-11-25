@@ -1,0 +1,4 @@
+method,family,layout,reason
+blasfeo,repeat-win-ragged,origin,worker exit -11: affinity_cpu=0 BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+blasfeo,fresh-near-row-limit,cropped,worker exit -11: affinity_cpu=0 BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+blasfeo,control-above-rows,cropped,worker exit -11: affinity_cpu=0 BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0

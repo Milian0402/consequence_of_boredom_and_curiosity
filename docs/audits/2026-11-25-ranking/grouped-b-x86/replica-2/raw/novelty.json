@@ -1,0 +1,29 @@
+{
+  "total_files_examined": 3946,
+  "unique_csvs_examined": 982,
+  "prior_dimension_tables": 797,
+  "prior_geometry_rows": 222683,
+  "ordered_table_inventory_sha256": "859b48a7a3573af1912dbc071a45e86954c589f412a8a863d5999df9614520be",
+  "matches": {
+    "repeat-win-ragged": 71,
+    "repeat-intel-gap": 27,
+    "fresh-short-tail": 0,
+    "fresh-thin-odd": 0,
+    "fresh-exact": 0,
+    "fresh-minus-one": 0,
+    "fresh-middle-plus-one": 0,
+    "fresh-long-depth": 0,
+    "fresh-upper-irregular": 0,
+    "fresh-near-row-limit": 0,
+    "control-below-width": 0,
+    "control-above-rows": 0
+  },
+  "examples": {
+    "repeat-win-ragged": [
+      "work/cob-linux-public/tools/world-rank/stream/panel.csv"
+    ],
+    "repeat-intel-gap": [
+      "work/world-rank/frontier-wave/apple/panel.csv"
+    ]
+  }
+}

@@ -1,0 +1,3 @@
+Upstream LIBXSMM 2.1.0 7944bf36cf847c846b3fa0eb194789295e00b624
+LIBXSMM version=2.1.0-2 target=gnr mode=FP32-JIT inputs=unpacked beta=0
+Ten LIBXSMM FP32 layouts passed, including same-shape stride changes and fresh inputs

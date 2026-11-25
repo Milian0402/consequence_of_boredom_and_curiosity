@@ -1,0 +1,138 @@
+{
+  "admissions.csv": {
+    "member": "grouped/admissions.csv",
+    "sha256": "f7b1666d3437be63af765d15ba03555cb5491550250850bfb732ee1b128d3c39"
+  },
+  "aocl-configuration.txt": {
+    "member": "grouped/aocl-configuration.txt",
+    "sha256": "d9094c75b495ed6eb9fcdd3ff5538fe7506b7abc1e09f9ba6b4d8f247b92163a"
+  },
+  "blasfeo-build.txt": {
+    "member": "grouped/blasfeo-build.txt",
+    "sha256": "e95518f73465205a4dc0eb0c7f6f486a1021230bb1428a0f6dbdf0cd5d87be1d"
+  },
+  "candidate.sha256": {
+    "member": "grouped/candidate.sha256",
+    "sha256": "91f03d533111f6d812abe913803ace142afede9c24c9876f346db1bc575e33c5"
+  },
+  "failures.csv": {
+    "member": "grouped/failures.csv",
+    "sha256": "6dba9b96c23fa913246c445581d740cec7207e4eb607626ad573ef5e361a3d9b"
+  },
+  "grouped-b-flags.json": {
+    "member": "grouped/grouped-b-flags.json",
+    "sha256": "b6d1c9a3febc81dae6fc4ae6b95840b610cb1d3900e14b2ceeaafa78fae1f296"
+  },
+  "grouped-b-tests.txt": {
+    "member": "grouped/grouped-b-tests.txt",
+    "sha256": "3bca039e1f5184ad9a9549e947e2c5dcfb766d39cdb0dbb447e3e56495787b18"
+  },
+  "grouped-builds.csv": {
+    "member": "grouped/grouped-builds.csv",
+    "sha256": "a1b530a0a226606296719a12a570d5978fcc26a373f22242b35497db879089c0"
+  },
+  "grouped-control-parity.csv": {
+    "member": "grouped/grouped-control-parity.csv",
+    "sha256": "edc765b8300f7cf2b8307f0d958cecbaedeed3c2faacfd1cbacc9b0d4cc7a4d7"
+  },
+  "grouped-dispatch-flags.txt": {
+    "member": "grouped/grouped-dispatch-flags.txt",
+    "sha256": "3aafdf38d329d66081d16b3508f6dec9ea1516b9da03092b4a5cceb1d3cbc87c"
+  },
+  "grouped-fallbacks.csv": {
+    "member": "grouped/grouped-fallbacks.csv",
+    "sha256": "2174cb20b02005a07b19ff2f5beab4e79dc5b756b37fe1990f0e90d1e9035cce"
+  },
+  "grouped-guard-tests.txt": {
+    "member": "grouped/grouped-guard-tests.txt",
+    "sha256": "6b33f7d282cd7d055a3f222dcc222406571b9af7768af7a35c36e5748d0f4a91"
+  },
+  "grouped-native-features.txt": {
+    "member": "grouped/grouped-native-features.txt",
+    "sha256": "3f11ad6bbc7ecca0b2416b713dee77f1a635c00aaeaa946e14cde1c2bfae56d5"
+  },
+  "grouped-routes.csv": {
+    "member": "grouped/grouped-routes.csv",
+    "sha256": "710e95e175f9f1e57147ccea813af8f38cf4d6d9fd996ebf363742b335eca21f"
+  },
+  "grouped-score.json": {
+    "member": "grouped/grouped-score.json",
+    "sha256": "3cbb684f5a9082b090a8cc2360b99faa5c5e07f662cbebe53bc603a9eee741cc"
+  },
+  "grouped-sources.json": {
+    "member": "grouped/grouped-sources.json",
+    "sha256": "6e721ce422b35242a235154bad44e6f84d1e545ee85345a6fb81e5a4aae33c8f"
+  },
+  "host.txt": {
+    "member": "grouped/host.txt",
+    "sha256": "f98fbeaaca42bda8c7c7a77d38a5874da164409c4b6ec8919c68338a5d44d440"
+  },
+  "libxsmm-build.txt": {
+    "member": "grouped/libxsmm-build.txt",
+    "sha256": "312ca90d3d5fb11d9bedf0c2d5e691ac3c5c38adf86fa6d5a67e043bf5712ae9"
+  },
+  "libxsmm-routes.csv": {
+    "member": "grouped/libxsmm-routes.csv",
+    "sha256": "299ddbacb6cd33e688caaac75ca0999f7a54b33252a1c8c3201e222143aae4ae"
+  },
+  "methods.csv": {
+    "member": "grouped/methods.csv",
+    "sha256": "a2c09ffbeb9f27340ea63e05ca911b7ebdda7f8d44a18b0dd74394450fbf3e24"
+  },
+  "mkl-build.txt": {
+    "member": "grouped/mkl-build.txt",
+    "sha256": "f17d419687347af38cc12531d40e89a6d07df96541bd2e251bbc1df7ec6c1767"
+  },
+  "mkl-jit-build.txt": {
+    "member": "grouped/mkl-jit-build.txt",
+    "sha256": "6949b3329ec964f479c2137b388ae5078186da3b2d59c635ef3afce393a7dd98"
+  },
+  "novelty.json": {
+    "member": "grouped/novelty.json",
+    "sha256": "ee7067f3b8c4415a7b43911f91da1fd1548c6694f90f3f0fb39b5975e91e84b4"
+  },
+  "onednn-qualified-cached-plan.log": {
+    "member": "grouped/onednn-qualified-cached-plan.log",
+    "sha256": "dff0ea4ce9ce3fef7290dfd3f1cbb6d8097461ea8f314c07b97c1b68fcbff212"
+  },
+  "onednn-qualified-oneshot.log": {
+    "member": "grouped/onednn-qualified-oneshot.log",
+    "sha256": "b986ea968d0c6a22d8bd8fbf41da663a3237cd61a9c91024f85198fa84e5f909"
+  },
+  "onednn-routes.csv": {
+    "member": "grouped/onednn-routes.csv",
+    "sha256": "f22ad50b7e412c837b90e886178cf515a38eff8f878ff04f2e7db6d651e0090c"
+  },
+  "openblas-build.txt": {
+    "member": "grouped/openblas-build.txt",
+    "sha256": "ea04e5d90493f31903682870e51b4bbd963ddb948d1752f43088fd981d0066a7"
+  },
+  "page-size.txt": {
+    "member": "grouped/page-size.txt",
+    "sha256": "25ac87b7309b7946b51c32e824793ff48b56b735efa16875cf33e4ba67523d91"
+  },
+  "panel.csv": {
+    "member": "grouped/panel.csv",
+    "sha256": "5e470c40de6e63b6debbb96afd146eda58de83e50ef3da1e2f19186a8990b4c4"
+  },
+  "protocol.md": {
+    "member": "grouped/protocol.md",
+    "sha256": "a36cfd1999ebedf902a649f982ff30e498c6b8d8edb69e09ff7862f233f778a2"
+  },
+  "raw.csv": {
+    "member": "grouped/raw.csv",
+    "sha256": "eca029b42f13c8ee49343191e0f82d6128bf45bb177b571c44f9a8a1fcbc153c"
+  },
+  "run.json": {
+    "member": "grouped/run.json",
+    "sha256": "17a6f212553e09ac4106b66256c5f26c202aa45bb2168d448fef1cf7ae5ee969"
+  },
+  "stream-incumbent-flags.json": {
+    "member": "grouped/stream-incumbent-flags.json",
+    "sha256": "d213b17e308c72e34b1cc82d851ec1e003d4215dc259651a2b70d3108bf6438d"
+  },
+  "stream-incumbent-tests.txt": {
+    "member": "grouped/stream-incumbent-tests.txt",
+    "sha256": "085d1b0c5de38e83eee39aa1eb0be1a7564821554cf93ce0d64923efd765be55"
+  }
+}

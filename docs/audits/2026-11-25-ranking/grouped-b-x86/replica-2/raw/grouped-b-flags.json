@@ -1,0 +1,53 @@
+{
+  "avx2": [
+    "-DCOB_STREAM_B_AVX512=0",
+    "-march=native",
+    "-masm=att",
+    "-DCOB_ENABLE_BLOCKED_LEAF=1",
+    "-DCOB_ENABLE_DIRECT_SMALL_GEMM=0",
+    "-DCOB_ENABLE_SHORT_AXES=1",
+    "-DCOB_ENABLE_FUSED_STRASSEN=1",
+    "-DCOB_ENABLE_SMALL_X86=1",
+    "-DCOB_ENABLE_FEW_ROW_PANEL=1",
+    "-DCOB_ENABLE_X86_GROUPED_B=1",
+    "-O3",
+    "-DNDEBUG",
+    "-march=x86-64",
+    "-mavx2",
+    "-mfma"
+  ],
+  "avx512": [
+    "-DCOB_STREAM_B_AVX512=1",
+    "-march=native",
+    "-masm=att",
+    "-DCOB_ENABLE_BLOCKED_LEAF=1",
+    "-DCOB_ENABLE_DIRECT_SMALL_GEMM=0",
+    "-DCOB_ENABLE_SHORT_AXES=1",
+    "-DCOB_ENABLE_FUSED_STRASSEN=1",
+    "-DCOB_ENABLE_SMALL_X86=1",
+    "-DCOB_ENABLE_FEW_ROW_PANEL=1",
+    "-DCOB_ENABLE_X86_GROUPED_B=1",
+    "-O3",
+    "-DNDEBUG",
+    "-march=x86-64",
+    "-mavx512f",
+    "-mfma"
+  ],
+  "public": [
+    "-DCOB_ENABLE_PORTABLE_STRASSEN=1",
+    "-DCOB_ENABLE_RECURSIVE_STRASSEN=1",
+    "-DCOB_ENABLE_X86_MEDIUM_ROUTE=1",
+    "-DCOB_ENABLE_X86_STREAM_B=1",
+    "-march=native",
+    "-masm=att",
+    "-DCOB_ENABLE_BLOCKED_LEAF=1",
+    "-DCOB_ENABLE_DIRECT_SMALL_GEMM=0",
+    "-DCOB_ENABLE_SHORT_AXES=1",
+    "-DCOB_ENABLE_FUSED_STRASSEN=1",
+    "-DCOB_ENABLE_SMALL_X86=1",
+    "-DCOB_ENABLE_FEW_ROW_PANEL=1",
+    "-DCOB_ENABLE_X86_GROUPED_B=1",
+    "-O3",
+    "-DNDEBUG"
+  ]
+}

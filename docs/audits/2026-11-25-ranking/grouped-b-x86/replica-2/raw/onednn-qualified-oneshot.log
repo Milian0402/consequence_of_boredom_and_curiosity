@@ -1,0 +1,13 @@
+runtime=3.14.1 cpu_runtime=1 gpu_runtime=0 cached_plan=0 affinity=1 lib=/home/runner/work/consequence_of_boredom_and_curiosity/consequence_of_boredom_and_curiosity/../world-rank-vendors/onednn/prefix/lib/libdnnl.so.3
+M=1 N=17 K=9 lda=11 ldb=23 ldc=25 trial=0 checked=17 max_abs=1.061707735e-07 threads=1 impl=brg_matmul:avx512_core
+M=1 N=17 K=9 lda=11 ldb=23 ldc=25 trial=1 checked=17 max_abs=2.607703209e-07 threads=1 impl=brg_matmul:avx512_core
+M=16 N=16 K=16 lda=16 ldb=16 ldc=16 trial=0 checked=256 max_abs=3.641471267e-07 threads=1 impl=brg_matmul:avx512_core
+M=16 N=16 K=16 lda=16 ldb=16 ldc=16 trial=1 checked=256 max_abs=6.603077054e-07 threads=1 impl=brg_matmul:avx512_core
+M=67 N=131 K=93 lda=100 ldb=136 ldc=142 trial=0 checked=8777 max_abs=5.315057933e-06 threads=1 impl=brg_matmul:avx512_core
+M=67 N=131 K=93 lda=100 ldb=136 ldc=142 trial=1 checked=8777 max_abs=4.798173904e-06 threads=1 impl=brg_matmul:avx512_core
+M=67 N=131 K=93 lda=101 ldb=139 ldc=143 trial=0 checked=8777 max_abs=4.798173904e-06 threads=1 impl=brg_matmul:avx512_core
+M=67 N=131 K=93 lda=101 ldb=139 ldc=143 trial=1 checked=8777 max_abs=3.74391675e-06 threads=1 impl=brg_matmul:avx512_core
+M=97 N=193 K=159 lda=163 ldb=199 ldc=202 trial=0 checked=18721 max_abs=9.561888874e-06 threads=1 impl=brg_matmul:avx512_core
+M=97 N=193 K=159 lda=163 ldb=199 ldc=202 trial=1 checked=18721 max_abs=8.856877685e-06 threads=1 impl=brg_matmul:avx512_core
+strict_fp32_residual=0x1p-23 subnormal=0x1p-149
+PASS full_fp64_outputs=73096 created_plans=11

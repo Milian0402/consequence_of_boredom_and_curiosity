@@ -1,0 +1,137 @@
+{
+  "replica": 1,
+  "run": 45701814927,
+  "attempt": 1,
+  "benchmark_sha": "31a8fd88e74182d984386596585f2f1002d05ce4",
+  "branch": "bench/native-linux-gemm",
+  "url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45701814927",
+  "job": "Grouped B ranking on x86-64, replica 1",
+  "job_id": 139513654760,
+  "job_url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45701814927/job/139513654760",
+  "status": "success",
+  "steps": [
+    {
+      "name": "Set up job",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "conclusion": "success"
+    },
+    {
+      "name": "Prepare system tools and fallback FP64 BLAS",
+      "conclusion": "success"
+    },
+    {
+      "name": "Retrieve the same-family oneDNN build and evidence",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Fetch the pinned oneDNN artifact from the aligned-core run",
+      "conclusion": "success"
+    },
+    {
+      "name": "Qualify oneDNN on the CPU that will be measured",
+      "conclusion": "success"
+    },
+    {
+      "name": "Restore the pinned strict oneDNN peers when artifact reuse fails",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Verify standalone fused kernels against FP64",
+      "conclusion": "success"
+    },
+    {
+      "name": "Verify packed operand layout, fallbacks and whole-call bit identity",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Build pinned OpenBLAS",
+      "conclusion": "success"
+    },
+    {
+      "name": "Build AMD AOCL-BLAS",
+      "conclusion": "success"
+    },
+    {
+      "name": "Qualify the independent FastMMW Winograd comparator",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Prepare native vendor BLAS",
+      "conclusion": "success"
+    },
+    {
+      "name": "Build LIBXSMM small-shape JIT kernels",
+      "conclusion": "success"
+    },
+    {
+      "name": "Build native BLASFEO and verify its standard SGEMM entry",
+      "conclusion": "success"
+    },
+    {
+      "name": "Qualify optional Intel Haswell TBLIS Strassen",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Restore missing pinned release peers",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Compare installed candidates against an independent FP64 product",
+      "conclusion": "success"
+    },
+    {
+      "name": "Compare optional vendor-assisted medium-wide public routes",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Compare certified rank-48 and rank-49 block schedules",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Measure whole-call and component times on the same CPU",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Compare nine small workloads with warmed and cold JIT",
+      "conclusion": "success"
+    },
+    {
+      "name": "Record incomplete installation as a failed comparison",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Record a failed packed-forms correctness gate",
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Preserve raw measurements and accuracy",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "conclusion": "success"
+    },
+    {
+      "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+      "conclusion": "success"
+    },
+    {
+      "name": "Complete job",
+      "conclusion": "success"
+    }
+  ],
+  "artifact": "grouped-b-x86-45701814927-1-1",
+  "artifact_id": 15064580311,
+  "source_sha": "31a8fd88e74182d984386596585f2f1002d05ce4",
+  "artifact_sha256": "54624c9708490fffc8a38acf5f6801ac7554419bdd6067257635215f0672de50",
+  "bytes": 97905,
+  "members": 62,
+  "zipped_crc_passed": true
+}

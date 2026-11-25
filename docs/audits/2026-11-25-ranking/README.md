@@ -31,6 +31,10 @@ The option remains experimental and off by default. On all six padded thin holdo
 
 The installed option reproduced the default output bit for bit on 108 stress fixtures. Both configurations exceeded the 0.002 absolute-error threshold on some high-magnitude inputs. The speed result applies to the normalized benchmark inputs. The release option requires Apple SME2.1, 1024–4096 output columns and reduction depth 96–384. [Installed timings, accuracy limits and offline replay](m5-wide-release/README.md)
 
+## Packing adjacent B panels on x86
+
+Two Intel Xeon 6975P-C jobs tested packing four adjacent B panels before doing the same arithmetic as the released kernel. Grouped packing reached 97.1% and 96.8% of the incumbent's throughput across eight new rectangles. At 64 × 2304 × 224, the released kernel itself took 382 and 377 µs, while direct oneMKL took 315 and 313 µs. The four-panel implementation stays in the benchmark branch. BLASFEO qualified on nine of the twelve layouts per job and exited on the other three. [Per-layout timings, eligibility and replay](grouped-b-x86/README.md) · [Native benchmark](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45701814927)
+
 ## Medium rectangular products
 
 A standalone candidate packed A across output rows and read B in place. It lost all five fresh warm-call comparisons against the release on each of Intel Xeon Platinum 8573C and Arm Neoverse N2. Its geometric-mean speed relative to the release was 0.775× on Intel and 0.980× on Arm. All 576 full-output validations passed. On the Intel 49 × 2861 × 157 layout with eleven floats of row padding, the released implementation reached 0.679× oneMKL's speed. [Timings, checks and offline verifier](linux-medium/README.md) · [Native run](https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45686443679)

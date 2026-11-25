@@ -1,0 +1,18 @@
+Internal ctest changing into directory: /home/runner/work/_temp/grouped.v13Ai6Cb/grouped-b/objects
+Test project /home/runner/work/_temp/grouped.v13Ai6Cb/grouped-b/objects
+    Start 1: cob_stream_b_test
+1/6 Test #1: cob_stream_b_test ................   Passed    0.05 sec
+    Start 2: cob_gemm_test
+2/6 Test #2: cob_gemm_test ....................   Passed    0.27 sec
+    Start 3: cob_gemm_strassen_test
+3/6 Test #3: cob_gemm_strassen_test ...........   Passed    0.27 sec
+    Start 4: cob_gemm_strassen_square_test
+4/6 Test #4: cob_gemm_strassen_square_test ....   Passed    0.27 sec
+    Start 5: cob_portable_strassen_test
+5/6 Test #5: cob_portable_strassen_test .......   Passed    0.16 sec
+    Start 6: cob_fused_strassen_test
+6/6 Test #6: cob_fused_strassen_test ..........   Passed    0.04 sec
+
+100% tests passed, 0 tests failed out of 6
+
+Total Test time (real) =   1.05 sec

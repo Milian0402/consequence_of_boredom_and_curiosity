@@ -1,0 +1,16 @@
+{
+  "production": "a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6",
+  "benchmark": "31a8fd88e74182d984386596585f2f1002d05ce4",
+  "run": 45701814927,
+  "attempt": 1,
+  "replica": 1,
+  "cpu": 0,
+  "page": 4096,
+  "source_files": {
+    "panel.csv": "5e470c40de6e63b6debbb96afd146eda58de83e50ef3da1e2f19186a8990b4c4",
+    "protocol.md": "a36cfd1999ebedf902a649f982ff30e498c6b8d8edb69e09ff7862f233f778a2",
+    "novelty.json": "ee7067f3b8c4415a7b43911f91da1fd1548c6694f90f3f0fb39b5975e91e84b4",
+    "candidate.sha256": "91f03d533111f6d812abe913803ace142afede9c24c9876f346db1bc575e33c5",
+    "methods.csv": "695289585ba0d3859d75e3b79a20d2f1dd9f0a8b69901f8311c700bbfa50cd17"
+  }
+}

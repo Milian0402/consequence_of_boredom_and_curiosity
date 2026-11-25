@@ -1,0 +1,3 @@
+implementation,family,layout,m,n,k,lda,ldb,ldc,ar,ac,br,bc,cr,cc,isa,avx2,avx512,grouped_avx2,grouped_avx512,candidate_calls,route,first_bytes,first_align,checked,trace_checked,guard_cells,a_mod64,b_mod64,c_mod64,args_ok,workspace_ok,guards,inputs_unchanged,threads,cpu,error,trace_error,passed,allocation_refusals
+stream-incumbent,repeat-win-ragged,origin,137,2179,347,354,2186,2186,0,0,0,0,0,0,avx512,0,0,0,0,0,allocation-fallback,88832,64,298523,298523,5605,0,0,0,1,1,1,1,1,0,2.365205426e-05,2.365205426e-05,1,1
+grouped-b,repeat-win-ragged,origin,137,2179,347,354,2186,2186,0,0,0,0,0,0,avx512,0,0,0,0,0,allocation-fallback,355328,64,298523,298523,5605,0,0,0,1,1,1,1,1,0,2.365205426e-05,2.365205426e-05,1,1

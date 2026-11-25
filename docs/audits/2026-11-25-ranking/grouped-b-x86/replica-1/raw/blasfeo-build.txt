@@ -1,0 +1,11 @@
+source=https://github.com/giaf/blasfeo revision=e5d1cbbb2f458acd7adb7d9e8a6522416b7e336f tar_sha256=3e9276f686dad725049600b37459197e464fd3445a49fa7d87c690a5527de9b5 target=X64_INTEL_HASWELL
+cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Copyright (C) 2023 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+BLASFEO target=X64_INTEL_HASWELL API=standard-SGEMM workspace=initialized inputs=unpacked timed_output_clear=0
+ELF dependencies=['libc.so.6'], private BLASFEO symbols, no thread-launch imports
+5 complete rectangular / square FP32 checks, NaN old C, padded strides, one OS thread
+Stock native beta-zero path passed.
+3a025c26f814b9a56ff21a911ed1307b0f7806822fd666814fc9b65a2c74f600  /home/runner/work/_temp/blasfeo-rank.lYVWeo/blasfeo.so
