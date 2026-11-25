@@ -27,7 +27,7 @@ Linux/x86_64)
     unzip -q "$scratch/$headers" -d "$scratch/headers"
     inc="$scratch/headers/mkl_include-$version.data/data/include"
     lib="$scratch/runtime/mkl-$version.data/data/lib"
-    options=(-DRANK_INTEL -I"$inc")
+    options=(-DRANK_INTEL -isystem "$inc")
     libraries=(-L"$lib" -Wl,--no-as-needed -l:libmkl_intel_lp64.so.3
                -l:libmkl_sequential.so.3 -l:libmkl_core.so.3 -Wl,--as-needed -lpthread -lm -ldl)
     ;;
@@ -50,15 +50,35 @@ Linux/aarch64)
 *) echo "The vendor adapters require a native Linux x86-64 or aarch64 runner." >&2; exit 2 ;;
 esac
 
-"$cc" -std=c11 -O3 -Wall -Wextra -Werror -fPIC -shared "${options[@]}" \
-    "$src/vendor_backend.c" -Wl,-z,defs -Wl,--disable-new-dtags,-rpath,"$lib" \
-    "${libraries[@]}" -o "$scratch/backend.so"
-"$cc" -std=c11 -O3 -Wall -Wextra -Werror -fPIC -shared \
-    -DRANK_BACKEND_PATH="\"$scratch/backend.so\"" \
-    "$src/vendor_adapter.c" -Wl,-z,defs -ldl -o "$dest/$name.so"
-{
-    printf 'vendor=%s\nversion=%s\n' "$name" "$version"
-    readelf -d "$scratch/backend.so"
-    ldd "$scratch/backend.so"
-} > "$dest/$name-build.txt"
-cat "$dest/$name-build.txt"
+build_adapter() {
+    local variant=$1
+    shift
+    local backend="$scratch/$variant-backend.so"
+    "$cc" -std=c11 -O3 -Wall -Wextra -Werror -fPIC -shared "${options[@]}" "$@" \
+        "$src/vendor_backend.c" -Wl,-z,defs -Wl,--disable-new-dtags,-rpath,"$lib" \
+        "${libraries[@]}" -o "$backend"
+    "$cc" -std=c11 -O3 -Wall -Wextra -Werror -fPIC -shared \
+        -DRANK_BACKEND_PATH="\"$backend\"" \
+        "$src/vendor_adapter.c" -Wl,-z,defs -ldl -o "$dest/$variant.so"
+    {
+        printf 'vendor=%s\nversion=%s\n' "$variant" "$version"
+        readelf -d "$backend"
+        ldd "$backend"
+        if [[ "$variant" == mkl-jit ]]; then
+            # The installed header must retain both runtime branches at -O3.
+            nm -D --undefined-only "$backend" > "$scratch/jit-imports.txt"
+            for symbol in mkl_sgemm_jit sgemm_direct; do
+                grep -E "[[:space:]]U[[:space:]]+$symbol(@.*)?$" "$scratch/jit-imports.txt"
+            done
+        fi
+        if [[ "$name" == mkl ]]; then
+            MKL_VERBOSE=1 MKL_NUM_THREADS=1 python3 "$src/smoke_mkl.py" "$dest/$variant.so"
+        fi
+    } > "$dest/$variant-build.txt" 2>&1
+    cat "$dest/$variant-build.txt"
+}
+
+build_adapter "$name"
+if [[ "$name" == mkl ]]; then
+    build_adapter mkl-jit -DMKL_DIRECT_CALL_SEQ_JIT
+fi

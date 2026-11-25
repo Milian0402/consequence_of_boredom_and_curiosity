@@ -3147,6 +3147,9 @@ static int cob_sgemm_one_shot_x86(int m, int n, int k, const float* a, int lda,
 #if defined(COB_ENABLE_BLOCKED_LEAF) && COB_ENABLE_BLOCKED_LEAF && !defined(COB_USE_APPLE_AMX) && \
     (defined(COB_USE_X86_SIMD) || (defined(COB_USE_NEON) && defined(__aarch64__)))
 #define COB_USE_BLOCKED_LEAF 1
+#if defined(COB_ENABLE_X86_MEDIUM_ROUTE) && COB_ENABLE_X86_MEDIUM_ROUTE && defined(COB_USE_X86_SIMD)
+#define COB_USE_SCOPED_X86_MEDIUM 1
+#endif
 #include "cob_blocked_leaf.inc"
 #endif
 
@@ -4013,6 +4016,12 @@ COB_THIN_TARGET static void cob_sgemm_few_rows(int m, int n, int k,
 #include "cob_few_row_panel.inc"
 #endif
 
+#if defined(COB_ENABLE_N2_SMALL) && COB_ENABLE_N2_SMALL && defined(__linux__) && \
+    defined(__aarch64__) && defined(COB_USE_NEON) && defined(__ARM_NEON)
+#define COB_USE_N2_SMALL 1
+#include "cob_n2_small.inc"
+#endif
+
 void cob_sgemm_rowmajor(
     int m,
     int n,
@@ -4024,6 +4033,9 @@ void cob_sgemm_rowmajor(
     float* c,
     int ldc)
 {
+#ifdef COB_USE_N2_SMALL
+    if (cob_n2_try_sgemm(m, n, k, a, lda, b, ldb, c, ldc)) return;
+#endif
 #ifdef COB_USE_FEW_ROW_PANEL
     if (cob_try_panel_few_rows(m, n, k, a, lda, b, ldb, c, ldc)) return;
 #endif
@@ -4102,6 +4114,13 @@ void cob_sgemm_rowmajor(
         cob_sgemm_rowmajor_strassen1(m, n, k, a, lda, b, ldb, c, ldc)) {
         return;
     }
+#endif
+
+#if defined(COB_USE_SCOPED_X86_MEDIUM)
+    if (m >= 64 && m <= 256 && n >= 128 && n <= 4096 &&
+        k >= 128 && k <= 1024 && n >= m && (2 * n >= 3 * m || 2 * k >= 3 * m) &&
+        a && b && c && lda >= k && ldb >= n && ldc >= n &&
+        cob_sgemm_blocked_impl(m, n, k, a, lda, b, ldb, c, ldc, 1)) return;
 #endif
 
     cob_sgemm_rowmajor_fallback(m, n, k, a, lda, b, ldb, c, ldc);

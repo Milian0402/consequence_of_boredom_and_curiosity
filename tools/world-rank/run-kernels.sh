@@ -20,6 +20,11 @@ case "$(uname -m)" in
     aarch64) common+=(-mcpu=native -DCOB_USE_NEON=1); peers+=(--vendor "armpl=$vendor/armpl.so");;
     *) exit 2;;
 esac
+if [[ "$phase" == heldout ]]; then
+    for name in blasfeo mkl-jit; do
+        if [[ -f "$vendor/$name.so" ]]; then peers+=(--vendor "$name=$vendor/$name.so"); fi
+    done
+fi
 cob_build() {
     local name=$1
     shift
@@ -57,7 +62,12 @@ if [[ "$phase" == pilot ]]; then
         medium+=(--candidate "first-tile=direct:$build/first-tile.so")
     fi
 else
-    medium+=(--candidate "cob-selected=direct:$build/challenger.so")
+    if [[ $(uname -m) == x86_64 ]]; then
+        cob_build selected -DCOB_ENABLE_X86_MEDIUM_ROUTE=1
+        medium+=(--candidate "cob-selected=direct:$build/selected.so")
+    else
+        medium+=(--candidate "cob-selected=direct:$build/challenger.so")
+    fi
 fi
 capture medium "${medium[@]}"
 if [[ $(uname -m) == aarch64 ]]; then
@@ -74,3 +84,9 @@ for name in openblas aocl mkl armpl; do
     fi
 done
 capture recursive "${recursive[@]}"
+if [[ "$phase" == heldout ]]; then
+    sh "$dir/final-panel/check.sh" "$PWD" "$build/final-panel-check"
+    cp "$build/final-panel-check/accuracy.csv" "$out/final-panel-validation.csv"
+    cob_build final-panel -DCOB_ENABLE_FUSED_FINAL_PANEL=1
+    capture final-panel --candidate "cob-final-panel=direct:$build/final-panel.so"
+fi

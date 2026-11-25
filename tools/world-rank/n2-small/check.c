@@ -5,7 +5,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef N2_TEST_PUBLIC
+#include "cob_gemm.h"
+#else
 int n2_try_sgemm(int, int, int, const float *, int, const float *, int, float *, int);
+#endif
 
 static uint32_t state = 3141592U;
 static float draw(void)
@@ -35,8 +39,12 @@ static int check(int m, int n, int k, int apad, int bpad, int cpad)
         for (int j = 0; j < ldc; ++j)
             c[(size_t)i * ldc + j] = j < n ? NAN : 486123.0f;
 
-    int accepted = n2_try_sgemm(m, n, k, a, lda, b, ldb, c, ldc);
-    int bad = !accepted;
+#ifdef N2_TEST_PUBLIC
+    cob_sgemm_rowmajor(m, n, k, a, lda, b, ldb, c, ldc);
+    int bad = 0;
+#else
+    int bad = !n2_try_sgemm(m, n, k, a, lda, b, ldb, c, ldc);
+#endif
     for (int i = 0; i < m && !bad; ++i) {
         for (int j = 0; j < n; ++j) {
             double sum = 0;
@@ -77,11 +85,21 @@ int main(void)
         const int* v=cases_extra[t];
         if (check(v[0],v[1],v[2],v[3],v[3],v[3])) return 1;
     }
+#ifdef N2_TEST_PUBLIC
+    /* Valid products just outside each dispatch boundary use ordinary COB. */
+    const int fallback[][3]={{7,37,25},{23,7,29},{23,17,7},{129,17,29},
+                             {23,129,29},{23,17,129},{1,1,1}};
+    for (size_t t=0; t<sizeof(fallback)/sizeof(fallback[0]); ++t) {
+        const int *v=fallback[t];
+        if (check(v[0],v[1],v[2],2,3,5)) return 1;
+    }
+#else
     float alias[4096] = {0};
     if (n2_try_sgemm(32,32,32,alias,32,alias+2000,32,alias+10,32) != 0 ||
         n2_try_sgemm(32,32,32,alias,32,alias+1040,32,alias+1080,32) != 0 ||
         n2_try_sgemm(129,128,8,alias,8,alias,128,alias,128) != 0) return 1;
-    printf("%d active layouts, %" PRIu64 " FP64 outputs, max error %.9g, padding preserved\n",
+#endif
+    printf("%d layouts, %" PRIu64 " FP64 outputs, max error %.9g, padding preserved\n",
            cases, outputs, worst);
     return 0;
 }

@@ -278,7 +278,7 @@ static void cob_blocked_apply_panel(cob_blocked_kernel kernel, int m, int n, int
     }
 }
 
-#if defined(COB_ENABLE_CACHE_PANEL) && COB_ENABLE_CACHE_PANEL
+#if defined(COB_USE_SCOPED_X86_MEDIUM) || (defined(COB_ENABLE_CACHE_PANEL) && COB_ENABLE_CACHE_PANEL)
 #ifndef COB_PANEL_DEPTH
 #define COB_PANEL_DEPTH 256
 #endif
@@ -315,17 +315,24 @@ static int cob_sgemm_cache_panel(cob_blocked_kernel kernel, int m, int n, int k,
 }
 #endif
 
-static int cob_sgemm_one_shot_blocked(int m, int n, int k, const float* a, int lda,
-    const float* b, int ldb, float* c, int ldc)
+static int cob_sgemm_blocked_impl(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc, int selected_medium)
 {
+#if !defined(COB_USE_SCOPED_X86_MEDIUM)
+    (void)selected_medium;
+#endif
     if (m < 12 || n < 24 || k < 32 || (m <= 128 && n <= 128 && k <= 128)) return 0;
     size_t c_count = (size_t)(m-1)*ldc+n;
     if (cob_f32_ranges_overlap(c, c_count, a, (size_t)(m-1)*lda+k) ||
         cob_f32_ranges_overlap(c, c_count, b, (size_t)(k-1)*ldb+n)) return 0;
     cob_blocked_kernel kernel;
     if (!cob_blocked_select_kernel(&kernel)) return 0;
-#if defined(COB_ENABLE_CACHE_PANEL) && COB_ENABLE_CACHE_PANEL
-    if (cob_sgemm_cache_panel(kernel, m, n, k, a, lda, b, ldb, c, ldc)) return 1;
+#if defined(COB_USE_SCOPED_X86_MEDIUM) || (defined(COB_ENABLE_CACHE_PANEL) && COB_ENABLE_CACHE_PANEL)
+    if (
+#if defined(COB_USE_SCOPED_X86_MEDIUM)
+        selected_medium &&
+#endif
+        cob_sgemm_cache_panel(kernel, m, n, k, a, lda, b, ldb, c, ldc)) return 1;
 #endif
     const int mc = kernel.mc, mr = kernel.mr, nr = kernel.nr;
     const int kc = cob_min_i32(256, k), nc = cob_min_i32(768, n);
@@ -363,4 +370,11 @@ static int cob_sgemm_one_shot_blocked(int m, int n, int k, const float* a, int l
     }
     free(pack_b);
     return 1;
+}
+
+
+static int cob_sgemm_one_shot_blocked(int m, int n, int k, const float* a, int lda,
+    const float* b, int ldb, float* c, int ldc)
+{
+    return cob_sgemm_blocked_impl(m, n, k, a, lda, b, ldb, c, ldc, 0);
 }

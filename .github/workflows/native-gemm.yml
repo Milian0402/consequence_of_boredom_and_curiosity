@@ -53,6 +53,14 @@ jobs:
         id: libxsmm
         continue-on-error: true
         run: bash tools/world-rank/libxsmm/build.sh "$VENDOR_DIR"
+      - name: Build native BLASFEO and verify its standard SGEMM entry
+        id: blasfeo
+        if: success()
+        continue-on-error: true
+        run: |
+          if [[ $(cat tools/world-rank/phase.txt) == heldout ]]; then
+            bash tools/world-rank/blasfeo/build.sh "$VENDOR_DIR"
+          fi
       - name: Compare installed candidates against an independent FP64 product
         run: bash tools/world-rank/run.sh "$RUNNER_TEMP/rank-result" "$VENDOR_DIR"
       - name: Compare nine small workloads with warmed and cold JIT
@@ -65,7 +73,7 @@ jobs:
         if: >-
           ${{ !cancelled() && (steps.openblas.outcome == 'failure' ||
           steps.aocl.outcome == 'failure' || steps.vendor.outcome == 'failure' ||
-          steps.libxsmm.outcome == 'failure') }}
+          steps.libxsmm.outcome == 'failure' || steps.blasfeo.outcome == 'failure') }}
         run: |
           echo "At least one requested vendor build was unavailable." > "$RUNNER_TEMP/rank-result/missing-vendor.txt"
           exit 1

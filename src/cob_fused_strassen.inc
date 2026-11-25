@@ -115,17 +115,32 @@ typedef struct {
     float* pack_b;
 } cob_fused_slab;
 
+#if defined(COB_ENABLE_FUSED_FINAL_PANEL) && COB_ENABLE_FUSED_FINAL_PANEL
+#include "cob_final_product.inc"
+#else
+typedef struct cob_final_output cob_final_output;
+#endif
+
 static void cob_fused_product(const cob_fused_slab* s, cob_fused_operand a,
-    cob_fused_operand b, float* c, int ldc)
+    cob_fused_operand b, float* c, int ldc, const cob_final_output* output)
 {
+#if !defined(COB_ENABLE_FUSED_FINAL_PANEL) || !COB_ENABLE_FUSED_FINAL_PANEL
+    (void)output;
+#endif
     for (int pc = 0; pc < s->depth;) {
         const int kb = cob_min_i32(COB_FUSED_KC, s->depth-pc);
         cob_fused_pack_b(s->pack_b, b, (size_t)pc*s->ldb, s->ldb, kb, s->cols, s->kernel.nr);
         for (int ic = 0; ic < s->rows;) {
             const int mb = cob_min_i32(s->kernel.mc, s->rows-ic);
             cob_fused_pack_a(s->pack_a, a, (size_t)ic*s->lda+pc, s->lda, mb, kb, s->kernel.mr);
-            cob_blocked_apply_panel(s->kernel, mb, s->cols, kb, s->pack_a, s->pack_b,
-                c+(size_t)ic*ldc, ldc, pc != 0);
+#if defined(COB_ENABLE_FUSED_FINAL_PANEL) && COB_ENABLE_FUSED_FINAL_PANEL
+            if (output && kb == s->depth-pc)
+                cob_final_panel(&s->kernel,mb,s->cols,kb,s->pack_a,s->pack_b,
+                    c+(size_t)ic*ldc,ldc,pc!=0,output,ic);
+            else
+#endif
+                cob_blocked_apply_panel(s->kernel, mb, s->cols, kb, s->pack_a, s->pack_b,
+                    c+(size_t)ic*ldc, ldc, pc != 0);
             ic += mb;
         }
         pc += kb;
@@ -219,17 +234,31 @@ static int cob_sgemm_strassen_fused(int m, int n, int k, const float* a, int lda
 #define COB_FUSED_SUB(x,y) ((cob_fused_operand){x, y, -1})
             /* M2, M3, M4 seed three destinations; the remaining four products
                reuse one local slab and preserve the existing recombination order. */
-            cob_fused_product(&slab, COB_FUSED_ADD(a21,a22), COB_FUSED_ONE(b11), c21, ldc);
-            cob_fused_product(&slab, COB_FUSED_ONE(a11), COB_FUSED_SUB(b12,b22), c12, ldc);
-            cob_fused_product(&slab, COB_FUSED_ONE(a22), COB_FUSED_SUB(b21,b11), c11, ldc);
-            cob_fused_product(&slab, COB_FUSED_ADD(a11,a22), COB_FUSED_ADD(b11,b22), product, slab.cols);
+#if defined(COB_ENABLE_FUSED_FINAL_PANEL) && COB_ENABLE_FUSED_FINAL_PANEL
+#define COB_FINAL_OUT(op) (&(cob_final_output){c11,c12,c21,c22,ldc,(op)})
+#else
+#define COB_FINAL_OUT(op) NULL
+#endif
+            cob_fused_product(&slab, COB_FUSED_ADD(a21,a22), COB_FUSED_ONE(b11), c21, ldc, NULL);
+            cob_fused_product(&slab, COB_FUSED_ONE(a11), COB_FUSED_SUB(b12,b22), c12, ldc, NULL);
+            cob_fused_product(&slab, COB_FUSED_ONE(a22), COB_FUSED_SUB(b21,b11), c11, ldc, NULL);
+            cob_fused_product(&slab, COB_FUSED_ADD(a11,a22), COB_FUSED_ADD(b11,b22), product, slab.cols, COB_FINAL_OUT(COB_FINAL_M1));
+#if !defined(COB_ENABLE_FUSED_FINAL_PANEL) || !COB_ENABLE_FUSED_FINAL_PANEL
             cob_strassen_merge_m1(c11, c12, c21, c22, ldc, product, slab.rows, slab.cols);
-            cob_fused_product(&slab, COB_FUSED_ADD(a11,a12), COB_FUSED_ONE(b22), product, slab.cols);
+#endif
+            cob_fused_product(&slab, COB_FUSED_ADD(a11,a12), COB_FUSED_ONE(b22), product, slab.cols, COB_FINAL_OUT(COB_FINAL_M5));
+#if !defined(COB_ENABLE_FUSED_FINAL_PANEL) || !COB_ENABLE_FUSED_FINAL_PANEL
             cob_strassen_merge_m5(c11, c12, ldc, product, slab.rows, slab.cols);
-            cob_fused_product(&slab, COB_FUSED_SUB(a21,a11), COB_FUSED_ADD(b11,b12), product, slab.cols);
+#endif
+            cob_fused_product(&slab, COB_FUSED_SUB(a21,a11), COB_FUSED_ADD(b11,b12), product, slab.cols, COB_FINAL_OUT(COB_FINAL_M6));
+#if !defined(COB_ENABLE_FUSED_FINAL_PANEL) || !COB_ENABLE_FUSED_FINAL_PANEL
             cob_strassen_merge_product(c22, ldc, product, slab.rows, slab.cols, 1);
-            cob_fused_product(&slab, COB_FUSED_SUB(a12,a22), COB_FUSED_ADD(b21,b22), product, slab.cols);
+#endif
+            cob_fused_product(&slab, COB_FUSED_SUB(a12,a22), COB_FUSED_ADD(b21,b22), product, slab.cols, COB_FINAL_OUT(COB_FINAL_M7));
+#if !defined(COB_ENABLE_FUSED_FINAL_PANEL) || !COB_ENABLE_FUSED_FINAL_PANEL
             cob_strassen_merge_product(c11, ldc, product, slab.rows, slab.cols, 1);
+#endif
+#undef COB_FINAL_OUT
 #undef COB_FUSED_ONE
 #undef COB_FUSED_ADD
 #undef COB_FUSED_SUB
