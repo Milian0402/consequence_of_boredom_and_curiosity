@@ -25,6 +25,8 @@ A new opt-in SME kernel packs A once and computes the first 16 rows while packin
 
 On those nine layouts, the installed library with `COB_ENABLE_APPLE_MEDIUM_WIDE=ON` delivered **4.807× the speed of the same build with the option off** and 4.672× the prior release. The weakest gain over the prior release was 1.940×. The new implementation averaged 0.972× the fastest measured external entry per layout, including prepared LIBXSMM. Its lead exceeded 1% on two layouts. MaxMulSK and MpGEMM were called directly on compact layouts in this study.
 
+A clean reconstruction repeated all nine wins against the prior release, averaging 3.494× its speed. The fastest-peer geometric mean fell to 0.950×, and the 39 × 2304 × 160 case reached only 0.782× MpGEMM. That fell below the prespecified 0.85× floor. The option remains experimental and off by default.
+
 The installed option reproduced the default output bit for bit on 108 stress fixtures. Both configurations exceeded the 0.002 absolute-error threshold on some high-magnitude inputs. The speed result applies to the normalized benchmark inputs. The release option requires Apple SME2.1, 1024–4096 output columns and reduction depth 96–384. [Installed timings, accuracy limits and offline replay](m5-wide-release/README.md)
 
 ## Medium rectangular products
