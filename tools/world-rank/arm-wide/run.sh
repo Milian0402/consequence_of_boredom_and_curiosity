@@ -11,10 +11,11 @@ test "$(uname -m)" = aarch64
 rev=a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6
 test "$(git -C "$release" rev-parse HEAD)" = "$rev"
 patch=71e1c7a3ff3c3b807c0d76b89f2c067fdbd9d96261309b7e390110dcfa3f42be
+tests_sha=015032ff2c44413db5558e0e623d1107cc3e24ea4fcfa5219d48b734e1941986
 panel=5e470c40de6e63b6debbb96afd146eda58de83e50ef3da1e2f19186a8990b4c4
-printf '%s  %s\n' "$patch" "$dir/candidate.patch" "$panel" "$dir/panel.csv" | sha256sum --check --status
+printf '%s  %s\n' "$patch" "$dir/candidate.patch" "$panel" "$dir/panel.csv" "$tests_sha" "$dir/test-routes.patch" | sha256sum --check --status
 cp "$dir"/{protocol.md,panel.csv,score.py} "$out/"
-jq -n --arg release "$rev" --arg patch "$patch" --arg panel "$panel" '{release:$release,patch_sha256:$patch,panel_sha256:$panel}' > "$out/source.json"
+jq -n --arg release "$rev" --arg patch "$patch" --arg panel "$panel" --arg tests "$tests_sha" '{release:$release,patch_sha256:$patch,panel_sha256:$panel,test_overlay_sha256:$tests}' > "$out/source.json"
 git -C "$root" rev-parse HEAD > "$out/benchmark-revision.txt"
 getconf PAGE_SIZE > "$out/page-size.txt"
 { uname -a; lscpu; gcc --version; } > "$out/host.txt"
@@ -32,6 +33,9 @@ for method in incumbent candidate; do
     src="$scratch/$method-source"; build="$scratch/$method-build"; sdk="$scratch/$method-sdk"
     mkdir -p "$src"
     git -C "$release" archive "$rev" | tar xf - -C "$src"
+    # Each white-box Strassen fixture must check both the public small route and
+    # the forced Strassen allocator. This overlay touches only test source.
+    (cd "$src" && git apply "$dir/test-routes.patch")
     opts=(); wraps=(-Wl,--wrap=cob_sgemm_rowmajor)
     if [[ $method == candidate ]]; then
         (cd "$src" && git apply "$dir/candidate.patch")
