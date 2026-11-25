@@ -1,0 +1,133 @@
+{
+  "all_fresh_field_thresholds_pass": false,
+  "all_native_vendor_gates_pass": false,
+  "both_native_vendors_observed": false,
+  "cpu_model_count": 1,
+  "distinct_native_vendors": [
+    "GenuineIntel"
+  ],
+  "interpretation": "Ordered by registered run, attempt and replica. Timings and seed blocks from one machine are dependent. Same-model replicas are reported separately.",
+  "models": {
+    "Intel(R) Xeon(R) 6975P-C": {
+      "first_registered_replica": 1,
+      "first_registered_run": 45697897911,
+      "observations": [
+        {
+          "artifact_id": 15061259220,
+          "artifact_sha256": "81f90c2d4d3b7550664608aee2f94a1780101fd002be6de894bc29acabb1143c",
+          "attempt": 1,
+          "available": [
+            "aocl",
+            "blasfeo",
+            "frontier-incumbent",
+            "host-direct",
+            "host-pad8",
+            "libxsmm-dispatch",
+            "libxsmm-retained",
+            "mkl",
+            "mkl-jit",
+            "onednn-cached-plan",
+            "onednn-oneshot",
+            "openblas",
+            "stream-packed-a"
+          ],
+          "external_gates": {
+            "external_any": false,
+            "external_oneshot": false
+          },
+          "isa": "avx512",
+          "job_id": 139500093897,
+          "matched": {
+            "geomean": 0.8962435914112551,
+            "leave_one_layout_out_geomean_range": [
+              0.8895783561539428,
+              0.9031013884809159
+            ],
+            "leave_one_layout_out_geomeans": [
+              0.9031013884809159,
+              0.894618563787573,
+              0.897489390383569,
+              0.8895783561539428,
+              0.9004161451379518,
+              0.8934897535757157,
+              0.8950321715035322,
+              0.8962910569532623
+            ],
+            "maximum": 0.944319703868924,
+            "minimum": 0.849675187847696,
+            "observation_wins": 0,
+            "seed_geomeans": [
+              0.8970021379092974,
+              0.8927340112294261
+            ],
+            "wins": 0
+          },
+          "model": "Intel(R) Xeon(R) 6975P-C",
+          "omitted": {},
+          "primary": false,
+          "replica": 1,
+          "run": 45697897911,
+          "vendor": "GenuineIntel"
+        },
+        {
+          "artifact_id": 15060533935,
+          "artifact_sha256": "2e992ec1140a0b74265fd70c8125c70ac066d1e941685aaeeff6b2f805db34d1",
+          "attempt": 1,
+          "available": [
+            "aocl",
+            "blasfeo",
+            "frontier-incumbent",
+            "host-direct",
+            "host-pad8",
+            "libxsmm-dispatch",
+            "libxsmm-retained",
+            "mkl",
+            "mkl-jit",
+            "onednn-cached-plan",
+            "onednn-oneshot",
+            "openblas",
+            "stream-packed-a"
+          ],
+          "external_gates": {
+            "external_any": false,
+            "external_oneshot": false
+          },
+          "isa": "avx512",
+          "job_id": 139500093862,
+          "matched": {
+            "geomean": 0.8932926806911614,
+            "leave_one_layout_out_geomean_range": [
+              0.8871222535299051,
+              0.8996072942933176
+            ],
+            "leave_one_layout_out_geomeans": [
+              0.8996072942933176,
+              0.893044630332694,
+              0.8942612681447684,
+              0.8871222535299051,
+              0.8971435452668703,
+              0.890436055486009,
+              0.8922697219081998,
+              0.8925146386642966
+            ],
+            "maximum": 0.93770425908705,
+            "minimum": 0.8503141912193035,
+            "observation_wins": 0,
+            "seed_geomeans": [
+              0.8921568458738978,
+              0.8941536930782944
+            ],
+            "wins": 0
+          },
+          "model": "Intel(R) Xeon(R) 6975P-C",
+          "omitted": {},
+          "primary": false,
+          "replica": 2,
+          "run": 45697897911,
+          "vendor": "GenuineIntel"
+        }
+      ],
+      "status": "all missed"
+    }
+  }
+}

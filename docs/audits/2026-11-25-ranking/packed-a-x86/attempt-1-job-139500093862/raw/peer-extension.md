@@ -1,0 +1,5 @@
+# Additional independent JIT comparisons
+
+Before native performance measurements, the field was expanded to include two explicit FP32 LIBXSMM JIT interfaces on these same twelve registered layouts. The per-call dispatch entry requests the kernel on each complete public invocation. Later requests can hit LIBXSMM's internal registry. The retained entry can reuse the previously obtained callable for that geometry. Each fresh worker's first complete multiply is recorded separately. Qualification requires the actual non-reference MATMUL JIT entry, a positive native code size, the matching swapped row-major dimensions and strides, FP32 inputs and outputs and overwrite semantics. Include an unavailable or rejected shape in the coverage table with its reason.
+
+Count LIBXSMM dispatch among ordinary one-shot interfaces. Include retained LIBXSMM and retained oneDNN only in the rankings that permit explicit retained state. Both ranking views include standard direct libraries and report the strongest qualified competitor per layout. The frozen kernel, panel, seed schedule and standalone promotion thresholds continue to use the original protocol.

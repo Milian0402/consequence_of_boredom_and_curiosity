@@ -1,0 +1,60 @@
+{
+  "phase": "frontier-x86",
+  "panel_sha256": "b6d451644a0a979e1b09796ff22c6b4ff24b537a7a701e68afad72ada14d5190",
+  "protocol_sha256": "91df1250132c20dc7a32de34985956fbe6ebaffd4cbf0536b617df044041b83a",
+  "release": "a30d71f0aaba4bcceb9ec5c530cffd63e6967cd6",
+  "seeds": [
+    856103219,
+    1743857903
+  ],
+  "candidate": "stream-packed-a",
+  "baseline": "frontier-incumbent",
+  "roles": {
+    "openblas": "direct",
+    "mkl": "direct",
+    "mkl-jit": "direct",
+    "aocl": "direct",
+    "blasfeo": "direct",
+    "onednn-oneshot": "direct",
+    "onednn-cached-plan": "retained",
+    "libxsmm-dispatch": "direct",
+    "libxsmm-retained": "retained",
+    "frontier-incumbent": "incumbent",
+    "stream-packed-a": "candidate",
+    "host-direct": "assisted",
+    "host-pad8": "assisted"
+  },
+  "primary": {
+    "fresh_cases": 8,
+    "geomean_at_least": 1.03,
+    "minimum_at_least": 0.97,
+    "case_wins_at_least": 6,
+    "each_seed_greater_than": 1.0
+  },
+  "field": {
+    "every_fresh_paired_median_greater_than": 1.02,
+    "every_fresh_observations_won_at_least": 5
+  },
+  "source": {
+    "tree": "18f22622de1a4b1b7aebbdb66985741aa38c6e9e",
+    "patch": "b994dd80639f521ae59a0ca70dcf58b43db6773b4ecf92033f841515624877fa",
+    "methods": {
+      "frontier-incumbent": "c1ec96b0a6fb6fb7f80fa94addc4f4ff20eab39c68873ff0af89030eeafb6679",
+      "stream-packed-a": "5b3c5522ddd2728e89915d659587d4cec53075afaabd824eb75418dbf11b85a0"
+    },
+    "registered_files": {
+      "peer-extension.md": "e14377e08eb4ca2aeb92b8c627026000c1b5d4f4dfd4c8f5b8b5c20b30021258",
+      "novelty.json": "4a44b72465ebe2b2515dafeea2efc4ef097d55c24bb854062e4862867d9e6478",
+      "candidate.sha256": "af6a1450baa7cc905f3b7ae1054279c2771df50fd4b5ad1b748e381bf796077c"
+    },
+    "assisted_files": {
+      "adapter.c": "552bd2c9fefe93257fc5afc7be5de5dbcfca7b703b371c009c86bdee054321f3",
+      "check.c": "dffe3bbcd952f630ca44fa5c4be7b2dbd9760545d1c7e7e14df395d3a52605b3",
+      "proxy.c": "cb9a2dec010bf5e8d979fd30178ca4483d3d5b1d8cd378442a6a2e8b2568eb3a",
+      "protocol.md": "dfc7299cbbd98cb18169eaba1397293eceaa1251bf15511e767a2e02c76fef68"
+    }
+  },
+  "benchmarks": {
+    "45697897911": "668d794ea6485bb77c4178e8bffc848b7e187a19"
+  }
+}

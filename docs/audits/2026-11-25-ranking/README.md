@@ -46,6 +46,10 @@ The installed public library passed both acceptance tests on an Intel Xeon 6975P
 
 A separate test delegated whole products or all but the last few rows to a sequential BLAS. Across eight eligible layouts (four shared with the streamed-B panel and four additional), the whole oneMKL wrapper reached 1.100× the speed of prior standalone COB on Intel and 0.464× on AMD. It reached 1.002× the speed of calling the same oneMKL library directly on both hosts. Moving the last one to four rows into COB produced no consistently winning split across providers and CPUs. [Matched comparisons and single-thread checks](vendor-tail/README.md)
 
+A further candidate packed A in addition to B. It lost every one of the 96 paired comparisons against the installed streamed-B kernel on eight fresh layouts across two separate Xeon 6975P-C runners, at 0.896× and 0.893× the incumbent's speed. The fastest independent method by median was the oneMKL direct-call interface on all eight layouts on both runners. At 79 × 1793 × 223 the incumbent took 361–362 µs and oneMKL took 303 µs. The tested field included verified LIBXSMM JIT kernels, both direct and retained oneDNN interfaces, OpenBLAS, AOCL and BLASFEO. [Full x86 comparison](packed-a-x86/README.md)
+
+Rounding selected row counts up to a multiple of eight before calling the host's BLAS also slowed down every genuinely padded fresh comparison on the two Xeon runners. [Matched direct calls and actual provider dimensions](row-padding/README.md)
+
 ## Removing fourteen Winograd output updates
 
 A two-level variant uses serial BLAS to accumulate fourteen terminal products directly into C. On Neoverse N2 the OpenBLAS-backed variant had the lowest median of all eleven methods on each of five layouts. It beat the strongest independent method, FastMMW, in all twelve pairs on the two fresh odd layouts. Most of the advantage was already present in released COB.

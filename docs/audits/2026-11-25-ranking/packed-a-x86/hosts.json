@@ -1,0 +1,21 @@
+{
+  "benchmark": "668d794ea6485bb77c4178e8bffc848b7e187a19",
+  "hosts": [
+    {
+      "folder": "attempt-1-job-139500093897",
+      "model": "Intel(R) Xeon(R) 6975P-C",
+      "job": 139500093897,
+      "attempt": 1,
+      "url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45697897911/job/139500093897",
+      "artifact_sha256": "81f90c2d4d3b7550664608aee2f94a1780101fd002be6de894bc29acabb1143c"
+    },
+    {
+      "folder": "attempt-1-job-139500093862",
+      "model": "Intel(R) Xeon(R) 6975P-C",
+      "job": 139500093862,
+      "attempt": 1,
+      "url": "https://github.com/Milian0402/consequence_of_boredom_and_curiosity/actions/runs/45697897911/job/139500093862",
+      "artifact_sha256": "2e992ec1140a0b74265fd70c8125c70ac066d1e941685aaeeff6b2f805db34d1"
+    }
+  ]
+}
