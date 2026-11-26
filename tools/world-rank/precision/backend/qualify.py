@@ -35,7 +35,7 @@ def inspect_dump(folder, arch):
     for p in sorted(folder.glob('dnnl_dump_cpu_*.bin')):
         if arch=='x86_64':
             flags=['-m','i386:x86-64','-M','intel']
-            matcher=r'\btdpbf16ps\b'
+            matcher=r'\b(?:tdpbf16ps|vdpbf16ps)\b'
         else:
             flags=['-m','aarch64']
             matcher=r'\b(?:bfdot|bfmmla)\s+z\d+\.'
@@ -115,6 +115,9 @@ def run(probe, geom, diagnostic=False, emulated=False):
             evidence=inspect_dump(work,arch)
             out['jit_bf16_instructions']=evidence
             computational=[x for x in evidence if re.match(r'dnnl_dump_cpu_jit_(brgemm|bf16_matmul)',x['kernel_file'])]
+            if arch=='x86_64':
+                opcode='tdpbf16ps' if route=='x86-amx-bf16' else 'vdpbf16ps'
+                computational=[kernel for kernel in computational if kernel['instruction_example'].lower().startswith(opcode)]
             if not computational:
                 out.update(reason='no-independent-BF16-instruction-witness')
                 return out

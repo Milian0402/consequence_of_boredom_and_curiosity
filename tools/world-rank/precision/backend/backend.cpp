@@ -67,8 +67,10 @@ const char *classify(const std::string &impl) {
             return "x86-amx-bf16";
         return "amx-feature-or-os-permission-unverified";
     }
-    if (impl.find("bf16")!=std::string::npos && impl.find("avx")!=std::string::npos)
-        return "other-x86-vector-implementation";
+    if (impl.rfind("brg_matmul:",0)==0 && impl.find("bf16")!=std::string::npos && impl.find("avx512")!=std::string::npos) {
+        const bool base=cpuid_ok && (b&(1u<<16));
+        if(base && __get_cpuid_count(7,1,&a,&b,&c,&d) && (a&(1u<<5))) return "x86-avx512-bf16";
+    }
 #elif defined(__aarch64__)
     // gemm_bf16bf16f32 dispatches to ref_gemm_bf16bf16f32 on AArch64 in the pinned release.
     if (impl=="gemm:jit:bf16") return "arm-reference-bf16";
@@ -148,7 +150,7 @@ extern "C" const char *bf16_plan_route(const void *p) {
 }
 extern "C" int bf16_plan_native(const void *p) {
     const char *r=bf16_plan_route(p);
-    return !std::strcmp(r,"x86-amx-bf16") || !std::strcmp(r,"arm-sve-bf16");
+    return !std::strcmp(r,"x86-amx-bf16") || !std::strcmp(r,"arm-sve-bf16") || !std::strcmp(r,"x86-avx512-bf16");
 }
 extern "C" uint64_t bf16_plan_executions(const void *p) { return p ? static_cast<const plan*>(p)->executions : 0; }
 extern "C" int bf16_plan_status() { return static_cast<int>(history.status); }

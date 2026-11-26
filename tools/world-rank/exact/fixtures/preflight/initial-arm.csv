@@ -1,0 +1,17 @@
+signed,7,13,31,1,native-exact,620,1,32,0,a64_interleaved_bf16fp32_mmla_8x12
+early-A,7,13,31,2,integer-domain,620,0,32,0,
+late-B,7,13,31,2,integer-domain,620,0,32,0,
+257-last,3,5,8,2,integer-domain,64,0,15,0,
+equal-bound,3,5,256,1,native-exact,2048,1,15,0,a64_interleaved_bf16fp32_mmla_8x12
+over-bound,3,5,257,2,accumulator-bound,2056,0,15,0,
+positive-limit,1,1,4096,1,native-exact,8192,1,1,0,a64_interleaved_bf16fp32_mmla_8x12
+depth-over,2,3,4097,2,depth-outside,0,0,6,0,
+infinity-last,3,5,7,2,integer-domain,56,0,0,0,
+nan-first,3,5,7,2,integer-domain,56,0,0,0,
+signed-zero,3,5,7,1,native-exact,56,1,15,0,a64_interleaved_bf16fp32_mmla_8x12
+cube,4096,4096,4096,1,native-exact,33554432,1,32,0,a64_interleaved_bf16fp32_mmla_8x12
+heldout,1079,1553,1201,1,native-exact,3161032,1,32,0,a64_interleaved_bf16fp32_mmla_8x12
+heldout-early,1079,1553,1201,2,integer-domain,3161032,0,32,0,
+heldout-late,1079,1553,1201,2,integer-domain,3161032,0,32,0,
+digits,1797,3823,64,1,native-exact,359680,1,32,0,a64_interleaved_bf16fp32_mmla_8x12
+images,1797,1934,1024,1,native-exact,3820544,1,32,0,a64_interleaved_bf16fp32_mmla_8x12
