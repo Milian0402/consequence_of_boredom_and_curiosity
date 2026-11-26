@@ -80,6 +80,15 @@ static void transfer(const char *path,double *data,size_t n,int write){
     if(fclose(f)||!ok)fail("reference file length or I/O");
 }
 static void receipt(void *lib,const char *stage){
+    if(dlsym(lib,"exact_int8_checked_last_route")){
+        unsigned long long (*inspected)(void)=lookup(lib,"exact_int8_checked_last_inspected");
+        printf("S8_ROUTE\t%s\t%d\t%s\t%llu\t%d\t%d\t%d\t%d\t%d\t%d\t%s\n",
+               stage,getint(lib,"exact_int8_checked_last_route"),getstr(lib,"exact_int8_checked_last_reason"),inspected(),
+               getint(lib,"exact_int8_checked_last_amax"),getint(lib,"exact_int8_checked_last_bmax"),
+               getint(lib,"exact_int8_checked_last_plans"),getint(lib,"exact_int8_checked_last_products"),
+               getint(lib,"exact_int8_checked_last_fallback_calls"),getint(lib,"exact_int8_checked_last_native"),
+               getstr(lib,"exact_int8_checked_last_impl"));
+    }
     if(dlsym(lib,"exact_last_route")){
         unsigned long long (*inspected)(void)=lookup(lib,"exact_last_inspected");
         printf("ROUTE\t%s\t%d\t%s\t%llu\t%d\t%d\t%d\t%d\t%d\t%d\t%s\n",

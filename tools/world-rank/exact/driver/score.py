@@ -7,9 +7,9 @@ from pathlib import Path
 from statistics import median
 
 SEEDS=(188441917,3079128031)
+S8_SEEDS=(2341279043,916583729)
 FIELDS=("seconds cpu_seconds cpu threads checked guards guard_changes nonfinite over_abs over_gamma "
         "not_exact max_abs max_rho output_sha256").split()
-SLOTS=[(s,r) for s in SEEDS for r in (1,2,3)]
 STAGES=("FIRST","WARM")
 CORPUS_OUTPUT={
     "optdigits":"ec47b13672085cc2096a990dd166c76e2e29843c7f79ea88d1d483db94b05db0",
@@ -25,10 +25,41 @@ def order_for(methods, case, block, rnd):
     order=methods[off:]+methods[:off]
     return order if block==0 else order[::-1]
 
+def s8_route(row, p, binding, stage):
+    record = row["traces"]["S8_ROUTE"][stage]
+    route, reason, count, amax, bmax, plans, products, fallback, native, impl = record
+    counters = tuple(map(int, (route,count,amax,bmax,plans,products,fallback,native)))
+    route,count,amax,bmax,plans,products,fallback,native = counters
+    spec, k = p["spec"], p["k"]
+    cap = {"optdigits":16,"optdigits-images":1}.get(spec,63)
+    total = (p["m"]+p["n"])*k
+    available = binding["checked_int8_native"]
+    require(type(available) is bool, "missing signed instruction witness")
+    require(binding.get("checked_probe_passed") is True, "independent checked INT8 full-call proof failed")
+    if k<=128 or k>4096:
+        expected = "depth-shallow" if k<=128 else "depth-outside"
+        require(reason==expected and counters==(2,0,-1,-1,0,0,1,0), "checked INT8 shape-only FP32 bypass")
+    elif route==3 and not available:
+        require(reason=="backend-unavailable" and (plans,products,fallback,native)==(0,0,1,0),
+                "checked INT8 provider unavailability")
+        require((count,amax,bmax)==(0,-1,-1) or
+                (spec not in ("early","late") and (count,amax,bmax)==(total,cap,cap)),
+                "checked INT8 unavailable scan stage")
+    elif spec in ("early","late"):
+        invalid = (min(k,64),-1,-1) if spec=="early" else (total,cap,-1)
+        require(reason=="integer-domain" and counters==(2,*invalid,0,0,1,0), "checked INT8 fractional FP32 fallback")
+    else:
+        require(available and reason=="native-exact" and counters==(1,total,cap,cap,1,1,0,1)
+                and k*cap*cap<=2**24 and bool(impl) and impl==binding["int8_implementation"],
+                "checked signed INT8 native route, exact bound or primitive identity")
+
+
 def parse_route(row, p, binding, stage):
     traces=row["traces"]; name=row["method"]; mode=p["spec"]
     integer=mode not in ("early","late")
-    if name=="exact-dispatch":
+    if name=="s8-dispatch":
+        s8_route(row,p,binding,stage)
+    elif name=="exact-dispatch":
         r,reason,count,amax,bmax,fast,fallback,terms,native,impl=traces["ROUTE"][stage]
         r,count,amax,bmax,fast,fallback,terms,native=map(int,(r,count,amax,bmax,fast,fallback,terms,native))
         if not binding["native"]:
@@ -68,7 +99,11 @@ def compare(candidate,peer):
                 raw_median_ratio=raw,passes=med>1.02 and wins>=5,raw_median_win=raw>1)
 
 def compute(raw, records):
-    require(raw["seeds"]==list(SEEDS),"seed schedule differs")
+    checked = "s8-dispatch" in raw["methods"]
+    seeds = S8_SEEDS if checked else SEEDS
+    primary = "s8-dispatch" if checked else "exact-dispatch"
+    slots = [(s,r) for s in seeds for r in (1,2,3)]
+    require(raw["seeds"]==list(seeds),"seed schedule differs")
     indexed={}
     for r in records:
         key=(r["family"],r["method"],r["seed"],r["round"])
@@ -79,17 +114,17 @@ def compute(raw, records):
         f=p["family"];active=[n for n in source if n not in raw["skips"][f]]
         policy=raw["bindings"][f]
         modes=raw["goldens"][f]
-        for block,seed in enumerate(SEEDS):
+        for block,seed in enumerate(seeds):
             for rnd in (1,2,3):
                 for pos,n in enumerate(order_for(active,i,block,rnd)):
                     key=(f,n,seed,rnd)
                     require(indexed[key]["position"]==pos,"method order differs")
                     consumed.add(key)
         if p["spec"] in ("optdigits","optdigits-images"):
-            require(modes[str(SEEDS[0])]["inputs"]==modes[str(SEEDS[1])]["inputs"],"real inputs changed between scheduling blocks")
+            require(modes[str(seeds[0])]["inputs"]==modes[str(seeds[1])]["inputs"],"real inputs changed between scheduling blocks")
         evidence={};numerical=[];exact=[]; structural=[]
         for n in active:
-            rows=[indexed[f,n,s,r] for s,r in SLOTS]
+            rows=[indexed[f,n,s,r] for s,r in slots]
             issues=[];badnums=0;inexact=0;checks=0;peak=0.
             times={s:[] for s in STAGES}
             anchors={}
@@ -108,7 +143,9 @@ def compute(raw, records):
                         if p["spec"] in CORPUS_OUTPUT and v["not_exact"]==0:
                             require(v["output_sha256"]==CORPUS_OUTPUT[p["spec"]],"known integer corpus bytes differ")
                         parse_route(row,p,policy,stage)
-                        if n=="exact-dispatch" and (not policy["native"] or p["spec"] in ("early","late")):
+                        fallback_bf16 = n=="exact-dispatch" and (not policy["native"] or p["spec"] in ("early","late"))
+                        fallback_s8 = n=="s8-dispatch" and row["traces"]["S8_ROUTE"][stage][0]!="1"
+                        if fallback_bf16 or fallback_s8:
                             # Compare against the independently measured identical backing DSO on this exact input.
                             match=indexed[f,"fp32-policy",row["seed"],row["round"]]
                             require(match["stages"][stage]["output_sha256"]==v["output_sha256"],"FP32 backing bytes differ")
@@ -126,13 +163,16 @@ def compute(raw, records):
                              max_abs=peak,structural_issues=sorted(set(issues))[:6],times_s=times,
                              medians_ms={s:1000*median(t) for s,t in times.items() if len(t)==6})
         def fp32(n):
-            return n not in ("exact-dispatch","raw-bf16","onednn-int8","bitset-popcount") and source[n]["role"] not in ("integer-specialist","binary-specialist")
+            return n not in ("s8-dispatch","exact-dispatch","raw-bf16","onednn-int8","bitset-popcount") and source[n]["role"] not in ("integer-specialist","binary-specialist")
         def retained(n):
             return "retain" in source[n]["role"] or n.endswith("cached-plan")
         def independent(n):
             return fp32(n) and n not in ("fp32-policy","cob-standalone") and not n.startswith("release-")
         leaders={};comparisons={}
         integer=p["spec"] not in ("early","late")
+        eligible_s8_domain=integer and 128<p["k"]<=4096
+        expected_native=(policy["checked_int8_native"] and eligible_s8_domain) if checked else policy["native"] and integer
+        strict_primary=(expected_native if checked else integer)
         for stage in STAGES:
             groups={"fp32_oneshot":[n for n in numerical if fp32(n) and not retained(n)],
                     "fp32_any":[n for n in numerical if fp32(n)],
@@ -142,10 +182,15 @@ def compute(raw, records):
                     "independent_fp32_any":[n for n in numerical if independent(n)],
                     "integer_specialists":[n for n in exact if source[n]["role"] in ("integer-specialist","binary-specialist")],
                     "all_qualified":[n for n in numerical if n in exact or n not in ("raw-bf16","onednn-int8","bitset-popcount","exact-dispatch") or (n=="exact-dispatch" and not integer)]}
+            if checked:
+                groups["all_qualified"]=[n for n in numerical if fp32(n) or n in exact or
+                                           (n==primary and not expected_native) or
+                                           (n=="exact-dispatch" and (not integer or not policy["native"]))]
+                groups["checked_policies"]=[n for n in groups["all_qualified"] if n in (primary,"exact-dispatch","fp32-policy")]
             leaders[stage]={group:min(pool,key=lambda n:evidence[n]["medians_ms"][stage],default=None) for group,pool in groups.items()}
-            if "exact-dispatch" not in numerical or (integer and "exact-dispatch" not in exact): continue
-            candidate=evidence["exact-dispatch"]["times_s"][stage]
-            peers={n:compare(candidate,evidence[n]["times_s"][stage]) for n in numerical if n!="exact-dispatch"}
+            if primary not in numerical or (strict_primary and primary not in exact): continue
+            candidate=evidence[primary]["times_s"][stage]
+            peers={n:compare(candidate,evidence[n]["times_s"][stage]) for n in numerical if n!=primary}
             against={}
             for group,pool in groups.items():
                 choices=[n for n in pool if n in peers]
@@ -153,11 +198,36 @@ def compute(raw, records):
                     peer=min(choices,key=lambda n:evidence[n]["medians_ms"][stage])
                     against[group]=dict(peer=peer,**peers[peer])
             comparisons[stage]=dict(peers=peers,strongest=against)
-        cases[f]=dict(spec=p["spec"],dimensions=[p[k] for k in ("m","n","k")],expected_native=policy["native"] and integer,
+        cases[f]=dict(spec=p["spec"],dimensions=[p[k] for k in ("m","n","k")],expected_native=expected_native,
                       binding=policy,skips=raw["skips"][f],qualified_numerical=numerical,qualified_exact=exact,
                       structural=structural,evidence=evidence,leaders=leaders,candidate_comparisons=comparisons)
+        if checked:
+            eligible = primary in numerical and (not expected_native or primary in exact)
+            if policy.get("checked_probe_passed") is not True:
+                status="checked-probe-failed"
+            elif eligible_s8_domain and not policy["checked_int8_native"]:
+                status="native-unavailable"
+            elif not eligible:
+                status="primary-failed-qualification"
+            elif expected_native:
+                status="verified-native"
+            else:
+                status="verified-fallback"
+            cases[f].update(checked_native_domain=eligible_s8_domain,primary_status=status)
     require(set(indexed)==consumed,"extra measurement rows")
-    return dict(seeds=list(SEEDS),cases=cases,observations=len(indexed))
+    result=dict(seeds=list(seeds),cases=cases,observations=len(indexed))
+    if checked:
+        gaps={f:c["primary_status"] for f,c in cases.items() if c["primary_status"] not in ("verified-native","verified-fallback")}
+        fresh=cases.get("fresh3584")
+        large=None
+        if fresh is not None:
+            peer=fresh["candidate_comparisons"].get("WARM",{}).get("strongest",{}).get("fp32_any")
+            exact_native=fresh["primary_status"]=="verified-native" and primary in fresh["qualified_exact"]
+            large=dict(qualified=bool(peer and exact_native and peer["paired_median"]>=2 and
+                                      peer["raw_median_ratio"]>=2 and peer["wins"]>=5),
+                       exact_native=exact_native,opponent=peer)
+        result.update(candidate_method=primary,primary_complete=not gaps,primary_gaps=gaps,fresh_large_effect=large)
+    return result
 
 def write_results(out, result):
     (out/"score.json").write_text(json.dumps(result,indent=2,allow_nan=False)+"\n")

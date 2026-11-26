@@ -43,7 +43,9 @@ def int8(work,p,proof):
                     runtime=[s for s in lines if ',info,' in s and 'runtime:' in s],reason='executed sequential signed-integer primitive' if eligible else 'descriptor, implementation or full integer output did not qualify',diagnostic=lines[-6:] if not eligible else [])
         store(proof,record);return record
 def run(work,vendor,out):
-    rows=list(csv.DictReader((HERE/'panel.csv').open())); proven={};prior={};dest=out/'proof';dest.mkdir(exist_ok=True)
+    signed=os.environ.get('EXACT_CHECKED_S8')=='1'
+    rows=list(csv.DictReader(((HERE/'s8' if signed else HERE)/'panel.csv').open()))
+    proven={};prior={};dest=out/'proof';dest.mkdir(exist_ok=True)
     intel=platform.machine()=='x86_64';byshape={}
     for row in rows:
         label=row['family'];m,n,k=(row[x] for x in 'mnk');geo=(m,n,k)
@@ -55,8 +57,15 @@ def run(work,vendor,out):
             if path.is_file():data=json.loads(path.read_text())
             else:data=dict(eligible=False,reason='BF16 witness returned no receipt',returncode=proc.returncode)
             if proc.returncode not in (0,1):raise RuntimeError(f'BF16 shape probe failed {label}: {proc.stderr[-400:]}')
-            alt=int8(work,(label,m,n,k),dest/f'{label}-int8.json');byshape[geo]=(label,data,alt)
-        source_id,raw,alt=byshape[geo]
+            alt=int8(work,(label,m,n,k),dest/f'{label}-int8.json')
+            if signed:
+                from s8.jit import execute
+                raw_direct=execute(work,vendor,dest,row,'raw')
+                safe=execute(work,vendor,dest,row,'checked')
+            else:
+                raw_direct=safe={}
+            byshape[geo]=(label,data,alt,raw_direct,safe)
+        source_id,raw,alt,raw_direct,safe=byshape[geo]
         fallback=('release-mkl-aligned-two' if intel else 'fastmmw-1536') if label=='square4096' else ('mkl-jit' if intel else 'armpl')
         where=work/'adapters' if fallback.startswith('release-') else vendor
         plugin=where/(fallback+'.so')
@@ -64,6 +73,12 @@ def run(work,vendor,out):
         seen=dict(eligible=bool(raw.get('eligible')),implementation=raw.get('implementation',''),reason=raw.get('reason',''),
                   proof='proof/'+source_id+'-bf16.json',int8_eligible=alt['eligible'],int8_implementation=alt['implementation'],
                   int8_proof='proof/'+source_id+'-int8.json',fallback_method=fallback)
+        if signed:
+            op='tdpbssd' if intel else 'smmla'
+            seen['checked_int8_native']=bool(alt['eligible'] and raw_direct['exact_native'] and any(op in v['operations'] for v in alt['jit_instruction_evidence']))
+            seen['checked_actual']='proof/'+source_id+'-checked-actual.json'
+            seen['raw_actual']='proof/'+source_id+'-raw-actual.json'
+            seen['checked_probe_passed']=safe['full_output_and_guards'] and (int(k)<=128 or not seen['checked_int8_native'] or safe['exact_native'])
         prior[label]=seen;proven[label]=dict(**seen,fallback_plugin=str(work/'adapters/fp32-policy.so'))
     store(work/'native.json',proven);store(out/'admissions.json',prior)
 if __name__=='__main__':run(*(Path(x).resolve() for x in sys.argv[1:4]))

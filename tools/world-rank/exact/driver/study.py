@@ -79,6 +79,15 @@ def run(work,out,cpu,panel_file,corpus):
     need(len(set(p["family"] for p in panel))==len(panel)>0,"duplicate case")
     roster={m["method"]:m["role"] for m in registry}
     need(len(roster)==len(registry) and {"fp32-policy","exact-dispatch","openblas"}<=set(roster),"incomplete or duplicate method roster")
+    checked_s8=os.environ.get("EXACT_CHECKED_S8")=="1"
+    need(("s8-dispatch" in roster)==checked_s8,"checked S8 roster and launcher mode differ")
+    if checked_s8:
+        from score import S8_SEEDS
+        seeds=S8_SEEDS
+        need({"raw-bf16","onednn-int8","onednn-oneshot","onednn-cached-plan","bitset-popcount"}<=set(roster),
+             "incomplete checked S8 comparison field")
+    else:
+        seeds=SEEDS
     paths={m["method"]:plugin_path(m["plugin"],work) for m in registry}
     native=json.loads((work/"native.json").read_bytes())
     for p in panel:
@@ -91,7 +100,7 @@ def run(work,out,cpu,panel_file,corpus):
     for k in ("ONEDNN_VERBOSE","DNNL_VERBOSE","ONEDNN_JIT_DUMP"):
         env.pop(k,None)
     methods={n:{"role":r,"plugin_sha256":sha(paths[n]) if paths[n].is_file() else None} for n,r in roster.items()}
-    raw=dict(cpu=cpu,page_bytes=os.sysconf("SC_PAGESIZE"),seeds=list(SEEDS),worker_sha256=sha(wk),panel_sha256=sha(panel_file),methods=methods,panel=panel,bindings={},goldens={},skips={})
+    raw=dict(cpu=cpu,page_bytes=os.sysconf("SC_PAGESIZE"),seeds=list(seeds),worker_sha256=sha(wk),panel_sha256=sha(panel_file),methods=methods,panel=panel,bindings={},goldens={},skips={})
     records=[]
     with (out/"observations.jsonl").open("w",buffering=1) as stream:
         def emit(row):
@@ -109,6 +118,10 @@ def run(work,out,cpu,panel_file,corpus):
                          int8_eligible=bool(proof.get("int8_eligible",False)),int8_implementation=proof.get("int8_implementation",""),
                          fallback_method=proof.get("fallback_method","fp32-policy"),fallback_sha256=sha(fallback),
                          fast_sha256=sha(fast) if fast.is_file() else None)
+            if checked_s8:
+                for flag in ("checked_int8_native","checked_probe_passed"):
+                    need(type(proof.get(flag)) is bool,"missing or invalid signed INT8 witness "+flag+" for "+f)
+                    binding[flag]=proof[flag]
             raw["bindings"][f]=binding
             case_paths={**paths,"fp32-policy":fallback}
             here={**env,"EXACT_FALLBACK_PLUGIN":str(fallback),"EXACT_FAST_PLUGIN":str(fast),"EXACT_NATIVE_ENABLED":str(int(good))}
@@ -125,7 +138,7 @@ def run(work,out,cpu,panel_file,corpus):
             raw["skips"][f]=skips
             raw["goldens"][f]={}
             # Each pair of files is discarded after the three rounds for that input.
-            for block,seed in enumerate(SEEDS):
+            for block,seed in enumerate(seeds):
                 with tempfile.TemporaryDirectory(prefix="exact-golden-",dir=work) as tmp:
                     ref=Path(tmp)/"signed";weight=Path(tmp)/"weight"
                     gold=worker(wk,paths["openblas"],"gold",p,seed,corpus,ref,weight,here)
@@ -155,7 +168,10 @@ def run(work,out,cpu,panel_file,corpus):
                                     if not math.isfinite(vals["max_rho"]): vals["max_rho"]=None
                                     if not math.isfinite(vals["max_abs"]): vals["max_abs"]=None
                                     stages[stage]=vals
-                                extra={tag:stage_records(stdout,tag) for tag in ("ROUTE","BF16","DNN","INT8","BINARY")}
+                                tags=("ROUTE","BF16","DNN","INT8","BINARY")
+                                if checked_s8:
+                                    tags+=("S8_ROUTE",)
+                                extra={tag:stage_records(stdout,tag) for tag in tags}
                                 row.update(inputs=hashes,stages=stages,traces={k:v for k,v in extra.items() if v})
                             except (OSError,ValueError,subprocess.TimeoutExpired) as e:
                                 row["failure"]=str(e)

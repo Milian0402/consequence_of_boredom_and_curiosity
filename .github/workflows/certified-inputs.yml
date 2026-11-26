@@ -1,4 +1,4 @@
-name: Certified integer inputs on one CPU thread
+name: Checked signed INT8 on one CPU thread
 on:
   push:
     branches: [bench/certified-inputs]
@@ -7,7 +7,7 @@ permissions:
   actions: read
 jobs:
   compare:
-    name: Certified inputs on ${{ matrix.arch }}
+    name: Checked signed INT8 on ${{ matrix.arch }}
     strategy:
       fail-fast: false
       matrix:
@@ -17,6 +17,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 110
     env:
+      EXACT_CHECKED_S8: '1'
       VENDOR_DIR: ${{ github.workspace }}/../exact-vendors
       OUT_DIR: ${{ github.workspace }}/exact-output
     steps:
@@ -49,7 +50,7 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         if: ${{ !cancelled() }}
         with:
-          name: certified-inputs-${{ matrix.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
+          name: checked-s8-${{ matrix.arch }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ env.OUT_DIR }}
           if-no-files-found: error
           retention-days: 30

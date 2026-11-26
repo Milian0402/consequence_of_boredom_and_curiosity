@@ -44,6 +44,15 @@ fi
 "$cc" "${cflags[@]}" -shared -Wl,-z,defs "$here/providers/policy.c" -ldl -lpthread -o "$plugins/fp32-policy.so"
 "$cc" "${cflags[@]}" -shared "$here/providers/binary.c" -o "$plugins/bitset-popcount.so"
 "$cxx" -std=c++17 -fPIC -O3 "$tune" -fno-fast-math -shared -Wl,-z,defs -I"$vendor/onednn/prefix/include" "$here/providers/int8.cpp" -L"$vendor/onednn/prefix/lib" "-Wl,-rpath,$vendor/onednn/prefix/lib" -ldnnl -o "$plugins/onednn-int8.so"
+if [[ ${EXACT_CHECKED_S8:-0} == 1 ]]; then
+ "$cxx" -std=c++17 -fPIC -O3 -fno-fast-math -shared -Wl,-z,defs -I"$vendor/onednn/prefix/include" "-DEXACT_INT8_DNNL_PATH=\"$vendor/onednn/prefix/lib/libdnnl.so.3\"" "$here/s8/checked-int8.cpp" -ldl -pthread -o "$plugins/s8-dispatch.so"
+ "$cc" "${cflags[@]}" -I"$here/fixtures" "$here/s8/probe.c" "$here/fixtures/exact_fixture.c" -lcrypto -ldl -lm -o "$work/checked-int8-probe"
+ (cd "$here" && sha256sum s8/checked-int8.cpp s8/checked-int8.h s8/jit.py s8/probe.c s8/test.sh s8/smoke.cpp driver/{study.py,score.py,worker.c} providers/{int8.cpp,int8-probe.c} fixtures/{exact_fixture.c,exact_fixture.h} build.sh run.sh prove.py) > "$out/build/s8-sources.sha256"
+ cp "$here/fixtures/data/SHA256SUMS" "$out/build/s8-inputs.sha256"
+ ldd "$plugins/s8-dispatch.so" > "$out/build/s8-dispatch.ldd"
+ ldd "$plugins/onednn-int8.so" > "$out/build/onednn-int8.ldd"
+ sha256sum "$vendor/onednn/prefix/lib/libdnnl.so.3" "$work/checked-int8-probe" "$plugins/s8-dispatch.so" "$plugins/onednn-int8.so" > "$out/build/s8-runtime.sha256"
+fi
 "$cc" -std=c11 -O2 "$here/providers/int8-probe.c" -ldl -o "$work/int8-probe"
 "$cc" "${cflags[@]}" -I"$here/fixtures" "$here/driver/worker.c" "$here/fixtures/exact_fixture.c" -lcrypto -ldl -lm -o "$work/exact.worker"
 objdump -d "$plugins/bitset-popcount.so" | awk '/popcnt|cnt[[:space:]]+v[0-9]+/{print}' > "$out/build/popcount-instructions.txt"
