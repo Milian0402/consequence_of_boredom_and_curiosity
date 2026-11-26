@@ -47,6 +47,6 @@ PY
 { printf 'Upstream OpenBLAS %s %s\n' "$tag" "$revision"; cat "$tmp/settings.txt"; } > "$out/openblas-build.txt"
 cat "$out/openblas-build.txt"
 mv "$tmp/openblas.so" "$out/openblas.so"
-if [[ $(cat "$here/../phase.txt") =~ ^(tile-parent|leaf-wave|aligned-core|hk-forms|release-replay|signed-leaves|stream-b|rank48-arm-confirm|ragged-hk|leaf-confirm|precision-wave)$ ]]; then
+if [[ $(cat "$here/../phase.txt") =~ ^(tile-parent|leaf-wave|aligned-core|hk-forms|release-replay|signed-leaves|stream-b|rank48-arm-confirm|ragged-hk|leaf-confirm|precision-wave|exact-inputs)$ ]]; then
     printf '%s\n' "$prefix" > "$out/openblas-prefix.txt"
 fi
