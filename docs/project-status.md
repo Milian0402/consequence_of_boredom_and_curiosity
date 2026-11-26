@@ -8,6 +8,8 @@ The project aims to lead single-threaded CPU multiplication of row-major FP32 ma
 
 ## November measurements
 
+The optional Linux checked INT8 library accepts FP32 arrays containing bounded integers and falls back for other values. On a fresh 3584-square integer case it reached 2.98× the fastest tested ordinary FP32 method on Intel and 4.81× on Arm. A cropped rectangle measured 0.85× on Intel. [Build and C API](checked-int8.md) · [Complete timings, exclusions and replay](audits/2026-11-26-certified-inputs/README.md)
+
 The released HK15 kernel matched all 266,354,000 exactly representable outputs in the M5 Max stress suite. On eight cropped layouts all 469,839,504 additional outputs met the project's absolute tolerance. The fix improved throughput on biased inputs and cost throughput on ordinary signed inputs. Both HK15 options remain off by default. [Numerical and timing evidence](audits/2026-11-25-ranking/hk15-stability/README.md)
 
 The ranking index records the full competitor fields, including Intel oneMKL, ArmPL, AMD AOCL and Apple Accelerate. Ranking depends on the operation, build, test values, hardware and input reuse. [Measured scope and independent replays](audits/2026-11-25-ranking/README.md)

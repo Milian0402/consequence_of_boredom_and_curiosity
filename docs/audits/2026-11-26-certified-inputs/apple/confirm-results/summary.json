@@ -1,0 +1,48 @@
+{
+  "optical-counts": {
+    "accelerate": {
+      "median_ms": 1.2769585,
+      "over_exact_int8": 1.231509415190321,
+      "exact_faster": 24,
+      "pairs": 24
+    },
+    "exact-int8": {
+      "median_ms": 1.0453125,
+      "over_exact_int8": 1.0,
+      "exact_faster": 0,
+      "pairs": 24
+    },
+    "cob": {
+      "median_ms": 0.659854,
+      "over_exact_int8": 0.6315706129771457,
+      "exact_faster": 0,
+      "pairs": 24
+    }
+  },
+  "optical-binary": {
+    "accelerate": {
+      "median_ms": 4.7355205,
+      "over_exact_int8": 1.6343906870815723,
+      "exact_faster": 24,
+      "pairs": 24
+    },
+    "cob": {
+      "median_ms": 4.023771000000001,
+      "over_exact_int8": 1.398962507973069,
+      "exact_faster": 23,
+      "pairs": 24
+    },
+    "exact-int8": {
+      "median_ms": 2.8622705,
+      "over_exact_int8": 1.0,
+      "exact_faster": 0,
+      "pairs": 24
+    },
+    "binary-bitset": {
+      "median_ms": 12.1532085,
+      "over_exact_int8": 4.153602035139997,
+      "exact_faster": 24,
+      "pairs": 24
+    }
+  }
+}

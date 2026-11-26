@@ -1,0 +1,7 @@
+{
+  "portable_checked_words": 3780,
+  "cases": 54,
+  "exact_integer_cells": 5605,
+  "fallback_cases": 46,
+  "alias_stride_zero_checks": 3
+}

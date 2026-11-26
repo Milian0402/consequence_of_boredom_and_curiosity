@@ -1,0 +1,6 @@
+# The offline verifier hashes each file byte-for-byte, including original record endings.
+2026-11-26-certified-inputs/** -text
+2026-11-26-certified-inputs/apple/results/*.csv whitespace=trailing-space,space-before-tab,cr-at-eol
+2026-11-26-certified-inputs/apple/confirm-results/*.csv whitespace=trailing-space,space-before-tab,cr-at-eol
+# Preserve the upstream license notice verbatim.
+2026-11-26-certified-inputs/linux/notices/oneDNN/THIRD-PARTY-PROGRAMS -whitespace

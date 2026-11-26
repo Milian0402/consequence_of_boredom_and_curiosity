@@ -1,0 +1,16 @@
+{
+  "cpu": "Apple M5 Max",
+  "macos": "27.2.1",
+  "machine": "arm64",
+  "numpy": "2.4.4",
+  "time_unit": "seconds",
+  "affinity": "unavailable",
+  "serial_accelerate_setting": 1,
+  "reference_threads": 1,
+  "svl_words": 16,
+  "libraries": {
+    "kernel": "4c0b49e2bb7f23e7b2f461380d14bd74ec587251544f7f8d3fee6fbeb07afcee",
+    "cob": "fce58407d850a250eb191405f0d3f6a44b80794cac173123af68edb163052365",
+    "openblas": "07bc71aac2823e9202ea4088429a4f5d05146aded15e8aa44600e285eb700415"
+  }
+}

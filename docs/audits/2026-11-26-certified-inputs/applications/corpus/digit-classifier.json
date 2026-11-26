@@ -1,0 +1,20 @@
+[
+  {
+    "workload": "pixel_count_features",
+    "m": 1797,
+    "n": 3823,
+    "k": 64,
+    "recognized": 1761,
+    "test_records": 1797,
+    "f32_row_major_product_sha256": "ec47b13672085cc2096a990dd166c76e2e29843c7f79ea88d1d483db94b05db0"
+  },
+  {
+    "workload": "original_bitmaps",
+    "m": 1797,
+    "n": 1934,
+    "k": 1024,
+    "recognized": 1731,
+    "test_records": 1797,
+    "f32_row_major_product_sha256": "eec353b47234bfe0fa3544331dc16aceee6a9b1ee3b7165b51e30fe565a9e825"
+  }
+]

@@ -1,0 +1,16 @@
+{
+    global:
+        exact_int8_checked_sgemm;
+        exact_int8_checked_last_route;
+        exact_int8_checked_last_reason;
+        exact_int8_checked_last_inspected;
+        exact_int8_checked_last_amax;
+        exact_int8_checked_last_bmax;
+        exact_int8_checked_last_native;
+        exact_int8_checked_last_plans;
+        exact_int8_checked_last_products;
+        exact_int8_checked_last_fallback_calls;
+        exact_int8_checked_last_status;
+        exact_int8_checked_last_impl;
+    local: *;
+};

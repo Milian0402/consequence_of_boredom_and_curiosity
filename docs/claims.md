@@ -5,6 +5,8 @@ evidence needed to re-audit it.
 
 ## Current Claim Status
 
+The checked INT8 results apply to FP32 inputs that pass the integer range and exactness checks. The fresh 3584-square case beat the fastest tested ordinary FP32 method on Intel and Arm. Dedicated integer and binary methods are compared separately. [Results, eligibility and fallback timings](audits/2026-11-26-certified-inputs/README.md)
+
 COB has measured single-threaded FP32 wins on individual Apple, AMD and Arm workloads. Other tested implementations win on other valid inputs. Each performance claim identifies its CPU, build, dimensions, strides, input distribution, timing convention and comparison field. [Latest results and archived evidence](audits/2026-11-25-ranking/README.md)
 
 On M5 Max, `COB_ENABLE_HK15_RAGGED` produced every exact answer on the 44 scale-stress matrices after the numerical fix. It ran 1.20–1.30× as fast as the original opt-in on eight biased-input comparisons and 0.916× as fast across four ordinary signed layouts. These are comparisons to earlier COB. The reports provide the separate comparisons against independent libraries. [Numerical results and timing controls](audits/2026-11-25-ranking/hk15-stability/README.md)

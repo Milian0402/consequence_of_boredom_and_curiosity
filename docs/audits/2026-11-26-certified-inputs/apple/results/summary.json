@@ -1,0 +1,114 @@
+{
+  "optical-counts": {
+    "exact-int8": {
+      "median_ms": 1.3883340000000002,
+      "vs_accelerate": 1.3133845365080217,
+      "vs_cob": 0.6580808500808502,
+      "wins_accel": 7,
+      "wins_cob": 3,
+      "rounds": 9
+    },
+    "accelerate": {
+      "median_ms": 1.8004170000000002,
+      "vs_accelerate": 1.0,
+      "vs_cob": 0.6166898793298241,
+      "wins_accel": 0,
+      "wins_cob": 1,
+      "rounds": 9
+    },
+    "cob": {
+      "median_ms": 1.045625,
+      "vs_accelerate": 1.6215605825844437,
+      "vs_cob": 1.0,
+      "wins_accel": 8,
+      "wins_cob": 0,
+      "rounds": 9
+    }
+  },
+  "general-float": {
+    "exact-int8": {
+      "median_ms": 1.4889170000000003,
+      "vs_accelerate": 0.9403929164620995,
+      "vs_cob": 0.59398213969139,
+      "wins_accel": 3,
+      "wins_cob": 1,
+      "rounds": 9
+    },
+    "accelerate": {
+      "median_ms": 1.441208,
+      "vs_accelerate": 1.0,
+      "vs_cob": 0.5157899139544879,
+      "wins_accel": 0,
+      "wins_cob": 1,
+      "rounds": 9
+    },
+    "cob": {
+      "median_ms": 0.7312500000000001,
+      "vs_accelerate": 1.9387738552953513,
+      "vs_cob": 1.0,
+      "wins_accel": 8,
+      "wins_cob": 0,
+      "rounds": 9
+    }
+  },
+  "integer-cube": {
+    "exact-int8": {
+      "median_ms": 1.177375,
+      "vs_accelerate": 1.8607070814311497,
+      "vs_cob": 1.2051173689122265,
+      "wins_accel": 8,
+      "wins_cob": 6,
+      "rounds": 9
+    },
+    "accelerate": {
+      "median_ms": 2.505083,
+      "vs_accelerate": 1.0,
+      "vs_cob": 0.5855587761062317,
+      "wins_accel": 0,
+      "wins_cob": 1,
+      "rounds": 9
+    },
+    "cob": {
+      "median_ms": 1.35925,
+      "vs_accelerate": 1.7077704934245244,
+      "vs_cob": 1.0,
+      "wins_accel": 8,
+      "wins_cob": 0,
+      "rounds": 9
+    }
+  },
+  "optical-binary": {
+    "exact-int8": {
+      "median_ms": 3.8272915000000003,
+      "vs_accelerate": 1.984658309913935,
+      "vs_cob": 1.4815390408077183,
+      "wins_accel": 12,
+      "wins_cob": 11,
+      "rounds": 12
+    },
+    "accelerate": {
+      "median_ms": 8.71975,
+      "vs_accelerate": 1.0,
+      "vs_cob": 0.6942278994399691,
+      "wins_accel": 0,
+      "wins_cob": 1,
+      "rounds": 12
+    },
+    "cob": {
+      "median_ms": 6.484166500000001,
+      "vs_accelerate": 1.440626311883451,
+      "vs_cob": 1.0,
+      "wins_accel": 11,
+      "wins_cob": 0,
+      "rounds": 12
+    },
+    "binary-bitset": {
+      "median_ms": 13.105916500000001,
+      "vs_accelerate": 0.6942028713624511,
+      "vs_cob": 0.4857409172924698,
+      "wins_accel": 0,
+      "wins_cob": 1,
+      "rounds": 12
+    }
+  }
+}

@@ -4,7 +4,7 @@ COB chooses a kernel on each public call using the matrix dimensions, leading di
 
 ## Configuring a build
 
-Pass an option to CMake as `-DNAME=VALUE` or to Make as `NAME=VALUE`. For example, this builds and tests the Linux Strassen implementation with sequential OpenBLAS subproducts.
+The options in the table below configure the FP32 library. Pass them to CMake as `-DNAME=VALUE` or to Make as `NAME=VALUE`. The following build uses sequential OpenBLAS for Strassen subproducts on Linux.
 
 ```sh
 cmake -S . -B build-openblas -DCMAKE_BUILD_TYPE=Release \
@@ -27,6 +27,8 @@ OPENBLAS_NUM_THREADS=1 ctest --test-dir build-openblas --output-on-failure
 | `COB_ENABLE_ALIGNED_WINOGRAD` | `OFF` | Align terminal Winograd products on big rectangles. Requires portable and recursive Strassen and a selected BLAS provider. |
 | `COB_ENABLE_HK15` | `OFF` | Compute an eligible 2 × 3 × 3 block product with fifteen subproducts. |
 | `COB_ENABLE_HK15_RAGGED` | `OFF` | Enable HK15 on the divisible interior and compute the remaining rows, columns and reduction terms separately. |
+
+An additional CMake-only option, `COB_BUILD_CHECKED_INT8=ON`, builds the separate `cob_checked_int8` shared library on Linux x86-64 and Arm64. Its C entry point checks each eligible product and takes a caller-supplied FP32 fallback. [Build, install and call the checked integer library](checked-int8.md)
 
 ## Native kernels
 

@@ -8,6 +8,7 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 option(COB_BUILD_TESTS "Build correctness tests" ON)
 option(COB_BUILD_BENCH "Build benchmark runner" ON)
+option(COB_BUILD_CHECKED_INT8 "Build the Linux checked integer SGEMM adapter" OFF)
 option(COB_ENABLE_HK15 "Use one level of Hopcroft-Kerr on eligible 2-by-3-by-3 products" OFF)
 option(COB_ENABLE_HK15_RAGGED "Enable HK15 with exact edge products on nondivisible shapes" OFF)
 option(COB_ENABLE_APPLE_MEDIUM_WIDE "Use the SME2 medium-wide FP32 kernel on Apple arm64" OFF)
@@ -165,6 +166,39 @@ include(GNUInstallDirs)
 install(TARGETS cob_matmul ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES include/cob_gemm.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
+if(COB_BUILD_CHECKED_INT8)
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
+       NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|AMD64|aarch64|arm64|ARM64|AARCH64)$")
+        message(FATAL_ERROR "COB_BUILD_CHECKED_INT8 requires Linux x86-64 or Arm64")
+    endif()
+    enable_language(CXX)
+    find_package(Threads REQUIRED)
+    find_path(COB_DNNL_INCLUDE_DIR NAMES oneapi/dnnl/dnnl.h REQUIRED
+              DOC "Include directory of the oneDNN 3.14.1 SDK")
+    # The runtime check in the measured adapter is pinned to this ABI.
+    foreach(part IN ITEMS MAJOR MINOR PATCH)
+        file(STRINGS "${COB_DNNL_INCLUDE_DIR}/oneapi/dnnl/dnnl_version.h" version_line
+             REGEX "^#define DNNL_VERSION_${part} [0-9]+$")
+        string(REGEX MATCH "[0-9]+$" version_number "${version_line}")
+        list(APPEND checked_int8_version "${version_number}")
+    endforeach()
+    if(NOT "${checked_int8_version}" STREQUAL "3;14;1")
+        message(FATAL_ERROR "COB_BUILD_CHECKED_INT8 requires oneDNN 3.14.1 headers in COB_DNNL_INCLUDE_DIR")
+    endif()
+    set(checked_int8_dir "${PROJECT_SOURCE_DIR}/tools/world-rank/exact/s8")
+    add_library(cob_checked_int8 SHARED "${checked_int8_dir}/checked-int8.cpp")
+    target_compile_features(cob_checked_int8 PRIVATE cxx_std_17)
+    target_compile_options(cob_checked_int8 PRIVATE $<$<CXX_COMPILER_ID:GNU,Clang,IntelLLVM>:-fno-fast-math>)
+    target_include_directories(cob_checked_int8 PRIVATE "${COB_DNNL_INCLUDE_DIR}"
+        PUBLIC "$<BUILD_INTERFACE:${checked_int8_dir}>" "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
+    target_link_libraries(cob_checked_int8 PRIVATE Threads::Threads ${CMAKE_DL_LIBS})
+    set(checked_int8_exports "${PROJECT_SOURCE_DIR}/cmake/checked-int8.map")
+    target_link_options(cob_checked_int8 PRIVATE "LINKER:--version-script=${checked_int8_exports}")
+    set_property(TARGET cob_checked_int8 APPEND PROPERTY LINK_DEPENDS "${checked_int8_exports}")
+    install(TARGETS cob_checked_int8 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    install(FILES "${checked_int8_dir}/checked-int8.h" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+endif()
+
 target_include_directories(cob_matmul
     PUBLIC
         ${PROJECT_SOURCE_DIR}/include
@@ -187,6 +221,15 @@ endif()
 
 if(COB_BUILD_TESTS)
     enable_testing()
+    if(TARGET cob_checked_int8)
+        add_executable(cob_checked_int8_test "${checked_int8_dir}/smoke.cpp")
+        add_dependencies(cob_checked_int8_test cob_checked_int8)
+        target_compile_features(cob_checked_int8_test PRIVATE cxx_std_17)
+        target_link_libraries(cob_checked_int8_test PRIVATE ${CMAKE_DL_LIBS})
+        add_test(NAME cob_checked_int8_test COMMAND cob_checked_int8_test $<TARGET_FILE:cob_checked_int8> auto)
+        set_tests_properties(cob_checked_int8_test PROPERTIES
+            ENVIRONMENT "ONEDNN_PRIMITIVE_CACHE_CAPACITY=0;EXACT_INT8_NATIVE_ENABLED=1")
+    endif()
     if(COB_ENABLE_APPLE_MEDIUM_WIDE AND TARGET cob_strassen_sme_leaf)
         add_executable(cob_apple_medium_wide_test tests/test_apple_medium_wide.c)
         target_link_libraries(cob_apple_medium_wide_test PRIVATE cob_matmul)

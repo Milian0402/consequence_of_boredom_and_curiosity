@@ -1,0 +1,7 @@
+{
+  "users": 943,
+  "movies": 1682,
+  "ratings": 100000,
+  "dense_terms": 1495716818,
+  "sparse_ordered_terms": 16807190
+}

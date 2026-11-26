@@ -1,0 +1,9 @@
+# Optical digits
+
+Ethem Alpaydin and Cenk Kaynak contributed the Optical Recognition of Handwritten Digits dataset to the UCI Machine Learning Repository. It is distributed under [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/). [Dataset and citation](https://doi.org/10.24432/C50P49) · [Original UCI archive](https://archive.ics.uci.edu/static/public/80/optical+recognition+of+handwritten+digits.zip).
+
+The two files contain the original 64 integer features in their published order. We removed the class-label column and encoded each feature as one unsigned byte. The 1,797 test samples form rows of A. The 3,823 training samples form columns of B, transposed from their original file. Multiplication computes uncentered cross-sample feature dot products. No observations were duplicated or synthesized.
+
+The `image_A.u8` and `image_B.u8` files contain the same collection's original 32×32 binary images. A consists of all 1,797 writer-independent observations from `optdigits-orig.windep.Z`. B consists of the 1,934 original training observations in `optdigits-orig.tra.Z`, transposed to 1,024×1,934. Each uncompressed image contributes 32 consecutive 32-character binary lines in row-major pixel order. Image labels and headers were removed. Each matrix output counts shared set pixels. Bitwise AND followed by population count is a separate natural baseline for a binary-image application.
+
+The UCI archive SHA-256 is `0d7b054fea010270e9b3f06411c654c5e59547732ad626381980baffe0a23fb0`. The two original compressed members hash to `2f247a4358d6af91988699a23cd452c8d688d94e6cd0b9d993eb34bba898a8ed` (writer-independent) and `8e0688376b62133bf1db0e93e83570d5a81131a29674accd5e9975220bdebbc6` (training). The prepared matrix byte hashes are in [SHA256SUMS](SHA256SUMS).

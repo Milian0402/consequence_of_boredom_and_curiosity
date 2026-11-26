@@ -1,10 +1,20 @@
 # COB GEMM
 
-COB computes **C = A × B** for row-major FP32 matrices on one CPU thread. It accepts independent row strides, overwrites C, and supports both one-shot calls and reuse of packed inputs. It has native kernels for Apple Silicon, Arm64 and x86-64.
+COB multiplies two row-major FP32 matrices on one CPU thread. It computes **C = A × B**, supports independent row strides and lets callers reuse either a packed B or both packed operands. The library has native kernels for Apple Silicon, Arm64 and x86-64.
 
-## Quick start
+## How fast is it?
 
-Build with a C11 compiler and run the correctness tests and benchmark.
+**General FP32.** On an Apple M5 Max, COB beat all five tested libraries on a 9344 × 9344 square chosen before the run. It was **1.174×** as fast as MaxMulSK and won all six paired calls against it. Every implementation passed the full-output accuracy check. MaxMulSK led a separate 4096-square control. On Linux Neoverse N2, standalone COB led two of eight tested layouts, and COB with sequential OpenBLAS led two more. [Apple results by competitor](docs/audits/2026-11-25-ranking/earlier/README.md) · [Apple control](docs/audits/2026-11-25-strassen-sme.md) · [Linux results by layout](docs/audits/2026-11-25-ranking/bf16-components/README.md)
+
+**FP32 inputs containing small integers.** An optional Linux library checks whether a product can be computed exactly with signed INT8 instructions. On a fresh 3584 × 3584 square, it took **138 ms on Intel** and **300 ms on Arm**. The fastest qualifying FP32 methods took **411 ms** and **1,447 ms**, respectively. The timings include checking the inputs, converting them, multiplying with sequential oneDNN and writing FP32 output. [Measured results and offline replay](docs/audits/2026-11-26-certified-inputs/README.md)
+
+![Checked INT8 speed relative to the fastest tested FP32 method. On the 3584 square, Intel reached 2.98× and Arm reached 4.81×. On the strided rectangle, Intel reached 0.85× and Arm reached 4.01×.](docs/figures/checked-int8-speed.svg)
+
+The Intel strided rectangle shows why shape matters. Input values also matter. When the last element of B was fractional, the check added 43% on Intel and 6.6% on Arm before the FP32 fallback finished the product. A dedicated bit-packed method led both CPUs on the binary handwriting images. [Competitors, fallback costs and application coverage](docs/audits/2026-11-26-certified-inputs/README.md)
+
+## Build and run
+
+With a C11 compiler and Make, build the test and benchmark executables, check correctness and time a square or a rectangle.
 
 ```sh
 make
@@ -13,19 +23,20 @@ make test
 ./build/cob_gemm_bench 832x960x896
 ```
 
-The rectangular arguments are output rows, output columns and reduction depth. For 832 × 960 × 896, A is 832 × 896 and B is 896 × 960.
+The rectangular arguments are **M × N × K**. The rectangular example multiplies an 832 × 896 matrix by an 896 × 960 matrix.
 
-### CMake
+To build and install the static library and C header with CMake, run the following commands.
 
 ```sh
 cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
 cmake --build build-release --parallel
 ctest --test-dir build-release --output-on-failure
+cmake --install build-release --prefix "$PWD/install"
 ```
 
-CMake builds the static library target `cob_matmul`. To install its archive and public header, run `cmake --install build-release --prefix /path/to/prefix`.
+The default library dispatches by CPU and shape. On Linux, `-DCOB_BUILD_CHECKED_INT8=ON` builds a separate library with a C entry point and a caller-supplied FP32 fallback. [Checked INT8 setup and example](docs/checked-int8.md) · [Kernels and build options](docs/kernels.md)
 
-## Using the API
+## C API
 
 ```c
 #include "cob_gemm.h"
@@ -52,26 +63,10 @@ if (cob_sgemm_pack_b(&packed_b, k, n, b, ldb) == 0) {
 
 Callers reusing both operands can use `cob_sgemm_pack_a` and `cob_sgemm_rowmajor_packed_ab`. Release each packed object with its matching free function. [Public C API](include/cob_gemm.h)
 
-## Measured performance
+## Reproduce the benchmarks
 
-COB wins some measured workloads on Apple, AMD and Arm. The fastest implementation changes with the CPU, matrix dimensions, input values and buffer reuse. The benchmark reports below give the tested revisions, competitors, complete-call times and numerical checks.
-
-| Workload | What the measurement established |
-|---|---|
-| Neoverse N2 and Intel Xeon 6975P-C, eight squares and rectangles per CPU | On Arm, standalone COB led two warm medians and COB with OpenBLAS led two more. On Intel, COB with oneMKL led the 4096-square case at **590.43 ms**. On these CPUs the BF16 experiments that passed the FP32 accuracy checks lost all **336** paired comparisons to the fastest qualifying FP32 competitor for each shape. [Timings and full comparison field](docs/audits/2026-11-25-ranking/bf16-components/README.md) |
-| Neoverse N2 and Intel Xeon 6975P-C, three fresh large irregular products | Standalone HK15 reached **0.989× on Arm and 0.799× on Intel** against the fastest competing entry per shape. On Arm it was 1.103× as fast as earlier standalone COB and 1.028× as fast as the fastest independent one-shot library. A released COB configuration backed by OpenBLAS led two of the three fresh Arm shapes. [Full field and paired timings](docs/audits/2026-11-25-ranking/leaf-confirmation/README.md) |
-| Apple M5 Max, six large balanced products | COB led all six original target medians against Accelerate, MpGEMM and MaxMulSK. MaxMulSK led the 4096-square control and one target on a later integrated build. [Square results](docs/audits/2026-11-25-strassen-sme.md) |
-| Apple M5 Max, large irregular products with biased inputs | The guarded opt-in HK15 kernel delivered **1.20–1.30×** its former throughput across eight comparisons. All 266,354,000 exactly representable outputs matched and 469,839,504 further outputs met the 0.002 absolute tolerance. The guard reduced throughput to **0.916×** on four ordinary signed layouts. [Accuracy, timings and counterexamples](docs/audits/2026-11-25-ranking/hk15-stability/README.md) |
-| Intel Xeon and AMD EPYC, five wide rectangles | Packing one strip of B at a time made standalone COB **1.12×** as fast as its predecessor on both tested CPUs. An independent library led three Intel layouts and all five AMD layouts. [Per-CPU comparison](docs/audits/2026-11-25-ranking/README.md#medium-rectangular-products) |
-
-On the M5 Max, splitting each FP32 input into FP16 components added more work than the hardware recovered. All four variants lost every paired timing against the fastest accuracy-qualified FP32 control on six layouts. [FP16 accuracy and complete-call times](docs/audits/2026-11-25-ranking/fp16-components/README.md)
-
-Warm one-shot timings include work performed inside the multiplication, including packing and temporary allocation. Prepared calls and first-call timings have separate results. Reported throughput uses the classical-equivalent count `2 × M × N × K` divided by elapsed time. [All results by CPU and layout](docs/audits/2026-11-25-ranking/README.md) · [Benchmarking guide](docs/benchmarking.md)
-
-## Choosing a kernel
-
-The default build dispatches by CPU and shape. Apple builds probe for the optional MaxMulSK-derived SME leaf. Linux builds offer opt-in Strassen, Winograd and single-thread OpenBLAS, oneMKL or ArmPL leaves. Both Hopcroft–Kerr options default to off. The build reference covers their eligibility, workspace, numerical fallbacks and tests. [Kernels and build options](docs/kernels.md)
+Warm one-shot timings include the work each implementation performs inside the call. Prepared inputs and first calls have separate results. GFLOP/s uses the classical operation count `2 × M × N × K` divided by elapsed time, including for algorithms that perform fewer products. [Benchmarking guide](docs/benchmarking.md) · [FP32 results by CPU and shape](docs/audits/2026-11-25-ranking/README.md) · [Checked integer results](docs/audits/2026-11-26-certified-inputs/README.md)
 
 ## License
 
-COB uses the MIT license. The optional MaxMulSK-derived leaf uses Apache-2.0, and the Hopcroft–Kerr coefficient table uses BSD-2-Clause. [COB license](LICENSE) · [MaxMulSK license and notice](third_party/maxmulsk) · [Coefficient table and license](third_party/fast-matmul)
+COB uses the MIT license. The optional MaxMulSK-derived leaf uses Apache-2.0, and the Hopcroft–Kerr coefficient table uses BSD-2-Clause. The UCI handwriting fixtures are licensed under CC BY 4.0. [Dataset attribution](tools/world-rank/exact/fixtures/data/ATTRIBUTION.md) · [COB license](LICENSE) · [MaxMulSK license and notice](third_party/maxmulsk) · [Coefficient table and license](third_party/fast-matmul)

@@ -1,5 +1,7 @@
 # Single-thread FP32 benchmark results
 
+For FP32 arrays containing bounded integers, the November 26 study compares checked signed INT8 with ordinary FP32 routines, direct integer kernels and a binary specialist. It includes cases where checking and falling back costs time. [Integer-input results, source and replay](../2026-11-26-certified-inputs/README.md)
+
 ## Large irregular matrices on Arm and Intel
 
 The expanded field included all four released BLAS-backed Winograd configurations that were missing from the first Arm comparison. On Neoverse N2, standalone ragged HK15 beat the strongest independent one-shot library, FastMMW, in all 36 matched calls across three repeated and three fresh shapes. It reached **0.994×** the fastest competing method on the repeats and **0.989×** on the fresh shapes once the other COB builds were included. A released OpenBLAS-backed COB configuration led five of the six raw medians. On the Xeon 6975P-C, standalone HK15 reached **0.802×** and **0.799×** of the fastest competing method. The two vendor-backed HK15 experiments also missed the adoption criteria. These Linux rankings used the frozen implementation from before the final numerical guard. [Expanded field, full-output checks and offline replay](leaf-confirmation/README.md) · [Original nine-entry Arm comparison](ragged-hk15/README.md)
